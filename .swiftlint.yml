@@ -1,0 +1,6 @@
+disabled_rules:
+  - function_body_length
+  - trailing_comma
+identifier_name:
+  allowed_symbols: "_"
+  min_length: 1

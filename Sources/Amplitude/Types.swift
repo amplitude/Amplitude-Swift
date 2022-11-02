@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Marvin Liu on 10/27/22.
 //
@@ -87,7 +87,7 @@ public class BaseEvent: EventOptions {
     public var quantity: Int?
     public var productId: String?
     public var revenueType: String?
-    public var extra: [String : Any]?
+    public var extra: [String: Any]?
     public var callback: EventCallBack?
     public var partnerId: String?
     public var attempts: Int
@@ -96,8 +96,54 @@ public class BaseEvent: EventOptions {
     public var userProperties: [String: Any]?
     public var groups: [String: Any]?
     public var groupProperties: [String: Any]?
-    
-    init(userId: String? = nil, deviceId: String? = nil, timestamp: Double? = nil, eventId: Double? = nil, sessionId: Double, insertId: String? = nil, locationLat: Double? = nil, locationLng: Double? = nil, appVersion: String? = nil, versionName: String? = nil, platform: String? = nil, osName: String? = nil, osVersion: String? = nil, deviceBrand: String? = nil, deviceManufacturer: String? = nil, deviceModel: String? = nil, carrier: String? = nil, country: String? = nil, region: String? = nil, city: String? = nil, dma: String? = nil, idfa: String? = nil, idfv: String? = nil, adid: String? = nil, appSetId: String? = nil, androidId: String? = nil, language: String? = nil, library: String? = nil, ip: String? = nil, plan: Plan? = nil, ingestionMetadata: IngestionMetadata? = nil, revenue: Double? = nil, price: Double? = nil, quantity: Int? = nil, productId: String? = nil, revenueType: String? = nil, extra: [String : Any]? = nil, callback: EventCallBack? = nil, partnerId: String? = nil, attempts: Int, eventType: String, eventProperties: [String : Any]? = nil, userProperties: [String : Any]? = nil, groups: [String : Any]? = nil, groupProperties: [String : Any]? = nil) {
+
+    init(
+        userId: String? = nil,
+        deviceId: String? = nil,
+        timestamp: Double? = nil,
+        eventId: Double? = nil,
+        sessionId: Double,
+        insertId: String? = nil,
+        locationLat: Double? = nil,
+        locationLng: Double? = nil,
+        appVersion: String? = nil,
+        versionName: String? = nil,
+        platform: String? = nil,
+        osName: String? = nil,
+        osVersion: String? = nil,
+        deviceBrand: String? = nil,
+        deviceManufacturer: String? = nil,
+        deviceModel: String? = nil,
+        carrier: String? = nil,
+        country: String? = nil,
+        region: String? = nil,
+        city: String? = nil,
+        dma: String? = nil,
+        idfa: String? = nil,
+        idfv: String? = nil,
+        adid: String? = nil,
+        appSetId: String? = nil,
+        androidId: String? = nil,
+        language: String? = nil,
+        library: String? = nil,
+        ip: String? = nil,
+        plan: Plan? = nil,
+        ingestionMetadata: IngestionMetadata? = nil,
+        revenue: Double? = nil,
+        price: Double? = nil,
+        quantity: Int? = nil,
+        productId: String? = nil,
+        revenueType: String? = nil,
+        extra: [String: Any]? = nil,
+        callback: EventCallBack? = nil,
+        partnerId: String? = nil,
+        attempts: Int,
+        eventType: String,
+        eventProperties: [String: Any]? = nil,
+        userProperties: [String: Any]? = nil,
+        groups: [String: Any]? = nil,
+        groupProperties: [String: Any]? = nil
+    ) {
         self.userId = userId
         self.deviceId = deviceId
         self.timestamp = timestamp
@@ -189,7 +235,7 @@ public struct IngestionMetadata {
 }
 
 public protocol EventCallBack {
-    
+
 }
 
 public protocol Storage {
@@ -210,11 +256,11 @@ public protocol Logger {
 }
 
 public enum PluginType: String {
-    case Before
-    case Enrichment
-    case Destination
-    case Utility
-    case Observe
+    case before = "Before"
+    case enrichment = "Enrichment"
+    case destination = "Destination"
+    case utility = "Utility"
+    case observe = "Observe"
 }
 
 public protocol Plugin {
