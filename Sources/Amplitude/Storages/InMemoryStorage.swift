@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Marvin Liu on 10/28/22.
 //
@@ -9,23 +9,19 @@ import Foundation
 
 class InMemoryStorage: Storage {
     func set(key: String, value: String) async {
-        <#code#>
     }
-    
+
     func get(key: String) async -> String? {
-        <#code#>
+        return nil
     }
-    
+
     func saveEvent(event: BaseEvent) async {
-        <#code#>
     }
-    
+
     func getEvents() async -> [Any]? {
-        <#code#>
+        return nil
     }
-    
+
     func reset() async {
-        <#code#>
     }
-    
 }
