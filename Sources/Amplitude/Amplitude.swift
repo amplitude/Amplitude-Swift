@@ -22,6 +22,7 @@ public class Amplitude {
         return self
     }
 
+    @available(*, deprecated, message: "use 'track' instead")
     func logEvent() -> Amplitude {
         return self
     }
