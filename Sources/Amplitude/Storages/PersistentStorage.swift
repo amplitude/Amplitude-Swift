@@ -7,21 +7,26 @@
 
 import Foundation
 
-class PersistentStorage: Storage {
-    func set(key: String, value: String) async {
+actor PersistentStorage: Storage {
+    let storagePrefix: String
+    let userDefaults: UserDefaults?
+    let fileManager: FileManager?
+
+    init(storagePrefix: String = Constants.Storage.STORAGE_PREFIX) {
+        self.storagePrefix = storagePrefix
+        self.userDefaults = UserDefaults(suiteName: "com.amplitude.storage.\(storagePrefix)")
+        self.fileManager = FileManager.default
     }
 
-    func get(key: String) async -> String? {
-        return nil
+    func write(key: String, value: Any?) async {
+
     }
 
-    func saveEvent(event: BaseEvent) async {
-    }
-
-    func getEvents() async -> [Any]? {
+    func read(key: String) async -> Any? {
         return nil
     }
 
     func reset() async {
+
     }
 }

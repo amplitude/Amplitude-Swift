@@ -3,12 +3,16 @@ import XCTest
 @testable import Amplitude_Swift
 
 final class AmplitudeTests: XCTestCase {
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
+    private var configuration: Configuration!
+
+    override func setUp() {
+        super.setUp()
+        configuration = Configuration(apiKey: "testApiKey")
+    }
+
+    func testAmplitudeInit() {
         XCTAssertEqual(
-            Amplitude(configuration: Configuration(apiKey: "testApiKey")).instanceName,
+            Amplitude(configuration: configuration).instanceName,
             Constants.Configuration.DEFAULT_INSTANCE
         )
     }

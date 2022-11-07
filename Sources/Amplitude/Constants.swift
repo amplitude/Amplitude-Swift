@@ -39,4 +39,8 @@ public struct Constants {
         static let FLUSH_MAX_RETRIES = 5
         static let MIN_TIME_BETWEEN_SESSIONS_MILLIS = 300000
     }
+
+    struct Storage {
+        static let STORAGE_PREFIX = "amplitude-swift"
+    }
 }
