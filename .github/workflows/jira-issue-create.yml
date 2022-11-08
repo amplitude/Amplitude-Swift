@@ -1,5 +1,5 @@
 # Creates jira tickets for new github issues to help triage
-name: Jira Issue Creator For Kotlin
+name: Jira Issue Creator For Swift
 
 on:
   issues:

@@ -25,7 +25,12 @@ public class Configuration {
     var serverUrl: String?
     var plan: Plan?
     var ingestionMetadata: IngestionMetadata?
+    var useAdvertisingIdForDeviceId: Bool?
     var trackingOptions: TrackingOptions?
+    var enableCoppaControl: Bool?
+    var flushEventsOnClose: Bool?
+    var minTimeBetweenSessionsMillis: Int
+    var trackingSessionEvents: Bool?
 
     init(
         apiKey: String,
@@ -44,7 +49,14 @@ public class Configuration {
         serverZone: ServerZone = ServerZone.US,
         serverUrl: String = Constants.DEFAULT_API_HOST,
         plan: Plan? = nil,
-        ingestionMetadata: IngestionMetadata? = nil
+        ingestionMetadata: IngestionMetadata? = nil,
+        useAdvertisingIdForDeviceId: Bool = false,
+        trackingOptions: TrackingOptions = TrackingOptions(),
+        enableCoppaControl: Bool = false,
+        flushEventsOnClose: Bool = true,
+        minTimeBetweenSessionsMillis: Int = Constants.Configuration
+            .MIN_TIME_BETWEEN_SESSIONS_MILLIS,
+        trackingSessionEvents: Bool = true
     ) {
         self.apiKey = apiKey
         self.flushQueueSize = flushQueueSize
@@ -63,5 +75,17 @@ public class Configuration {
         self.serverUrl = serverUrl
         self.plan = plan
         self.ingestionMetadata = ingestionMetadata
+        self.useAdvertisingIdForDeviceId = useAdvertisingIdForDeviceId
+        self.trackingOptions = trackingOptions
+        self.enableCoppaControl = enableCoppaControl
+        self.flushEventsOnClose = flushEventsOnClose
+        self.minTimeBetweenSessionsMillis = minTimeBetweenSessionsMillis
+        self.trackingSessionEvents = trackingSessionEvents
+    }
+
+    func isValid() -> Bool {
+        return !apiKey.isEmpty && flushQueueSize > 0 && flushIntervalMillis > 0
+            && minTimeBetweenSessionsMillis > 0
+            && (minIdLength == nil || minIdLength! > 0)
     }
 }

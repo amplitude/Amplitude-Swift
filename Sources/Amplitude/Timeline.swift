@@ -8,10 +8,11 @@
 import Foundation
 
 public class Timeline {
+    var amplitude: Amplitude
     var plugins = [PluginType: [any Plugin]]()
 
-    init() {
-
+    init(amplitude: Amplitude) {
+        self.amplitude = amplitude
     }
 
     func process(event: BaseEvent) {
