@@ -8,7 +8,7 @@ public class Amplitude {
         return self.configuration.storageProvider
     }()
     lazy var timeline: Timeline = {
-        return Timeline(amplitude: self)
+        return Timeline()
     }()
     lazy var logger: any Logger = {
         return self.configuration.loggerProvider
@@ -20,6 +20,7 @@ public class Amplitude {
     ) {
         self.configuration = configuration
         self.instanceName = instanceName
+        //_ = add(LifecyclePlugin())
         _ = add(plugin: ContextPlugin())
         _ = add(plugin: AmplitudeDestinationPlugin())
     }
@@ -29,6 +30,7 @@ public class Amplitude {
         self.init(configuration: configuration)
     }
 
+    @discardableResult
     func track(event: BaseEvent, options: EventOptions? = nil, callback: EventCallBack? = nil) -> Amplitude {
         if options != nil {
             event.mergeEventOptions(eventOptions: options!)
@@ -74,6 +76,7 @@ public class Amplitude {
         return self
     }
 
+    @discardableResult
     func add(plugin: Plugin) -> Amplitude {
         timeline.add(plugin: plugin)
         return self

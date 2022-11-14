@@ -46,9 +46,20 @@ public enum PluginType: String {
     case observe = "Observe"
 }
 
-public protocol Plugin {
+public protocol Plugin: AnyObject {
     var type: PluginType { get }
     var amplitude: Amplitude? { get set }
-    func setup(amplitude: Amplitude)
+    func setup(amplitude: Amplitude) 
     func execute(event: BaseEvent) -> BaseEvent?
+}
+
+public protocol EventPlugin: Plugin {
+    func track(event: BaseEvent) -> BaseEvent?
+    func identify(event: IdentifyEvent) -> IdentifyEvent?
+    func groupIdentify(event: GroupIdentifyEvent) -> GroupIdentifyEvent?
+    func revenue(event: RevenueEvent) -> RevenueEvent?
+    func flush()
+}
+
+public protocol DestinationPlugin: EventPlugin {
 }
