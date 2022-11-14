@@ -20,7 +20,7 @@ public class Amplitude {
     ) {
         self.configuration = configuration
         self.instanceName = instanceName
-        //_ = add(LifecyclePlugin())
+        // _ = add(LifecyclePlugin())
         _ = add(plugin: ContextPlugin())
         _ = add(plugin: AmplitudeDestinationPlugin())
     }

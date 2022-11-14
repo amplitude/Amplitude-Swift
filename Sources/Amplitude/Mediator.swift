@@ -1,11 +1,9 @@
 //
-//  File.swift
-//  
+//  Mediator.swift
+//
 //
 //  Created by Hao Yu on 11/9/22.
 //
-
-import Foundation
 
 internal class Mediator {
     // create an array with certain type.
@@ -14,15 +12,15 @@ internal class Mediator {
     internal func add(plugin: Plugin) {
         plugins.append(plugin)
     }
-    
+
     internal func remove(plugin: Plugin) {
         plugins.removeAll { (storedPlugin) -> Bool in
             return storedPlugin === plugin
         }
     }
-    
+
     internal func execute(event: BaseEvent) -> BaseEvent? {
-        var result : BaseEvent? = event;
+        var result: BaseEvent? = event
         plugins.forEach { plugin in
             if let r = result {
                 if plugin is DestinationPlugin {
@@ -47,7 +45,7 @@ internal class Mediator {
         }
         return result
     }
-    
+
     internal func applyClosure(_ closure: (Plugin) -> Void) {
         plugins.forEach { plugin in
             closure(plugin)

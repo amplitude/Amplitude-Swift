@@ -1,22 +1,19 @@
 //
-//  File.swift
+//  Timeline.swift
 //
 //
 //  Created by Marvin Liu on 10/27/22.
 //
 
-import Foundation
-
 public class Timeline {
     internal let plugins: [PluginType: Mediator]
-
 
     init() {
         self.plugins = [
             PluginType.before: Mediator(),
             PluginType.enrichment: Mediator(),
             PluginType.destination: Mediator(),
-            PluginType.utility: Mediator()
+            PluginType.utility: Mediator(),
         ]
     }
 
@@ -29,13 +26,13 @@ public class Timeline {
 
     internal func applyPlugin(pluginType: PluginType, event: BaseEvent?) -> BaseEvent? {
         var result: BaseEvent? = event
-        if let mediator = plugins[pluginType], let e = event {
-            result = mediator.execute(event: e)
+        if let mediator = plugins[pluginType] {
+            result = mediator.execute(event: event!)
         }
         return result
-        
+
     }
-    
+
     internal func add(plugin: Plugin) {
         if let mediator = plugins[plugin.type] {
             mediator.add(plugin: plugin)

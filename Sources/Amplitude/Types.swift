@@ -1,11 +1,9 @@
 //
-//  File.swift
+//  Types.swift
 //
 //
 //  Created by Marvin Liu on 10/27/22.
 //
-
-import Foundation
 
 public struct Plan {
     var branch: String?
@@ -49,7 +47,7 @@ public enum PluginType: String {
 public protocol Plugin: AnyObject {
     var type: PluginType { get }
     var amplitude: Amplitude? { get set }
-    func setup(amplitude: Amplitude) 
+    func setup(amplitude: Amplitude)
     func execute(event: BaseEvent) -> BaseEvent?
 }
 
