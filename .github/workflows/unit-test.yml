@@ -1,0 +1,49 @@
+name: Unit Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: macos-12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set Xcode 14
+        run: |
+          sudo xcode-select -switch /Applications/Xcode_14.1.app
+      - name: List Simulators
+        run: |
+          xcrun simctl list
+      - name: List Project Configuration
+        run: |
+          xcodebuild -list
+      - name: iOS Tests
+        run: |
+          xcodebuild test \
+            -scheme Amplitude-Swift \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 14'
+      - name: macOS Tests
+        run: |
+          xcodebuild test \
+            -scheme Amplitude-Swift \
+            -sdk macosx \
+            -destination 'platform=macosx'
+      - name: tvOS Tests
+        run: |
+          xcodebuild \
+            -scheme Amplitude-Swift \
+            -sdk appletvsimulator \
+            -destination 'platform=tvOS Simulator,name=Apple TV' \
+            test
+      - name: watchOS Tests
+        run: |
+          xcodebuild \
+            -scheme Amplitude-Swift \
+            -sdk watchsimulator \
+            -destination 'platform=watchOS Simulator,name=Apple Watch Series 8 (41mm)' \
+            test
