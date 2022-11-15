@@ -19,7 +19,7 @@ public class BaseEvent: EventOptions {
         deviceId: String? = nil,
         timestamp: Double? = nil,
         eventId: Double? = nil,
-        sessionId: Double,
+        sessionId: Double? = -1,
         insertId: String? = nil,
         locationLat: Double? = nil,
         locationLng: Double? = nil,
@@ -109,7 +109,7 @@ public class BaseEvent: EventOptions {
         deviceId = deviceId ?? eventOptions.deviceId
         timestamp = timestamp ?? eventOptions.timestamp
         eventId = eventId ?? eventOptions.eventId
-        sessionId = sessionId < 0 ? eventOptions.sessionId : sessionId
+        sessionId = (sessionId == nil || sessionId! < 0) ? eventOptions.sessionId : sessionId
         insertId = insertId ?? eventOptions.insertId
         locationLat = locationLat ?? eventOptions.locationLat
         locationLng = locationLng ?? eventOptions.locationLng

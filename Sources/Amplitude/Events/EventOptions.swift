@@ -12,7 +12,7 @@ public class EventOptions {
     var deviceId: String?
     var timestamp: Double?
     var eventId: Double?
-    var sessionId: Double
+    var sessionId: Double? = -1
     var insertId: String?
     var locationLat: Double?
     var locationLng: Double?
@@ -52,7 +52,7 @@ public class EventOptions {
         deviceId: String? = nil,
         timestamp: Double? = nil,
         eventId: Double? = nil,
-        sessionId: Double = -1,
+        sessionId: Double? = -1,
         insertId: String? = nil,
         locationLat: Double? = nil,
         locationLng: Double? = nil,
