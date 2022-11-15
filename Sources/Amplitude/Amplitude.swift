@@ -78,6 +78,7 @@ public class Amplitude {
 
     @discardableResult
     func add(plugin: Plugin) -> Amplitude {
+        plugin.setup(amplitude: self)
         timeline.add(plugin: plugin)
         return self
     }
