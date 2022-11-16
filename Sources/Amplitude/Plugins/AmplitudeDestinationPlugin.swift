@@ -50,6 +50,8 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
         self.amplitude = amplitude
         pipeline = EventPipeline(amplitude: amplitude)
         pipeline?.start()
+
+        add(plugin: IdentityEventSender())
     }
 
     public func execute(event: BaseEvent) -> BaseEvent? {
