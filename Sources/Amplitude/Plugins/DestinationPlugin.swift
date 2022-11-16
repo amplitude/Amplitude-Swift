@@ -6,17 +6,11 @@
 //
 
 public protocol DestinationPlugin: EventPlugin {
-
+    var timeline: Timeline { get }
 }
 
-private var _timeline: Timeline? = nil
 extension DestinationPlugin {
-    var timeline: Timeline? {
-        if _timeline == nil {
-            _timeline = Timeline()
-        }
-        return _timeline
-    }
+
     var enabled: Bool {
         return true
     }
@@ -28,12 +22,12 @@ extension DestinationPlugin {
     @discardableResult
     func add(plugin: Plugin) -> Plugin {
         plugin.amplitude = self.amplitude
-        timeline?.add(plugin: plugin)
+        timeline.add(plugin: plugin)
         return plugin
     }
 
     func remove(plugin: Plugin) {
-        timeline?.remove(plugin: plugin)
+        timeline.remove(plugin: plugin)
     }
 
     func process(event: BaseEvent?) -> BaseEvent? {
@@ -41,8 +35,8 @@ extension DestinationPlugin {
         if !enabled {
             return nil
         }
-        let beforeResult = timeline?.applyPlugin(pluginType: .before, event: event)
-        let enrichmentResult = timeline?.applyPlugin(pluginType: .enrichment, event: beforeResult)
+        let beforeResult = timeline.applyPlugin(pluginType: .before, event: event)
+        let enrichmentResult = timeline.applyPlugin(pluginType: .enrichment, event: beforeResult)
         var destinationResult: BaseEvent? = nil
         switch enrichmentResult {
         case let e as IdentifyEvent:

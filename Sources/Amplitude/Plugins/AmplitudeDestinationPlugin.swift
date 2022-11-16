@@ -6,6 +6,7 @@
 //
 
 public class AmplitudeDestinationPlugin: DestinationPlugin {
+    public let timeline = Timeline()
     public var amplitude: Amplitude? = nil
     public let type: PluginType = .destination
     private var pipeline: EventPipeline?
