@@ -16,7 +16,7 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
             if e.isValid() {
                 pipeline?.put(event: e)
             } else {
-                logger.error(message: "Event is invalid for missing information like userId and deviceId")
+                logger?.error(message: "Event is invalid for missing information like userId and deviceId")
             }
         }
 

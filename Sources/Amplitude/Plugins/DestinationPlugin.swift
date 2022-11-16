@@ -15,8 +15,8 @@ extension DestinationPlugin {
         return true
     }
 
-    var logger: (any Logger) {
-        return self.amplitude?.logger ?? ConsoleLogger()
+    var logger: (any Logger)? {
+        return self.amplitude?.logger
     }
 
     @discardableResult
