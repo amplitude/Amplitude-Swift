@@ -58,6 +58,3 @@ public protocol EventPlugin: Plugin {
     func revenue(event: RevenueEvent) -> RevenueEvent?
     func flush()
 }
-
-public protocol DestinationPlugin: EventPlugin {
-}
