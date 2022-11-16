@@ -15,6 +15,6 @@ internal class IdentityEventSender: Plugin {
     }
 
     func execute(event: BaseEvent) -> BaseEvent? {
-        
+        return event
     }
 }
