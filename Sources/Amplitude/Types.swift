@@ -59,7 +59,6 @@ public protocol EventPlugin: Plugin {
     func flush()
 }
 
-
 extension Plugin {
     // default behavior
     public func execute(event: BaseEvent) -> BaseEvent? {

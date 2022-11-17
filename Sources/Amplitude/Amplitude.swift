@@ -5,7 +5,6 @@ public class Amplitude {
     var instanceName: String
     internal var inForeground = false
 
-
     lazy var storage: Storage = {
         return self.configuration.storageProvider
     }()
@@ -122,11 +121,11 @@ public class Amplitude {
         inForeground = false
         _ = self.flush()
     }
-    
+
     public func apply(closure: (Plugin) -> Void) {
         timeline.apply(closure)
     }
-    
+
     private func process(event: BaseEvent) {
         if configuration.optOut {
             logger.log(message: "Skip event based on opt out configuration")
