@@ -52,4 +52,8 @@ extension DestinationPlugin {
         }
         return destinationResult
     }
+    
+    public func apply(closure: (Plugin) -> Void) {
+        timeline.apply(closure)
+    }
 }

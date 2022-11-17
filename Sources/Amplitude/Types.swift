@@ -36,7 +36,7 @@ public protocol Logger {
     func debug(message: String)
 }
 
-public enum PluginType: String {
+public enum PluginType: String, CaseIterable {
     case before = "Before"
     case enrichment = "Enrichment"
     case destination = "Destination"
@@ -57,4 +57,16 @@ public protocol EventPlugin: Plugin {
     func groupIdentify(event: GroupIdentifyEvent) -> GroupIdentifyEvent?
     func revenue(event: RevenueEvent) -> RevenueEvent?
     func flush()
+}
+
+
+extension Plugin {
+    // default behavior
+    public func execute(event: BaseEvent) -> BaseEvent? {
+        return event
+    }
+
+    public func setup(amplitude: Amplitude) {
+        self.amplitude = amplitude
+    }
 }

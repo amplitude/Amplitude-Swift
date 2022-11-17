@@ -1,0 +1,20 @@
+//
+//  VendorSystem.swift
+//  
+//
+//  Created by Hao Yu on 11/11/22.
+//
+
+internal class VendorSystem {
+    static var current: VendorSystem = {
+        #if os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)
+        return iOSVendorSystem()
+        #else
+        return VendorSystem()
+        #endif
+    }()
+
+    var requiredPlugin: Plugin? {
+        return nil
+    }
+}
