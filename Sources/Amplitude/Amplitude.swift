@@ -119,7 +119,9 @@ public class Amplitude {
 
     func onExitForeground() {
         inForeground = false
-        _ = self.flush()
+        if configuration.flushEventsOnClose == true {
+            _ = self.flush()
+        }
     }
 
     public func apply(closure: (Plugin) -> Void) {

@@ -12,7 +12,7 @@
     }
 #endif
 
-#if os(watchOS)
+#if os(macOS)
     internal class MacOSVendorSystem: VendorSystem {
         override var requiredPlugin: Plugin {
             return MacOSLifecycleMonitor()

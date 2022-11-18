@@ -8,7 +8,7 @@
 #if os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)
 
     import Foundation
-    import UIKit
+    import SwiftUI
 
     public protocol IOSLifecycle {
         func applicationDidEnterBackground(application: UIApplication?)

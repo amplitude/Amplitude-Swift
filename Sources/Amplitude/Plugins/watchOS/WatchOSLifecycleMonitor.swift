@@ -67,7 +67,7 @@
             // from iOS, so ignore until we've been backgrounded at least once.
             if wasBackgrounded == false { return }
 
-            analytics?.apply { (ext) in
+            amplitude?.apply { (ext) in
                 if let validExt = ext as? WatchOSLifecycle {
                     validExt.applicationWillEnterForeground(watchExtension: watchExtension)
                 }
@@ -78,7 +78,7 @@
             // make sure to denote that we were backgrounded.
             wasBackgrounded = true
 
-            analytics?.apply { (ext) in
+            amplitude?.apply { (ext) in
                 if let validExt = ext as? WatchOSLifecycle {
                     validExt.applicationDidEnterBackground(watchExtension: watchExtension)
                 }

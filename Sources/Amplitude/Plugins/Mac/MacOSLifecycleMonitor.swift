@@ -64,7 +64,7 @@
         }
 
         func applicationDidBecomeActive(notification: NSNotification) {
-            analytics?.apply { (ext) in
+            amplitude?.apply { (ext) in
                 if let validExt = ext as? MacOSLifecycle {
                     validExt.applicationDidBecomeActive()
                 }
@@ -72,22 +72,11 @@
         }
 
         func applicationWillResignActive(notification: NSNotification) {
-            analytics?.apply { (ext) in
+            amplitude?.apply { (ext) in
                 if let validExt = ext as? MacOSLifecycle {
                     validExt.applicationWillResignActive()
                 }
             }
-        }
-    }
-
-    extension AmplitudeDestinationPlugin: MacOSLifecycle {
-        public func applicationWillEnterForeground(application: UIApplication?) {
-            let timestamp = NSDate().timeIntervalSince1970
-            self.amplitude?.onEnterForeground(timestamp: timestamp)
-        }
-
-        public func applicationDidEnterBackground(application: UIApplication?) {
-            self.amplitude?.onExitForeground()
         }
     }
 
