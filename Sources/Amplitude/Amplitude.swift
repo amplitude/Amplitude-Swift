@@ -119,6 +119,7 @@ public class Amplitude {
 
     func onExitForeground() {
         inForeground = false
+        // TODO: Need to make sure the flush won't block the main thread
         if configuration.flushEventsOnClose == true {
             _ = self.flush()
         }

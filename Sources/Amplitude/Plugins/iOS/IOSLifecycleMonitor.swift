@@ -40,6 +40,7 @@
         ]
 
         required init() {
+            // TODO: Check if lifecycle plugin works for app extension
             // App extensions can't use UIAppication.shared, so
             // funnel it through something to check; Could be nil.
             application = UIApplication.safeShared
