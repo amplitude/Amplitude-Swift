@@ -43,7 +43,7 @@
             // TODO: Check if lifecycle plugin works for app extension
             // App extensions can't use UIAppication.shared, so
             // funnel it through something to check; Could be nil.
-            application = UIApplication.safeShared
+            application = UIApplication.value(forKeyPath: "sharedApplication") as? UIApplication
             setupListeners()
         }
 
@@ -100,12 +100,6 @@
 
         public func applicationDidEnterBackground(application: UIApplication?) {
             self.amplitude?.onExitForeground()
-        }
-    }
-
-    extension UIApplication {
-        static var safeShared: UIApplication? {
-            return UIApplication.value(forKeyPath: "sharedApplication") as? UIApplication
         }
     }
 
