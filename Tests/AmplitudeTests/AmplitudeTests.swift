@@ -16,4 +16,21 @@ final class AmplitudeTests: XCTestCase {
             Constants.Configuration.DEFAULT_INSTANCE
         )
     }
+
+    func testContext() {
+        let amplitude = Amplitude(configuration: configuration)
+        let outputReader = OutputReaderPlugin()
+        amplitude.add(plugin: outputReader)
+        amplitude.track(event: BaseEvent(eventType: "testEvent"))
+
+        let lastEvent = outputReader.lastEvent
+        XCTAssertEqual(lastEvent?.library, "\(Constants.SDK_LIBRARY)/\(Constants.SDK_VERSION)")
+        XCTAssertEqual(lastEvent?.deviceManufacturer, "Apple")
+        XCTAssertEqual(lastEvent?.deviceModel, "Simulator")
+        XCTAssertEqual(lastEvent?.ip, "$remote")
+        XCTAssertNil(lastEvent?.country)
+        XCTAssertNotNil(lastEvent?.platform)
+        XCTAssertNotNil(lastEvent?.language)
+    }
+
 }

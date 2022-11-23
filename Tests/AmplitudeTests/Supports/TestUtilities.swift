@@ -14,7 +14,7 @@ class TestEnrichmentPlugin: Plugin {
         self.amplitude = amplitude
     }
 
-    func execute(event: BaseEvent) -> BaseEvent? {
+    func execute(event: BaseEvent?) -> BaseEvent? {
         var returnEvent: BaseEvent? = event
         if let completion = trackCompletion {
             if !completion() {
@@ -23,5 +23,24 @@ class TestEnrichmentPlugin: Plugin {
         }
         return returnEvent
     }
+}
 
+class OutputReaderPlugin: Plugin {
+    var type: PluginType
+    var amplitude: Amplitude?
+
+    var lastEvent: BaseEvent?
+
+    init() {
+        self.type = .destination
+    }
+
+    func setup(amplitude: Amplitude) {
+        self.amplitude = amplitude
+    }
+
+    func execute(event: BaseEvent?) -> BaseEvent? {
+        lastEvent = event
+        return event
+    }
 }

@@ -1,6 +1,8 @@
 disabled_rules:
   - function_body_length
   - trailing_comma
+  - todo
 identifier_name:
   allowed_symbols: "_"
   min_length: 1
+cyclomatic_complexity: 25
