@@ -7,7 +7,7 @@
 
 public class AmplitudeDestinationPlugin: DestinationPlugin {
     public let timeline = Timeline()
-    public var amplitude: Amplitude? = nil
+    public var amplitude: Amplitude?
     public let type: PluginType = .destination
     private var pipeline: EventPipeline?
 
@@ -54,7 +54,7 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
         add(plugin: IdentityEventSender())
     }
 
-    public func execute(event: BaseEvent) -> BaseEvent? {
+    public func execute(event: BaseEvent?) -> BaseEvent? {
         return event
     }
 }
