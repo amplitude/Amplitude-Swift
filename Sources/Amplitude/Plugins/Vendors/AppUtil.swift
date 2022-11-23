@@ -45,13 +45,13 @@ import Foundation
             return platform
         }
 
-        override var requiredPlugin: Plugin {
-            return IOSLifecycleMonitor()
-        }
-
         private func deviceModel() -> String {
             let platform = self.platform
             return getDeviceModel(platform: platform)
+        }
+
+        override var requiredPlugin: Plugin {
+            return IOSLifecycleMonitor()
         }
     }
 #endif
@@ -93,7 +93,7 @@ import Foundation
             return MacOSLifecycleMonitor()
         }
 
-        private func deviceModel() -> String {
+        override var platform: String {
             var systemInfo = utsname()
             uname(&systemInfo)
             let machineMirror = Mirror(reflecting: systemInfo.machine)
@@ -102,6 +102,11 @@ import Foundation
                 return identifier + String(UnicodeScalar(UInt8(value)))
             }
             return identifier
+        }
+
+        private func deviceModel() -> String {
+            let platform = self.platform
+            return getDeviceModel(platform: platform)
         }
 
         private func macAddress(bsd : String) -> String? {
