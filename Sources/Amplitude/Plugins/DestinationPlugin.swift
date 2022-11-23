@@ -37,7 +37,7 @@ extension DestinationPlugin {
         }
         let beforeResult = timeline.applyPlugin(pluginType: .before, event: event)
         let enrichmentResult = timeline.applyPlugin(pluginType: .enrichment, event: beforeResult)
-        var destinationResult: BaseEvent? = nil
+        var destinationResult: BaseEvent?
         switch enrichmentResult {
         case let e as IdentifyEvent:
             destinationResult = identify(event: e)
@@ -51,5 +51,9 @@ extension DestinationPlugin {
             break
         }
         return destinationResult
+    }
+
+    public func apply(closure: (Plugin) -> Void) {
+        timeline.apply(closure)
     }
 }

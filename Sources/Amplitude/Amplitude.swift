@@ -3,6 +3,7 @@ import Foundation
 public class Amplitude {
     var configuration: Configuration
     var instanceName: String
+    internal var inForeground = false
 
     lazy var storage: Storage = {
         return self.configuration.storageProvider
@@ -20,7 +21,10 @@ public class Amplitude {
     ) {
         self.configuration = configuration
         self.instanceName = instanceName
-        // _ = add(LifecyclePlugin())
+        // required plugin for specific platform, only has lifecyclePlugin now
+        if let requiredPlugin = VendorSystem.current.requiredPlugin {
+            _ = add(plugin: requiredPlugin)
+        }
         _ = add(plugin: ContextPlugin())
         _ = add(plugin: AmplitudeDestinationPlugin())
     }
@@ -102,6 +106,27 @@ public class Amplitude {
 
     func reset() -> Amplitude {
         return self
+    }
+
+    func onEnterForeground(timestamp: Double) {
+        inForeground = true
+
+        let dummySessionStartEvent = BaseEvent(eventType: "session_start")
+        dummySessionStartEvent.timestamp = timestamp
+        dummySessionStartEvent.sessionId = -1
+        timeline.process(event: dummySessionStartEvent)
+    }
+
+    func onExitForeground() {
+        inForeground = false
+        // TODO: Need to make sure the flush won't block the main thread
+        if configuration.flushEventsOnClose == true {
+            _ = self.flush()
+        }
+    }
+
+    public func apply(closure: (Plugin) -> Void) {
+        timeline.apply(closure)
     }
 
     private func process(event: BaseEvent) {

@@ -53,4 +53,17 @@ public class Timeline {
             mediator.applyClosure(closure)
         }
     }
+
+    internal func apply(_ closure: (Plugin) -> Void) {
+        for type in PluginType.allCases {
+            if let mediator = plugins[type] {
+                mediator.plugins.forEach { (plugin) in
+                    closure(plugin)
+                    if let destPlugin = plugin as? DestinationPlugin {
+                        destPlugin.apply(closure: closure)
+                    }
+                }
+            }
+        }
+    }
 }

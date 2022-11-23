@@ -11,7 +11,7 @@ internal class IdentityEventSender: Plugin {
     var amplitude: Amplitude?
 
     func setup(amplitude: Amplitude) {
-        
+
     }
 
     func execute(event: BaseEvent) -> BaseEvent? {
