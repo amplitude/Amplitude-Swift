@@ -152,7 +152,7 @@ import Foundation
     import WatchKit
 
     internal class WatchOSVendorSystem: VendorSystem {
-        private let device = WKInterfaceDevice.V()
+        private let device = WKInterfaceDevice.current()
 
         override var manufacturer: String {
             return "Apple"
@@ -188,7 +188,7 @@ import Foundation
 
         private func deviceModel() -> String {
             let platform = self.platform
-            getDeviceModel(platform: platform)
+            return getDeviceModel(platform: platform)
         }
 
         override var requiredPlugin: Plugin {
