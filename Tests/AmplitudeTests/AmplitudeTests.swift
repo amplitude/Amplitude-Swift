@@ -26,11 +26,10 @@ final class AmplitudeTests: XCTestCase {
         let lastEvent = outputReader.lastEvent
         XCTAssertEqual(lastEvent?.library, "\(Constants.SDK_LIBRARY)/\(Constants.SDK_VERSION)")
         XCTAssertEqual(lastEvent?.deviceManufacturer, "Apple")
-        XCTAssertEqual(lastEvent?.deviceModel, "Simulator")
+        XCTAssertEqual(lastEvent?.deviceModel!.isEmpty, false)
         XCTAssertEqual(lastEvent?.ip, "$remote")
         XCTAssertNil(lastEvent?.country)
-        XCTAssertNotNil(lastEvent?.platform)
-        XCTAssertNotNil(lastEvent?.language)
+        XCTAssertEqual(lastEvent?.platform!.isEmpty, false)
+        XCTAssertEqual(lastEvent?.language!.isEmpty, false)
     }
-
 }

@@ -5,7 +5,7 @@ public class Amplitude {
     var instanceName: String
     internal var inForeground = false
 
-    lazy var storage: Storage = {
+    lazy var storage: any Storage = {
         return self.configuration.storageProvider
     }()
     lazy var timeline: Timeline = {

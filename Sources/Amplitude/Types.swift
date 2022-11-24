@@ -5,14 +5,14 @@
 //  Created by Marvin Liu on 10/27/22.
 //
 
-public struct Plan {
+public struct Plan: Codable {
     var branch: String?
     var source: String?
     var version: String?
     var versionId: String?
 }
 
-public struct IngestionMetadata {
+public struct IngestionMetadata: Codable {
     var sourceName: String?
     var sourceVersion: String?
 }
@@ -22,8 +22,9 @@ public protocol EventCallBack {
 }
 
 public protocol Storage {
-    func write(key: String, value: Any?) async
-    func read(key: String) async -> Any?
+    associatedtype StorageKey: RawRepresentable where StorageKey.RawValue: StringProtocol
+    func write(key: StorageKey, value: Any?) async throws
+    func read<T>(key: StorageKey) async -> T?
     func reset() async
 }
 

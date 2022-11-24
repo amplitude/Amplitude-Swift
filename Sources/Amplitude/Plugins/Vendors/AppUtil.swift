@@ -83,10 +83,12 @@ import Foundation
         }
 
         override var os_version: String {
-            return String(format: "%ld.%ld.%ld",
-                          device.operatingSystemVersion.majorVersion,
-                          device.operatingSystemVersion.minorVersion,
-                          device.operatingSystemVersion.patchVersion)
+            return String(
+                format: "%ld.%ld.%ld",
+                device.operatingSystemVersion.majorVersion,
+                device.operatingSystemVersion.minorVersion,
+                device.operatingSystemVersion.patchVersion
+            )
         }
 
         override var requiredPlugin: Plugin {
@@ -109,12 +111,12 @@ import Foundation
             return getDeviceModel(platform: platform)
         }
 
-        private func macAddress(bsd : String) -> String? {
+        private func macAddress(bsd: String) -> String? {
             let MAC_ADDRESS_LENGTH = 6
             let separator = ":"
 
-            var length : size_t = 0
-            var buffer : [CChar]
+            var length: size_t = 0
+            var buffer: [CChar]
 
             let bsdIndex = Int32(if_nametoindex(bsd))
             if bsdIndex == 0 {
@@ -124,16 +126,19 @@ import Foundation
             var managementInfoBase = [CTL_NET, AF_ROUTE, 0, AF_LINK, NET_RT_IFLIST, bsdIndex]
 
             if sysctl(&managementInfoBase, 6, nil, &length, nil, 0) < 0 {
-                return nil;
+                return nil
             }
 
-            buffer = [CChar](unsafeUninitializedCapacity: length, initializingWith: {buffer, initializedCount in
-                for x in 0..<length { buffer[x] = 0 }
-                initializedCount = length
-            })
+            buffer = [CChar](
+                unsafeUninitializedCapacity: length,
+                initializingWith: { buffer, initializedCount in
+                    for x in 0..<length { buffer[x] = 0 }
+                    initializedCount = length
+                }
+            )
 
             if sysctl(&managementInfoBase, 6, &buffer, &length, nil, 0) < 0 {
-                return nil;
+                return nil
             }
 
             let infoData = Data(bytes: buffer, count: length)
@@ -142,7 +147,7 @@ import Foundation
             let lower = rangeOfToken.upperBound
             let upper = lower + MAC_ADDRESS_LENGTH
             let macAddressData = infoData[lower..<upper]
-            let addressBytes = macAddressData.map { String(format:"%02x", $0) }
+            let addressBytes = macAddressData.map { String(format: "%02x", $0) }
             return addressBytes.joined(separator: separator)
         }
     }
