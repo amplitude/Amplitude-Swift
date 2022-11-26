@@ -9,10 +9,11 @@ import Foundation
 
 class EventPipeline {
     var amplitude: Amplitude
-    var httpClient: HttpClient = HttpClient()
+    var httpClient: HttpClient
 
     init(amplitude: Amplitude) {
         self.amplitude = amplitude
+        self.httpClient = HttpClient(configuration: amplitude.configuration)
     }
 
     func put(event: BaseEvent) {
