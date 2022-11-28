@@ -58,6 +58,6 @@ final class HttpClientTests: XCTestCase {
             XCTAssertTrue(String(decoding: data!, as: UTF8.self).contains("Invalid API key: testApiKey"))
             asyncExpectation.fulfill()
         }
-        waitForExpectations(timeout: 15)
+        _ = XCTWaiter.wait(for: [asyncExpectation], timeout: 5)
     }
 }
