@@ -19,14 +19,12 @@ class InMemoryStorage: Storage {
     func reset() async {
 
     }
-}
 
-extension InMemoryStorage {
-    enum StorageKey: String, CaseIterable {
-        case LAST_EVENT_ID = "last_event_id"
-        case PREVIOUS_SESSION_ID = "previous_session_id"
-        case LAST_EVENT_TIME = "last_event_time"
-        case OPT_OUT = "opt_out"
-        case EVENTS = "events"
+    func rollover() async {
+
+    }
+
+    func getEventsString(eventBlock: Any) async -> String? {
+        return nil
     }
 }

@@ -8,3 +8,10 @@ identifier_name:
   allowed_symbols: "_"
   min_length: 1
 cyclomatic_complexity: 25
+nesting:
+  type_level:
+    warning: 3
+    error: 6
+  function_level:
+    warning: 5
+    error: 10

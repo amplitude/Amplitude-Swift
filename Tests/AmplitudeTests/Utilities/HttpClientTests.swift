@@ -47,7 +47,7 @@ final class HttpClientTests: XCTestCase {
         let httpClient = HttpClient(configuration: configuration)
         let asyncExpectation = expectation(description: "Async function")
         let event1 = BaseEvent(userId: "unit-test user", deviceId: "unit-test device", eventType: "unit-test event")
-        httpClient.upload(events: "[\(event1.toString())]") { result in
+        _ = httpClient.upload(events: "[\(event1.toString())]") { result in
             guard case .failure(let error) = result else {
                 return XCTFail("not getting upload failure")
             }

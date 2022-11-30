@@ -18,12 +18,13 @@ class HttpClient {
         self.session = URLSession.shared
     }
 
-    func upload(events: String, completion: @escaping (_ result: Result<Bool, Error>) -> Void) {
+    func upload(events: String, completion: @escaping (_ result: Result<Bool, Error>) -> Void) -> URLSessionDataTask? {
+        var sessionTask: URLSessionDataTask?
         do {
             let request = try getRequest()
             let requestData = getRequestData(events: events)
 
-            let sessionTask = session.uploadTask(with: request, from: requestData) { data, response, error in
+            sessionTask = session.uploadTask(with: request, from: requestData) { data, response, error in
                 if error != nil {
                     completion(.failure(error!))
                 } else if let httpResponse = response as? HTTPURLResponse {
@@ -35,10 +36,11 @@ class HttpClient {
                     }
                 }
             }
-            sessionTask.resume()
+            sessionTask!.resume()
         } catch {
             completion(.failure(Exception.httpError(code: 500, data: nil)))
         }
+        return sessionTask
     }
 
     func getUrl() -> String {

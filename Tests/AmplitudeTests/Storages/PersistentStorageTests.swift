@@ -31,14 +31,14 @@ final class PersistentStorageTests: XCTestCase {
     func testWrite() async {
         let persistentStorage = PersistentStorage(apiKey: "xxx-api-key")
         try? await persistentStorage.write(
-            key: PersistentStorage.StorageKey.EVENTS,
+            key: StorageKey.EVENTS,
             value: BaseEvent(eventType: "test1")
         )
         try? await persistentStorage.write(
-            key: PersistentStorage.StorageKey.EVENTS,
+            key: StorageKey.EVENTS,
             value: BaseEvent(eventType: "test2")
         )
-        let eventFiles: [URL]? = await persistentStorage.read(key: PersistentStorage.StorageKey.EVENTS)
+        let eventFiles: [URL]? = await persistentStorage.read(key: StorageKey.EVENTS)
         XCTAssertEqual(eventFiles?[0].absoluteString.contains("xxx-api-key.events.index"), true)
         XCTAssertNotEqual(eventFiles?[0].pathExtension, PersistentStorage.TEMP_FILE_EXTENSION)
         await persistentStorage.reset()

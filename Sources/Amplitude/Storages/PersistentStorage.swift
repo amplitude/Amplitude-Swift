@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  PersistentStorage.swift
 //
 //
 //  Created by Marvin Liu on 10/28/22.
@@ -47,6 +47,17 @@ actor PersistentStorage: Storage {
         return result
     }
 
+    func getEventsString(eventBlock: Any) async -> String? {
+        var content: String?
+        guard let eventBlock = eventBlock as? URL else { return content }
+        do {
+            content = try String(contentsOf: eventBlock, encoding: .utf8)
+        } catch {
+            amplitude?.logger?.error(message: error.localizedDescription)
+        }
+        return content
+    }
+
     func reset() async {
         let urls = getEventFiles(includeUnfinished: true)
         let keys = userDefaults?.dictionaryRepresentation().keys
@@ -55,6 +66,19 @@ actor PersistentStorage: Storage {
         }
         for url in urls {
             try? fileManager!.removeItem(atPath: url.path)
+        }
+    }
+
+    func rollover() async {
+        let currentFile = getCurrentFile()
+        if fileManager?.fileExists(atPath: currentFile.path) == false {
+            return
+        }
+        if let attributes = try? fileManager?.attributesOfItem(atPath: currentFile.path),
+            let fileSize = attributes[FileAttributeKey.size] as? UInt64,
+            fileSize >= 0
+        {
+            finish(file: currentFile)
         }
     }
 
@@ -79,14 +103,6 @@ extension PersistentStorage {
     static let AMP_STORAGE_PREFIX = "com.amplitude.storage"
     static let MAX_FILE_SIZE = 975000  // 975KB
     static let TEMP_FILE_EXTENSION = "tmp"
-
-    enum StorageKey: String, CaseIterable {
-        case LAST_EVENT_ID = "last_event_id"
-        case PREVIOUS_SESSION_ID = "previous_session_id"
-        case LAST_EVENT_TIME = "last_event_time"
-        case OPT_OUT = "opt_out"
-        case EVENTS = "events"
-    }
 
     enum Exception: Error {
         case unsupportedType
@@ -186,7 +202,7 @@ extension PersistentStorage {
         let jsonString = event.toString()
         do {
             if outputStream == nil {
-                amplitude?.logger.error(message: "OutputStream is nil with file: \(storeFile)")
+                amplitude?.logger?.error(message: "OutputStream is nil with file: \(storeFile)")
             }
             if newFile == false {
                 // prepare for the next entry
@@ -194,7 +210,7 @@ extension PersistentStorage {
             }
             try outputStream?.write(jsonString)
         } catch {
-            amplitude?.logger.error(message: error.localizedDescription)
+            amplitude?.logger?.error(message: error.localizedDescription)
         }
     }
 
@@ -205,7 +221,7 @@ extension PersistentStorage {
             try outputStream?.create()
             try outputStream?.write(contents)
         } catch {
-            amplitude?.logger.error(message: error.localizedDescription)
+            amplitude?.logger?.error(message: error.localizedDescription)
         }
     }
 
@@ -215,7 +231,7 @@ extension PersistentStorage {
             do {
                 outputStream = try OutputFileStream(fileURL: file)
             } catch {
-                amplitude?.logger.error(message: error.localizedDescription)
+                amplitude?.logger?.error(message: error.localizedDescription)
             }
         }
 
@@ -223,7 +239,7 @@ extension PersistentStorage {
             do {
                 try outputStream.open()
             } catch {
-                amplitude?.logger.error(message: error.localizedDescription)
+                amplitude?.logger?.error(message: error.localizedDescription)
             }
         }
     }
@@ -237,7 +253,7 @@ extension PersistentStorage {
         do {
             try outputStream.write(fileEnding)
         } catch {
-            amplitude?.logger.error(message: error.localizedDescription)
+            amplitude?.logger?.error(message: error.localizedDescription)
         }
         outputStream.close()
         self.outputStream = nil
@@ -246,7 +262,7 @@ extension PersistentStorage {
         do {
             try fileManager?.moveItem(at: file, to: fileWithoutTemp)
         } catch {
-            amplitude?.logger.error(message: "Unable to rename file: \(file.path)")
+            amplitude?.logger?.error(message: "Unable to rename file: \(file.path)")
         }
 
         let currentFileIndex: Int = (userDefaults?.integer(forKey: eventsFileKey) ?? 0) + 1

@@ -94,7 +94,7 @@
 
     extension AmplitudeDestinationPlugin: IOSLifecycle {
         public func applicationWillEnterForeground(application: UIApplication?) {
-            let timestamp = NSDate().timeIntervalSince1970
+            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
             self.amplitude?.onEnterForeground(timestamp: timestamp)
         }
 

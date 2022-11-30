@@ -59,9 +59,9 @@ public class BaseEvent: EventOptions, Codable {
     init(
         userId: String? = nil,
         deviceId: String? = nil,
-        timestamp: Double? = nil,
-        eventId: Double? = nil,
-        sessionId: Double? = -1,
+        timestamp: Int64? = nil,
+        eventId: Int64? = nil,
+        sessionId: Int64? = -1,
         insertId: String? = nil,
         locationLat: Double? = nil,
         locationLng: Double? = nil,
@@ -200,9 +200,9 @@ public class BaseEvent: EventOptions, Codable {
         super.init()
         userId = try values.decode(String.self, forKey: .userId)
         deviceId = try values.decode(String.self, forKey: .deviceId)
-        timestamp = try values.decode(Double.self, forKey: .timestamp)
-        eventId = try values.decode(Double.self, forKey: .eventId)
-        sessionId = try values.decode(Double.self, forKey: .sessionId)
+        timestamp = try values.decode(Int64.self, forKey: .timestamp)
+        eventId = try values.decode(Int64.self, forKey: .eventId)
+        sessionId = try values.decode(Int64.self, forKey: .sessionId)
         locationLat = try values.decode(Double.self, forKey: .locationLat)
         locationLng = try values.decode(Double.self, forKey: .locationLng)
         appVersion = try values.decode(String.self, forKey: .appVersion)

@@ -22,10 +22,19 @@ public protocol EventCallBack {
 }
 
 public protocol Storage {
-    associatedtype StorageKey: RawRepresentable where StorageKey.RawValue: StringProtocol
     func write(key: StorageKey, value: Any?) async throws
     func read<T>(key: StorageKey) async -> T?
+    func getEventsString(eventBlock: Any) async -> String?
+    func rollover() async
     func reset() async
+}
+
+public enum StorageKey: String, CaseIterable {
+    case LAST_EVENT_ID = "last_event_id"
+    case PREVIOUS_SESSION_ID = "previous_session_id"
+    case LAST_EVENT_TIME = "last_event_time"
+    case OPT_OUT = "opt_out"
+    case EVENTS = "events"
 }
 
 public protocol Logger {

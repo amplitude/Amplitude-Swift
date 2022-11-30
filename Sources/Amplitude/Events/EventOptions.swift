@@ -10,9 +10,9 @@ import Foundation
 public class EventOptions {
     var userId: String?
     var deviceId: String?
-    var timestamp: Double?
-    var eventId: Double?
-    var sessionId: Double? = -1
+    var timestamp: Int64?
+    var eventId: Int64?
+    var sessionId: Int64? = -1
     var insertId: String?
     var locationLat: Double?
     var locationLng: Double?
@@ -45,14 +45,14 @@ public class EventOptions {
     var extra: [String: Any]?
     var callback: EventCallBack?
     var partnerId: String?
-    private var attempts: Int
+    internal var attempts: Int
 
     init(
         userId: String? = nil,
         deviceId: String? = nil,
-        timestamp: Double? = nil,
-        eventId: Double? = nil,
-        sessionId: Double? = -1,
+        timestamp: Int64? = nil,
+        eventId: Int64? = nil,
+        sessionId: Int64? = -1,
         insertId: String? = nil,
         locationLat: Double? = nil,
         locationLng: Double? = nil,

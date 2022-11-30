@@ -76,7 +76,7 @@ class ContextPlugin: Plugin {
 
     internal func mergeContext(event: BaseEvent, context: [String: Any]) {
         if event.timestamp == nil {
-            event.timestamp = NSDate().timeIntervalSince1970 * 1000
+            event.timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
         }
         if event.insertId == nil {
             event.insertId = NSUUID().uuidString
