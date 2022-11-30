@@ -15,10 +15,16 @@ final class PersistentStorageTests: XCTestCase {
         var isValueBasicType = await persistentStorage.isBasicType(value: 111)
         XCTAssertEqual(isValueBasicType, true)
 
+        isValueBasicType = await persistentStorage.isBasicType(value: 11.11)
+        XCTAssertEqual(isValueBasicType, true)
+
         isValueBasicType = await persistentStorage.isBasicType(value: true)
         XCTAssertEqual(isValueBasicType, true)
 
         isValueBasicType = await persistentStorage.isBasicType(value: "test")
+        XCTAssertEqual(isValueBasicType, true)
+
+        isValueBasicType = await persistentStorage.isBasicType(value: NSString("test"))
         XCTAssertEqual(isValueBasicType, true)
 
         isValueBasicType = await persistentStorage.isBasicType(value: nil)

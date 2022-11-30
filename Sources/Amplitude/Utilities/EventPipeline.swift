@@ -9,7 +9,7 @@ import Foundation
 
 class EventPipeline {
     let amplitude: Amplitude
-    let httpClient: HttpClient
+    var httpClient: HttpClient
     var storage: Storage? { amplitude.storage }
     @Atomic internal var eventCount: Int = 0
     @Atomic internal var flushSizeDivider: Int = 1
@@ -33,7 +33,7 @@ class EventPipeline {
         }
     }
 
-    func put(event: BaseEvent) {
+    func put(event: BaseEvent, completion: (() -> Void)? = nil) {
         guard let storage = self.storage else { return }
         event.attempts += 1
         Task {
@@ -43,13 +43,14 @@ class EventPipeline {
                 if eventCount >= getFlushCount() {
                     flush()
                 }
+                completion?()
             } catch {
                 amplitude.logger?.error(message: "Error when storing event: \(error.localizedDescription)")
             }
         }
     }
 
-    func flush() {
+    func flush(completion: (() -> Void)? = nil) {
         Task {
             guard let storage = self.storage else { return }
             await storage.rollover()
@@ -64,7 +65,7 @@ class EventPipeline {
                     continue
                 }
                 let uploadTask = httpClient.upload(events: eventsString) { [weak self] result in
-                    // TODO: handle response
+                    // TODO: handle response and add retry logic
                     switch result {
                     case .success(let status):
                         self?.amplitude.logger?.log(message: "Upload event success: \(status)")
@@ -83,6 +84,7 @@ class EventPipeline {
                     add(uploadTask: UploadTaskInfo(events: eventsString, task: upload))
                 }
             }
+            completion?()
         }
     }
 

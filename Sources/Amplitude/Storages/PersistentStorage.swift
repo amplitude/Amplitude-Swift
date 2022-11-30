@@ -88,7 +88,7 @@ actor PersistentStorage: Storage {
             result = true
         } else {
             switch value {
-            case is NSNull, is Decimal, is NSNumber, is Bool, is String:
+            case is NSNull, is Int, is Float, is Double, is Decimal, is NSNumber, is Bool, is String, is NSString:
                 result = true
             default:
                 break
@@ -230,14 +230,9 @@ extension PersistentStorage {
             // this can happen if an instance was terminated before finishing a file.
             do {
                 outputStream = try OutputFileStream(fileURL: file)
-            } catch {
-                amplitude?.logger?.error(message: error.localizedDescription)
-            }
-        }
-
-        if let outputStream = outputStream {
-            do {
-                try outputStream.open()
+                if let outputStream = outputStream {
+                    try outputStream.open()
+                }
             } catch {
                 amplitude?.logger?.error(message: error.localizedDescription)
             }

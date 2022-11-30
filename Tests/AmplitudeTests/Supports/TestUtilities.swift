@@ -1,3 +1,5 @@
+import Foundation
+
 @testable import Amplitude_Swift
 
 class TestEnrichmentPlugin: Plugin {
@@ -42,5 +44,63 @@ class OutputReaderPlugin: Plugin {
     func execute(event: BaseEvent?) -> BaseEvent? {
         lastEvent = event
         return event
+    }
+}
+
+actor FakeInMemoryStorage: Storage {
+    var keyValueStore = [String: Any?]()
+    var eventsStore = [URL: [BaseEvent]]()
+    var index = URL(string: "0")!
+
+    func write(key: StorageKey, value: Any?) async throws {
+        switch key {
+        case .EVENTS:
+            if let event = value as? BaseEvent {
+                var chunk = eventsStore[index, default: [BaseEvent]()]
+                chunk.append(event)
+                eventsStore[index] = chunk
+            }
+        default:
+            keyValueStore[key.rawValue] = value
+        }
+    }
+
+    func read<T>(key: StorageKey) async -> T? {
+        var result: T?
+        switch key {
+        case .EVENTS:
+            result = Array(eventsStore.keys) as? T
+        default:
+            result = keyValueStore[key.rawValue] as? T
+        }
+        return result
+    }
+
+    func getEventsString(eventBlock: Any) async -> String? {
+        var content: String?
+        guard let eventBlock = eventBlock as? URL else { return content }
+        content = "["
+        content = content! + (eventsStore[eventBlock] ?? []).map { $0.toString() }.joined(separator: ", ")
+        content = content! + "]"
+        return content
+    }
+
+    func rollover() async {
+    }
+
+    func reset() async {
+        keyValueStore.removeAll()
+        eventsStore.removeAll()
+    }
+}
+
+class FakeHttpClient: HttpClient {
+    var isUploadCalled: Bool = false
+
+    override func upload(events: String, completion: @escaping (_ result: Result<Bool, Error>) -> Void)
+        -> URLSessionDataTask?
+    {
+        isUploadCalled = true
+        return nil
     }
 }
