@@ -5,8 +5,8 @@
 //  Created by Hao Yu on 11/30/22.
 //
 
-import SwiftUI
 import Amplitude_Swift
+import SwiftUI
 
 @main
 struct AmplitudeSwiftUIExampleApp: App {
