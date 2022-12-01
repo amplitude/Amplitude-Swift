@@ -28,7 +28,8 @@ let package = Package(
         .target(
             name: "Amplitude-Swift",
             dependencies: [],
-            path: "Sources/Amplitude"
+            path: "Sources/Amplitude",
+            exclude:["../../Examples/"]
         ),
         .testTarget(
             name: "Amplitude-SwiftTests",

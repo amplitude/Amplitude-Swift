@@ -1,0 +1,397 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		19C9CC162937F5A400C1E660 /* AmplitudeSwiftUIExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19C9CC152937F5A400C1E660 /* AmplitudeSwiftUIExampleApp.swift */; };
+		19C9CC182937F5A400C1E660 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19C9CC172937F5A400C1E660 /* ContentView.swift */; };
+		19C9CC1A2937F5A600C1E660 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 19C9CC192937F5A600C1E660 /* Assets.xcassets */; };
+		19C9CC1D2937F5A600C1E660 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 19C9CC1C2937F5A600C1E660 /* Preview Assets.xcassets */; };
+		19C9CC1F2937F5A600C1E660 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19C9CC1E2937F5A600C1E660 /* Persistence.swift */; };
+		19C9CC222937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 19C9CC202937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodeld */; };
+		19C9CC2D2937F5D000C1E660 /* Amplitude-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 19C9CC2C2937F5D000C1E660 /* Amplitude-Swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		19C9CC122937F5A400C1E660 /* AmplitudeSwiftUIExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AmplitudeSwiftUIExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		19C9CC152937F5A400C1E660 /* AmplitudeSwiftUIExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmplitudeSwiftUIExampleApp.swift; sourceTree = "<group>"; };
+		19C9CC172937F5A400C1E660 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		19C9CC192937F5A600C1E660 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		19C9CC1C2937F5A600C1E660 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		19C9CC1E2937F5A600C1E660 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		19C9CC212937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = AmplitudeSwiftUIExample.xcdatamodel; sourceTree = "<group>"; };
+		19C9CC292937F5B200C1E660 /* Amplitude-Swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "Amplitude-Swift"; path = ../..; sourceTree = "<group>"; };
+		19C9CC2A2937F5C900C1E660 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		19C9CC0F2937F5A400C1E660 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				19C9CC2D2937F5D000C1E660 /* Amplitude-Swift in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		19C9CC092937F5A400C1E660 = {
+			isa = PBXGroup;
+			children = (
+				19C9CC282937F5B200C1E660 /* Packages */,
+				19C9CC142937F5A400C1E660 /* AmplitudeSwiftUIExample */,
+				19C9CC132937F5A400C1E660 /* Products */,
+				19C9CC2B2937F5D000C1E660 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		19C9CC132937F5A400C1E660 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				19C9CC122937F5A400C1E660 /* AmplitudeSwiftUIExample.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		19C9CC142937F5A400C1E660 /* AmplitudeSwiftUIExample */ = {
+			isa = PBXGroup;
+			children = (
+				19C9CC2A2937F5C900C1E660 /* Info.plist */,
+				19C9CC152937F5A400C1E660 /* AmplitudeSwiftUIExampleApp.swift */,
+				19C9CC172937F5A400C1E660 /* ContentView.swift */,
+				19C9CC192937F5A600C1E660 /* Assets.xcassets */,
+				19C9CC1E2937F5A600C1E660 /* Persistence.swift */,
+				19C9CC202937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodeld */,
+				19C9CC1B2937F5A600C1E660 /* Preview Content */,
+			);
+			path = AmplitudeSwiftUIExample;
+			sourceTree = "<group>";
+		};
+		19C9CC1B2937F5A600C1E660 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				19C9CC1C2937F5A600C1E660 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		19C9CC282937F5B200C1E660 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				19C9CC292937F5B200C1E660 /* Amplitude-Swift */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		19C9CC2B2937F5D000C1E660 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		19C9CC112937F5A400C1E660 /* AmplitudeSwiftUIExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 19C9CC252937F5A600C1E660 /* Build configuration list for PBXNativeTarget "AmplitudeSwiftUIExample" */;
+			buildPhases = (
+				19C9CC0E2937F5A400C1E660 /* Sources */,
+				19C9CC0F2937F5A400C1E660 /* Frameworks */,
+				19C9CC102937F5A400C1E660 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AmplitudeSwiftUIExample;
+			packageProductDependencies = (
+				19C9CC2C2937F5D000C1E660 /* Amplitude-Swift */,
+			);
+			productName = AmplitudeSwiftUIExample;
+			productReference = 19C9CC122937F5A400C1E660 /* AmplitudeSwiftUIExample.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		19C9CC0A2937F5A400C1E660 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1410;
+				LastUpgradeCheck = 1410;
+				TargetAttributes = {
+					19C9CC112937F5A400C1E660 = {
+						CreatedOnToolsVersion = 14.1;
+					};
+				};
+			};
+			buildConfigurationList = 19C9CC0D2937F5A400C1E660 /* Build configuration list for PBXProject "AmplitudeSwiftUIExample" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 19C9CC092937F5A400C1E660;
+			productRefGroup = 19C9CC132937F5A400C1E660 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				19C9CC112937F5A400C1E660 /* AmplitudeSwiftUIExample */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		19C9CC102937F5A400C1E660 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				19C9CC1D2937F5A600C1E660 /* Preview Assets.xcassets in Resources */,
+				19C9CC1A2937F5A600C1E660 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		19C9CC0E2937F5A400C1E660 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				19C9CC222937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodeld in Sources */,
+				19C9CC1F2937F5A600C1E660 /* Persistence.swift in Sources */,
+				19C9CC182937F5A400C1E660 /* ContentView.swift in Sources */,
+				19C9CC162937F5A400C1E660 /* AmplitudeSwiftUIExampleApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		19C9CC232937F5A600C1E660 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		19C9CC242937F5A600C1E660 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		19C9CC262937F5A600C1E660 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"AmplitudeSwiftUIExample/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AmplitudeSwiftUIExample/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.amplitude.Amplitude.AmplitudeSwiftUIExample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		19C9CC272937F5A600C1E660 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"AmplitudeSwiftUIExample/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AmplitudeSwiftUIExample/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.amplitude.Amplitude.AmplitudeSwiftUIExample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		19C9CC0D2937F5A400C1E660 /* Build configuration list for PBXProject "AmplitudeSwiftUIExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				19C9CC232937F5A600C1E660 /* Debug */,
+				19C9CC242937F5A600C1E660 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		19C9CC252937F5A600C1E660 /* Build configuration list for PBXNativeTarget "AmplitudeSwiftUIExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				19C9CC262937F5A600C1E660 /* Debug */,
+				19C9CC272937F5A600C1E660 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		19C9CC2C2937F5D000C1E660 /* Amplitude-Swift */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = "Amplitude-Swift";
+		};
+/* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		19C9CC202937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				19C9CC212937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodel */,
+			);
+			currentVersion = 19C9CC212937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodel */;
+			path = AmplitudeSwiftUIExample.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = 19C9CC0A2937F5A400C1E660 /* Project object */;
+}
