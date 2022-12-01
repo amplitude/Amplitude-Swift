@@ -12,7 +12,6 @@ class EventPipeline {
     var httpClient: HttpClient
     var storage: Storage? { amplitude.storage }
     @Atomic internal var eventCount: Int = 0
-    @Atomic internal var flushSizeDivider: Int = 1
     internal var flushTimer: QueueTimer?
     private let uploadsQueue = DispatchQueue(label: "uploadsQueue.amplitude.com")
 
@@ -101,7 +100,7 @@ class EventPipeline {
     }
 
     private func getFlushCount() -> Int {
-        let count = amplitude.configuration.flushQueueSize / flushSizeDivider
+        let count = amplitude.configuration.flushQueueSize
         return count != 0 ? count : 1
     }
 }
