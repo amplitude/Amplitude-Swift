@@ -44,7 +44,7 @@ struct ContentView: View {
                                 TextField("UserId", text: $userId)
                                 Button(action: {
                                     print("Set UserId")
-                                    _ = Amplitude.main.setUserId(userId: userId)
+                                    _ = Amplitude.testInstance.setUserId(userId: userId)
                                 }) {
                                     Text("Set UserId")
                                 }.buttonStyle(AmplitudeButton())
@@ -52,7 +52,7 @@ struct ContentView: View {
                             HStack {
                                 TextField("DeviceId", text: $deviceId)
                                 Button(action: {
-                                    _ = Amplitude.main.setDeviceId(deviceId: deviceId)
+                                    _ = Amplitude.testInstance.setDeviceId(deviceId: deviceId)
                                 }) {
                                     Text("Reset DeviceId")
                                 }.buttonStyle(AmplitudeButton())
@@ -65,7 +65,7 @@ struct ContentView: View {
                                 Button(action: {
                                     print("Log event.")
                                     let event = BaseEvent(eventType: eventType)
-                                    _ = Amplitude.main.track(event: event)
+                                    _ = Amplitude.testInstance.track(event: event)
                                 }) {
                                     Text("Send Event")
                                 }.buttonStyle(AmplitudeButton())
@@ -109,7 +109,7 @@ struct ContentView: View {
                             }.buttonStyle(AmplitudeButton())
                         }
                         Button(action: {
-                            _ = Amplitude.main.flush()
+                            _ = Amplitude.testInstance.flush()
                         }) {
                             Text("Flush All Events")
                                 .frame(maxWidth: .infinity)

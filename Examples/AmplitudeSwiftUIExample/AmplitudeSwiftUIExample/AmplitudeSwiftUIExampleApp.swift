@@ -21,5 +21,5 @@ struct AmplitudeSwiftUIExampleApp: App {
 }
 
 extension Amplitude {
-    static var main = Amplitude(configuration: Configuration(apiKey: "TEST-API-KEY"))
+    static var testInstance = Amplitude(configuration: Configuration(apiKey: "TEST-API-KEY"))
 }
