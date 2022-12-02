@@ -21,7 +21,6 @@ public class Timeline {
         let beforeResult = applyPlugin(pluginType: PluginType.before, event: event)
         let enrichmentResult = applyPlugin(pluginType: PluginType.enrichment, event: beforeResult)
         _ = applyPlugin(pluginType: PluginType.destination, event: enrichmentResult)
-
     }
 
     internal func applyPlugin(pluginType: PluginType, event: BaseEvent?) -> BaseEvent? {
@@ -30,7 +29,6 @@ public class Timeline {
             result = mediator.execute(event: event!)
         }
         return result
-
     }
 
     internal func add(plugin: Plugin) {

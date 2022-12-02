@@ -13,7 +13,7 @@ public class Configuration {
     var flushIntervalMillis: Int
     var instanceName: String
     var optOut: Bool
-    var storageProvider: Storage
+    var storageProvider: any Storage
     var logLevel: LogLevelEnum
     var loggerProvider: any Logger
     var minIdLength: Int?
@@ -38,7 +38,7 @@ public class Configuration {
         flushIntervalMillis: Int = Constants.Configuration.FLUSH_INTERVAL_MILLIS,
         instanceName: String = Constants.Configuration.DEFAULT_INSTANCE,
         optOut: Bool = false,
-        storageProvider: Storage = PersistentStorage(),
+        storageProvider: (any Storage)? = nil,
         logLevel: LogLevelEnum = LogLevelEnum.WARN,
         loggerProvider: any Logger = ConsoleLogger(),
         minIdLength: Int? = nil,
@@ -63,7 +63,7 @@ public class Configuration {
         self.flushIntervalMillis = flushIntervalMillis
         self.instanceName = instanceName
         self.optOut = optOut
-        self.storageProvider = storageProvider
+        self.storageProvider = storageProvider ?? PersistentStorage(apiKey: apiKey)
         self.logLevel = logLevel
         self.loggerProvider = loggerProvider
         self.minIdLength = minIdLength

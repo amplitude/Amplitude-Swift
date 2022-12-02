@@ -5,13 +5,13 @@ public class Amplitude {
     var instanceName: String
     internal var inForeground = false
 
-    lazy var storage: Storage = {
+    lazy var storage: any Storage = {
         return self.configuration.storageProvider
     }()
     lazy var timeline: Timeline = {
         return Timeline()
     }()
-    lazy var logger: any Logger = {
+    lazy var logger: (any Logger)? = {
         return self.configuration.loggerProvider
     }()
 
@@ -108,7 +108,7 @@ public class Amplitude {
         return self
     }
 
-    func onEnterForeground(timestamp: Double) {
+    func onEnterForeground(timestamp: Int64) {
         inForeground = true
 
         let dummySessionStartEvent = BaseEvent(eventType: "session_start")
@@ -131,10 +131,10 @@ public class Amplitude {
 
     private func process(event: BaseEvent) {
         if configuration.optOut {
-            logger.log(message: "Skip event based on opt out configuration")
+            logger?.log(message: "Skip event based on opt out configuration")
             return
         }
-        event.timestamp = event.timestamp ?? NSDate().timeIntervalSince1970
+        event.timestamp = event.timestamp ?? Int64(NSDate().timeIntervalSince1970 * 1000)
         timeline.process(event: event)
     }
 }

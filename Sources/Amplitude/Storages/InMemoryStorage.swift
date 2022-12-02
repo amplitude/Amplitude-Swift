@@ -8,15 +8,23 @@
 import Foundation
 
 class InMemoryStorage: Storage {
-    func write(key: String, value: Any?) async {
+    func write(key: StorageKey, value: Any?) async {
 
     }
 
-    func read(key: String) async -> Any? {
+    func read<T>(key: StorageKey) async -> T? {
         return nil
     }
 
     func reset() async {
 
+    }
+
+    func rollover() async {
+
+    }
+
+    func getEventsString(eventBlock: Any) async -> String? {
+        return nil
     }
 }

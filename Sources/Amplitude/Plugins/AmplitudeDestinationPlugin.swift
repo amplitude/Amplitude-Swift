@@ -19,7 +19,6 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
                 logger?.error(message: "Event is invalid for missing information like userId and deviceId")
             }
         }
-
     }
 
     public func track(event: BaseEvent) -> BaseEvent? {

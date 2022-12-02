@@ -82,7 +82,7 @@
 
     extension AmplitudeDestinationPlugin: MacOSLifecycle {
         public func applicationDidBecomeActive() {
-            let timestamp = NSDate().timeIntervalSince1970
+            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
             self.amplitude?.onEnterForeground(timestamp: timestamp)
         }
 

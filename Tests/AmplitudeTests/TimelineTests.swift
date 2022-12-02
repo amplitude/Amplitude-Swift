@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Amplitude_Swift
 
-final class TimelineTest: XCTestCase {
+final class TimelineTests: XCTestCase {
     private var timeline: Timeline!
 
     func testTimeline() {

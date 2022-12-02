@@ -58,7 +58,6 @@ public struct Constants {
         static let MIN_TIME_BETWEEN_SESSIONS_MILLIS = 300000
     }
 
-    struct Storage {
-        static let STORAGE_PREFIX = "amplitude-swift"
+    public struct Storage {
     }
 }

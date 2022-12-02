@@ -5,14 +5,14 @@
 //  Created by Marvin Liu on 10/27/22.
 //
 
-public struct Plan {
+public struct Plan: Codable {
     var branch: String?
     var source: String?
     var version: String?
     var versionId: String?
 }
 
-public struct IngestionMetadata {
+public struct IngestionMetadata: Codable {
     var sourceName: String?
     var sourceVersion: String?
 }
@@ -22,9 +22,19 @@ public protocol EventCallBack {
 }
 
 public protocol Storage {
-    func write(key: String, value: Any?) async
-    func read(key: String) async -> Any?
+    func write(key: StorageKey, value: Any?) async throws
+    func read<T>(key: StorageKey) async -> T?
+    func getEventsString(eventBlock: Any) async -> String?
+    func rollover() async
     func reset() async
+}
+
+public enum StorageKey: String, CaseIterable {
+    case LAST_EVENT_ID = "last_event_id"
+    case PREVIOUS_SESSION_ID = "previous_session_id"
+    case LAST_EVENT_TIME = "last_event_time"
+    case OPT_OUT = "opt_out"
+    case EVENTS = "events"
 }
 
 public protocol Logger {
