@@ -8,6 +8,8 @@
 import Foundation
 
 class InMemoryStorage: Storage {
+    typealias EventBlock = Any
+
     func write(key: StorageKey, value: Any?) async {
 
     }
@@ -24,7 +26,24 @@ class InMemoryStorage: Storage {
 
     }
 
-    func getEventsString(eventBlock: Any) async -> String? {
+    func getEventsString(eventBlock: EventBlock) async -> String? {
         return nil
+    }
+
+    func remove(eventBlock: EventBlock) async {
+
+    }
+
+    func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) async {
+
+    }
+
+    func getResponseHandler(
+        configuration: Configuration,
+        eventPipeline: EventPipeline,
+        eventBlock: EventBlock,
+        eventsString: String
+    ) -> ResponseHandler {
+        return (Any).self as! ResponseHandler
     }
 }

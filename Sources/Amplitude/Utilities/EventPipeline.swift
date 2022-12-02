@@ -7,7 +7,7 @@
 
 import Foundation
 
-class EventPipeline {
+public class EventPipeline {
     let amplitude: Amplitude
     var httpClient: HttpClient
     var storage: Storage? { amplitude.storage }
@@ -53,6 +53,7 @@ class EventPipeline {
         Task {
             guard let storage = self.storage else { return }
             await storage.rollover()
+            // TODO: make this type optional, instead of binding to URL
             guard let eventFiles: [URL]? = await storage.read(key: StorageKey.EVENTS) else { return }
             amplitude.logger?.log(message: "Start flushing \(eventCount) events")
             eventCount = 0
@@ -64,20 +65,13 @@ class EventPipeline {
                     continue
                 }
                 let uploadTask = httpClient.upload(events: eventsString) { [weak self] result in
-                    // TODO: handle response and add retry logic
-                    switch result {
-                    case .success(let status):
-                        self?.amplitude.logger?.log(message: "Upload event success: \(status)")
-                    case .failure(let error):
-                        switch error {
-                        case HttpClient.Exception.httpError(let code, let data):
-                            self?.amplitude.logger?.log(
-                                message: "Upload event error \(code): \(String(decoding: data!, as: UTF8.self))"
-                            )
-                        default:
-                            self?.amplitude.logger?.log(message: "\(error.localizedDescription)")
-                        }
-                    }
+                    let responseHandler = storage.getResponseHandler(
+                        configuration: self!.amplitude.configuration,
+                        eventPipeline: self!,
+                        eventBlock: eventFile,
+                        eventsString: eventsString
+                    )
+                    responseHandler.handle(result: result)
                 }
                 if let upload = uploadTask {
                     add(uploadTask: UploadTaskInfo(events: eventsString, task: upload))

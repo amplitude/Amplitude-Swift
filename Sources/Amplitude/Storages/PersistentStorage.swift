@@ -8,6 +8,8 @@
 import Foundation
 
 actor PersistentStorage: Storage {
+    typealias EventBlock = Any
+
     let storagePrefix: String
     let userDefaults: UserDefaults?
     let fileManager: FileManager?
@@ -47,7 +49,7 @@ actor PersistentStorage: Storage {
         return result
     }
 
-    func getEventsString(eventBlock: Any) async -> String? {
+    func getEventsString(eventBlock: EventBlock) async -> String? {
         var content: String?
         guard let eventBlock = eventBlock as? URL else { return content }
         do {
@@ -56,6 +58,42 @@ actor PersistentStorage: Storage {
             amplitude?.logger?.error(message: error.localizedDescription)
         }
         return content
+    }
+
+    func remove(eventBlock: EventBlock) async {
+        guard let eventBlock = eventBlock as? URL else { return }
+        do {
+            try fileManager!.removeItem(atPath: eventBlock.path)
+        } catch {
+            amplitude?.logger?.error(message: error.localizedDescription)
+        }
+    }
+
+    func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) async {
+        guard let eventBlock = eventBlock as? URL else { return }
+        let total = events.count
+        let half = total / 2
+        let leftSplit = Array(events[0..<half])
+        let rightSplit = Array(events[half..<total])
+        storeEventsInNewFile(toFile: eventBlock.appendingPathComponent("-1"), events: leftSplit)
+        storeEventsInNewFile(toFile: eventBlock.appendingPathComponent("-2"), events: rightSplit)
+        await remove(eventBlock: eventBlock)
+    }
+
+    
+    nonisolated func getResponseHandler(
+        configuration: Configuration,
+        eventPipeline: EventPipeline,
+        eventBlock: Any,
+        eventsString: String
+    ) -> ResponseHandler {
+        return PersitentStorageResponseHandler(
+            configuration: configuration,
+            storage: self,
+            eventPipeline: eventPipeline,
+            eventBlock: eventBlock as! URL,
+            eventsString: eventsString
+        )
     }
 
     func reset() async {
@@ -212,6 +250,26 @@ extension PersistentStorage {
         } catch {
             amplitude?.logger?.error(message: error.localizedDescription)
         }
+    }
+
+    private func storeEventsInNewFile(toFile file: URL, events: [BaseEvent]) {
+        let storeFile = file
+
+        guard fileManager?.fileExists(atPath: storeFile.path) == true else {
+            return
+        }
+
+        start(file: storeFile)
+        let jsonString = events.map { $0.toString() }.joined(separator: ", ")
+        do {
+            if outputStream == nil {
+                amplitude?.logger?.error(message: "OutputStream is nil with file: \(storeFile)")
+            }
+            try outputStream?.write(jsonString)
+        } catch {
+            amplitude?.logger?.error(message: error.localizedDescription)
+        }
+        finish(file: storeFile)
     }
 
     private func start(file: URL) {

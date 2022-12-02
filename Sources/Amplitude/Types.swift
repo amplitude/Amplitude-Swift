@@ -17,16 +17,24 @@ public struct IngestionMetadata: Codable {
     var sourceVersion: String?
 }
 
-public protocol EventCallBack {
-
-}
+public typealias EventCallBack = (BaseEvent, Int, String) -> Void
 
 public protocol Storage {
+    // associatedtype EventBlock
+    // TODO: associatedtype EventBlock, instead of using Any
     func write(key: StorageKey, value: Any?) async throws
     func read<T>(key: StorageKey) async -> T?
     func getEventsString(eventBlock: Any) async -> String?
+    func remove(eventBlock: Any) async
+    func splitBlock(eventBlock: Any, events: [BaseEvent]) async
     func rollover() async
     func reset() async
+    func getResponseHandler(
+        configuration: Configuration,
+        eventPipeline: EventPipeline,
+        eventBlock: Any,
+        eventsString: String
+    ) -> ResponseHandler
 }
 
 public enum StorageKey: String, CaseIterable {

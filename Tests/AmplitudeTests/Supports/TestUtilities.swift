@@ -48,6 +48,8 @@ class OutputReaderPlugin: Plugin {
 }
 
 actor FakeInMemoryStorage: Storage {
+    typealias EventBlock = Any
+
     var keyValueStore = [String: Any?]()
     var eventsStore = [URL: [BaseEvent]]()
     var index = URL(string: "0")!
@@ -76,7 +78,7 @@ actor FakeInMemoryStorage: Storage {
         return result
     }
 
-    func getEventsString(eventBlock: Any) async -> String? {
+    func getEventsString(eventBlock: EventBlock) async -> String? {
         var content: String?
         guard let eventBlock = eventBlock as? URL else { return content }
         content = "["
@@ -92,12 +94,27 @@ actor FakeInMemoryStorage: Storage {
         keyValueStore.removeAll()
         eventsStore.removeAll()
     }
+
+    func remove(eventBlock: EventBlock) async {
+    }
+
+    func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) async {
+    }
+
+    nonisolated func getResponseHandler(
+        configuration: Configuration,
+        eventPipeline: EventPipeline,
+        eventBlock: Any,
+        eventsString: String
+    ) -> ResponseHandler {
+        return (Any).self as! ResponseHandler
+    }
 }
 
 class FakeHttpClient: HttpClient {
     var isUploadCalled: Bool = false
 
-    override func upload(events: String, completion: @escaping (_ result: Result<Bool, Error>) -> Void)
+    override func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void)
         -> URLSessionDataTask?
     {
         isUploadCalled = true
