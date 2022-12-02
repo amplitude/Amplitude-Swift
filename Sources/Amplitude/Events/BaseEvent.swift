@@ -56,7 +56,7 @@ public class BaseEvent: EventOptions, Codable {
         case partnerId = "partner_id"
     }
 
-    init(
+    public init(
         userId: String? = nil,
         deviceId: String? = nil,
         timestamp: Int64? = nil,

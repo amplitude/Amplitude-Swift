@@ -15,7 +15,7 @@ public class Amplitude {
         return self.configuration.loggerProvider
     }()
 
-    init(
+    public init(
         configuration: Configuration,
         instanceName: String = Constants.Configuration.DEFAULT_INSTANCE
     ) {
@@ -35,7 +35,7 @@ public class Amplitude {
     }
 
     @discardableResult
-    func track(event: BaseEvent, options: EventOptions? = nil, callback: EventCallBack? = nil) -> Amplitude {
+    public func track(event: BaseEvent, options: EventOptions? = nil, callback: EventCallBack? = nil) -> Amplitude {
         if options != nil {
             event.mergeEventOptions(eventOptions: options!)
         }
@@ -47,23 +47,23 @@ public class Amplitude {
     }
 
     @available(*, deprecated, message: "use 'track' instead")
-    func logEvent(event: BaseEvent) -> Amplitude {
+    public func logEvent(event: BaseEvent) -> Amplitude {
         return track(event: event)
     }
 
-    func identify(type: String) -> Amplitude {
+    public func identify(type: String) -> Amplitude {
         return self
     }
 
-    func identify() -> Amplitude {
+    public func identify() -> Amplitude {
         return self
     }
 
-    func groupIdentify() -> Amplitude {
+    public func groupIdentify() -> Amplitude {
         return self
     }
 
-    func groupIdentify(
+    public func groupIdentify(
         groupType: String,
         groupName: String,
         groupProperties: [String: Any],
@@ -72,35 +72,35 @@ public class Amplitude {
         return self
     }
 
-    func logRevenue() -> Amplitude {
+    public func logRevenue() -> Amplitude {
         return self
     }
 
-    func revenue() -> Amplitude {
+    public func revenue() -> Amplitude {
         return self
     }
 
     @discardableResult
-    func add(plugin: Plugin) -> Amplitude {
+    public func add(plugin: Plugin) -> Amplitude {
         plugin.setup(amplitude: self)
         timeline.add(plugin: plugin)
         return self
     }
 
-    func remove(plugin: Plugin) -> Amplitude {
+    public func remove(plugin: Plugin) -> Amplitude {
         timeline.remove(plugin: plugin)
         return self
     }
 
-    func flush() -> Amplitude {
+    public func flush() -> Amplitude {
         return self
     }
 
-    func setUserId(userId: String) -> Amplitude {
+    public func setUserId(userId: String) -> Amplitude {
         return self
     }
 
-    func setDeviceId(deviceId: String) -> Amplitude {
+    public func setDeviceId(deviceId: String) -> Amplitude {
         return self
     }
 

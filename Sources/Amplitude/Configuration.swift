@@ -32,7 +32,7 @@ public class Configuration {
     var minTimeBetweenSessionsMillis: Int
     var trackingSessionEvents: Bool?
 
-    init(
+    public init(
         apiKey: String,
         flushQueueSize: Int = Constants.Configuration.FLUSH_QUEUE_SIZE,
         flushIntervalMillis: Int = Constants.Configuration.FLUSH_INTERVAL_MILLIS,

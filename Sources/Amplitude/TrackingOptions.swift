@@ -8,6 +8,8 @@
 import Foundation
 
 public class TrackingOptions {
+    
+    public init() {}
 
     private let COPPA_CONTROL_PROPERTIES = [
         Constants.AMP_TRACKING_OPTION_IDFA,

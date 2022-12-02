@@ -16,7 +16,7 @@ let package = Package(
         .library(
             name: "Amplitude-Swift",
             targets: ["Amplitude-Swift"]
-        ),
+        )
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -28,7 +28,8 @@ let package = Package(
         .target(
             name: "Amplitude-Swift",
             dependencies: [],
-            path: "Sources/Amplitude"
+            path: "Sources/Amplitude",
+            exclude: ["../../Examples/", "../../Tests/"]
         ),
         .testTarget(
             name: "Amplitude-SwiftTests",
