@@ -7,20 +7,22 @@
 
 import Foundation
 
-class ConsoleLogger: Logger {
-    typealias LogLevel = LogLevelEnum
+public class ConsoleLogger: Logger {
+    public typealias LogLevel = LogLevelEnum
 
-    var logLevel: Int?
-
-    func error(message: String) {
+    public var logLevel: Int?
+    
+    public init() {}
+    
+    public func error(message: String) {
     }
 
-    func warn(message: String) {
+    public func warn(message: String) {
     }
 
-    func log(message: String) {
+    public func log(message: String) {
     }
 
-    func debug(message: String) {
+    public func debug(message: String) {
     }
 }

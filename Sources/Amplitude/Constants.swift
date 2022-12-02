@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum LogLevelEnum: Int {
+public enum LogLevelEnum: Int {
     case DEBUG
     case LOG
     case WARN
@@ -15,7 +15,7 @@ enum LogLevelEnum: Int {
     case OFF
 }
 
-enum ServerZone: String {
+public enum ServerZone: String {
     case US
     case EU
 }
@@ -23,8 +23,8 @@ enum ServerZone: String {
 public struct Constants {
     static let SDK_LIBRARY = "amplitude-swift"
     static let SDK_VERSION = "0.0.0"  // TODO: SHOULD IMPLEMENT THE SEMENTIC RELEASE TO AUTO UPDATE THIS VALUE
-    static let DEFAULT_API_HOST = "https://api2.amplitude.com/2/httpapi"
-    static let EU_DEFAULT_API_HOST = "https://api.eu.amplitude.com/2/httpapi"
+    public static let DEFAULT_API_HOST = "https://api2.amplitude.com/2/httpapi"
+    public static let EU_DEFAULT_API_HOST = "https://api.eu.amplitude.com/2/httpapi"
     static let BATCH_API_HOST = "https://api2.amplitude.com/batch"
     static let EU_BATCH_API_HOST = "https://api.eu.amplitude.com/batch"
     static let IDENTIFY_EVENT = "$identify"
@@ -50,14 +50,15 @@ public struct Constants {
     static let AMP_TRACKING_OPTION_REGION = "region"
     static let AMP_TRACKING_OPTION_VERSION_NAME = "version_name"
 
-    struct Configuration {
-        static let FLUSH_QUEUE_SIZE = 30
-        static let FLUSH_INTERVAL_MILLIS = 30 * 1000  // 30s
-        static let DEFAULT_INSTANCE = "default_instance"
-        static let FLUSH_MAX_RETRIES = 5
-        static let MIN_TIME_BETWEEN_SESSIONS_MILLIS = 300000
+    public struct Configuration {
+        public static let FLUSH_QUEUE_SIZE = 30
+        public static let FLUSH_INTERVAL_MILLIS = 30 * 1000  // 30s
+        public static let DEFAULT_INSTANCE = "default_instance"
+        public static let FLUSH_MAX_RETRIES = 5
+        public static let MIN_TIME_BETWEEN_SESSIONS_MILLIS = 300000
     }
 
     public struct Storage {
+        public static let STORAGE_PREFIX = "amplitude-swift"
     }
 }

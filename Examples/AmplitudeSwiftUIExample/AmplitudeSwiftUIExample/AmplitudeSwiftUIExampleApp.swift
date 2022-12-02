@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Amplitude_Swift
 
 @main
 struct AmplitudeSwiftUIExampleApp: App {
@@ -17,4 +18,8 @@ struct AmplitudeSwiftUIExampleApp: App {
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
+}
+
+extension Amplitude {
+    static var main = Amplitude(configuration: Configuration(apiKey: "TEST-API-KEY"))
 }

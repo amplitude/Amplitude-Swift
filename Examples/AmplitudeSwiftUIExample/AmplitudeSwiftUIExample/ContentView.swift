@@ -12,67 +12,78 @@ import Amplitude_Swift
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State var userId: String = ""
+    // TODO: get current deviceId
     @State var deviceId: String = "xxx-xxx-xxx"
-    @State var isPrivate: Bool = true
+    @State var eventType: String = ""
+    @State var productId: String = ""
+    @State var price: Double = 0
+    @State var quantity: Int = 1
+    @State var userPropertyKey = ""
+    @State var userPropertyValue = ""
+    @State var groupType = ""
+    @State var groupProperty = ""
+    @State var groupUserPropertyKey = ""
+    @State var groupUserPropertyValue = ""
+    
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("IDENTITY")) {
                     TextField("UserId", text: $userId)
                     Button(action: {
-                        print("Perform an action here...")
+                        _ = Amplitude.main.setUserId(userId: userId)
                     }) {
                        Text("Set UserId")
                     }.buttonStyle(AmplitudeButton())
 
                     TextField("DeviceId", text: $deviceId)
                     Button(action: {
-                        print("Perform an action here...")
+                        _ = Amplitude.main.setDeviceId(deviceId: deviceId)
                     }) {
-                        Text("Regenerate DeviceId")
-                            .frame(maxWidth: .infinity)
+                        Text("Set DeviceId")
                     }.buttonStyle(AmplitudeButton())
                 }
                 Section(header: Text("GENERAL EVENT")) {
-                    TextField("Event Name", text: $userId)
+                    TextField("Event Name", text: $eventType)
                     Button(action: {
-                        print("Perform an action here...")
+                        let event = BaseEvent(eventType: eventType)
+                        _ = Amplitude.main.track(event: event)
                     }) {
                        Text("Send Event")
                     }.buttonStyle(AmplitudeButton())
                 }
                 Section(header: Text("REVENUE EVENT")) {
-                    TextField("Product Id", text: $userId)
-                    TextField("Price", text: $userId)
-                    TextField("Quantity", text: $userId)
+                    TextField("Product Id", text: $productId)
+                    //TextField("Price", text: $price)
+                    //TextField("Quantity", text: $quantity)
                     Button(action: {
-                        print("Perform an action here...")
+                       // TODO: trigger revenue event
                     }) {
                        Text("Send Revenue Event")
                     }.buttonStyle(AmplitudeButton())
                 }
                 Section(header: Text("IDENTIFY")) {
-                    TextField("User Property Key", text: $userId)
-                    TextField("User Property Value", text: $userId)
+                    TextField("User Property Key", text: $userPropertyKey)
+                    TextField("User Property Value", text: $userPropertyValue)
                     Button(action: {
-                        print("Perform an action here...")
+                        // TODO: trigger identify event
                     }) {
                        Text("Send Identify Event")
                     }.buttonStyle(AmplitudeButton())
                 }
                 Section(header: Text("GROUP IDENTIFY")) {
-                    TextField("Group Type", text: $userId)
-                    TextField("Group Property", text: $userId)
-                    TextField("User Property Key", text: $userId)
-                    TextField("User Property Value", text: $userId)
+                    TextField("Group Type", text: $groupType)
+                    TextField("Group Property", text: $groupProperty)
+                    TextField("User Property Key", text: $groupUserPropertyKey)
+                    TextField("User Property Value", text: $groupUserPropertyValue)
                     Button(action: {
-                        print("Perform an action here...")
+                        // TODO: trigger group identify event
                     }) {
                        Text("Send Group Identify Event")
                     }.buttonStyle(AmplitudeButton())
                 }
                 Button(action: {
-                    print("Perform an action here...")
+                    _ = Amplitude.main.flush()
                 }) {
                     Text("Flush All Events")
                         .frame(maxWidth: .infinity)
