@@ -81,6 +81,8 @@ public class Configuration {
         self.flushEventsOnClose = flushEventsOnClose
         self.minTimeBetweenSessionsMillis = minTimeBetweenSessionsMillis
         self.trackingSessionEvents = trackingSessionEvents
+        // Logging is OFF by default
+        self.loggerProvider.logLevel = logLevel.rawValue
     }
 
     func isValid() -> Bool {

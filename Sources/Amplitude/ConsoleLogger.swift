@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  ConsoleLogger.swift
 //
 //
 //  Created by Marvin Liu on 10/28/22.

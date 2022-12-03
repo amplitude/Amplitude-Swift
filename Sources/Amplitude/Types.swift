@@ -91,3 +91,25 @@ extension Plugin {
         self.amplitude = amplitude
     }
 }
+
+public protocol ResponseHandler {
+    func handle(result: Result<Int, Error>)
+    func handleSuccessResponse(code: Int) async
+    func handleBadRequestResponse(data: [String: Any]) async
+    func handlePayloadTooLargeResponse(data: [String: Any]) async
+    func handleTooManyRequestsResponse(data: [String: Any])
+    func handleTimeoutResponse(data: [String: Any])
+    func handleFailedResponse(data: [String: Any])
+}
+
+extension ResponseHandler {
+    func collectIndices(data: [String: [Int]]) -> Set<Int> {
+        var indices = Set<Int>()
+        for (_, elements) in data {
+            for el in elements {
+                indices.insert(el)
+            }
+        }
+        return indices
+    }
+}
