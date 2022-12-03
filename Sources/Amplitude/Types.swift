@@ -5,6 +5,8 @@
 //  Created by Marvin Liu on 10/27/22.
 //
 
+import Foundation
+
 public struct Plan: Codable {
     var branch: String?
     var source: String?
@@ -19,20 +21,22 @@ public struct IngestionMetadata: Codable {
 
 public typealias EventCallBack = (BaseEvent, Int, String) -> Void
 
+// Swift 5.7 supports any existential type.
+// The type of EventBlock has to be determined pre-runtime.
+// It cannot be dynamically associated with this protocol.
+// https://github.com/apple/swift/issues/62219#issuecomment-1326531801
 public protocol Storage {
-    // associatedtype EventBlock
-    // TODO: associatedtype EventBlock, instead of using Any
     func write(key: StorageKey, value: Any?) async throws
     func read<T>(key: StorageKey) async -> T?
-    func getEventsString(eventBlock: Any) async -> String?
-    func remove(eventBlock: Any) async
-    func splitBlock(eventBlock: Any, events: [BaseEvent]) async
+    func getEventsString(eventBlock: URL) async -> String?
+    func remove(eventBlock: URL) async
+    func splitBlock(eventBlock: URL, events: [BaseEvent]) async
     func rollover() async
     func reset() async
     func getResponseHandler(
         configuration: Configuration,
         eventPipeline: EventPipeline,
-        eventBlock: Any,
+        eventBlock: URL,
         eventsString: String
     ) -> ResponseHandler
 }
@@ -47,7 +51,7 @@ public enum StorageKey: String, CaseIterable {
 
 public protocol Logger {
     associatedtype LogLevel: RawRepresentable
-    var logLevel: Int? { get set }
+    var logLevel: Int { get set }
     func error(message: String)
     func warn(message: String)
     func log(message: String)

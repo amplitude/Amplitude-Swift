@@ -48,7 +48,7 @@ class OutputReaderPlugin: Plugin {
 }
 
 actor FakeInMemoryStorage: Storage {
-    typealias EventBlock = Any
+    typealias EventBlock = URL
 
     var keyValueStore = [String: Any?]()
     var eventsStore = [URL: [BaseEvent]]()
@@ -80,7 +80,6 @@ actor FakeInMemoryStorage: Storage {
 
     func getEventsString(eventBlock: EventBlock) async -> String? {
         var content: String?
-        guard let eventBlock = eventBlock as? URL else { return content }
         content = "["
         content = content! + (eventsStore[eventBlock] ?? []).map { $0.toString() }.joined(separator: ", ")
         content = content! + "]"
@@ -104,10 +103,10 @@ actor FakeInMemoryStorage: Storage {
     nonisolated func getResponseHandler(
         configuration: Configuration,
         eventPipeline: EventPipeline,
-        eventBlock: Any,
+        eventBlock: EventBlock,
         eventsString: String
     ) -> ResponseHandler {
-        return (Any).self as! ResponseHandler
+        FakeResponseHandler()
     }
 }
 
@@ -119,5 +118,28 @@ class FakeHttpClient: HttpClient {
     {
         isUploadCalled = true
         return nil
+    }
+}
+
+class FakeResponseHandler: ResponseHandler {
+    func handle(result: Result<Int, Error>) {
+    }
+
+    func handleSuccessResponse(code: Int) async {
+    }
+
+    func handleBadRequestResponse(data: [String: Any]) async {
+    }
+
+    func handlePayloadTooLargeResponse(data: [String: Any]) async {
+    }
+
+    func handleTooManyRequestsResponse(data: [String: Any]) {
+    }
+
+    func handleTimeoutResponse(data: [String: Any]) {
+    }
+
+    func handleFailedResponse(data: [String: Any]) {
     }
 }

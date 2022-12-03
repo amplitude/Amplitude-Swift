@@ -53,7 +53,6 @@ public class EventPipeline {
         Task {
             guard let storage = self.storage else { return }
             await storage.rollover()
-            // TODO: make this type optional, instead of binding to URL
             guard let eventFiles: [URL]? = await storage.read(key: StorageKey.EVENTS) else { return }
             amplitude.logger?.log(message: "Start flushing \(eventCount) events")
             eventCount = 0

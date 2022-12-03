@@ -8,7 +8,7 @@
 import Foundation
 
 actor PersistentStorage: Storage {
-    typealias EventBlock = Any
+    typealias EventBlock = URL
 
     let storagePrefix: String
     let userDefaults: UserDefaults?
@@ -51,7 +51,6 @@ actor PersistentStorage: Storage {
 
     func getEventsString(eventBlock: EventBlock) async -> String? {
         var content: String?
-        guard let eventBlock = eventBlock as? URL else { return content }
         do {
             content = try String(contentsOf: eventBlock, encoding: .utf8)
         } catch {
@@ -61,7 +60,6 @@ actor PersistentStorage: Storage {
     }
 
     func remove(eventBlock: EventBlock) async {
-        guard let eventBlock = eventBlock as? URL else { return }
         do {
             try fileManager!.removeItem(atPath: eventBlock.path)
         } catch {
@@ -70,7 +68,6 @@ actor PersistentStorage: Storage {
     }
 
     func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) async {
-        guard let eventBlock = eventBlock as? URL else { return }
         let total = events.count
         let half = total / 2
         let leftSplit = Array(events[0..<half])
@@ -80,18 +77,17 @@ actor PersistentStorage: Storage {
         await remove(eventBlock: eventBlock)
     }
 
-    
     nonisolated func getResponseHandler(
         configuration: Configuration,
         eventPipeline: EventPipeline,
-        eventBlock: Any,
+        eventBlock: EventBlock,
         eventsString: String
     ) -> ResponseHandler {
         return PersitentStorageResponseHandler(
             configuration: configuration,
             storage: self,
             eventPipeline: eventPipeline,
-            eventBlock: eventBlock as! URL,
+            eventBlock: eventBlock,
             eventsString: eventsString
         )
     }

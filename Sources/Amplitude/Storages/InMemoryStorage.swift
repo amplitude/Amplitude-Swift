@@ -8,7 +8,7 @@
 import Foundation
 
 class InMemoryStorage: Storage {
-    typealias EventBlock = Any
+    typealias EventBlock = URL
 
     func write(key: StorageKey, value: Any?) async {
 
@@ -44,6 +44,6 @@ class InMemoryStorage: Storage {
         eventBlock: EventBlock,
         eventsString: String
     ) -> ResponseHandler {
-        return (Any).self as! ResponseHandler
+        abort()
     }
 }

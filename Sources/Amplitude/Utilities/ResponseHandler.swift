@@ -105,7 +105,11 @@ class PersitentStorageResponseHandler: ResponseHandler {
         }
         if events.count == 1 {
             let error = data["error"] as? String ?? ""
-            triggerEventsCallBack(events: events, code: HttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue, message: error)
+            triggerEventsCallBack(
+                events: events,
+                code: HttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue,
+                message: error
+            )
             await storage.remove(eventBlock: eventBlock)
         }
         await storage.splitBlock(eventBlock: eventBlock, events: events)

@@ -15,3 +15,5 @@ nesting:
   function_level:
     warning: 5
     error: 10
+excluded:
+  - Examples
