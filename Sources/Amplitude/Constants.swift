@@ -8,11 +8,11 @@
 import Foundation
 
 public enum LogLevelEnum: Int {
-    case DEBUG
-    case LOG
-    case WARN
-    case ERROR
     case OFF
+    case ERROR
+    case WARN
+    case LOG
+    case DEBUG
 }
 
 public enum ServerZone: String {
