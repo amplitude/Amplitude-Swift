@@ -41,6 +41,17 @@ class PersitentStorageResponseHandler: ResponseHandler {
             return
         }
 
+        if events.count == 1 {
+            let error = data["error"] as? String ?? ""
+            triggerEventsCallBack(
+                events: events,
+                code: HttpClient.HttpStatus.BAD_REQUEST.rawValue,
+                message: error
+            )
+            await storage.remove(eventBlock: eventBlock)
+            return
+        }
+
         var dropIndexes = Set<Int>()
         if let eventsWithInvalidFields = data["events_with_invalid_fields"] as? [String: [Int]] {
             dropIndexes.formUnion(collectIndices(data: eventsWithInvalidFields))
