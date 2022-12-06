@@ -18,7 +18,7 @@ class HttpClient {
         self.session = URLSession.shared
     }
 
-    func upload(events: String, completion: @escaping (_ result: Result<Bool, Error>) -> Void) -> URLSessionDataTask? {
+    func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
         var sessionTask: URLSessionDataTask?
         do {
             let request = try getRequest()
@@ -30,7 +30,7 @@ class HttpClient {
                 } else if let httpResponse = response as? HTTPURLResponse {
                     switch httpResponse.statusCode {
                     case 1..<300:
-                        completion(.success(true))
+                        completion(.success(httpResponse.statusCode))
                     default:
                         completion(.failure(Exception.httpError(code: httpResponse.statusCode, data: data)))
                     }

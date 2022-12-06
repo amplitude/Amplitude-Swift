@@ -48,6 +48,8 @@ class OutputReaderPlugin: Plugin {
 }
 
 actor FakeInMemoryStorage: Storage {
+    typealias EventBlock = URL
+
     var keyValueStore = [String: Any?]()
     var eventsStore = [URL: [BaseEvent]]()
     var index = URL(string: "0")!
@@ -76,9 +78,8 @@ actor FakeInMemoryStorage: Storage {
         return result
     }
 
-    func getEventsString(eventBlock: Any) async -> String? {
+    func getEventsString(eventBlock: EventBlock) async -> String? {
         var content: String?
-        guard let eventBlock = eventBlock as? URL else { return content }
         content = "["
         content = content! + (eventsStore[eventBlock] ?? []).map { $0.toString() }.joined(separator: ", ")
         content = content! + "]"
@@ -92,15 +93,53 @@ actor FakeInMemoryStorage: Storage {
         keyValueStore.removeAll()
         eventsStore.removeAll()
     }
+
+    func remove(eventBlock: EventBlock) async {
+    }
+
+    func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) async {
+    }
+
+    nonisolated func getResponseHandler(
+        configuration: Configuration,
+        eventPipeline: EventPipeline,
+        eventBlock: EventBlock,
+        eventsString: String
+    ) -> ResponseHandler {
+        FakeResponseHandler()
+    }
 }
 
 class FakeHttpClient: HttpClient {
     var isUploadCalled: Bool = false
 
-    override func upload(events: String, completion: @escaping (_ result: Result<Bool, Error>) -> Void)
+    override func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void)
         -> URLSessionDataTask?
     {
         isUploadCalled = true
         return nil
+    }
+}
+
+class FakeResponseHandler: ResponseHandler {
+    func handle(result: Result<Int, Error>) {
+    }
+
+    func handleSuccessResponse(code: Int) async {
+    }
+
+    func handleBadRequestResponse(data: [String: Any]) async {
+    }
+
+    func handlePayloadTooLargeResponse(data: [String: Any]) async {
+    }
+
+    func handleTooManyRequestsResponse(data: [String: Any]) {
+    }
+
+    func handleTimeoutResponse(data: [String: Any]) {
+    }
+
+    func handleFailedResponse(data: [String: Any]) {
     }
 }

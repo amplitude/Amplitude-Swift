@@ -5,6 +5,8 @@
 //  Created by Marvin Liu on 10/27/22.
 //
 
+import Foundation
+
 public struct Plan: Codable {
     var branch: String?
     var source: String?
@@ -17,16 +19,26 @@ public struct IngestionMetadata: Codable {
     var sourceVersion: String?
 }
 
-public protocol EventCallBack {
+public typealias EventCallBack = (BaseEvent, Int, String) -> Void
 
-}
-
+// Swift 5.7 supports any existential type.
+// The type of EventBlock has to be determined pre-runtime.
+// It cannot be dynamically associated with this protocol.
+// https://github.com/apple/swift/issues/62219#issuecomment-1326531801
 public protocol Storage {
     func write(key: StorageKey, value: Any?) async throws
     func read<T>(key: StorageKey) async -> T?
-    func getEventsString(eventBlock: Any) async -> String?
+    func getEventsString(eventBlock: URL) async -> String?
+    func remove(eventBlock: URL) async
+    func splitBlock(eventBlock: URL, events: [BaseEvent]) async
     func rollover() async
     func reset() async
+    func getResponseHandler(
+        configuration: Configuration,
+        eventPipeline: EventPipeline,
+        eventBlock: URL,
+        eventsString: String
+    ) -> ResponseHandler
 }
 
 public enum StorageKey: String, CaseIterable {
@@ -39,7 +51,7 @@ public enum StorageKey: String, CaseIterable {
 
 public protocol Logger {
     associatedtype LogLevel: RawRepresentable
-    var logLevel: Int? { get set }
+    var logLevel: Int { get set }
     func error(message: String)
     func warn(message: String)
     func log(message: String)
@@ -77,5 +89,27 @@ extension Plugin {
 
     public func setup(amplitude: Amplitude) {
         self.amplitude = amplitude
+    }
+}
+
+public protocol ResponseHandler {
+    func handle(result: Result<Int, Error>)
+    func handleSuccessResponse(code: Int) async
+    func handleBadRequestResponse(data: [String: Any]) async
+    func handlePayloadTooLargeResponse(data: [String: Any]) async
+    func handleTooManyRequestsResponse(data: [String: Any])
+    func handleTimeoutResponse(data: [String: Any])
+    func handleFailedResponse(data: [String: Any])
+}
+
+extension ResponseHandler {
+    func collectIndices(data: [String: [Int]]) -> Set<Int> {
+        var indices = Set<Int>()
+        for (_, elements) in data {
+            for el in elements {
+                indices.insert(el)
+            }
+        }
+        return indices
     }
 }
