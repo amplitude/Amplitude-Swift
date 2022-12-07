@@ -9,9 +9,13 @@ public class Amplitude {
     lazy var storage: any Storage = {
         return self.configuration.storageProvider
     }()
+    
     lazy var timeline: Timeline = {
-        return Timeline()
+        let timeline = Timeline()
+        timeline.amplitude = self
+        return timeline
     }()
+    
     lazy var logger: (any Logger)? = {
         return self.configuration.loggerProvider
     }()
@@ -28,7 +32,7 @@ public class Amplitude {
         }
         _ = add(plugin: ContextPlugin())
         _ = add(plugin: AmplitudeDestinationPlugin())
-        timeline.start(amplitude: self)
+        timeline.start()
     }
 
     convenience init(apiKey: String, configuration: Configuration) {
@@ -145,7 +149,6 @@ public class Amplitude {
 
     func onExitForeground() {
         _inForeground = false
-        // TODO: Need to make sure the flush won't block the main thread
         if configuration.flushEventsOnClose == true {
             _ = self.flush()
         }

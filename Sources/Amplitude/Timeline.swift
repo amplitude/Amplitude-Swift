@@ -7,9 +7,8 @@
 
 import Foundation
 
-public class Timeline : TimelineBase {
-    public var amplitude: Amplitude?
-    
+public class Timeline {
+    var amplitude: Amplitude?
     internal let plugins: [PluginType: Mediator]
     var sessionId: Int64 = -1
     var lastEventId: Int64 = 0
@@ -24,12 +23,12 @@ public class Timeline : TimelineBase {
         ]
     }
     
-    func start(amplitude: Amplitude) {
+    func start() {
         Task {
-            sessionId = await amplitude.storage.read(key: .PREVIOUS_SESSION_ID) ?? -1
-            lastEventId = await amplitude.storage.read(key: .LAST_EVENT_ID) ?? -1
-            lastEventTime = await amplitude.storage.read(key: .LAST_EVENT_TIME) ?? -1
-            self.amplitude = amplitude
+            sessionId = await amplitude?.storage.read(key: .PREVIOUS_SESSION_ID) ?? -1
+            lastEventId = await amplitude?.storage.read(key: .LAST_EVENT_ID) ?? -1
+            lastEventTime = await amplitude?.storage.read(key: .LAST_EVENT_TIME) ?? -1
+            
         }
     }
 

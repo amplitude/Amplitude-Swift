@@ -73,10 +73,6 @@ public protocol Plugin: AnyObject {
     func execute(event: BaseEvent?) -> BaseEvent?
 }
 
-public protocol TimelineBase {
-    var amplitude: Amplitude? {get set}
-}
-
 public protocol EventPlugin: Plugin {
     func track(event: BaseEvent) -> BaseEvent?
     func identify(event: IdentifyEvent) -> IdentifyEvent?

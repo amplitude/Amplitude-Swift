@@ -121,8 +121,8 @@ extension Amplitude {
         
         if (self.configuration.trackingSessionEvents == true) {
             let lastEventTime: Int64? = await self.storage.read(key: .LAST_EVENT_TIME) ?? nil
-            let sessionEndEvent = BaseEvent(timestamp: lastEventTime, sessionId: _sessionId, eventType: Constants.AMP_SESSION_START_EVENT)
-            sessionEvents.append(sessionEndEvent)
+            let sessionStartEnd = BaseEvent(timestamp: lastEventTime, sessionId: _sessionId, eventType: Constants.AMP_SESSION_START_EVENT)
+            sessionEvents.append(sessionStartEnd)
         }
 
         return sessionEvents
