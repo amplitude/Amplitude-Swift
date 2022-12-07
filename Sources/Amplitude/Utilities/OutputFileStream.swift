@@ -5,7 +5,6 @@
 //  Created by Marvin Liu on 11/22/22.
 //
 //  Originally from Segment: https://github.com/segmentio/analytics-swift, under MIT license.
-//  Use C library file operations to avoid Swift API deprecation and related bugs.
 
 import Foundation
 
@@ -21,9 +20,10 @@ internal class OutputFileStream {
         case unableToOpen(String)
         case unableToWrite(String)
         case unableToCreate(String)
+        case unableToClose(String)
     }
 
-    var filePointer: UnsafeMutablePointer<FILE>?
+    var fileHandle: FileHandle?
     let fileURL: URL
 
     init(fileURL: URL) throws {
@@ -47,35 +47,47 @@ internal class OutputFileStream {
     }
 
     func open() throws {
-        if filePointer != nil { return }
-        let path = fileURL.path
-        path.withCString { file in
-            filePointer = fopen(file, "w")
+        if fileHandle != nil { return }
+        do {
+            fileHandle = try FileHandle(forWritingTo: fileURL)
+        } catch {
+            throw OutputStreamError.unableToOpen(fileURL.path)
         }
-        guard filePointer != nil else { throw OutputStreamError.unableToOpen(path) }
     }
 
     func write(_ data: Data) throws {
-        guard let string = String(data: data, encoding: .utf8) else { return }
-        try write(string)
+        guard data.isEmpty == false else { return }
+        if #available(macOS 10.15.4, iOS 13.4, macCatalyst 13.4, tvOS 13.4, watchOS 13.4, *) {
+            do {
+                try fileHandle?.write(contentsOf: data)
+            } catch {
+                throw OutputStreamError.unableToWrite(fileURL.path)
+            }
+        } else {
+            fileHandle?.write(data)
+        }
     }
 
     func write(_ string: String) throws {
         guard string.isEmpty == false else { return }
-        _ = try string.utf8.withContiguousStorageIfAvailable { str in
-            if let baseAddr = str.baseAddress {
-                fwrite(baseAddr, 1, str.count, filePointer)
-            } else {
-                throw OutputStreamError.unableToWrite(fileURL.path)
-            }
-            if ferror(filePointer) != 0 {
-                throw OutputStreamError.unableToWrite(fileURL.path)
-            }
+        if let data = string.data(using: .utf8) {
+            try write(data)
         }
     }
 
-    func close() {
-        fclose(filePointer)
-        filePointer = nil
+    func close() throws {
+        do {
+            let existing = fileHandle
+            fileHandle = nil
+            if #available(tvOS 13.0, *) {
+                try existing?.synchronize()
+                try existing?.close()
+            } else {
+                existing?.synchronizeFile()
+                existing?.closeFile()
+            }
+        } catch {
+            throw OutputStreamError.unableToClose(fileURL.path)
+        }
     }
 }

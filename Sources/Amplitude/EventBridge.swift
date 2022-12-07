@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  EventBridge.swift
 //
 //
 //  Created by Marvin Liu on 10/27/22.

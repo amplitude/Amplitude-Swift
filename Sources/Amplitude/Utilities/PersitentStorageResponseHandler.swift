@@ -28,16 +28,16 @@ class PersitentStorageResponseHandler: ResponseHandler {
         self.eventsString = eventsString
     }
 
-    func handleSuccessResponse(code: Int) async {
+    func handleSuccessResponse(code: Int) {
         if let events = BaseEvent.fromArrayString(jsonString: eventsString) {
             triggerEventsCallBack(events: events, code: code, message: "Successfully send event")
         }
-        await storage.remove(eventBlock: eventBlock)
+        storage.remove(eventBlock: eventBlock)
     }
 
-    func handleBadRequestResponse(data: [String: Any]) async {
+    func handleBadRequestResponse(data: [String: Any]) {
         guard let events = BaseEvent.fromArrayString(jsonString: eventsString) else {
-            await storage.remove(eventBlock: eventBlock)
+            storage.remove(eventBlock: eventBlock)
             return
         }
 
@@ -48,7 +48,7 @@ class PersitentStorageResponseHandler: ResponseHandler {
                 code: HttpClient.HttpStatus.BAD_REQUEST.rawValue,
                 message: error
             )
-            await storage.remove(eventBlock: eventBlock)
+            storage.remove(eventBlock: eventBlock)
             return
         }
 
@@ -84,12 +84,12 @@ class PersitentStorageResponseHandler: ResponseHandler {
             eventPipeline.put(event: event)
         }
 
-        await storage.remove(eventBlock: eventBlock)
+        storage.remove(eventBlock: eventBlock)
     }
 
-    func handlePayloadTooLargeResponse(data: [String: Any]) async {
+    func handlePayloadTooLargeResponse(data: [String: Any]) {
         guard let events = BaseEvent.fromArrayString(jsonString: eventsString) else {
-            await storage.remove(eventBlock: eventBlock)
+            storage.remove(eventBlock: eventBlock)
             return
         }
         if events.count == 1 {
@@ -99,9 +99,10 @@ class PersitentStorageResponseHandler: ResponseHandler {
                 code: HttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue,
                 message: error
             )
-            await storage.remove(eventBlock: eventBlock)
+            storage.remove(eventBlock: eventBlock)
+            return
         }
-        await storage.splitBlock(eventBlock: eventBlock, events: events)
+        storage.splitBlock(eventBlock: eventBlock, events: events)
     }
 
     func handleTooManyRequestsResponse(data: [String: Any]) {
@@ -117,36 +118,33 @@ class PersitentStorageResponseHandler: ResponseHandler {
     }
 
     func handle(result: Result<Int, Error>) {
-        Task {
-            switch result {
-            case .success(let code):
-                // We don't care about the data when success
-                await handleSuccessResponse(code: code)
-            case .failure(let error):
-                switch error {
-                case HttpClient.Exception.httpError(let code, let data):
-                    var json = [String: Any]()
-                    if data != nil {
-                        json = (try? JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any]) ?? json
-                    }
-                    switch code {
-                    case HttpClient.HttpStatus.BAD_REQUEST.rawValue:
-                        await handleBadRequestResponse(data: json)
-                    case HttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue:
-                        await handlePayloadTooLargeResponse(data: json)
-                    case HttpClient.HttpStatus.TIMEOUT.rawValue:
-                        handleTimeoutResponse(data: json)
-                    case HttpClient.HttpStatus.TOO_MANY_REQUESTS.rawValue:
-                        handleTooManyRequestsResponse(data: json)
-                    case HttpClient.HttpStatus.FAILED.rawValue:
-                        handleFailedResponse(data: json)
-                    default:
-                        handleFailedResponse(data: json)
-                    }
-                    eventPipeline.cleanupUploads()
-                default:
-                    break
+        switch result {
+        case .success(let code):
+            // We don't care about the data when success
+            handleSuccessResponse(code: code)
+        case .failure(let error):
+            switch error {
+            case HttpClient.Exception.httpError(let code, let data):
+                var json = [String: Any]()
+                if data != nil {
+                    json = (try? JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any]) ?? json
                 }
+                switch code {
+                case HttpClient.HttpStatus.BAD_REQUEST.rawValue:
+                    handleBadRequestResponse(data: json)
+                case HttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue:
+                    handlePayloadTooLargeResponse(data: json)
+                case HttpClient.HttpStatus.TIMEOUT.rawValue:
+                    handleTimeoutResponse(data: json)
+                case HttpClient.HttpStatus.TOO_MANY_REQUESTS.rawValue:
+                    handleTooManyRequestsResponse(data: json)
+                case HttpClient.HttpStatus.FAILED.rawValue:
+                    handleFailedResponse(data: json)
+                default:
+                    handleFailedResponse(data: json)
+                }
+            default:
+                break
             }
         }
     }

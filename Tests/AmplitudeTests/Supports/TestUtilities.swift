@@ -47,14 +47,14 @@ class OutputReaderPlugin: Plugin {
     }
 }
 
-actor FakeInMemoryStorage: Storage {
+class FakeInMemoryStorage: Storage {
     typealias EventBlock = URL
 
     var keyValueStore = [String: Any?]()
     var eventsStore = [URL: [BaseEvent]]()
     var index = URL(string: "0")!
 
-    func write(key: StorageKey, value: Any?) async throws {
+    func write(key: StorageKey, value: Any?) throws {
         switch key {
         case .EVENTS:
             if let event = value as? BaseEvent {
@@ -67,7 +67,7 @@ actor FakeInMemoryStorage: Storage {
         }
     }
 
-    func read<T>(key: StorageKey) async -> T? {
+    func read<T>(key: StorageKey) -> T? {
         var result: T?
         switch key {
         case .EVENTS:
@@ -78,7 +78,7 @@ actor FakeInMemoryStorage: Storage {
         return result
     }
 
-    func getEventsString(eventBlock: EventBlock) async -> String? {
+    func getEventsString(eventBlock: EventBlock) -> String? {
         var content: String?
         content = "["
         content = content! + (eventsStore[eventBlock] ?? []).map { $0.toString() }.joined(separator: ", ")
@@ -86,18 +86,18 @@ actor FakeInMemoryStorage: Storage {
         return content
     }
 
-    func rollover() async {
+    func rollover() {
     }
 
-    func reset() async {
+    func reset() {
         keyValueStore.removeAll()
         eventsStore.removeAll()
     }
 
-    func remove(eventBlock: EventBlock) async {
+    func remove(eventBlock: EventBlock) {
     }
 
-    func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) async {
+    func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) {
     }
 
     nonisolated func getResponseHandler(
@@ -125,13 +125,13 @@ class FakeResponseHandler: ResponseHandler {
     func handle(result: Result<Int, Error>) {
     }
 
-    func handleSuccessResponse(code: Int) async {
+    func handleSuccessResponse(code: Int) {
     }
 
-    func handleBadRequestResponse(data: [String: Any]) async {
+    func handleBadRequestResponse(data: [String: Any]) {
     }
 
-    func handlePayloadTooLargeResponse(data: [String: Any]) async {
+    func handlePayloadTooLargeResponse(data: [String: Any]) {
     }
 
     func handleTooManyRequestsResponse(data: [String: Any]) {

@@ -10,43 +10,43 @@ import XCTest
 @testable import Amplitude_Swift
 
 final class PersistentStorageTests: XCTestCase {
-    func testIsBasicType() async {
+    func testIsBasicType() {
         let persistentStorage = PersistentStorage()
-        var isValueBasicType = await persistentStorage.isBasicType(value: 111)
+        var isValueBasicType = persistentStorage.isBasicType(value: 111)
         XCTAssertEqual(isValueBasicType, true)
 
-        isValueBasicType = await persistentStorage.isBasicType(value: 11.11)
+        isValueBasicType = persistentStorage.isBasicType(value: 11.11)
         XCTAssertEqual(isValueBasicType, true)
 
-        isValueBasicType = await persistentStorage.isBasicType(value: true)
+        isValueBasicType = persistentStorage.isBasicType(value: true)
         XCTAssertEqual(isValueBasicType, true)
 
-        isValueBasicType = await persistentStorage.isBasicType(value: "test")
+        isValueBasicType = persistentStorage.isBasicType(value: "test")
         XCTAssertEqual(isValueBasicType, true)
 
-        isValueBasicType = await persistentStorage.isBasicType(value: NSString("test"))
+        isValueBasicType = persistentStorage.isBasicType(value: NSString("test"))
         XCTAssertEqual(isValueBasicType, true)
 
-        isValueBasicType = await persistentStorage.isBasicType(value: nil)
+        isValueBasicType = persistentStorage.isBasicType(value: nil)
         XCTAssertEqual(isValueBasicType, true)
 
-        isValueBasicType = await persistentStorage.isBasicType(value: Date())
+        isValueBasicType = persistentStorage.isBasicType(value: Date())
         XCTAssertEqual(isValueBasicType, false)
     }
 
-    func testWrite() async {
+    func testWrite() {
         let persistentStorage = PersistentStorage(apiKey: "xxx-api-key")
-        try? await persistentStorage.write(
+        try? persistentStorage.write(
             key: StorageKey.EVENTS,
             value: BaseEvent(eventType: "test1")
         )
-        try? await persistentStorage.write(
+        try? persistentStorage.write(
             key: StorageKey.EVENTS,
             value: BaseEvent(eventType: "test2")
         )
-        let eventFiles: [URL]? = await persistentStorage.read(key: StorageKey.EVENTS)
+        let eventFiles: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
         XCTAssertEqual(eventFiles?[0].absoluteString.contains("xxx-api-key.events.index"), true)
         XCTAssertNotEqual(eventFiles?[0].pathExtension, PersistentStorage.TEMP_FILE_EXTENSION)
-        await persistentStorage.reset()
+        persistentStorage.reset()
     }
 }
