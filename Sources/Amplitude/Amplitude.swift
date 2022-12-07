@@ -48,9 +48,8 @@ public class Amplitude {
         if callback != nil {
             event.callback = callback
         }
-        Task {
-            await process(event: event)
-        }
+        process(event: event)
+        
         return self
     }
 
@@ -114,9 +113,7 @@ public class Amplitude {
     
     public func setSessionId(sessionId: Int64) -> Amplitude {
         _sessionId = sessionId
-        Task {
-            _ = try await self.storage.write(key: .PREVIOUS_SESSION_ID, value: sessionId)
-        }
+        _ = try? self.storage.write(key: .PREVIOUS_SESSION_ID, value: sessionId)
         return self
     }
 
@@ -128,22 +125,22 @@ public class Amplitude {
         timeline.apply(closure)
     }
 
-    private func process(event: BaseEvent) async {
+    private func process(event: BaseEvent) {
         if configuration.optOut {
             logger?.log(message: "Skip event based on opt out configuration")
             return
         }
         event.timestamp = event.timestamp ?? Int64(NSDate().timeIntervalSince1970 * 1000)
-        await timeline.process(event: event)
+        timeline.process(event: event)
     }
     
     func onEnterForeground(timestamp: Int64) {
         _inForeground = true
         
-        Task {
+   
             let dummySessionStartEvent = BaseEvent(timestamp: timestamp, sessionId: -1, eventType: Constants.AMP_SESSION_START_EVENT)
-            await timeline.process(event: dummySessionStartEvent)
-        }
+             timeline.process(event: dummySessionStartEvent)
+    
 
     }
 

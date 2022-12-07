@@ -24,15 +24,12 @@ public class Timeline {
     }
     
     func start() {
-        Task {
-            sessionId = await amplitude?.storage.read(key: .PREVIOUS_SESSION_ID) ?? -1
-            lastEventId = await amplitude?.storage.read(key: .LAST_EVENT_ID) ?? -1
-            lastEventTime = await amplitude?.storage.read(key: .LAST_EVENT_TIME) ?? -1
-            
-        }
+        sessionId =  amplitude?.storage.read(key: .PREVIOUS_SESSION_ID) ?? -1
+        lastEventId = amplitude?.storage.read(key: .LAST_EVENT_ID) ?? -1
+        lastEventTime = amplitude?.storage.read(key: .LAST_EVENT_TIME) ?? -1
     }
 
-    func process(event: BaseEvent) async {
+    func process(event: BaseEvent) {
             let eventTimeStamp = event.timestamp!
             var skipEvent : Bool = false
             var sessionEvents: Array<BaseEvent>? = nil
@@ -40,18 +37,18 @@ public class Timeline {
             if event.eventType == Constants.AMP_SESSION_START_EVENT {
                 if (event.sessionId! < 0) {
                     skipEvent = true
-                    sessionEvents = await self.amplitude?.startOrContinueSession(timestamp: eventTimeStamp)
+                    sessionEvents = self.amplitude?.startOrContinueSession(timestamp: eventTimeStamp)
                 } else {
                     _ = self.amplitude?.setSessionId(sessionId: eventTimeStamp)
-                    await self.amplitude?.refreshSessionTime(timestamp: eventTimeStamp)
+                    self.amplitude?.refreshSessionTime(timestamp: eventTimeStamp)
                 }
             } else if event.eventType == Constants.AMP_SESSION_END_EVENT {
                 // do nothing
             } else {
                 if (!(self.amplitude?._inForeground ?? false)) {
-                    sessionEvents = await self.amplitude?.startOrContinueSession(timestamp: eventTimeStamp)
+                    sessionEvents = self.amplitude?.startOrContinueSession(timestamp: eventTimeStamp)
                 } else {
-                    _ = await self.amplitude?.refreshSessionTime(timestamp: eventTimeStamp)
+                    _ = self.amplitude?.refreshSessionTime(timestamp: eventTimeStamp)
                 }
             }
             
@@ -77,7 +74,7 @@ public class Timeline {
             
             if (lastEventId > savedLastEventId) {
                 do {
-                    _ = try? await self.amplitude?.storage.write(key: .LAST_EVENT_ID, value: lastEventId)
+                    _ = try? self.amplitude?.storage.write(key: .LAST_EVENT_ID, value: lastEventId)
                 }
             }
         
