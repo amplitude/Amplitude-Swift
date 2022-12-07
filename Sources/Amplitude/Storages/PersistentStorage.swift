@@ -7,7 +7,7 @@
 
 import Foundation
 
-actor PersistentStorage: Storage {
+class PersistentStorage: Storage {
     typealias EventBlock = URL
 
     let storagePrefix: String
@@ -16,40 +16,46 @@ actor PersistentStorage: Storage {
     private var outputStream: OutputFileStream?
     internal weak var amplitude: Amplitude?
 
+    let syncQueue = DispatchQueue(label: "syncPersistentStorage.amplitude.com")
+
     init(apiKey: String = "") {
         self.storagePrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(apiKey)"
         self.userDefaults = UserDefaults(suiteName: "\(PersistentStorage.AMP_STORAGE_PREFIX).\(storagePrefix)")
         self.fileManager = FileManager.default
     }
 
-    func write(key: StorageKey, value: Any?) async throws {
-        switch key {
-        case .EVENTS:
-            if let event = value as? BaseEvent {
-                let eventStoreFile = getCurrentFile()
-                self.storeEvent(toFile: eventStoreFile, event: event)
-            }
-        default:
-            if isBasicType(value: value) {
-                userDefaults?.set(value, forKey: key.rawValue)
-            } else {
-                throw Exception.unsupportedType
+    func write(key: StorageKey, value: Any?) throws {
+        try syncQueue.sync {
+            switch key {
+            case .EVENTS:
+                if let event = value as? BaseEvent {
+                    let eventStoreFile = getCurrentFile()
+                    self.storeEvent(toFile: eventStoreFile, event: event)
+                }
+            default:
+                if isBasicType(value: value) {
+                    userDefaults?.set(value, forKey: key.rawValue)
+                } else {
+                    throw Exception.unsupportedType
+                }
             }
         }
     }
 
-    func read<T>(key: StorageKey) async -> T? {
-        var result: T?
-        switch key {
-        case .EVENTS:
-            result = getEventFiles() as? T
-        default:
-            result = userDefaults?.object(forKey: key.rawValue) as? T
+    func read<T>(key: StorageKey) -> T? {
+        syncQueue.sync {
+            var result: T?
+            switch key {
+            case .EVENTS:
+                result = getEventFiles() as? T
+            default:
+                result = userDefaults?.object(forKey: key.rawValue) as? T
+            }
+            return result
         }
-        return result
     }
 
-    func getEventsString(eventBlock: EventBlock) async -> String? {
+    func getEventsString(eventBlock: EventBlock) -> String? {
         var content: String?
         do {
             content = try String(contentsOf: eventBlock, encoding: .utf8)
@@ -59,25 +65,33 @@ actor PersistentStorage: Storage {
         return content
     }
 
-    func remove(eventBlock: EventBlock) async {
-        do {
-            try fileManager!.removeItem(atPath: eventBlock.path)
-        } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
+    func remove(eventBlock: EventBlock) {
+        syncQueue.sync {
+            do {
+                try fileManager!.removeItem(atPath: eventBlock.path)
+            } catch {
+                amplitude?.logger?.error(message: error.localizedDescription)
+            }
         }
     }
 
-    func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) async {
-        let total = events.count
-        let half = total / 2
-        let leftSplit = Array(events[0..<half])
-        let rightSplit = Array(events[half..<total])
-        storeEventsInNewFile(toFile: eventBlock.appendingPathComponent("-1"), events: leftSplit)
-        storeEventsInNewFile(toFile: eventBlock.appendingPathComponent("-2"), events: rightSplit)
-        await remove(eventBlock: eventBlock)
+    func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) {
+        syncQueue.sync {
+            let total = events.count
+            let half = total / 2
+            let leftSplit = Array(events[0..<half])
+            let rightSplit = Array(events[half..<total])
+            storeEventsInNewFile(toFile: eventBlock.appendFileNameSuffix(suffix: "-1"), events: leftSplit)
+            storeEventsInNewFile(toFile: eventBlock.appendFileNameSuffix(suffix: "-2"), events: rightSplit)
+            do {
+                try fileManager!.removeItem(atPath: eventBlock.path)
+            } catch {
+                amplitude?.logger?.error(message: error.localizedDescription)
+            }
+        }
     }
 
-    nonisolated func getResponseHandler(
+    func getResponseHandler(
         configuration: Configuration,
         eventPipeline: EventPipeline,
         eventBlock: EventBlock,
@@ -92,27 +106,31 @@ actor PersistentStorage: Storage {
         )
     }
 
-    func reset() async {
-        let urls = getEventFiles(includeUnfinished: true)
-        let keys = userDefaults?.dictionaryRepresentation().keys
-        keys?.forEach { key in
-            userDefaults?.removeObject(forKey: key)
-        }
-        for url in urls {
-            try? fileManager!.removeItem(atPath: url.path)
+    func reset() {
+        syncQueue.sync {
+            let urls = getEventFiles(includeUnfinished: true)
+            let keys = userDefaults?.dictionaryRepresentation().keys
+            keys?.forEach { key in
+                userDefaults?.removeObject(forKey: key)
+            }
+            for url in urls {
+                try? fileManager!.removeItem(atPath: url.path)
+            }
         }
     }
 
-    func rollover() async {
-        let currentFile = getCurrentFile()
-        if fileManager?.fileExists(atPath: currentFile.path) == false {
-            return
-        }
-        if let attributes = try? fileManager?.attributesOfItem(atPath: currentFile.path),
-            let fileSize = attributes[FileAttributeKey.size] as? UInt64,
-            fileSize >= 0
-        {
-            finish(file: currentFile)
+    func rollover() {
+        syncQueue.sync {
+            let currentFile = getCurrentFile()
+            if fileManager?.fileExists(atPath: currentFile.path) == false {
+                return
+            }
+            if let attributes = try? fileManager?.attributesOfItem(atPath: currentFile.path),
+                let fileSize = attributes[FileAttributeKey.size] as? UInt64,
+                fileSize >= 0
+            {
+                finish(file: currentFile)
+            }
         }
     }
 
@@ -251,7 +269,7 @@ extension PersistentStorage {
     private func storeEventsInNewFile(toFile file: URL, events: [BaseEvent]) {
         let storeFile = file
 
-        guard fileManager?.fileExists(atPath: storeFile.path) == true else {
+        guard fileManager?.fileExists(atPath: storeFile.path) != true else {
             return
         }
 
@@ -301,10 +319,10 @@ extension PersistentStorage {
         let fileEnding = "]"
         do {
             try outputStream.write(fileEnding)
+            try outputStream.close()
         } catch {
             amplitude?.logger?.error(message: error.localizedDescription)
         }
-        outputStream.close()
         self.outputStream = nil
 
         let fileWithoutTemp = file.deletingPathExtension()

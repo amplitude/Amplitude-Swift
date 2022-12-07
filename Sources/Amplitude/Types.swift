@@ -26,13 +26,13 @@ public typealias EventCallBack = (BaseEvent, Int, String) -> Void
 // It cannot be dynamically associated with this protocol.
 // https://github.com/apple/swift/issues/62219#issuecomment-1326531801
 public protocol Storage {
-    func write(key: StorageKey, value: Any?) async throws
-    func read<T>(key: StorageKey) async -> T?
-    func getEventsString(eventBlock: URL) async -> String?
-    func remove(eventBlock: URL) async
-    func splitBlock(eventBlock: URL, events: [BaseEvent]) async
-    func rollover() async
-    func reset() async
+    func write(key: StorageKey, value: Any?) throws
+    func read<T>(key: StorageKey) -> T?
+    func getEventsString(eventBlock: URL) -> String?
+    func remove(eventBlock: URL)
+    func splitBlock(eventBlock: URL, events: [BaseEvent])
+    func rollover()
+    func reset()
     func getResponseHandler(
         configuration: Configuration,
         eventPipeline: EventPipeline,
@@ -94,9 +94,9 @@ extension Plugin {
 
 public protocol ResponseHandler {
     func handle(result: Result<Int, Error>)
-    func handleSuccessResponse(code: Int) async
-    func handleBadRequestResponse(data: [String: Any]) async
-    func handlePayloadTooLargeResponse(data: [String: Any]) async
+    func handleSuccessResponse(code: Int)
+    func handleBadRequestResponse(data: [String: Any])
+    func handlePayloadTooLargeResponse(data: [String: Any])
     func handleTooManyRequestsResponse(data: [String: Any])
     func handleTimeoutResponse(data: [String: Any])
     func handleFailedResponse(data: [String: Any])

@@ -41,9 +41,9 @@ final class EventPipelineTests: XCTestCase {
         _ = XCTWaiter.wait(for: [asyncExpectation], timeout: 3)
     }
 
-    func testFlush() async {
+    func testFlush() {
         let testEvent = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
-        try? await eventPipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
+        try? eventPipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
 
         let fakeHttpClient = FakeHttpClient(configuration: configuration)
         eventPipeline.httpClient = fakeHttpClient as HttpClient

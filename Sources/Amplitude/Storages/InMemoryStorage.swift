@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  InMemoryStorage.swift
 //
 //
 //  Created by Marvin Liu on 10/28/22.
@@ -10,31 +10,31 @@ import Foundation
 class InMemoryStorage: Storage {
     typealias EventBlock = URL
 
-    func write(key: StorageKey, value: Any?) async {
+    func write(key: StorageKey, value: Any?) {
 
     }
 
-    func read<T>(key: StorageKey) async -> T? {
+    func read<T>(key: StorageKey) -> T? {
         return nil
     }
 
-    func reset() async {
+    func reset() {
 
     }
 
-    func rollover() async {
+    func rollover() {
 
     }
 
-    func getEventsString(eventBlock: EventBlock) async -> String? {
+    func getEventsString(eventBlock: EventBlock) -> String? {
         return nil
     }
 
-    func remove(eventBlock: EventBlock) async {
+    func remove(eventBlock: EventBlock) {
 
     }
 
-    func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) async {
+    func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) {
 
     }
 

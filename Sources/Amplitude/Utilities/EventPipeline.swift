@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  EventPipeline.swift
 //
 //
 //  Created by Marvin Liu on 10/28/22.
@@ -35,29 +35,28 @@ public class EventPipeline {
     func put(event: BaseEvent, completion: (() -> Void)? = nil) {
         guard let storage = self.storage else { return }
         event.attempts += 1
-        Task {
-            do {
-                try await storage.write(key: StorageKey.EVENTS, value: event)
-                eventCount += 1
-                if eventCount >= getFlushCount() {
-                    flush()
-                }
-                completion?()
-            } catch {
-                amplitude.logger?.error(message: "Error when storing event: \(error.localizedDescription)")
+        do {
+            try storage.write(key: StorageKey.EVENTS, value: event)
+            eventCount += 1
+            if eventCount >= getFlushCount() {
+                flush()
             }
+            completion?()
+        } catch {
+            amplitude.logger?.error(message: "Error when storing event: \(error.localizedDescription)")
         }
     }
 
     func flush(completion: (() -> Void)? = nil) {
-        Task {
-            guard let storage = self.storage else { return }
-            await storage.rollover()
-            guard let eventFiles: [URL]? = await storage.read(key: StorageKey.EVENTS) else { return }
-            amplitude.logger?.log(message: "Start flushing \(eventCount) events")
-            eventCount = 0
+        amplitude.logger?.log(message: "Start flushing \(eventCount) events")
+        eventCount = 0
+        guard let storage = self.storage else { return }
+        storage.rollover()
+        guard let eventFiles: [URL]? = storage.read(key: StorageKey.EVENTS) else { return }
+        cleanupUploads()
+        if pendingUploads == 0 {
             for eventFile in eventFiles! {
-                guard let eventsString = await storage.getEventsString(eventBlock: eventFile) else {
+                guard let eventsString = storage.getEventsString(eventBlock: eventFile) else {
                     continue
                 }
                 if eventsString.isEmpty {
@@ -71,6 +70,7 @@ public class EventPipeline {
                         eventsString: eventsString
                     )
                     responseHandler.handle(result: result)
+                    self?.cleanupUploads()
                 }
                 if let upload = uploadTask {
                     add(uploadTask: UploadTaskInfo(events: eventsString, task: upload))
