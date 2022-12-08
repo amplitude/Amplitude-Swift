@@ -145,9 +145,10 @@ class FakeResponseHandler: ResponseHandler {
 }
 
 class FakePersistentStorage: PersistentStorage {
-    var calledWithContext = [String]()
+    // Array to store the method invocation history for testing verification purpose
+    var haveBeenCalledWith = [String]()
 
     override func removeEventCallback(insertId: String) {
-        calledWithContext.append("removeEventCallback(insertId: \(insertId)")
+        haveBeenCalledWith.append("removeEventCallback(insertId: \(insertId)")
     }
 }

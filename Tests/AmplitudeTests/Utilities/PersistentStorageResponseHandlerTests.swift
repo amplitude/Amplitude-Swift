@@ -43,7 +43,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         XCTAssertEqual(handler.eventsString, eventsString)
     }
 
-    func testRemoveEventCallbackByEventsString() {
+    func testRemoveEventCallbackByEventsString_callsRemoveEventCallback() {
         let eventsString = """
             [
               {"event_type":"test","insert_id":"e3e4488d-6877-4775-ae88-344df7ccd5d8","user_id":"test-user"},
@@ -61,11 +61,15 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
 
         handler.removeEventCallbackByEventsString(eventsString: eventsString)
         XCTAssertEqual(
-            fakePersistentStorage.calledWithContext[0],
+            fakePersistentStorage.haveBeenCalledWith.count,
+            2
+        )
+        XCTAssertEqual(
+            fakePersistentStorage.haveBeenCalledWith[0],
             "removeEventCallback(insertId: e3e4488d-6877-4775-ae88-344df7ccd5d8"
         )
         XCTAssertEqual(
-            fakePersistentStorage.calledWithContext[1],
+            fakePersistentStorage.haveBeenCalledWith[1],
             "removeEventCallback(insertId: c8d58999-7539-4184-8a7d-54302697baf0"
         )
     }

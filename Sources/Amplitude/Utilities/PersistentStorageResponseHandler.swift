@@ -177,7 +177,7 @@ extension PersistentStorageResponseHandler {
             (1..<match.numberOfRanges).forEach {
                 if match.range(at: $0).location != NSNotFound {
                     let eventInsertId = eventsNSString.substring(with: match.range(at: $0))
-                    self.storage.removeEventCallback(insertId: eventInsertId)
+                    storage.removeEventCallback(insertId: eventInsertId)
                 }
             }
         }
