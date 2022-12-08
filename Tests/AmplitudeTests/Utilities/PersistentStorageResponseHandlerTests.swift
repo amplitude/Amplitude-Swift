@@ -66,11 +66,65 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         )
         XCTAssertEqual(
             fakePersistentStorage.haveBeenCalledWith[0],
-            "removeEventCallback(insertId: e3e4488d-6877-4775-ae88-344df7ccd5d8"
+            "removeEventCallback(insertId: e3e4488d-6877-4775-ae88-344df7ccd5d8)"
         )
         XCTAssertEqual(
             fakePersistentStorage.haveBeenCalledWith[1],
-            "removeEventCallback(insertId: c8d58999-7539-4184-8a7d-54302697baf0"
+            "removeEventCallback(insertId: c8d58999-7539-4184-8a7d-54302697baf0)"
+        )
+    }
+
+    func testRemoveEventCallbackByEventsString_notCallRemoveEventCallback() {
+        // insert_id format, missing insert_id
+        let eventsString = """
+            [
+              {"event_type":"wrong-insert_id-format","insert_id":"6877-4775-ae88-344df7ccd5d8","user_id":"test-user"},
+              {"event_type":"missing-insert_id","user_id":"test-user"}
+            ]
+            """
+
+        let fakePersistentStorage = FakePersistentStorage(apiKey: "testApiKey")
+        let handler = PersistentStorageResponseHandler(
+            configuration: configuration,
+            storage: fakePersistentStorage,
+            eventPipeline: eventPipeline,
+            eventBlock: eventBlock,
+            eventsString: eventsString
+        )
+
+        handler.removeEventCallbackByEventsString(eventsString: eventsString)
+        XCTAssertEqual(
+            fakePersistentStorage.haveBeenCalledWith.count,
+            0
+        )
+    }
+
+    func testHandleSuccessResponseWithInvalidEventsString_removesEventBlockAndEventCallback() {
+        // valid event, invalid event
+        let eventsString = """
+            [
+              {"event_type":"valid-event","insert_id":"e3e4488d-6877-4775-ae88-344df7ccd5d8","user_id":"test-user"},
+              {"event_type":"invalid-event",user_id:test-user,xxx}
+            ]
+            """
+
+        let fakePersistentStorage = FakePersistentStorage(apiKey: "testApiKey")
+        let handler = PersistentStorageResponseHandler(
+            configuration: configuration,
+            storage: fakePersistentStorage,
+            eventPipeline: eventPipeline,
+            eventBlock: eventBlock,
+            eventsString: eventsString
+        )
+
+        handler.handleSuccessResponse(code: 200)
+        XCTAssertEqual(
+            fakePersistentStorage.haveBeenCalledWith[0],
+            "remove(eventBlock: \(eventBlock.absoluteURL))"
+        )
+        XCTAssertEqual(
+            fakePersistentStorage.haveBeenCalledWith[1],
+            "removeEventCallback(insertId: e3e4488d-6877-4775-ae88-344df7ccd5d8)"
         )
     }
 }

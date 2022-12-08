@@ -149,6 +149,10 @@ class FakePersistentStorage: PersistentStorage {
     var haveBeenCalledWith = [String]()
 
     override func removeEventCallback(insertId: String) {
-        haveBeenCalledWith.append("removeEventCallback(insertId: \(insertId)")
+        haveBeenCalledWith.append("removeEventCallback(insertId: \(insertId))")
+    }
+
+    override func remove(eventBlock: EventBlock) {
+        haveBeenCalledWith.append("remove(eventBlock: \(eventBlock.absoluteURL))")
     }
 }
