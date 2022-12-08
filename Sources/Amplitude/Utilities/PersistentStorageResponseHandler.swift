@@ -1,5 +1,5 @@
 //
-//  PersitentStorageResponseHandler.swift
+//  PersistentStorageResponseHandler.swift
 //
 //
 //  Created by Marvin Liu on 11/30/22.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class PersitentStorageResponseHandler: ResponseHandler {
+class PersistentStorageResponseHandler: ResponseHandler {
     var configuration: Configuration
     var storage: PersistentStorage
     var eventPipeline: EventPipeline
@@ -29,21 +29,25 @@ class PersitentStorageResponseHandler: ResponseHandler {
     }
 
     func handleSuccessResponse(code: Int) {
-        if let events = BaseEvent.fromArrayString(jsonString: eventsString) {
-            triggerEventsCallBack(events: events, code: code, message: "Successfully send event")
+        guard let events = BaseEvent.fromArrayString(jsonString: eventsString) else {
+            storage.remove(eventBlock: eventBlock)
+            removeEventCallbackByEventsString(eventsString: eventsString)
+            return
         }
+        triggerEventsCallback(events: events, code: code, message: "Successfully send event")
         storage.remove(eventBlock: eventBlock)
     }
 
     func handleBadRequestResponse(data: [String: Any]) {
         guard let events = BaseEvent.fromArrayString(jsonString: eventsString) else {
             storage.remove(eventBlock: eventBlock)
+            removeEventCallbackByEventsString(eventsString: eventsString)
             return
         }
 
         if events.count == 1 {
             let error = data["error"] as? String ?? ""
-            triggerEventsCallBack(
+            triggerEventsCallback(
                 events: events,
                 code: HttpClient.HttpStatus.BAD_REQUEST.rawValue,
                 message: error
@@ -78,7 +82,7 @@ class PersitentStorageResponseHandler: ResponseHandler {
         }
 
         let error = data["error"] as? String ?? ""
-        triggerEventsCallBack(events: eventsToDrop, code: HttpClient.HttpStatus.BAD_REQUEST.rawValue, message: error)
+        triggerEventsCallback(events: eventsToDrop, code: HttpClient.HttpStatus.BAD_REQUEST.rawValue, message: error)
 
         eventsToRetry.forEach { event in
             eventPipeline.put(event: event)
@@ -90,11 +94,12 @@ class PersitentStorageResponseHandler: ResponseHandler {
     func handlePayloadTooLargeResponse(data: [String: Any]) {
         guard let events = BaseEvent.fromArrayString(jsonString: eventsString) else {
             storage.remove(eventBlock: eventBlock)
+            removeEventCallbackByEventsString(eventsString: eventsString)
             return
         }
         if events.count == 1 {
             let error = data["error"] as? String ?? ""
-            triggerEventsCallBack(
+            triggerEventsCallback(
                 events: events,
                 code: HttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue,
                 message: error
@@ -150,12 +155,31 @@ class PersitentStorageResponseHandler: ResponseHandler {
     }
 }
 
-extension PersitentStorageResponseHandler {
-    private func triggerEventsCallBack(events: [BaseEvent], code: Int, message: String) {
+extension PersistentStorageResponseHandler {
+    private func triggerEventsCallback(events: [BaseEvent], code: Int, message: String) {
         events.forEach { event in
             configuration.callback?(event, code, message)
-            // TODO: discuss whether to add event.callback support in here and storage for each individual event
-            // The map store event callbacks has to be in-memory, might be erased or cause memory leak issue
+            if let eventInsertId = event.insertId, let eventCallback = storage.getEventCallback(insertId: eventInsertId)
+            {
+                eventCallback(event, code, message)
+                storage.removeEventCallback(insertId: eventInsertId)
+            }
+        }
+    }
+
+    func removeEventCallbackByEventsString(eventsString: String) {
+        guard let regex = try? NSRegularExpression(pattern: #"\"insert_id\":\"(.{36})\","#) else {
+            return
+        }
+        let eventsNSString = NSString(string: eventsString)
+        regex.matches(in: eventsString, options: [], range: NSRange(location: 0, length: eventsNSString.length)).forEach
+        { match in
+            (1..<match.numberOfRanges).forEach {
+                if match.range(at: $0).location != NSNotFound {
+                    let eventInsertId = eventsNSString.substring(with: match.range(at: $0))
+                    storage.removeEventCallback(insertId: eventInsertId)
+                }
+            }
         }
     }
 }

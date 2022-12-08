@@ -165,3 +165,16 @@ class FakeResponseHandler: ResponseHandler {
     func handleFailedResponse(data: [String: Any]) {
     }
 }
+
+class FakePersistentStorage: PersistentStorage {
+    // Array to store the method invocation history for testing verification purpose
+    var haveBeenCalledWith = [String]()
+
+    override func removeEventCallback(insertId: String) {
+        haveBeenCalledWith.append("removeEventCallback(insertId: \(insertId))")
+    }
+
+    override func remove(eventBlock: EventBlock) {
+        haveBeenCalledWith.append("remove(eventBlock: \(eventBlock.absoluteURL))")
+    }
+}

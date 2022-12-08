@@ -19,7 +19,7 @@ public struct IngestionMetadata: Codable {
     var sourceVersion: String?
 }
 
-public typealias EventCallBack = (BaseEvent, Int, String) -> Void
+public typealias EventCallback = (BaseEvent, Int, String) -> Void
 
 // Swift 5.7 supports any existential type.
 // The type of EventBlock has to be determined pre-runtime.

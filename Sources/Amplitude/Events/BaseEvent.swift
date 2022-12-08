@@ -25,6 +25,7 @@ public class BaseEvent: EventOptions, Codable {
         case timestamp = "time"
         case eventId = "event_id"
         case sessionId = "session_id"
+        case insertId = "insert_id"
         case locationLat = "location_lat"
         case locationLng = "location_lng"
         case appVersion = "app_version"
@@ -92,7 +93,7 @@ public class BaseEvent: EventOptions, Codable {
         productId: String? = nil,
         revenueType: String? = nil,
         extra: [String: Any]? = nil,
-        callback: EventCallBack? = nil,
+        callback: EventCallback? = nil,
         partnerId: String? = nil,
         eventType: String,
         eventProperties: [String: Any]? = nil,
@@ -203,6 +204,7 @@ public class BaseEvent: EventOptions, Codable {
         timestamp = try values.decodeIfPresent(Int64.self, forKey: .timestamp)
         eventId = try values.decodeIfPresent(Int64.self, forKey: .eventId)
         sessionId = try values.decodeIfPresent(Int64.self, forKey: .sessionId)
+        insertId = try values.decodeIfPresent(String.self, forKey: .insertId)
         locationLat = try values.decodeIfPresent(Double.self, forKey: .locationLat)
         locationLng = try values.decodeIfPresent(Double.self, forKey: .locationLng)
         appVersion = try values.decodeIfPresent(String.self, forKey: .appVersion)
@@ -246,6 +248,7 @@ public class BaseEvent: EventOptions, Codable {
         try container.encode(timestamp, forKey: .timestamp)
         try container.encode(eventId, forKey: .eventId)
         try container.encode(sessionId, forKey: .sessionId)
+        try container.encode(insertId, forKey: .insertId)
         try container.encode(locationLat, forKey: .locationLat)
         try container.encode(locationLng, forKey: .locationLng)
         try container.encode(appVersion, forKey: .appVersion)

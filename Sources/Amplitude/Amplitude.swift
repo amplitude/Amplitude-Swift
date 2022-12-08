@@ -41,7 +41,7 @@ public class Amplitude {
     }
 
     @discardableResult
-    public func track(event: BaseEvent, options: EventOptions? = nil, callback: EventCallBack? = nil) -> Amplitude {
+    public func track(event: BaseEvent, options: EventOptions? = nil, callback: EventCallback? = nil) -> Amplitude {
         if options != nil {
             event.mergeEventOptions(eventOptions: options!)
         }
