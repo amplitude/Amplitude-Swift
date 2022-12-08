@@ -143,3 +143,11 @@ class FakeResponseHandler: ResponseHandler {
     func handleFailedResponse(data: [String: Any]) {
     }
 }
+
+class FakePersistentStorage: PersistentStorage {
+    var calledWithContext = [String]()
+
+    override func removeEventCallback(insertId: String) {
+        calledWithContext.append("removeEventCallback(insertId: \(insertId)")
+    }
+}

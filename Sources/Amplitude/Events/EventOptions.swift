@@ -43,7 +43,7 @@ public class EventOptions {
     var productId: String?
     var revenueType: String?
     var extra: [String: Any]?
-    var callback: EventCallBack?
+    var callback: EventCallback?
     var partnerId: String?
     internal var attempts: Int
 
@@ -83,7 +83,7 @@ public class EventOptions {
         productId: String? = nil,
         revenueType: String? = nil,
         extra: [String: Any]? = nil,
-        callback: EventCallBack? = nil,
+        callback: EventCallback? = nil,
         partnerId: String? = nil,
         attempts: Int = 0
     ) {

@@ -16,12 +16,16 @@ class PersistentStorage: Storage {
     private var outputStream: OutputFileStream?
     internal weak var amplitude: Amplitude?
 
+    // Store event.callback in memory as it cannot be ser/deser in files.
+    private var eventCallbackMap: [String: EventCallback]
+
     let syncQueue = DispatchQueue(label: "syncPersistentStorage.amplitude.com")
 
     init(apiKey: String = "") {
         self.storagePrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(apiKey)"
         self.userDefaults = UserDefaults(suiteName: "\(PersistentStorage.AMP_STORAGE_PREFIX).\(storagePrefix)")
         self.fileManager = FileManager.default
+        self.eventCallbackMap = [String: EventCallback]()
     }
 
     func write(key: StorageKey, value: Any?) throws {
@@ -31,6 +35,9 @@ class PersistentStorage: Storage {
                 if let event = value as? BaseEvent {
                     let eventStoreFile = getCurrentFile()
                     self.storeEvent(toFile: eventStoreFile, event: event)
+                    if let eventCallback = event.callback, let eventInsertId = event.insertId {
+                        eventCallbackMap[eventInsertId] = eventCallback
+                    }
                 }
             default:
                 if isBasicType(value: value) {
@@ -97,7 +104,7 @@ class PersistentStorage: Storage {
         eventBlock: EventBlock,
         eventsString: String
     ) -> ResponseHandler {
-        return PersitentStorageResponseHandler(
+        return PersistentStorageResponseHandler(
             configuration: configuration,
             storage: self,
             eventPipeline: eventPipeline,
@@ -132,6 +139,14 @@ class PersistentStorage: Storage {
                 finish(file: currentFile)
             }
         }
+    }
+
+    func getEventCallback(insertId: String) -> EventCallback? {
+        return eventCallbackMap[insertId]
+    }
+
+    func removeEventCallback(insertId: String) {
+        eventCallbackMap.removeValue(forKey: insertId)
     }
 
     func isBasicType(value: Any?) -> Bool {

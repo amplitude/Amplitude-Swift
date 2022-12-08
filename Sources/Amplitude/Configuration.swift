@@ -18,7 +18,7 @@ public class Configuration {
     var loggerProvider: any Logger
     var minIdLength: Int?
     var partnerId: String?
-    var callback: EventCallBack?
+    var callback: EventCallback?
     var flushMaxRetries: Int
     var useBatch: Bool
     var serverZone: ServerZone
@@ -43,7 +43,7 @@ public class Configuration {
         loggerProvider: any Logger = ConsoleLogger(),
         minIdLength: Int? = nil,
         partnerId: String? = nil,
-        callback: EventCallBack? = nil,
+        callback: EventCallback? = nil,
         flushMaxRetries: Int = Constants.Configuration.FLUSH_MAX_RETRIES,
         useBatch: Bool = false,
         serverZone: ServerZone = ServerZone.US,
