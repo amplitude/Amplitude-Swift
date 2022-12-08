@@ -55,7 +55,7 @@ final class AmplitudeTests: XCTestCase {
         amplitude._sessionId = previousSessionTimestamp
         let sessionReader = SessionReaderPlugin()
         amplitude.add(plugin: sessionReader)
-        let currentSessionTimestamp =  Int64(NSDate().timeIntervalSince1970 * 1000)
+        let currentSessionTimestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
         amplitude.onEnterForeground(timestamp: currentSessionTimestamp)
 
         let sessionEvents = sessionReader.sessionEvents

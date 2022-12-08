@@ -1,6 +1,6 @@
 //
 //  Session.swift
-//  
+//
 //
 //  Created by Alyssa.Yu on 12/2/22.
 //
@@ -14,15 +14,15 @@ extension Amplitude {
         return timeDelta < self.configuration.minTimeBetweenSessionsMillis
 
     }
-    
-    public func refreshSessionTime(timestamp: Int64)  {
+
+    public func refreshSessionTime(timestamp: Int64) {
         do {
             try self.storage.write(key: .LAST_EVENT_TIME, value: timestamp)
         } catch {
             print("User creation failed with error: \(error)")
         }
     }
-    
+
     private func getPreviouSession() -> Int64? {
         guard let previousSession: Int64 = self.storage.read(key: StorageKey.PREVIOUS_SESSION_ID) else { return nil }
 
@@ -34,32 +34,36 @@ extension Amplitude {
 
         return lastEventTime
     }
-    
+
     private func sendSessionEvent(sessionEventType: String) {
         let timestamp = self.getLastEventTime()
         let sessionEvent = BaseEvent(timestamp: timestamp, eventType: sessionEventType)
         self.track(event: sessionEvent)
     }
-    
-    public func startOrContinueSession(timestamp: Int64) ->  Array<BaseEvent>? {
-        if (_sessionId >= 0) {
+
+    public func startOrContinueSession(timestamp: Int64) -> [BaseEvent]? {
+        if _sessionId >= 0 {
             // if with in the same session extend the session and update the session time
             if self.isWithinMinTimeBetweenSessions(timestamp: timestamp) == true {
                 self.refreshSessionTime(timestamp: timestamp)
                 return nil
             }
         }
-        
+
         return startNewSession(timestamp: timestamp)
     }
-    
-    public func startNewSession(timestamp: Int64) -> Array<BaseEvent>? {
 
-        var sessionEvents : Array<BaseEvent> = Array()
-        
-        if (self.configuration.trackingSessionEvents == true  && _sessionId >= 0) {
+    public func startNewSession(timestamp: Int64) -> [BaseEvent]? {
+
+        var sessionEvents: [BaseEvent] = Array()
+
+        if self.configuration.trackingSessionEvents == true && _sessionId >= 0 {
             let lastEventTime: Int64? = self.storage.read(key: .LAST_EVENT_TIME) ?? nil
-            let sessionEndEvent = BaseEvent(timestamp: lastEventTime, sessionId: _sessionId, eventType: Constants.AMP_SESSION_END_EVENT)
+            let sessionEndEvent = BaseEvent(
+                timestamp: lastEventTime,
+                sessionId: _sessionId,
+                eventType: Constants.AMP_SESSION_END_EVENT
+            )
             sessionEvents.append(sessionEndEvent)
 
         }
@@ -67,10 +71,14 @@ extension Amplitude {
         // start new session
         _ = self.setSessionId(sessionId: timestamp)
         self.refreshSessionTime(timestamp: timestamp)
-        
-        if (self.configuration.trackingSessionEvents == true) {
+
+        if self.configuration.trackingSessionEvents == true {
             let lastEventTime: Int64? = self.storage.read(key: .LAST_EVENT_TIME) ?? nil
-            let sessionStartEvent = BaseEvent(timestamp: lastEventTime, sessionId: _sessionId, eventType: Constants.AMP_SESSION_START_EVENT)
+            let sessionStartEvent = BaseEvent(
+                timestamp: lastEventTime,
+                sessionId: _sessionId,
+                eventType: Constants.AMP_SESSION_START_EVENT
+            )
             sessionEvents.append(sessionStartEvent)
         }
 

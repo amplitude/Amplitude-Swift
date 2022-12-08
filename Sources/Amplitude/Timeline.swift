@@ -13,7 +13,7 @@ public class Timeline {
     var sessionId: Int64 = -1
     var lastEventId: Int64 = 0
     var lastEventTime: Int64 = -1
-    
+
     init() {
         self.plugins = [
             PluginType.before: Mediator(),
@@ -22,71 +22,71 @@ public class Timeline {
             PluginType.utility: Mediator(),
         ]
     }
-    
+
     func start() {
-        sessionId =  amplitude?.storage.read(key: .PREVIOUS_SESSION_ID) ?? -1
+        sessionId = amplitude?.storage.read(key: .PREVIOUS_SESSION_ID) ?? -1
         lastEventId = amplitude?.storage.read(key: .LAST_EVENT_ID) ?? -1
         lastEventTime = amplitude?.storage.read(key: .LAST_EVENT_TIME) ?? -1
     }
 
     func process(event: BaseEvent) {
-            let eventTimeStamp = event.timestamp!
-            var skipEvent : Bool = false
-            var sessionEvents: Array<BaseEvent>? = nil
-            
-            if event.eventType == Constants.AMP_SESSION_START_EVENT {
-                if (event.sessionId! < 0) {
-                    skipEvent = true
-                    sessionEvents = self.amplitude?.startOrContinueSession(timestamp: eventTimeStamp)
-                } else {
-                    _ = self.amplitude?.setSessionId(sessionId: eventTimeStamp)
-                    self.amplitude?.refreshSessionTime(timestamp: eventTimeStamp)
-                }
-            } else if event.eventType == Constants.AMP_SESSION_END_EVENT {
-                // do nothing
+        let eventTimeStamp = event.timestamp!
+        var skipEvent: Bool = false
+        var sessionEvents: [BaseEvent]? = nil
+
+        if event.eventType == Constants.AMP_SESSION_START_EVENT {
+            if event.sessionId! < 0 {
+                skipEvent = true
+                sessionEvents = self.amplitude?.startOrContinueSession(timestamp: eventTimeStamp)
             } else {
-                if (!(self.amplitude?._inForeground ?? false)) {
-                    sessionEvents = self.amplitude?.startOrContinueSession(timestamp: eventTimeStamp)
-                } else {
-                    _ = self.amplitude?.refreshSessionTime(timestamp: eventTimeStamp)
-                }
+                _ = self.amplitude?.setSessionId(sessionId: eventTimeStamp)
+                self.amplitude?.refreshSessionTime(timestamp: eventTimeStamp)
             }
-            
-            if (!skipEvent && event.sessionId! < 0) {
-                event.sessionId = sessionId
+        } else if event.eventType == Constants.AMP_SESSION_END_EVENT {
+            // do nothing
+        } else {
+            if !(self.amplitude?._inForeground ?? false) {
+                sessionEvents = self.amplitude?.startOrContinueSession(timestamp: eventTimeStamp)
+            } else {
+                _ = self.amplitude?.refreshSessionTime(timestamp: eventTimeStamp)
             }
-            
-            let savedLastEventId = lastEventId
-            
-            sessionEvents?.forEach({ sessionEvent in
-                if sessionEvent.eventId == nil {
-                    let newEventId = lastEventId + 1
-                    sessionEvent.eventId = newEventId
-                    lastEventId = newEventId
-                }
-            })
-            
-            if (!skipEvent) {
+        }
+
+        if !skipEvent && event.sessionId! < 0 {
+            event.sessionId = sessionId
+        }
+
+        let savedLastEventId = lastEventId
+
+        sessionEvents?.forEach({ sessionEvent in
+            if sessionEvent.eventId == nil {
                 let newEventId = lastEventId + 1
-                event.eventId = newEventId
+                sessionEvent.eventId = newEventId
                 lastEventId = newEventId
             }
-            
-            if (lastEventId > savedLastEventId) {
-                do {
-                    _ = try? self.amplitude?.storage.write(key: .LAST_EVENT_ID, value: lastEventId)
-                }
+        })
+
+        if !skipEvent {
+            let newEventId = lastEventId + 1
+            event.eventId = newEventId
+            lastEventId = newEventId
+        }
+
+        if lastEventId > savedLastEventId {
+            do {
+                _ = try? self.amplitude?.storage.write(key: .LAST_EVENT_ID, value: lastEventId)
             }
-        
-            sessionEvents?.forEach({ sessionEvent in
-                self.processEvent(event: sessionEvent)
-            })
-            
-            if (!skipEvent) {
-                processEvent(event: event)
-            }
+        }
+
+        sessionEvents?.forEach({ sessionEvent in
+            self.processEvent(event: sessionEvent)
+        })
+
+        if !skipEvent {
+            processEvent(event: event)
+        }
     }
-    
+
     func processEvent(event: BaseEvent) {
         let beforeResult = self.applyPlugin(pluginType: PluginType.before, event: event)
         let enrichmentResult = self.applyPlugin(pluginType: PluginType.enrichment, event: beforeResult)

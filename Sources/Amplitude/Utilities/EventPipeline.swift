@@ -48,12 +48,13 @@ public class EventPipeline {
     }
 
     func flush(completion: (() -> Void)? = nil) {
-        Task {
-            guard let storage = self.storage else { return }
-            await storage.rollover()
-            guard let eventFiles: [URL]? = await storage.read(key: .EVENTS) else { return }
-            amplitude.logger?.log(message: "Start flushing \(eventCount) events")
-            eventCount = 0
+        amplitude.logger?.log(message: "Start flushing \(eventCount) events")
+        eventCount = 0
+        guard let storage = self.storage else { return }
+        storage.rollover()
+        guard let eventFiles: [URL]? = storage.read(key: StorageKey.EVENTS) else { return }
+        cleanupUploads()
+        if pendingUploads == 0 {
             for eventFile in eventFiles! {
                 guard let eventsString = storage.getEventsString(eventBlock: eventFile) else {
                     continue

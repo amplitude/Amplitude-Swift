@@ -50,7 +50,7 @@ class OutputReaderPlugin: Plugin {
 class SessionReaderPlugin: Plugin {
     var type: PluginType
     var amplitude: Amplitude?
-    var sessionEvents: Array<BaseEvent>? = Array()
+    var sessionEvents: [BaseEvent]? = Array()
 
     init() {
         self.type = .destination
@@ -61,12 +61,13 @@ class SessionReaderPlugin: Plugin {
     }
 
     func execute(event: BaseEvent?) -> BaseEvent? {
-        guard let eventType = event?.eventType, (eventType == Constants.AMP_SESSION_START_EVENT || eventType == Constants.AMP_SESSION_END_EVENT) else { return event }
+        guard let eventType = event?.eventType,
+            eventType == Constants.AMP_SESSION_START_EVENT || eventType == Constants.AMP_SESSION_END_EVENT
+        else { return event }
         sessionEvents?.append(event!)
         return event
     }
 }
-
 
 class FakeInMemoryStorage: Storage {
     typealias EventBlock = URL
