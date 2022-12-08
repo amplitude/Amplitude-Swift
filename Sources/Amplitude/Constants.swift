@@ -49,6 +49,8 @@ public struct Constants {
     static let AMP_TRACKING_OPTION_PLATFORM = "platform"
     static let AMP_TRACKING_OPTION_REGION = "region"
     static let AMP_TRACKING_OPTION_VERSION_NAME = "version_name"
+    static let AMP_SESSION_END_EVENT = "session_end"
+    static let AMP_SESSION_START_EVENT = "session_start"
 
     public struct Configuration {
         public static let FLUSH_QUEUE_SIZE = 30

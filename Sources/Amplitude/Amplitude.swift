@@ -3,14 +3,19 @@ import Foundation
 public class Amplitude {
     var configuration: Configuration
     var instanceName: String
-    internal var inForeground = false
+    var _inForeground = false
+    internal var _sessionId: Int64 = -1
 
     lazy var storage: any Storage = {
         return self.configuration.storageProvider
     }()
+
     lazy var timeline: Timeline = {
-        return Timeline()
+        let timeline = Timeline()
+        timeline.amplitude = self
+        return timeline
     }()
+
     lazy var logger: (any Logger)? = {
         return self.configuration.loggerProvider
     }()
@@ -27,6 +32,7 @@ public class Amplitude {
         }
         _ = add(plugin: ContextPlugin())
         _ = add(plugin: AmplitudeDestinationPlugin())
+        timeline.start()
     }
 
     convenience init(apiKey: String, configuration: Configuration) {
@@ -43,6 +49,7 @@ public class Amplitude {
             event.callback = callback
         }
         process(event: event)
+
         return self
     }
 
@@ -104,25 +111,14 @@ public class Amplitude {
         return self
     }
 
-    func reset() -> Amplitude {
+    public func setSessionId(sessionId: Int64) -> Amplitude {
+        _sessionId = sessionId
+        _ = try? self.storage.write(key: .PREVIOUS_SESSION_ID, value: sessionId)
         return self
     }
 
-    func onEnterForeground(timestamp: Int64) {
-        inForeground = true
-
-        let dummySessionStartEvent = BaseEvent(eventType: "session_start")
-        dummySessionStartEvent.timestamp = timestamp
-        dummySessionStartEvent.sessionId = -1
-        timeline.process(event: dummySessionStartEvent)
-    }
-
-    func onExitForeground() {
-        inForeground = false
-        // TODO: Need to make sure the flush won't block the main thread
-        if configuration.flushEventsOnClose == true {
-            _ = self.flush()
-        }
+    func reset() -> Amplitude {
+        return self
     }
 
     public func apply(closure: (Plugin) -> Void) {
@@ -137,4 +133,22 @@ public class Amplitude {
         event.timestamp = event.timestamp ?? Int64(NSDate().timeIntervalSince1970 * 1000)
         timeline.process(event: event)
     }
+
+    func onEnterForeground(timestamp: Int64) {
+        _inForeground = true
+        let dummySessionStartEvent = BaseEvent(
+            timestamp: timestamp,
+            sessionId: -1,
+            eventType: Constants.AMP_SESSION_START_EVENT
+        )
+        timeline.process(event: dummySessionStartEvent)
+    }
+
+    func onExitForeground() {
+        _inForeground = false
+        if configuration.flushEventsOnClose == true {
+            _ = self.flush()
+        }
+    }
+
 }

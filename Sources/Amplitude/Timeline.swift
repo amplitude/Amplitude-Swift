@@ -5,8 +5,14 @@
 //  Created by Marvin Liu on 10/27/22.
 //
 
+import Foundation
+
 public class Timeline {
+    var amplitude: Amplitude?
     internal let plugins: [PluginType: Mediator]
+    var sessionId: Int64 = -1
+    var lastEventId: Int64 = 0
+    var lastEventTime: Int64 = -1
 
     init() {
         self.plugins = [
@@ -17,10 +23,74 @@ public class Timeline {
         ]
     }
 
+    func start() {
+        sessionId = amplitude?.storage.read(key: .PREVIOUS_SESSION_ID) ?? -1
+        lastEventId = amplitude?.storage.read(key: .LAST_EVENT_ID) ?? -1
+        lastEventTime = amplitude?.storage.read(key: .LAST_EVENT_TIME) ?? -1
+    }
+
     func process(event: BaseEvent) {
-        let beforeResult = applyPlugin(pluginType: PluginType.before, event: event)
-        let enrichmentResult = applyPlugin(pluginType: PluginType.enrichment, event: beforeResult)
-        _ = applyPlugin(pluginType: PluginType.destination, event: enrichmentResult)
+        let eventTimeStamp = event.timestamp!
+        var skipEvent: Bool = false
+        var sessionEvents: [BaseEvent]? = nil
+
+        if event.eventType == Constants.AMP_SESSION_START_EVENT {
+            if event.sessionId! < 0 {
+                skipEvent = true
+                sessionEvents = self.amplitude?.startOrContinueSession(timestamp: eventTimeStamp)
+            } else {
+                _ = self.amplitude?.setSessionId(sessionId: eventTimeStamp)
+                self.amplitude?.refreshSessionTime(timestamp: eventTimeStamp)
+            }
+        } else if event.eventType == Constants.AMP_SESSION_END_EVENT {
+            // do nothing
+        } else {
+            if !(self.amplitude?._inForeground ?? false) {
+                sessionEvents = self.amplitude?.startOrContinueSession(timestamp: eventTimeStamp)
+            } else {
+                _ = self.amplitude?.refreshSessionTime(timestamp: eventTimeStamp)
+            }
+        }
+
+        if !skipEvent && event.sessionId! < 0 {
+            event.sessionId = sessionId
+        }
+
+        let savedLastEventId = lastEventId
+
+        sessionEvents?.forEach({ sessionEvent in
+            if sessionEvent.eventId == nil {
+                let newEventId = lastEventId + 1
+                sessionEvent.eventId = newEventId
+                lastEventId = newEventId
+            }
+        })
+
+        if !skipEvent {
+            let newEventId = lastEventId + 1
+            event.eventId = newEventId
+            lastEventId = newEventId
+        }
+
+        if lastEventId > savedLastEventId {
+            do {
+                _ = try? self.amplitude?.storage.write(key: .LAST_EVENT_ID, value: lastEventId)
+            }
+        }
+
+        sessionEvents?.forEach({ sessionEvent in
+            self.processEvent(event: sessionEvent)
+        })
+
+        if !skipEvent {
+            processEvent(event: event)
+        }
+    }
+
+    func processEvent(event: BaseEvent) {
+        let beforeResult = self.applyPlugin(pluginType: PluginType.before, event: event)
+        let enrichmentResult = self.applyPlugin(pluginType: PluginType.enrichment, event: beforeResult)
+        _ = self.applyPlugin(pluginType: PluginType.destination, event: enrichmentResult)
     }
 
     internal func applyPlugin(pluginType: PluginType, event: BaseEvent?) -> BaseEvent? {
