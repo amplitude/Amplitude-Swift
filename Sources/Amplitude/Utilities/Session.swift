@@ -42,13 +42,13 @@ extension Amplitude {
     }
     
     public func startOrContinueSession(timestamp: Int64) ->  Array<BaseEvent>? {
-            if (_sessionId >= 0) {
-                // if with in the same session extend the session and update the session time
-                if self.isWithinMinTimeBetweenSessions(timestamp: timestamp) == true {
-                    self.refreshSessionTime(timestamp: timestamp)
-                    return nil
-                }
+        if (_sessionId >= 0) {
+            // if with in the same session extend the session and update the session time
+            if self.isWithinMinTimeBetweenSessions(timestamp: timestamp) == true {
+                self.refreshSessionTime(timestamp: timestamp)
+                return nil
             }
+        }
         
         return startNewSession(timestamp: timestamp)
     }
@@ -70,8 +70,8 @@ extension Amplitude {
         
         if (self.configuration.trackingSessionEvents == true) {
             let lastEventTime: Int64? = self.storage.read(key: .LAST_EVENT_TIME) ?? nil
-            let sessionStartEnd = BaseEvent(timestamp: lastEventTime, sessionId: _sessionId, eventType: Constants.AMP_SESSION_START_EVENT)
-            sessionEvents.append(sessionStartEnd)
+            let sessionStartEvent = BaseEvent(timestamp: lastEventTime, sessionId: _sessionId, eventType: Constants.AMP_SESSION_START_EVENT)
+            sessionEvents.append(sessionStartEvent)
         }
 
         return sessionEvents

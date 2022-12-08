@@ -136,12 +136,8 @@ public class Amplitude {
     
     func onEnterForeground(timestamp: Int64) {
         _inForeground = true
-        
-   
-            let dummySessionStartEvent = BaseEvent(timestamp: timestamp, sessionId: -1, eventType: Constants.AMP_SESSION_START_EVENT)
-             timeline.process(event: dummySessionStartEvent)
-    
-
+        let dummySessionStartEvent = BaseEvent(timestamp: timestamp, sessionId: -1, eventType: Constants.AMP_SESSION_START_EVENT)
+        timeline.process(event: dummySessionStartEvent)
     }
 
     func onExitForeground() {

@@ -32,4 +32,43 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(lastEvent?.platform!.isEmpty, false)
         XCTAssertEqual(lastEvent?.language!.isEmpty, false)
     }
+
+    func testNewSessionStartEvent() {
+        let amplitude = Amplitude(configuration: configuration)
+        let sessionReader = SessionReaderPlugin()
+        amplitude.add(plugin: sessionReader)
+        let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+        amplitude.onEnterForeground(timestamp: timestamp)
+
+        let sessionEvents = sessionReader.sessionEvents
+        let sessionEvent = sessionEvents?[0]
+
+        XCTAssertEqual(sessionEvents?.count, 1)
+        XCTAssertEqual(sessionEvent?.eventType, Constants.AMP_SESSION_START_EVENT)
+        XCTAssertEqual(sessionEvent?.timestamp, timestamp)
+        XCTAssertNotNil(sessionEvent?.eventId)
+    }
+
+    func testSessionEventNotInTheSameSession() {
+        let previousSessionTimestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "testApiKey", minTimeBetweenSessionsMillis: 1))
+        amplitude._sessionId = previousSessionTimestamp
+        let sessionReader = SessionReaderPlugin()
+        amplitude.add(plugin: sessionReader)
+        let currentSessionTimestamp =  Int64(NSDate().timeIntervalSince1970 * 1000)
+        amplitude.onEnterForeground(timestamp: currentSessionTimestamp)
+
+        let sessionEvents = sessionReader.sessionEvents
+        let sessionEndEvent = sessionEvents?[0]
+        let sessionStartEvent = sessionEvents?[1]
+
+        XCTAssertNotNil(sessionStartEvent)
+        XCTAssertNotNil(sessionEndEvent)
+        XCTAssertEqual(sessionStartEvent?.eventType, Constants.AMP_SESSION_START_EVENT)
+        XCTAssertEqual(sessionStartEvent?.sessionId, currentSessionTimestamp)
+        XCTAssertNotNil(sessionStartEvent?.eventId)
+        XCTAssertEqual(sessionEndEvent?.eventType, Constants.AMP_SESSION_END_EVENT)
+        XCTAssertEqual(sessionEndEvent?.sessionId, previousSessionTimestamp)
+        XCTAssertNotNil(sessionEndEvent?.eventId)
+    }
 }
