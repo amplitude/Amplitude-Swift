@@ -29,15 +29,26 @@ class IDFACollectionPlugin: Plugin {
     
     func execute(event: BaseEvent?) -> BaseEvent? {
         let status = ATTrackingManager.trackingAuthorizationStatus
-        var idfa = ""
+        var idfa = fallbackValue
         if status == .authorized {
             idfa = ASIdentifierManager.shared().advertisingIdentifier.uuidString
         }
                 
         let workingEvent = event
         // The idfa on simulator is always 00000000-0000-0000-0000-000000000000
-        event?.idfa = "12345678-1234-1234-1234-123456789012"
+        event?.idfa = idfa
 
         return workingEvent
+    }
+}
+
+extension IDFACollectionPlugin {
+    var fallbackValue: String? {
+        get {
+            // fallback to the IDFV value.
+            // this is also sent in event.context.device.id,
+            // feel free to use a value that is more useful to you.
+            return UIDevice.current.identifierForVendor?.uuidString
+        }
     }
 }
