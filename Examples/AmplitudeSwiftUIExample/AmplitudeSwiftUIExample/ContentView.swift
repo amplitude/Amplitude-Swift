@@ -8,11 +8,13 @@
 import Amplitude_Swift
 import CoreData
 import SwiftUI
+import AppTrackingTransparency
 
 let amplitudeColor = Color(red: 0.16, green: 0.46, blue: 0.87)
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
+
     @State var userId: String = ""
     // TODO: get current deviceId
     @State var deviceId: String = "xxx-xxx-xxx"
