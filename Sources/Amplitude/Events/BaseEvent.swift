@@ -9,10 +9,10 @@ import Foundation
 
 public class BaseEvent: EventOptions, Codable {
     public var eventType: String
-    public var eventProperties: [String: Any]?
-    public var userProperties: [String: Any]?
-    public var groups: [String: Any]?
-    public var groupProperties: [String: Any]?
+    public var eventProperties: [String: Any?]?
+    public var userProperties: [String: Any?]?
+    public var groups: [String: Any?]?
+    public var groupProperties: [String: Any?]?
 
     enum CodingKeys: String, CodingKey {
         case eventType = "event_type"
@@ -96,10 +96,10 @@ public class BaseEvent: EventOptions, Codable {
         callback: EventCallback? = nil,
         partnerId: String? = nil,
         eventType: String,
-        eventProperties: [String: Any]? = nil,
-        userProperties: [String: Any]? = nil,
-        groups: [String: Any]? = nil,
-        groupProperties: [String: Any]? = nil
+        eventProperties: [String: Any?]? = nil,
+        userProperties: [String: Any?]? = nil,
+        groups: [String: Any?]? = nil,
+        groupProperties: [String: Any?]? = nil
     ) {
         self.eventType = eventType
         self.eventProperties = eventProperties

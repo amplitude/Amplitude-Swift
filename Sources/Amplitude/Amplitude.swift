@@ -49,7 +49,18 @@ public class Amplitude {
             event.callback = callback
         }
         process(event: event)
+        return self
+    }
 
+    public func track(eventType: String, eventProperties: [String: Any]? = nil, options: EventOptions? = nil)
+        -> Amplitude
+    {
+        let event = BaseEvent(eventType: eventType)
+        event.eventProperties = eventProperties
+        if let eventOptions = options {
+            event.mergeEventOptions(eventOptions: eventOptions)
+        }
+        process(event: event)
         return self
     }
 
@@ -58,32 +69,112 @@ public class Amplitude {
         return track(event: event)
     }
 
-    public func identify(type: String) -> Amplitude {
+    public func identify(userProperties: [String: Any]?, options: EventOptions? = nil) -> Amplitude {
+        return identify(identify: convertPropertiesToIdentify(userProperties: userProperties), options: options)
+    }
+
+    public func identify(identify: Identify, options: EventOptions? = nil) -> Amplitude {
+        let event = IdentifyEvent()
+        event.userProperties = identify.properties as [String: Any]
+        if let eventOptions = options {
+            event.mergeEventOptions(eventOptions: eventOptions)
+            if eventOptions.userId != nil {
+                _ = setUserId(userId: eventOptions.userId)
+            }
+            if eventOptions.deviceId != nil {
+                _ = setUserId(userId: eventOptions.deviceId)
+            }
+        }
+        process(event: event)
         return self
     }
 
-    public func identify() -> Amplitude {
-        return self
-    }
-
-    public func groupIdentify() -> Amplitude {
-        return self
+    private func convertPropertiesToIdentify(userProperties: [String: Any]?) -> Identify {
+        let identify = Identify()
+        userProperties?.forEach { key, value in
+            _ = identify.set(property: key, value: value)
+        }
+        return identify
     }
 
     public func groupIdentify(
         groupType: String,
         groupName: String,
-        groupProperties: [String: Any],
-        options: [String: Any]
+        groupProperties: [String: Any]?,
+        options: EventOptions? = nil
     ) -> Amplitude {
+        return groupIdentify(
+            groupType: groupType,
+            groupName: groupName,
+            identify: convertPropertiesToIdentify(userProperties: groupProperties),
+            options: options
+        )
+    }
+
+    public func groupIdentify(
+        groupType: String,
+        groupName: String,
+        identify: Identify,
+        options: EventOptions? = nil
+    ) -> Amplitude {
+        let event = GroupIdentifyEvent()
+        var groups = [String: Any]()
+        groups[groupType] = groupName
+        event.groups = groups
+        event.groupProperties = identify.properties
+        if let eventOptions = options {
+            event.mergeEventOptions(eventOptions: eventOptions)
+        }
+        process(event: event)
         return self
     }
 
+    public func setGroup(
+        groupType: String,
+        groupName: String,
+        options: EventOptions? = nil
+    ) -> Amplitude {
+        let event = IdentifyEvent()
+        event.groups = [groupType: groupName]
+        track(event: event, options: options)
+        return self
+    }
+
+    public func setGroup(
+        groupType: String,
+        groupName: [String],
+        options: EventOptions? = nil
+    ) -> Amplitude {
+        let event = IdentifyEvent()
+        event.groups = [groupType: groupName]
+        track(event: event, options: options)
+        return self
+    }
+
+    @available(*, deprecated, message: "use 'revenue' instead")
     public func logRevenue() -> Amplitude {
         return self
     }
+    
+    public func revenue(
+        revenue: Revenue,
+        options: EventOptions? = nil
+    ) -> Amplitude {
+        guard revenue.isValid() else {
+            logger?.warn(message: "Invalid revenue object, missing required fields")
+            return self
+        }
+        
+        let event = revenue.toRevenueEvent()
+        if let eventOptions = options {
+            event.mergeEventOptions(eventOptions: eventOptions)
+        }
+        _ = self.revenue(event: event)
+        return self
+    }
 
-    public func revenue() -> Amplitude {
+    public func revenue(event: RevenueEvent) -> Amplitude {
+        process(event: event)
         return self
     }
 
@@ -100,14 +191,21 @@ public class Amplitude {
     }
 
     public func flush() -> Amplitude {
+        timeline.apply { plugin in
+            if let _plugin = plugin as? EventPlugin {
+                _plugin.flush()
+            }
+        }
         return self
     }
 
-    public func setUserId(userId: String) -> Amplitude {
+    public func setUserId(userId: String?) -> Amplitude {
+        try? storage.write(key: .USER_ID, value: userId)
         return self
     }
 
-    public func setDeviceId(deviceId: String) -> Amplitude {
+    public func setDeviceId(deviceId: String?) -> Amplitude {
+        try? storage.write(key: .DEVICE_ID, value: deviceId)
         return self
     }
 
@@ -118,6 +216,9 @@ public class Amplitude {
     }
 
     func reset() -> Amplitude {
+        _ = setUserId(userId: nil)
+        _ = setDeviceId(deviceId: nil)
+        // TODO: initializeDeviceId
         return self
     }
 
@@ -150,5 +251,4 @@ public class Amplitude {
             _ = self.flush()
         }
     }
-
 }
