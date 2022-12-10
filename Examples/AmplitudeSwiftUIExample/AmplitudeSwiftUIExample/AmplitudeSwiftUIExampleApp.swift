@@ -6,8 +6,8 @@
 //
 
 import Amplitude_Swift
-import SwiftUI
 import AppTrackingTransparency
+import SwiftUI
 
 @main
 struct AmplitudeSwiftUIExampleApp: App {
@@ -23,10 +23,10 @@ struct AmplitudeSwiftUIExampleApp: App {
             ContentView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-                   let status = ATTrackingManager.trackingAuthorizationStatus
-                   if status == .notDetermined {
+                    let status = ATTrackingManager.trackingAuthorizationStatus
+                    if status == .notDetermined {
                         askForPermission()
-                   }
+                    }
                 }
         }
     }
@@ -35,7 +35,12 @@ struct AmplitudeSwiftUIExampleApp: App {
         // Popup modal to request the tracking autorization
         ATTrackingManager.requestTrackingAuthorization { status in
             // send a track event that shows the results of asking the user for permission.
-            Amplitude.testInstance.track(event: BaseEvent(eventType: "Ask For IDFA permission", eventProperties: ["status": statusToString(status)]))
+            Amplitude.testInstance.track(
+                event: BaseEvent(
+                    eventType: "Ask For IDFA permission",
+                    eventProperties: ["status": statusToString(status)]
+                )
+            )
         }
     }
 
@@ -56,7 +61,6 @@ struct AmplitudeSwiftUIExampleApp: App {
         return result
     }
 }
-
 
 extension Amplitude {
     static var testInstance = Amplitude(configuration: Configuration(apiKey: "TEST-API-KEY"))
