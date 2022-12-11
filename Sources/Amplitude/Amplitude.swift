@@ -6,6 +6,7 @@ public class Amplitude {
     var _inForeground = false
     internal var _sessionId: Int64 = -1
     var state: State = State()
+    var contextPlugin: ContextPlugin
 
     lazy var storage: any Storage = {
         return self.configuration.storageProvider
@@ -27,11 +28,15 @@ public class Amplitude {
     ) {
         self.configuration = configuration
         self.instanceName = instanceName
+
+        let contextPlugin = ContextPlugin()
+        self.contextPlugin = contextPlugin
+
         // required plugin for specific platform, only has lifecyclePlugin now
         if let requiredPlugin = VendorSystem.current.requiredPlugin {
             _ = add(plugin: requiredPlugin)
         }
-        _ = add(plugin: ContextPlugin())
+        _ = add(plugin: contextPlugin)
         _ = add(plugin: AmplitudeDestinationPlugin())
         timeline.start()
     }
@@ -221,7 +226,7 @@ public class Amplitude {
     func reset() -> Amplitude {
         _ = setUserId(userId: nil)
         _ = setDeviceId(deviceId: nil)
-        // TODO: initializeDeviceId
+        contextPlugin.initializeDeviceId()
         return self
     }
 

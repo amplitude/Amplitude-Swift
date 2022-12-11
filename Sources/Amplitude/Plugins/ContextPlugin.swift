@@ -12,6 +12,11 @@ class ContextPlugin: Plugin {
     public weak var amplitude: Amplitude?
     internal static var device = VendorSystem.current
 
+    func setup(amplitude: Amplitude) {
+        self.amplitude = amplitude
+        initializeDeviceId()
+    }
+
     func execute(event: BaseEvent?) -> BaseEvent? {
         guard let workingEvent = event else { return event }
 
@@ -88,7 +93,7 @@ class ContextPlugin: Plugin {
             event.userId = self.amplitude?.state.userId
         }
         if event.deviceId == nil {
-             event.deviceId = self.amplitude?.state.deviceId
+            event.deviceId = self.amplitude?.state.deviceId
         }
         if event.partnerId == nil {
             if let pId = self.amplitude?.configuration.partnerId {
@@ -155,5 +160,33 @@ class ContextPlugin: Plugin {
                 event.ingestionMetadata = ingestionMetadata
             }
         }
+    }
+
+    func initializeDeviceId() {
+        var deviceId = amplitude?.state.deviceId
+        if isValidDeviceId(deviceId) {
+            return
+        }
+        if amplitude?.configuration.useAdvertisingIdForDeviceId == true
+            && amplitude?.configuration.trackingOptions?.shouldTrackIDFA() == true
+        {
+            deviceId = NSUUID().uuidString  // TODO: feed idfa here
+        }
+        if deviceId == nil {
+            deviceId = staticContext["vendorID"] as? String
+        }
+        if deviceId == nil {
+            deviceId = NSUUID().uuidString
+        }
+        _ = amplitude?.setDeviceId(deviceId: deviceId)
+    }
+
+    func isValidDeviceId(_ deviceId: String?) -> Bool {
+        if deviceId == nil || deviceId == "e3f5536a141811db40efd6400f1d0a4e"
+            || deviceId == "04bab7ee75b9a58d39b8dc54e8851084"
+        {
+            return false
+        }
+        return true
     }
 }
