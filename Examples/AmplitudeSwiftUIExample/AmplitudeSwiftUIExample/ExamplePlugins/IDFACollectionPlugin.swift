@@ -7,7 +7,7 @@
 
 // NOTE: You can see this plugin in use in the AmplitudeSwiftUIExample application.
 //
-// This plugin is NOT SUPPORTED by Segment.  It is here merely as an example,
+// This plugin is NOT SUPPORTED by Amplitude.  It is here merely as an example,
 // and for your convenience should you find it useful.
 
 import AdSupport
@@ -23,7 +23,6 @@ import SwiftUI
 class IDFACollectionPlugin: Plugin {
     let type = PluginType.enrichment
     weak var amplitude: Amplitude? = nil
-    @Atomic private var alreadyAsked = false
 
     func execute(event: BaseEvent?) -> BaseEvent? {
         let status = ATTrackingManager.trackingAuthorizationStatus
