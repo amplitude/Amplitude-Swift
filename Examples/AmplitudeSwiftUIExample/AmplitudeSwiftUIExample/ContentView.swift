@@ -28,94 +28,104 @@ struct ContentView: View {
     @State var groupUserPropertyValue = ""
 
     var body: some View {
+        VStack {
+            LazyVStack {
+                Text("Amplitude Exmaple")
+                    .bold()
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(amplitudeColor)
+                    .foregroundColor(.white)
+            }
             VStack {
-                LazyVStack {
-                    Text("Amplitude Exmaple")
-                        .bold()
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(amplitudeColor)
-                        .foregroundColor(.white)
-                }
-                VStack {
-                    Form {
-                        Section(header: Text("IDENTITY")) {
-                            HStack {
-                                TextField("UserId", text: $userId)
-                                Button(action: {
-                                    print("Set UserId")
-                                    _ = Amplitude.testInstance.setUserId(userId: userId)
-                                }) {
-                                    Text("Set UserId")
-                                }.buttonStyle(AmplitudeButton())
-                            }
-                            HStack {
-                                TextField("DeviceId", text: $deviceId)
-                                Button(action: {
-                                    _ = Amplitude.testInstance.setDeviceId(deviceId: deviceId)
-                                }) {
-                                    Text("Reset DeviceId")
-                                }.buttonStyle(AmplitudeButton())
-                                
-                            }
-                        }
-                        Section(header: Text("GENERAL EVENT")) {
-                            HStack {
-                                TextField("Event Name", text: $eventType)
-                                Button(action: {
-                                    print("Log event.")
-                                    let event = BaseEvent(eventType: eventType)
-                                    _ = Amplitude.testInstance.track(event: event)
-                                }) {
-                                    Text("Send Event")
-                                }.buttonStyle(AmplitudeButton())
-                                
-                            }
-                        }
-                        Section(header: Text("REVENUE EVENT")) {
-                            TextField("Product Id", text: $productId)
-                            TextField("Price", value: $price, formatter: decimalFormatter())
-                            TextField("Quantity", value: $quantity, formatter: NumberFormatter())
+                Form {
+                    Section(header: Text("IDENTITY")) {
+                        HStack {
+                            TextField("UserId", text: $userId)
                             Button(action: {
-                                // TODO: trigger revenue event
+                                print("Set UserId")
+                                _ = Amplitude.testInstance.setUserId(userId: userId)
                             }) {
-                                Text("Send Revenue Event")
+                                Text("Set UserId")
                             }.buttonStyle(AmplitudeButton())
                         }
-                        Section(header: Text("IDENTIFY")) {
-                            HStack {
-                                TextField("User Property Key", text: $userPropertyKey)
-                                TextField("User Property Value", text: $userPropertyValue)
-                            }
+                        HStack {
+                            TextField("DeviceId", text: $deviceId)
                             Button(action: {
-                                // TODO: trigger identify event
+                                print("Set DeviceId")
+                                _ = Amplitude.testInstance.setDeviceId(deviceId: deviceId)
                             }) {
-                                Text("Send Identify Event")
+                                Text("Reset DeviceId")
+                            }.buttonStyle(AmplitudeButton())
+
+                        }
+                    }
+                    Section(header: Text("GENERAL EVENT")) {
+                        HStack {
+                            TextField("Event Name", text: $eventType)
+                            Button(action: {
+                                print("Send event")
+                                _ = Amplitude.testInstance.track(eventType: eventType)
+                            }) {
+                                Text("Send Event")
                             }.buttonStyle(AmplitudeButton())
                         }
-                        Section(header: Text("GROUP IDENTIFY")) {
-                            HStack {
-                                TextField("Group Type", text: $groupType)
-                                TextField("Group Property", text: $groupProperty)
-                            }
-                            HStack {
-                                TextField("User Property Key", text: $groupUserPropertyKey)
-                                TextField("User Property Value", text: $groupUserPropertyValue)
-                            }
-                            Button(action: {
-                                // TODO: trigger group identify event
-                            }) {
-                                Text("Send Group Identify Event")
-                            }.buttonStyle(AmplitudeButton())
-                        }
+                    }
+                    Section(header: Text("REVENUE EVENT")) {
+                        TextField("Product Id", text: $productId)
+                        TextField("Price", value: $price, formatter: decimalFormatter())
+                        TextField("Quantity", value: $quantity, formatter: NumberFormatter())
                         Button(action: {
-                            _ = Amplitude.testInstance.flush()
+                            print("Send revenue event")
+                            let revenue = Revenue()
+                            revenue.price = price
+                            revenue.quantity = quantity
+                            revenue.productId = productId
+                            _ = Amplitude.testInstance.revenue(revenue: revenue)
                         }) {
-                            Text("Flush All Events")
-                                .frame(maxWidth: .infinity)
+                            Text("Send Revenue Event")
                         }.buttonStyle(AmplitudeButton())
                     }
+                    Section(header: Text("IDENTIFY")) {
+                        HStack {
+                            TextField("User Property Key", text: $userPropertyKey)
+                            TextField("User Property Value", text: $userPropertyValue)
+                        }
+                        Button(action: {
+                            print("Send identify event")
+                            let identify = Identify()
+                            _ = identify.set(property: userPropertyKey, value: userPropertyValue)
+                            _ = Amplitude.testInstance.identify(identify: identify)
+                        }) {
+                            Text("Send Identify Event")
+                        }.buttonStyle(AmplitudeButton())
+                    }
+                    Section(header: Text("GROUP IDENTIFY")) {
+                        HStack {
+                            TextField("Group Type", text: $groupType)
+                            TextField("Group Property", text: $groupProperty)
+                        }
+                        HStack {
+                            TextField("User Property Key", text: $groupUserPropertyKey)
+                            TextField("User Property Value", text: $groupUserPropertyValue)
+                        }
+                        Button(action: {
+                            print("Send groupIdentify event")
+                            let groupIdentify = Identify()
+                            _ = groupIdentify.set(property: groupUserPropertyKey, value: groupUserPropertyValue)
+                            _ = Amplitude.testInstance.groupIdentify(groupType: groupType, groupName: groupProperty, identify: groupIdentify)
+                        }) {
+                            Text("Send Group Identify Event")
+                        }.buttonStyle(AmplitudeButton())
+                    }
+                    Button(action: {
+                        _ = Amplitude.testInstance.flush()
+                    }) {
+                        Text("Flush All Events")
+                            .frame(maxWidth: .infinity)
+                    }.buttonStyle(AmplitudeButton())
                 }
+            }
         }
     }
 }

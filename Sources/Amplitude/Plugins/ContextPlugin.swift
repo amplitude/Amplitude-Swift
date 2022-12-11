@@ -85,12 +85,10 @@ class ContextPlugin: Plugin {
             event.library = context["library"] as? String
         }
         if event.userId == nil {
-            // TODO: get stored userId
-            // event.userId = self.amplitude.store.userId
+            event.userId = self.amplitude?.state.userId
         }
         if event.deviceId == nil {
-            // TODO: get stored deviceID
-            // event.deviceId = self.amplitude.store.deviceId
+             event.deviceId = self.amplitude?.state.deviceId
         }
         if event.partnerId == nil {
             if let pId = self.amplitude?.configuration.partnerId {

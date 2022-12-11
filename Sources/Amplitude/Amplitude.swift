@@ -5,6 +5,7 @@ public class Amplitude {
     var instanceName: String
     var _inForeground = false
     internal var _sessionId: Int64 = -1
+    var state: State = State()
 
     lazy var storage: any Storage = {
         return self.configuration.storageProvider
@@ -155,7 +156,7 @@ public class Amplitude {
     public func logRevenue() -> Amplitude {
         return self
     }
-    
+
     public func revenue(
         revenue: Revenue,
         options: EventOptions? = nil
@@ -164,7 +165,7 @@ public class Amplitude {
             logger?.warn(message: "Invalid revenue object, missing required fields")
             return self
         }
-        
+
         let event = revenue.toRevenueEvent()
         if let eventOptions = options {
             event.mergeEventOptions(eventOptions: eventOptions)
@@ -201,11 +202,13 @@ public class Amplitude {
 
     public func setUserId(userId: String?) -> Amplitude {
         try? storage.write(key: .USER_ID, value: userId)
+        state.userId = userId
         return self
     }
 
     public func setDeviceId(deviceId: String?) -> Amplitude {
         try? storage.write(key: .DEVICE_ID, value: deviceId)
+        state.deviceId = deviceId
         return self
     }
 

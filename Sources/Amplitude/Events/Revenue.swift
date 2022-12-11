@@ -18,72 +18,74 @@ public class Revenue {
         case REVENUE = "$revenue"
     }
 
+    public init() {}
+
     private var _productId: String?
-    var productId: String? {
+    public var productId: String? {
+        get {
+            return _productId
+        }
         set(value) {
             if value != nil && !value!.isEmpty {
                 _productId = value
             }
         }
-        get {
-            return _productId
-        }
     }
 
     private var _quantity: Int = 1
-    var quantity: Int {
+    public var quantity: Int {
+        get {
+            return _quantity
+        }
         set(value) {
             if value > 0 {
                 _quantity = value
             }
         }
-        get {
-            return _quantity
-        }
     }
 
     private var _price: Double?
-    var price: Double? {
+    public var price: Double? {
+        get {
+            return _price
+        }
         set(value) {
             if value != nil {
                 _price = value
             }
         }
-        get {
-            return _price
-        }
     }
 
     private var _revenue: Double?
-    var revenue: Double? {
+    public var revenue: Double? {
+        get {
+            return _revenue
+        }
         set(value) {
             if value != nil {
                 _revenue = value
             }
         }
-        get {
-            return _revenue
-        }
     }
 
-    var revenueType: String?
+    public var revenueType: String?
 
-    var receipt: String?
+    public var receipt: String?
 
-    var receiptSig: String?
+    public var receiptSig: String?
 
-    var properties: [String: Any?]?
+    public var properties: [String: Any?]?
 
-    func setReceipt(receipt: String, receiptSignature: String) -> Revenue {
+    public func setReceipt(receipt: String, receiptSignature: String) -> Revenue {
         self.receipt = receipt
         self.receiptSig = receiptSignature
         return self
     }
-    
+
     func isValid() -> Bool {
-        return price == nil
+        return price != nil
     }
-    
+
     func toRevenueEvent() -> RevenueEvent {
         let event = RevenueEvent()
         var eventProperties = properties ?? [String: Any?]()

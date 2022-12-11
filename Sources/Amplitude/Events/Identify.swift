@@ -23,569 +23,571 @@ public class Identify {
         case REMOVE = "$remove"
     }
 
+    public init() {}
+
     var propertySet = Set<String>()
     var properties = [String: Any?]()
     var logger = ConsoleLogger(logLevel: LogLevelEnum.WARN.rawValue)
 
     // $set operation
-    func set(property: String, value: Bool) -> Identify {
+    public func set(property: String, value: Bool) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: Int) -> Identify {
+    public func set(property: String, value: Int) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: Float) -> Identify {
+    public func set(property: String, value: Float) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: Double) -> Identify {
+    public func set(property: String, value: Double) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: Int64) -> Identify {
+    public func set(property: String, value: Int64) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: String) -> Identify {
+    public func set(property: String, value: String) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: [String: Any]) -> Identify {
+    public func set(property: String, value: [String: Any]) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: [Any]) -> Identify {
+    public func set(property: String, value: [Any]) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: [Bool]) -> Identify {
+    public func set(property: String, value: [Bool]) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: [Int]) -> Identify {
+    public func set(property: String, value: [Int]) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: [Float]) -> Identify {
+    public func set(property: String, value: [Float]) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: [Double]) -> Identify {
+    public func set(property: String, value: [Double]) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: [Int64]) -> Identify {
+    public func set(property: String, value: [Int64]) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: [String]) -> Identify {
+    public func set(property: String, value: [String]) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
-    func set(property: String, value: Any?) -> Identify {
+    public func set(property: String, value: Any?) -> Identify {
         setUserProperty(operation: .SET, property: property, value: value)
         return self
     }
 
     // $setOnce operation
-    func setOnce(property: String, value: Bool) -> Identify {
+    public func setOnce(property: String, value: Bool) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: Int) -> Identify {
+    public func setOnce(property: String, value: Int) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: Float) -> Identify {
+    public func setOnce(property: String, value: Float) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: Double) -> Identify {
+    public func setOnce(property: String, value: Double) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: Int64) -> Identify {
+    public func setOnce(property: String, value: Int64) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: String) -> Identify {
+    public func setOnce(property: String, value: String) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: [String: Any]) -> Identify {
+    public func setOnce(property: String, value: [String: Any]) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: [Any]) -> Identify {
+    public func setOnce(property: String, value: [Any]) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: [Bool]) -> Identify {
+    public func setOnce(property: String, value: [Bool]) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: [Int]) -> Identify {
+    public func setOnce(property: String, value: [Int]) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: [Float]) -> Identify {
+    public func setOnce(property: String, value: [Float]) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: [Double]) -> Identify {
+    public func setOnce(property: String, value: [Double]) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: [Int64]) -> Identify {
+    public func setOnce(property: String, value: [Int64]) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
-    func setOnce(property: String, value: [String]) -> Identify {
+    public func setOnce(property: String, value: [String]) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
     }
 
     // $prepend operation
-    func prepend(property: String, value: Bool) -> Identify {
+    public func prepend(property: String, value: Bool) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: Int) -> Identify {
+    public func prepend(property: String, value: Int) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: Float) -> Identify {
+    public func prepend(property: String, value: Float) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: Double) -> Identify {
+    public func prepend(property: String, value: Double) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: Int64) -> Identify {
+    public func prepend(property: String, value: Int64) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: String) -> Identify {
+    public func prepend(property: String, value: String) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: [String: Any]) -> Identify {
+    public func prepend(property: String, value: [String: Any]) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: [Any]) -> Identify {
+    public func prepend(property: String, value: [Any]) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: [Bool]) -> Identify {
+    public func prepend(property: String, value: [Bool]) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: [Int]) -> Identify {
+    public func prepend(property: String, value: [Int]) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: [Float]) -> Identify {
+    public func prepend(property: String, value: [Float]) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: [Double]) -> Identify {
+    public func prepend(property: String, value: [Double]) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: [Int64]) -> Identify {
+    public func prepend(property: String, value: [Int64]) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
-    func prepend(property: String, value: [String]) -> Identify {
+    public func prepend(property: String, value: [String]) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
 
     // $append operation
-    func append(property: String, value: Bool) -> Identify {
+    public func append(property: String, value: Bool) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: Int) -> Identify {
+    public func append(property: String, value: Int) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: Float) -> Identify {
+    public func append(property: String, value: Float) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: Double) -> Identify {
+    public func append(property: String, value: Double) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: Int64) -> Identify {
+    public func append(property: String, value: Int64) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: String) -> Identify {
+    public func append(property: String, value: String) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: [String: Any]) -> Identify {
+    public func append(property: String, value: [String: Any]) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: [Any]) -> Identify {
+    public func append(property: String, value: [Any]) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: [Bool]) -> Identify {
+    public func append(property: String, value: [Bool]) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: [Int]) -> Identify {
+    public func append(property: String, value: [Int]) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: [Float]) -> Identify {
+    public func append(property: String, value: [Float]) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: [Double]) -> Identify {
+    public func append(property: String, value: [Double]) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: [Int64]) -> Identify {
+    public func append(property: String, value: [Int64]) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
-    func append(property: String, value: [String]) -> Identify {
+    public func append(property: String, value: [String]) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
     }
 
     // $postInsert operation
-    func postInsert(property: String, value: Bool) -> Identify {
+    public func postInsert(property: String, value: Bool) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: Int) -> Identify {
+    public func postInsert(property: String, value: Int) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: Float) -> Identify {
+    public func postInsert(property: String, value: Float) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: Double) -> Identify {
+    public func postInsert(property: String, value: Double) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: Int64) -> Identify {
+    public func postInsert(property: String, value: Int64) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: String) -> Identify {
+    public func postInsert(property: String, value: String) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: [String: Any]) -> Identify {
+    public func postInsert(property: String, value: [String: Any]) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: [Any]) -> Identify {
+    public func postInsert(property: String, value: [Any]) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: [Bool]) -> Identify {
+    public func postInsert(property: String, value: [Bool]) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: [Int]) -> Identify {
+    public func postInsert(property: String, value: [Int]) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: [Float]) -> Identify {
+    public func postInsert(property: String, value: [Float]) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: [Double]) -> Identify {
+    public func postInsert(property: String, value: [Double]) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: [Int64]) -> Identify {
+    public func postInsert(property: String, value: [Int64]) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
-    func postInsert(property: String, value: [String]) -> Identify {
+    public func postInsert(property: String, value: [String]) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
 
     // $preInsert operation
-    func preInsert(property: String, value: Bool) -> Identify {
+    public func preInsert(property: String, value: Bool) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: Int) -> Identify {
+    public func preInsert(property: String, value: Int) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: Float) -> Identify {
+    public func preInsert(property: String, value: Float) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: Double) -> Identify {
+    public func preInsert(property: String, value: Double) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: Int64) -> Identify {
+    public func preInsert(property: String, value: Int64) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: String) -> Identify {
+    public func preInsert(property: String, value: String) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: [String: Any]) -> Identify {
+    public func preInsert(property: String, value: [String: Any]) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: [Any]) -> Identify {
+    public func preInsert(property: String, value: [Any]) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: [Bool]) -> Identify {
+    public func preInsert(property: String, value: [Bool]) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: [Int]) -> Identify {
+    public func preInsert(property: String, value: [Int]) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: [Float]) -> Identify {
+    public func preInsert(property: String, value: [Float]) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: [Double]) -> Identify {
+    public func preInsert(property: String, value: [Double]) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: [Int64]) -> Identify {
+    public func preInsert(property: String, value: [Int64]) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
-    func preInsert(property: String, value: [String]) -> Identify {
+    public func preInsert(property: String, value: [String]) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
     }
 
     // $remove operation
-    func remove(property: String, value: Bool) -> Identify {
+    public func remove(property: String, value: Bool) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: Int) -> Identify {
+    public func remove(property: String, value: Int) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: Float) -> Identify {
+    public func remove(property: String, value: Float) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: Double) -> Identify {
+    public func remove(property: String, value: Double) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: Int64) -> Identify {
+    public func remove(property: String, value: Int64) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: String) -> Identify {
+    public func remove(property: String, value: String) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: [String: Any]) -> Identify {
+    public func remove(property: String, value: [String: Any]) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: [Any]) -> Identify {
+    public func remove(property: String, value: [Any]) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: [Bool]) -> Identify {
+    public func remove(property: String, value: [Bool]) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: [Int]) -> Identify {
+    public func remove(property: String, value: [Int]) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: [Float]) -> Identify {
+    public func remove(property: String, value: [Float]) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: [Double]) -> Identify {
+    public func remove(property: String, value: [Double]) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: [Int64]) -> Identify {
+    public func remove(property: String, value: [Int64]) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
-    func remove(property: String, value: [String]) -> Identify {
+    public func remove(property: String, value: [String]) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
     }
 
     // $add operation
-    func add(property: String, value: Int) -> Identify {
+    public func add(property: String, value: Int) -> Identify {
         setUserProperty(operation: .ADD, property: property, value: value)
         return self
     }
 
-    func add(property: String, value: Float) -> Identify {
+    public func add(property: String, value: Float) -> Identify {
         setUserProperty(operation: .ADD, property: property, value: value)
         return self
     }
 
-    func add(property: String, value: Double) -> Identify {
+    public func add(property: String, value: Double) -> Identify {
         setUserProperty(operation: .ADD, property: property, value: value)
         return self
     }
 
-    func add(property: String, value: Int64) -> Identify {
+    public func add(property: String, value: Int64) -> Identify {
         setUserProperty(operation: .ADD, property: property, value: value)
         return self
     }
 
     // $unset operation
-    func unset(proprety: String) -> Identify {
+    public func unset(proprety: String) -> Identify {
         setUserProperty(operation: .UNSET, property: proprety, value: Identify.UNSET_VALUE)
         return self
     }
 
     // $clearAll operation
-    func clearAll() -> Identify {
+    public func clearAll() -> Identify {
         properties.removeAll()
         properties[Operation.UNSET.rawValue] = Identify.UNSET_VALUE
         return self
     }
 
     func setUserProperty(operation: Operation, property: String, value: Any?) {
-        if property.isEmpty {
+        guard !property.isEmpty else {
             logger.warn(
                 message:
                     "Attempting to perform operation \(operation.rawValue) with a null or empty string property, ignoring"
             )
             return
         }
-        if value == nil {
+        guard value != nil else {
             logger.warn(
                 message:
                     "Attempting to perform operation \(operation.rawValue) with null value for property \(property), ignoring"
             )
             return
         }
-        if properties[Operation.CLEAR_ALL.rawValue] != nil {
+        guard properties[Operation.CLEAR_ALL.rawValue] == nil else {
             logger.warn(
                 message:
                     "This Identify already contains a $clearAll operation, ignoring operation \(operation.rawValue)"
             )
             return
         }
-        if propertySet.contains(operation.rawValue) {
+        guard !propertySet.contains(operation.rawValue) else {
             logger.warn(
                 message:
                     "Already used property \(property) in previous operation, ignoring operation \(operation.rawValue)"
@@ -596,7 +598,8 @@ public class Identify {
             properties[operation.rawValue] = [String: Any]()
         }
         if var prop = properties[operation.rawValue] as? [String: Any] {
-            prop[property] = value
+            prop[property] = value!
+            properties[operation.rawValue] = prop  // need to assign back for nested dict
             propertySet.insert(property)
         }
     }

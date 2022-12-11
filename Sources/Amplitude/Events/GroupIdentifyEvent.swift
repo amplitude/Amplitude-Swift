@@ -19,7 +19,7 @@ public class GroupIdentifyEvent: BaseEvent {
     convenience init() {
         self.init(eventType: "$groupidentify")
     }
-    
+
     override func isValid() -> Bool {
         return groups != nil && groupProperties != nil
     }
