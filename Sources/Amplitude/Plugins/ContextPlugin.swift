@@ -167,11 +167,6 @@ class ContextPlugin: Plugin {
         if isValidDeviceId(deviceId) {
             return
         }
-        if amplitude?.configuration.useAdvertisingIdForDeviceId == true
-            && amplitude?.configuration.trackingOptions?.shouldTrackIDFA() == true
-        {
-            deviceId = NSUUID().uuidString  // TODO: feed idfa here
-        }
         if deviceId == nil {
             deviceId = staticContext["vendorID"] as? String
         }
