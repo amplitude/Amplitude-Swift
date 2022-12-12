@@ -34,7 +34,8 @@ class IDFACollectionPlugin: Plugin {
         let workingEvent = event
         // The idfa on simulator is always 00000000-0000-0000-0000-000000000000
         event?.idfa = idfa
-
+        // If you want to use idfa for the device_id
+        event?.deviceId = idfa
         return workingEvent
     }
 }
