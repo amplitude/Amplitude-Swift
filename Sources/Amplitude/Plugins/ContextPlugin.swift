@@ -55,7 +55,7 @@ class ContextPlugin: Plugin {
         let device = self.device
         staticContext["device_manufacturer"] = device.manufacturer
         staticContext["device_model"] = device.model
-        staticContext["vendorID"] = device.identifierForVendor
+        staticContext["idfv"] = device.identifierForVendor
         staticContext["os_name"] = device.os_name
         staticContext["os_version"] = device.os_version
         staticContext["platform"] = device.platform
@@ -138,12 +138,15 @@ class ContextPlugin: Plugin {
         if trackingOptions?.shouldTrackCountry() ?? false && event.ip != "$remote" {
             event.country = context["country"] as? String
         }
+        if trackingOptions?.shouldTrackIDFV() ?? false {
+            event.idfv = context["idfv"] as? String
+        }
         // TODO: get lat and lng from locationInfoBlock
-        /*if (trackingOptions?.shouldTrackLatLng() ?? false) && (self.amplitude.locationInfoBlock != nil)  {
-            let location = self.amplitude.locationInfoBlock();
-            event.locationLat = location.lat
-            event.locationLng = location.lng
-        }*/
+        if (trackingOptions?.shouldTrackLatLng() ?? false) && (self.amplitude?.locationInfoBlock != nil)  {
+            let location = self.amplitude?.locationInfoBlock!()
+            event.locationLat = location?.lat
+            event.locationLng = location?.lng
+        }
         if trackingOptions?.shouldTrackLanguage() ?? false {
             event.language = context["language"] as? String
         }

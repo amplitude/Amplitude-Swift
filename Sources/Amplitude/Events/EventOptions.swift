@@ -8,43 +8,43 @@
 import Foundation
 
 public class EventOptions {
-    var userId: String?
-    var deviceId: String?
-    var timestamp: Int64?
-    var eventId: Int64?
-    var sessionId: Int64? = -1
-    var insertId: String?
-    var locationLat: Double?
-    var locationLng: Double?
-    var appVersion: String?
-    var versionName: String?
-    var platform: String?
-    var osName: String?
-    var osVersion: String?
-    var deviceBrand: String?
-    var deviceManufacturer: String?
-    var deviceModel: String?
-    var carrier: String?
-    var country: String?
-    var region: String?
-    var city: String?
-    var dma: String?
-    var idfa: String?
-    var idfv: String?
-    var adid: String?
-    var language: String?
-    var library: String?
-    var ip: String?
-    var plan: Plan?
-    var ingestionMetadata: IngestionMetadata?
-    var revenue: Double?
-    var price: Double?
-    var quantity: Int?
-    var productId: String?
-    var revenueType: String?
-    var extra: [String: Any]?
-    var callback: EventCallback?
-    var partnerId: String?
+    public var userId: String?
+    public var deviceId: String?
+    public var timestamp: Int64?
+    public var eventId: Int64?
+    public var sessionId: Int64? = -1
+    public var insertId: String?
+    public var locationLat: Double?
+    public var locationLng: Double?
+    public var appVersion: String?
+    public var versionName: String?
+    public var platform: String?
+    public var osName: String?
+    public var osVersion: String?
+    public var deviceBrand: String?
+    public var deviceManufacturer: String?
+    public var deviceModel: String?
+    public var carrier: String?
+    public var country: String?
+    public var region: String?
+    public var city: String?
+    public var dma: String?
+    public var idfa: String?
+    public var idfv: String?
+    public var adid: String?
+    public var language: String?
+    public var library: String?
+    public var ip: String?
+    public var plan: Plan?
+    public var ingestionMetadata: IngestionMetadata?
+    public var revenue: Double?
+    public var price: Double?
+    public var quantity: Int?
+    public var productId: String?
+    public var revenueType: String?
+    public var extra: [String: Any]?
+    public var callback: EventCallback?
+    public var partnerId: String?
     internal var attempts: Int
 
     init(

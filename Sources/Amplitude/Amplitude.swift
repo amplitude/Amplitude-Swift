@@ -5,8 +5,19 @@ public class Amplitude {
     var instanceName: String
     var _inForeground = false
     internal var _sessionId: Int64 = -1
+
     var state: State = State()
     var contextPlugin: ContextPlugin
+
+    /**
+     Sets a block to be called when location (latitude, longitude) information can be passed into an event.
+
+     let locationInfo = LocationInfo(lat: 37.7, lng: 122.4)
+     Amplitude.testInstance.locationInfoBlock = {
+         return locationInfo
+     }
+     */
+    public var locationInfoBlock : LocationInfoBlock? = nil
 
     lazy var storage: any Storage = {
         return self.configuration.storageProvider

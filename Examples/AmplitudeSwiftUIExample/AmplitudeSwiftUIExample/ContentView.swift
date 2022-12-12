@@ -6,6 +6,7 @@
 //
 
 import Amplitude_Swift
+import AppTrackingTransparency
 import CoreData
 import SwiftUI
 
@@ -13,6 +14,7 @@ let amplitudeColor = Color(red: 0.16, green: 0.46, blue: 0.87)
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
+
     @State var userId: String = ""
     // TODO: get current deviceId
     @State var deviceId: String = "xxx-xxx-xxx"
@@ -44,7 +46,7 @@ struct ContentView: View {
                             TextField("UserId", text: $userId)
                             Button(action: {
                                 print("Set UserId")
-                                _ = Amplitude.testInstance.setUserId(userId: userId)
+                                Amplitude.testInstance.setUserId(userId: userId)
                             }) {
                                 Text("Set UserId")
                             }.buttonStyle(AmplitudeButton())
@@ -53,7 +55,7 @@ struct ContentView: View {
                             TextField("DeviceId", text: $deviceId)
                             Button(action: {
                                 print("Set DeviceId")
-                                _ = Amplitude.testInstance.setDeviceId(deviceId: deviceId)
+                                Amplitude.testInstance.setDeviceId(deviceId: deviceId)
                             }) {
                                 Text("Reset DeviceId")
                             }.buttonStyle(AmplitudeButton())
@@ -65,10 +67,11 @@ struct ContentView: View {
                             TextField("Event Name", text: $eventType)
                             Button(action: {
                                 print("Send event")
-                                _ = Amplitude.testInstance.track(eventType: eventType)
+                                Amplitude.testInstance.track(eventType: eventType)
                             }) {
                                 Text("Send Event")
                             }.buttonStyle(AmplitudeButton())
+
                         }
                     }
                     Section(header: Text("REVENUE EVENT")) {
@@ -81,7 +84,7 @@ struct ContentView: View {
                             revenue.price = price
                             revenue.quantity = quantity
                             revenue.productId = productId
-                            _ = Amplitude.testInstance.revenue(revenue: revenue)
+                            Amplitude.testInstance.revenue(revenue: revenue)
                         }) {
                             Text("Send Revenue Event")
                         }.buttonStyle(AmplitudeButton())
@@ -94,8 +97,8 @@ struct ContentView: View {
                         Button(action: {
                             print("Send identify event")
                             let identify = Identify()
-                            _ = identify.set(property: userPropertyKey, value: userPropertyValue)
-                            _ = Amplitude.testInstance.identify(identify: identify)
+                            identify.set(property: userPropertyKey, value: userPropertyValue)
+                            Amplitude.testInstance.identify(identify: identify)
                         }) {
                             Text("Send Identify Event")
                         }.buttonStyle(AmplitudeButton())
@@ -112,14 +115,14 @@ struct ContentView: View {
                         Button(action: {
                             print("Send groupIdentify event")
                             let groupIdentify = Identify()
-                            _ = groupIdentify.set(property: groupUserPropertyKey, value: groupUserPropertyValue)
-                            _ = Amplitude.testInstance.groupIdentify(groupType: groupType, groupName: groupProperty, identify: groupIdentify)
+                            groupIdentify.set(property: groupUserPropertyKey, value: groupUserPropertyValue)
+                            Amplitude.testInstance.groupIdentify(groupType: groupType, groupName: groupProperty, identify: groupIdentify)
                         }) {
                             Text("Send Group Identify Event")
                         }.buttonStyle(AmplitudeButton())
                     }
                     Button(action: {
-                        _ = Amplitude.testInstance.flush()
+                        Amplitude.testInstance.flush()
                     }) {
                         Text("Flush All Events")
                             .frame(maxWidth: .infinity)
