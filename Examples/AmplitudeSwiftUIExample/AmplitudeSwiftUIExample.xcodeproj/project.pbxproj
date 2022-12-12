@@ -14,6 +14,7 @@
 		19C9CC1F2937F5A600C1E660 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19C9CC1E2937F5A600C1E660 /* Persistence.swift */; };
 		19C9CC222937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 19C9CC202937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodeld */; };
 		19C9CC2D2937F5D000C1E660 /* Amplitude-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 19C9CC2C2937F5D000C1E660 /* Amplitude-Swift */; };
+		3A4E19BD2941D885002EA8BC /* IDFACollectionPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4E19BC2941D86E002EA8BC /* IDFACollectionPlugin.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		19C9CC212937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = AmplitudeSwiftUIExample.xcdatamodel; sourceTree = "<group>"; };
 		19C9CC292937F5B200C1E660 /* Amplitude-Swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "Amplitude-Swift"; path = ../..; sourceTree = "<group>"; };
 		19C9CC2A2937F5C900C1E660 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		3A4E19BC2941D86E002EA8BC /* IDFACollectionPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDFACollectionPlugin.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +63,7 @@
 		19C9CC142937F5A400C1E660 /* AmplitudeSwiftUIExample */ = {
 			isa = PBXGroup;
 			children = (
+				3A4E19BB2941D86E002EA8BC /* ExamplePlugins */,
 				19C9CC2A2937F5C900C1E660 /* Info.plist */,
 				19C9CC152937F5A400C1E660 /* AmplitudeSwiftUIExampleApp.swift */,
 				19C9CC172937F5A400C1E660 /* ContentView.swift */,
@@ -93,6 +96,14 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3A4E19BB2941D86E002EA8BC /* ExamplePlugins */ = {
+			isa = PBXGroup;
+			children = (
+				3A4E19BC2941D86E002EA8BC /* IDFACollectionPlugin.swift */,
+			);
+			path = ExamplePlugins;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -172,6 +183,7 @@
 				19C9CC1F2937F5A600C1E660 /* Persistence.swift in Sources */,
 				19C9CC182937F5A400C1E660 /* ContentView.swift in Sources */,
 				19C9CC162937F5A400C1E660 /* AmplitudeSwiftUIExampleApp.swift in Sources */,
+				3A4E19BD2941D885002EA8BC /* IDFACollectionPlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
