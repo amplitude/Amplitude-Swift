@@ -76,6 +76,7 @@ public class Revenue {
 
     public var properties: [String: Any?]?
 
+    @discardableResult
     public func setReceipt(receipt: String, receiptSignature: String) -> Revenue {
         self.receipt = receipt
         self.receiptSig = receiptSignature
@@ -97,7 +98,7 @@ public class Revenue {
             eventProperties[Property.REVENUE_PRICE.rawValue] = price
         }
         if revenueType != nil {
-            eventProperties[Property.REVENUE_TYPE.rawValue] = price
+            eventProperties[Property.REVENUE_TYPE.rawValue] = revenueType
         }
         if receipt != nil {
             eventProperties[Property.REVENUE_RECEIPT.rawValue] = receipt

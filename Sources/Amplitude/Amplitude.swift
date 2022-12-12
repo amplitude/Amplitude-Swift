@@ -58,6 +58,7 @@ public class Amplitude {
         return self
     }
 
+    @discardableResult
     public func track(eventType: String, eventProperties: [String: Any]? = nil, options: EventOptions? = nil)
         -> Amplitude
     {
@@ -70,15 +71,18 @@ public class Amplitude {
         return self
     }
 
+    @discardableResult
     @available(*, deprecated, message: "use 'track' instead")
     public func logEvent(event: BaseEvent) -> Amplitude {
         return track(event: event)
     }
 
+    @discardableResult
     public func identify(userProperties: [String: Any]?, options: EventOptions? = nil) -> Amplitude {
         return identify(identify: convertPropertiesToIdentify(userProperties: userProperties), options: options)
     }
 
+    @discardableResult
     public func identify(identify: Identify, options: EventOptions? = nil) -> Amplitude {
         let event = IdentifyEvent()
         event.userProperties = identify.properties as [String: Any]
@@ -103,6 +107,7 @@ public class Amplitude {
         return identify
     }
 
+    @discardableResult
     public func groupIdentify(
         groupType: String,
         groupName: String,
@@ -117,6 +122,7 @@ public class Amplitude {
         )
     }
 
+    @discardableResult
     public func groupIdentify(
         groupType: String,
         groupName: String,
@@ -135,6 +141,7 @@ public class Amplitude {
         return self
     }
 
+    @discardableResult
     public func setGroup(
         groupType: String,
         groupName: String,
@@ -146,6 +153,7 @@ public class Amplitude {
         return self
     }
 
+    @discardableResult
     public func setGroup(
         groupType: String,
         groupName: [String],
@@ -157,11 +165,13 @@ public class Amplitude {
         return self
     }
 
+    @discardableResult
     @available(*, deprecated, message: "use 'revenue' instead")
     public func logRevenue() -> Amplitude {
         return self
     }
 
+    @discardableResult
     public func revenue(
         revenue: Revenue,
         options: EventOptions? = nil
@@ -179,6 +189,7 @@ public class Amplitude {
         return self
     }
 
+    @discardableResult
     public func revenue(event: RevenueEvent) -> Amplitude {
         process(event: event)
         return self
@@ -191,11 +202,13 @@ public class Amplitude {
         return self
     }
 
+    @discardableResult
     public func remove(plugin: Plugin) -> Amplitude {
         timeline.remove(plugin: plugin)
         return self
     }
 
+    @discardableResult
     public func flush() -> Amplitude {
         timeline.apply { plugin in
             if let _plugin = plugin as? EventPlugin {
@@ -205,24 +218,28 @@ public class Amplitude {
         return self
     }
 
+    @discardableResult
     public func setUserId(userId: String?) -> Amplitude {
         try? storage.write(key: .USER_ID, value: userId)
         state.userId = userId
         return self
     }
 
+    @discardableResult
     public func setDeviceId(deviceId: String?) -> Amplitude {
         try? storage.write(key: .DEVICE_ID, value: deviceId)
         state.deviceId = deviceId
         return self
     }
 
+    @discardableResult
     public func setSessionId(sessionId: Int64) -> Amplitude {
         _sessionId = sessionId
         _ = try? self.storage.write(key: .PREVIOUS_SESSION_ID, value: sessionId)
         return self
     }
 
+    @discardableResult
     func reset() -> Amplitude {
         _ = setUserId(userId: nil)
         _ = setDeviceId(deviceId: nil)
