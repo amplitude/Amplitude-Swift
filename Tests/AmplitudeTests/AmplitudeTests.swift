@@ -5,12 +5,14 @@ import XCTest
 final class AmplitudeTests: XCTestCase {
     private var storage: FakePersistentStorage!
     private var configuration: Configuration!
+    private var configurationWithFakeStorage: Configuration!
 
     override func setUp() {
         super.setUp()
         let apiKey = "testApiKey"
         storage = FakePersistentStorage(apiKey: apiKey)
-        configuration = Configuration(
+        configuration = Configuration(apiKey: apiKey)
+        configurationWithFakeStorage = Configuration(
             apiKey: apiKey,
             storageProvider: storage
         )
@@ -24,7 +26,7 @@ final class AmplitudeTests: XCTestCase {
     }
 
     func testInitContextPlugin_setsDeviceId() {
-        let amplitude = Amplitude(configuration: configuration)
+        let amplitude = Amplitude(configuration: configurationWithFakeStorage)
         XCTAssertEqual(amplitude.state.deviceId != nil, true)
         let deviceIdUuid = amplitude.state.deviceId!
         XCTAssertEqual(storage.haveBeenCalledWith, ["write(key: \(StorageKey.DEVICE_ID.rawValue), \(deviceIdUuid))"])
@@ -86,7 +88,7 @@ final class AmplitudeTests: XCTestCase {
     }
 
     func testSetUserId() {
-        let amplitude = Amplitude(configuration: configuration)
+        let amplitude = Amplitude(configuration: configurationWithFakeStorage)
         XCTAssertEqual(amplitude.state.userId, nil)
 
         amplitude.setUserId(userId: "test-user")
@@ -95,7 +97,7 @@ final class AmplitudeTests: XCTestCase {
     }
 
     func testSetDeviceId() {
-        let amplitude = Amplitude(configuration: configuration)
+        let amplitude = Amplitude(configuration: configurationWithFakeStorage)
         // init deviceId is set by ContextPlugin
         XCTAssertEqual(amplitude.state.deviceId != nil, true)
 
