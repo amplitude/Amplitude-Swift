@@ -59,6 +59,8 @@ public enum StorageKey: String, CaseIterable {
     case LAST_EVENT_TIME = "last_event_time"
     case OPT_OUT = "opt_out"
     case EVENTS = "events"
+    case USER_ID = "user_id"
+    case DEVICE_ID = "device_id"
 }
 
 public protocol Logger {

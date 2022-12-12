@@ -15,4 +15,8 @@ public class RevenueEvent: BaseEvent {
         set {
         }
     }
+
+    convenience init() {
+        self.init(eventType: "revenue_amount")
+    }
 }

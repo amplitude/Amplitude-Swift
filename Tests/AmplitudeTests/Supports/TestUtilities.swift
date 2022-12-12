@@ -177,4 +177,8 @@ class FakePersistentStorage: PersistentStorage {
     override func remove(eventBlock: EventBlock) {
         haveBeenCalledWith.append("remove(eventBlock: \(eventBlock.absoluteURL))")
     }
+
+    override func write(key: StorageKey, value: Any?) throws {
+        haveBeenCalledWith.append("write(key: \(key.rawValue), \(String(describing: value!)))")
+    }
 }

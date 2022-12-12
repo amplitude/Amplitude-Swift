@@ -3,18 +3,33 @@ import XCTest
 @testable import Amplitude_Swift
 
 final class AmplitudeTests: XCTestCase {
+    private var storage: FakePersistentStorage!
     private var configuration: Configuration!
+    private var configurationWithFakeStorage: Configuration!
 
     override func setUp() {
         super.setUp()
-        configuration = Configuration(apiKey: "testApiKey")
+        let apiKey = "testApiKey"
+        storage = FakePersistentStorage(apiKey: apiKey)
+        configuration = Configuration(apiKey: apiKey)
+        configurationWithFakeStorage = Configuration(
+            apiKey: apiKey,
+            storageProvider: storage
+        )
     }
 
-    func testAmplitudeInit() {
+    func testInit() {
         XCTAssertEqual(
             Amplitude(configuration: configuration).instanceName,
             Constants.Configuration.DEFAULT_INSTANCE
         )
+    }
+
+    func testInitContextPlugin_setsDeviceId() {
+        let amplitude = Amplitude(configuration: configurationWithFakeStorage)
+        XCTAssertEqual(amplitude.state.deviceId != nil, true)
+        let deviceIdUuid = amplitude.state.deviceId!
+        XCTAssertEqual(storage.haveBeenCalledWith, ["write(key: \(StorageKey.DEVICE_ID.rawValue), \(deviceIdUuid))"])
     }
 
     func testContext() {
@@ -79,5 +94,24 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(sessionEndEvent?.eventType, Constants.AMP_SESSION_END_EVENT)
         XCTAssertEqual(sessionEndEvent?.sessionId, previousSessionTimestamp)
         XCTAssertNotNil(sessionEndEvent?.eventId)
+    }
+
+    func testSetUserId() {
+        let amplitude = Amplitude(configuration: configurationWithFakeStorage)
+        XCTAssertEqual(amplitude.state.userId, nil)
+
+        amplitude.setUserId(userId: "test-user")
+        XCTAssertEqual(amplitude.state.userId, "test-user")
+        XCTAssertEqual(storage.haveBeenCalledWith[1], "write(key: \(StorageKey.USER_ID.rawValue), test-user)")
+    }
+
+    func testSetDeviceId() {
+        let amplitude = Amplitude(configuration: configurationWithFakeStorage)
+        // init deviceId is set by ContextPlugin
+        XCTAssertEqual(amplitude.state.deviceId != nil, true)
+
+        amplitude.setDeviceId(deviceId: "test-device")
+        XCTAssertEqual(amplitude.state.deviceId, "test-device")
+        XCTAssertEqual(storage.haveBeenCalledWith[1], "write(key: \(StorageKey.DEVICE_ID.rawValue), test-device)")
     }
 }

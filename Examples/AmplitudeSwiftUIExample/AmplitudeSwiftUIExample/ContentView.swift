@@ -16,7 +16,6 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @State var userId: String = ""
-    // TODO: get current deviceId
     @State var deviceId: String = "xxx-xxx-xxx"
     @State var eventType: String = ""
     @State var productId: String = ""
@@ -46,7 +45,7 @@ struct ContentView: View {
                             TextField("UserId", text: $userId)
                             Button(action: {
                                 print("Set UserId")
-                                _ = Amplitude.testInstance.setUserId(userId: userId)
+                                Amplitude.testInstance.setUserId(userId: userId)
                             }) {
                                 Text("Set UserId")
                             }.buttonStyle(AmplitudeButton())
@@ -54,7 +53,8 @@ struct ContentView: View {
                         HStack {
                             TextField("DeviceId", text: $deviceId)
                             Button(action: {
-                                _ = Amplitude.testInstance.setDeviceId(deviceId: deviceId)
+                                print("Set DeviceId")
+                                Amplitude.testInstance.setDeviceId(deviceId: deviceId)
                             }) {
                                 Text("Reset DeviceId")
                             }.buttonStyle(AmplitudeButton())
@@ -65,9 +65,8 @@ struct ContentView: View {
                         HStack {
                             TextField("Event Name", text: $eventType)
                             Button(action: {
-                                print("Log event.")
-                                let event = BaseEvent(eventType: eventType)
-                                _ = Amplitude.testInstance.track(event: event)
+                                print("Send event")
+                                Amplitude.testInstance.track(eventType: eventType)
                             }) {
                                 Text("Send Event")
                             }.buttonStyle(AmplitudeButton())
@@ -79,7 +78,12 @@ struct ContentView: View {
                         TextField("Price", value: $price, formatter: decimalFormatter())
                         TextField("Quantity", value: $quantity, formatter: NumberFormatter())
                         Button(action: {
-                            // TODO: trigger revenue event
+                            print("Send revenue event")
+                            let revenue = Revenue()
+                            revenue.price = price
+                            revenue.quantity = quantity
+                            revenue.productId = productId
+                            Amplitude.testInstance.revenue(revenue: revenue)
                         }) {
                             Text("Send Revenue Event")
                         }.buttonStyle(AmplitudeButton())
@@ -90,7 +94,10 @@ struct ContentView: View {
                             TextField("User Property Value", text: $userPropertyValue)
                         }
                         Button(action: {
-                            // TODO: trigger identify event
+                            print("Send identify event")
+                            let identify = Identify()
+                            identify.set(property: userPropertyKey, value: userPropertyValue)
+                            Amplitude.testInstance.identify(identify: identify)
                         }) {
                             Text("Send Identify Event")
                         }.buttonStyle(AmplitudeButton())
@@ -105,13 +112,16 @@ struct ContentView: View {
                             TextField("User Property Value", text: $groupUserPropertyValue)
                         }
                         Button(action: {
-                            // TODO: trigger group identify event
+                            print("Send groupIdentify event")
+                            let groupIdentify = Identify()
+                            groupIdentify.set(property: groupUserPropertyKey, value: groupUserPropertyValue)
+                            Amplitude.testInstance.groupIdentify(groupType: groupType, groupName: groupProperty, identify: groupIdentify)
                         }) {
                             Text("Send Group Identify Event")
                         }.buttonStyle(AmplitudeButton())
                     }
                     Button(action: {
-                        _ = Amplitude.testInstance.flush()
+                        Amplitude.testInstance.flush()
                     }) {
                         Text("Flush All Events")
                             .frame(maxWidth: .infinity)

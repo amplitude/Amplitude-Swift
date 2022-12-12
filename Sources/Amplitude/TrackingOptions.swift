@@ -111,15 +111,6 @@ public class TrackingOptions {
         return self
     }
 
-    public func shouldTrackIDFA() -> Bool {
-        return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_IDFA)
-    }
-
-    public func disableTrackIDFA() -> TrackingOptions {
-        disabledFields.insert(Constants.AMP_TRACKING_OPTION_IDFA)
-        return self
-    }
-
     public func shouldTrackIDFV() -> Bool {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_IDFV)
     }

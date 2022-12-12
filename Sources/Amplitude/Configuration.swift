@@ -25,7 +25,6 @@ public class Configuration {
     var serverUrl: String?
     var plan: Plan?
     var ingestionMetadata: IngestionMetadata?
-    var useAdvertisingIdForDeviceId: Bool?
     var trackingOptions: TrackingOptions?
     var enableCoppaControl: Bool?
     var flushEventsOnClose: Bool?
@@ -50,7 +49,6 @@ public class Configuration {
         serverUrl: String = Constants.DEFAULT_API_HOST,
         plan: Plan? = nil,
         ingestionMetadata: IngestionMetadata? = nil,
-        useAdvertisingIdForDeviceId: Bool = false,
         trackingOptions: TrackingOptions = TrackingOptions(),
         enableCoppaControl: Bool = false,
         flushEventsOnClose: Bool = true,
@@ -75,7 +73,6 @@ public class Configuration {
         self.serverUrl = serverUrl
         self.plan = plan
         self.ingestionMetadata = ingestionMetadata
-        self.useAdvertisingIdForDeviceId = useAdvertisingIdForDeviceId
         self.trackingOptions = trackingOptions
         self.enableCoppaControl = enableCoppaControl
         self.flushEventsOnClose = flushEventsOnClose

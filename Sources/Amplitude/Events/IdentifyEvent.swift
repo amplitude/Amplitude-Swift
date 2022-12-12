@@ -15,4 +15,8 @@ public class IdentifyEvent: BaseEvent {
         set {
         }
     }
+
+    convenience init() {
+        self.init(eventType: "$identify")
+    }
 }

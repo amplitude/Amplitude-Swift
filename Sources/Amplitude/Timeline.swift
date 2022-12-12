@@ -32,7 +32,7 @@ public class Timeline {
     func process(event: BaseEvent) {
         let eventTimeStamp = event.timestamp!
         var skipEvent: Bool = false
-        var sessionEvents: [BaseEvent]? = nil
+        var sessionEvents: [BaseEvent]?
 
         if event.eventType == Constants.AMP_SESSION_START_EVENT {
             if event.sessionId! < 0 {
