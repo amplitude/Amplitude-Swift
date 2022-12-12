@@ -16,7 +16,6 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @State var userId: String = ""
-    // TODO: get current deviceId
     @State var deviceId: String = "xxx-xxx-xxx"
     @State var eventType: String = ""
     @State var productId: String = ""

@@ -63,9 +63,16 @@ struct AmplitudeSwiftUIExampleApp: App {
 }
 
 extension Amplitude {
-    static var testInstance = Amplitude(configuration: Configuration(apiKey: "82b148f7211db7f9ccaff8048d0f7192",
-                                                                     logLevel: LogLevelEnum.DEBUG,
-                                                                     trackingOptions: TrackingOptions().disableCarrier().disableTrackDMA(),
-                                                                     flushEventsOnClose: true,
-                                                                     minTimeBetweenSessionsMillis: 100000))
+    static var testInstance = Amplitude(
+        configuration: Configuration(
+            apiKey: "TEST-API-KEY",
+            logLevel: LogLevelEnum.DEBUG,
+            callback: { (event: BaseEvent, code: Int, message: String) -> Void in
+                print("eventcallback: \(event), code: \(code), message: \(message)")
+            },
+            trackingOptions: TrackingOptions().disableCarrier().disableTrackDMA(),
+            flushEventsOnClose: true,
+            minTimeBetweenSessionsMillis: 15000
+        )
+    )
 }

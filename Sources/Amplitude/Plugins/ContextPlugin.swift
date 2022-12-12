@@ -141,7 +141,6 @@ class ContextPlugin: Plugin {
         if trackingOptions?.shouldTrackIDFV() ?? false {
             event.idfv = context["idfv"] as? String
         }
-        // TODO: get lat and lng from locationInfoBlock
         if (trackingOptions?.shouldTrackLatLng() ?? false) && (self.amplitude?.locationInfoBlock != nil)  {
             let location = self.amplitude?.locationInfoBlock!()
             event.locationLat = location?.lat
@@ -171,7 +170,7 @@ class ContextPlugin: Plugin {
             return
         }
         if deviceId == nil {
-            deviceId = staticContext["vendorID"] as? String
+            deviceId = staticContext["idfv"] as? String
         }
         if deviceId == nil {
             deviceId = NSUUID().uuidString
