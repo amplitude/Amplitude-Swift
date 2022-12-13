@@ -11,7 +11,7 @@ on:
 jobs:
   authorize:
     name: Authorize
-    runs-on: macos-latest
+    runs-on: macos-12
     steps:
       - name: ${{ github.actor }} permission check to do a release
         uses: octokit/request-action@v2.0.0
@@ -23,7 +23,7 @@ jobs:
 
   release:
     name: Release
-    runs-on: macos-latest
+    runs-on: macos-12
     needs: [authorize]
     env:
       SWIFT_DOC_VERSION: '1.0.0-rc.1'
