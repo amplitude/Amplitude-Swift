@@ -33,8 +33,6 @@ jobs:
       - name: Set Xcode 14
         run: |
           sudo xcode-select -switch /Applications/Xcode_14.1.app
-      - name: Carthage Bootstrap
-        run: carthage bootstrap --use-xcframeworks
       - name: iOS Tests
         run: |
           xcodebuild test \
