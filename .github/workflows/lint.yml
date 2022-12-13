@@ -16,4 +16,4 @@ jobs:
         run: |
           sudo xcode-select -switch /Applications/Xcode_14.1.app
       - name: Lint
-        run: swiftlint
+        run: swiftlint --strict # force to fix warnings too
