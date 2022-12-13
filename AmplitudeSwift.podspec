@@ -13,19 +13,15 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target  = '13.0'
   s.ios.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
-  s.ios.resources          = 'Sources/Resources/*.{der}'
 
   s.tvos.deployment_target = '13.0'
   s.tvos.source_files      = 'Sources/Amplitude/**/*.{h,swift}'
-  s.tvos.resources         = 'Sources/Resources/*.{der}'
 
   s.osx.deployment_target  = '10.15'
   s.osx.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
-  s.osx.resources          = 'Sources/Resources/*.{der}'
 
   s.watchos.deployment_target  = '7.0'
   s.watchos.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
-  s.watchos.resources          = 'Sources/Resources/*.{der}'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
 end
