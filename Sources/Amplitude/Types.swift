@@ -32,7 +32,6 @@ public struct LocationInfo {
 
 public typealias LocationInfoBlock = () -> LocationInfo
 
-
 // Swift 5.7 supports any existential type.
 // The type of EventBlock has to be determined pre-runtime.
 // It cannot be dynamically associated with this protocol.

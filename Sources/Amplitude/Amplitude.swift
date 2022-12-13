@@ -17,7 +17,7 @@ public class Amplitude {
          return locationInfo
      }
      */
-    public var locationInfoBlock : LocationInfoBlock? = nil
+    public var locationInfoBlock: LocationInfoBlock?
 
     lazy var storage: any Storage = {
         return self.configuration.storageProvider

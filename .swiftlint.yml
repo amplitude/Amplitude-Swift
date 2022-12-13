@@ -6,10 +6,10 @@ disabled_rules:
   - trailing_comma
   - opening_brace
   - todo
+  - cyclomatic_complexity
 identifier_name:
   allowed_symbols: "_"
   min_length: 1
-cyclomatic_complexity: 25
 nesting:
   type_level:
     warning: 3
