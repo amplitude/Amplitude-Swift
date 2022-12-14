@@ -34,26 +34,26 @@ jobs:
       - name: iOS Tests
         run: |
           xcodebuild test \
-            -scheme Amplitude-Swift \
+            -scheme Amplitude-Swift-Package \
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,name=iPhone 14'
       - name: macOS Tests
         run: |
           xcodebuild test \
-            -scheme Amplitude-Swift \
+            -scheme Amplitude-Swift-Package \
             -sdk macosx \
             -destination 'platform=macosx'
       - name: tvOS Tests
         run: |
           xcodebuild \
-            -scheme Amplitude-Swift \
+            -scheme Amplitude-Swift-Package \
             -sdk appletvsimulator \
             -destination 'platform=tvOS Simulator,name=Apple TV' \
             test
       - name: watchOS Tests
         run: |
           xcodebuild \
-            -scheme Amplitude-Swift \
+            -scheme Amplitude-Swift-Package \
             -sdk watchsimulator \
             -destination 'platform=watchOS Simulator,name=Apple Watch Series 8 (41mm)' \
             test
