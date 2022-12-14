@@ -20,8 +20,10 @@ Pod::Spec.new do |s|
   s.osx.deployment_target  = '10.15'
   s.osx.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
 
-  s.watchos.deployment_target  = '7.0'
-  s.watchos.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
+  # temporary disable watchos support due to: https://github.com/CocoaPods/CocoaPods/issues/11558
+  # unpaired watchos will cause failure, the fix of the above issue is merged but not released
+  # s.watchos.deployment_target  = '7.0'
+  # s.watchos.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
 end
