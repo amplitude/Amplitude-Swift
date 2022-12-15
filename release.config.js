@@ -34,8 +34,8 @@ module.exports = {
           },
           {
             "files": ["Sources/Amplitude/Constants.swift"],
-            "from": "SDK_VERSION = @\".*\"",
-            "to": "SDK_VERSION = @\"${nextRelease.version}\"",
+            "from": "SDK_VERSION = \".*\"",
+            "to": "SDK_VERSION = \"${nextRelease.version}\"",
             "results": [
               {
                 "file": "Sources/Amplitude/Constants.swift",
