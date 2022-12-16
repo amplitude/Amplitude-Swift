@@ -5,6 +5,7 @@
 //  Created by Alyssa.Yu on 12/7/22.
 //
 
+// This plugin example currently supports iOS 14+ only.
 // NOTE: You can see this plugin in use in the AmplitudeSwiftUIExample application.
 //
 // This plugin is NOT SUPPORTED by Amplitude.  It is here merely as an example,

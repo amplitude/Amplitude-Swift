@@ -5,6 +5,9 @@
 //  Created by Marvin Liu on 10/28/22.
 //
 
+#if os(iOS)
+import CoreTelephony
+#endif
 import Foundation
 
 class ContextPlugin: Plugin {
@@ -63,14 +66,18 @@ class ContextPlugin: Plugin {
             staticContext["language"] = Locale.preferredLanguages[0]
         }
 
-        // TODO: need to add logic for multi carrier
-        /* let networkInfo = NSClassFromString("CTTelephonyNetworkInfo")
-        if networkInfo != nil {
-            let subscriberCellularProvider = NSSelectorFromString("subscriberCellularProvider")
-            let carrier = networkInfo?.method(for: subscriberCellularProvider) ?? "unknown"
-            staticContext["carrier"] = carrier
+        var carrier = "Unknown"
+        #if os(iOS)
+        let networkInfo = CTTelephonyNetworkInfo()
+        if let providers = networkInfo.serviceSubscriberCellularProviders {
+            for (_, provider) in providers where provider.mobileNetworkCode != nil {
+                carrier = provider.carrierName ?? carrier
+                // As long as we get one carrier information, we break.
+                break
+            }
         }
-        */
+        #endif
+        staticContext["carrier"] = carrier
 
         if Locale.preferredLanguages.count > 0 {
             staticContext["country"] = Locale.current.regionCode
@@ -141,7 +148,7 @@ class ContextPlugin: Plugin {
         if trackingOptions?.shouldTrackIDFV() ?? false {
             event.idfv = context["idfv"] as? String
         }
-        if (trackingOptions?.shouldTrackLatLng() ?? false) && (self.amplitude?.locationInfoBlock != nil)  {
+        if (trackingOptions?.shouldTrackLatLng() ?? false) && (self.amplitude?.locationInfoBlock != nil) {
             let location = self.amplitude?.locationInfoBlock!()
             event.locationLat = location?.lat
             event.locationLng = location?.lng
