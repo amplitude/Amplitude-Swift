@@ -5,7 +5,9 @@
 //  Created by Marvin Liu on 10/28/22.
 //
 
+#if os(iOS)
 import CoreTelephony
+#endif
 import Foundation
 
 class ContextPlugin: Plugin {
@@ -64,8 +66,9 @@ class ContextPlugin: Plugin {
             staticContext["language"] = Locale.preferredLanguages[0]
         }
 
-        let networkInfo = CTTelephonyNetworkInfo()
         var carrier = "Unknown"
+        #if os(iOS)
+        let networkInfo = CTTelephonyNetworkInfo()
         if let providers = networkInfo.serviceSubscriberCellularProviders {
             for (key, provider) in providers {
                 if provider.mobileNetworkCode != nil {
@@ -75,6 +78,7 @@ class ContextPlugin: Plugin {
                 }
             }
         }
+        #endif
         staticContext["carrier"] = carrier
 
         if Locale.preferredLanguages.count > 0 {
