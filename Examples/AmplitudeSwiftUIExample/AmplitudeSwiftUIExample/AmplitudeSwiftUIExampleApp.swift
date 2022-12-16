@@ -70,7 +70,7 @@ extension Amplitude {
             callback: { (event: BaseEvent, code: Int, message: String) -> Void in
                 print("eventcallback: \(event), code: \(code), message: \(message)")
             },
-            trackingOptions: TrackingOptions().disableTrackDMA(),
+            trackingOptions: TrackingOptions().disableCarrier().disableTrackDMA(),
             flushEventsOnClose: true,
             minTimeBetweenSessionsMillis: 15000
         )
