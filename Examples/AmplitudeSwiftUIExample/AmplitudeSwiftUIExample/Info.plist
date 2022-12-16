@@ -2,7 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Using IDFA as a DeviceID</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>com.amplitude.Amplitude.AmplitudeSwiftUIExample</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>swiftuiexample</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
