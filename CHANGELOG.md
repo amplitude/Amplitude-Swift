@@ -1,3 +1,11 @@
+# [0.2.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.1.0...v0.2.0) (2022-12-16)
+
+
+### Features
+
+* add carrier info ([#27](https://github.com/amplitude/Amplitude-Swift/issues/27)) ([3a946d8](https://github.com/amplitude/Amplitude-Swift/commit/3a946d87d11b47e81dffa406f728bbe32111d0fe))
+* add widget appclip examples ([#28](https://github.com/amplitude/Amplitude-Swift/issues/28)) ([c23e990](https://github.com/amplitude/Amplitude-Swift/commit/c23e990ad45f53292022e11fb2260d8f59974221))
+
 # [0.1.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.0.0...v0.1.0) (2022-12-15)
 
 
