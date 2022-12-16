@@ -70,12 +70,10 @@ class ContextPlugin: Plugin {
         #if os(iOS)
         let networkInfo = CTTelephonyNetworkInfo()
         if let providers = networkInfo.serviceSubscriberCellularProviders {
-            for (key, provider) in providers {
-                if provider.mobileNetworkCode != nil {
-                    carrier = providers[key]?.carrierName ?? carrier
-                    // As long as we get one carrier information, we break.
-                    break
-                }
+            for (_, provider) in providers where provider.mobileNetworkCode != nil {
+                carrier = provider.carrierName ?? carrier
+                // As long as we get one carrier information, we break.
+                break
             }
         }
         #endif
