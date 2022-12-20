@@ -6,9 +6,6 @@
 //
 
 public class AmplitudeDestinationPlugin: DestinationPlugin {
-    public let timeline = Timeline()
-    public var amplitude: Amplitude?
-    public let type: PluginType = .destination
     private var pipeline: EventPipeline?
 
     internal func enqueue(event: BaseEvent?) {
@@ -21,31 +18,31 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
         }
     }
 
-    public func track(event: BaseEvent) -> BaseEvent? {
+    public override func track(event: BaseEvent) -> BaseEvent? {
         enqueue(event: event)
         return event
     }
 
-    public func identify(event: IdentifyEvent) -> IdentifyEvent? {
+    public override func identify(event: IdentifyEvent) -> IdentifyEvent? {
         enqueue(event: event)
         return event
     }
 
-    public func groupIdentify(event: GroupIdentifyEvent) -> GroupIdentifyEvent? {
+    public override func groupIdentify(event: GroupIdentifyEvent) -> GroupIdentifyEvent? {
         enqueue(event: event)
         return event
     }
 
-    public func revenue(event: RevenueEvent) -> RevenueEvent? {
+    public override func revenue(event: RevenueEvent) -> RevenueEvent? {
         enqueue(event: event)
         return event
     }
 
-    public func flush() {
+    public override func flush() {
         pipeline?.flush()
     }
 
-    public func setup(amplitude: Amplitude) {
+    public override func setup(amplitude: Amplitude) {
         self.amplitude = amplitude
         pipeline = EventPipeline(amplitude: amplitude)
         pipeline?.start()
@@ -53,7 +50,7 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
         add(plugin: IdentityEventSender())
     }
 
-    public func execute(event: BaseEvent?) -> BaseEvent? {
+    public override func execute(event: BaseEvent?) -> BaseEvent? {
         return event
     }
 }
