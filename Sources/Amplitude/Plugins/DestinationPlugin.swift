@@ -5,12 +5,43 @@
 //  Created by Hao Yu on 11/15/22.
 //
 
-public protocol DestinationPlugin: EventPlugin {
-    var timeline: Timeline { get }
+open class DestinationPlugin: EventPlugin {
+    public let type: PluginType = .destination
+    public var amplitude: Amplitude?
+    private var timeline = Timeline()
+
+    public init() {
+    }
+
+    open func track(event: BaseEvent) -> BaseEvent? {
+        return event
+    }
+
+    open func identify(event: IdentifyEvent) -> IdentifyEvent? {
+        return event
+    }
+
+    open func groupIdentify(event: GroupIdentifyEvent) -> GroupIdentifyEvent? {
+        return event
+    }
+
+    open func revenue(event: RevenueEvent) -> RevenueEvent? {
+        return event
+    }
+
+    open func flush() {
+    }
+
+    open func execute(event: BaseEvent?) -> BaseEvent? {
+        return event
+    }
+
+    open func setup(amplitude: Amplitude) {
+        self.amplitude = amplitude
+    }
 }
 
 extension DestinationPlugin {
-
     var enabled: Bool {
         return true
     }
