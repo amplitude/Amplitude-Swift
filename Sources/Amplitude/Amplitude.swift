@@ -29,7 +29,7 @@ public class Amplitude {
         return timeline
     }()
 
-    lazy var logger: (any Logger)? = {
+    public lazy var logger: (any Logger)? = {
         return self.configuration.loggerProvider
     }()
 
