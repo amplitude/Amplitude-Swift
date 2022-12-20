@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.2.0...v0.3.0) (2022-12-20)
+
+
+### Features
+
+* update destination plugin to class ([#30](https://github.com/amplitude/Amplitude-Swift/issues/30)) ([705e61f](https://github.com/amplitude/Amplitude-Swift/commit/705e61fe81146b7ec0f59d98144483b5497ead97))
+
 # [0.2.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.1.0...v0.2.0) (2022-12-16)
 
 
