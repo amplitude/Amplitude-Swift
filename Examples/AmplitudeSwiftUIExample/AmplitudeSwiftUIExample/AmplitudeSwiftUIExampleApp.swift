@@ -63,6 +63,8 @@ struct AmplitudeSwiftUIExampleApp: App {
 }
 
 extension Amplitude {
+    
+    let plan = Plan(branch: "test")
     static var testInstance = Amplitude(
         configuration: Configuration(
             apiKey: "TEST-API-KEY",
@@ -72,7 +74,8 @@ extension Amplitude {
             },
             trackingOptions: TrackingOptions().disableCarrier().disableTrackDMA(),
             flushEventsOnClose: true,
-            minTimeBetweenSessionsMillis: 15000
+            minTimeBetweenSessionsMillis: 15000,
+            plan: plan
         )
     )
 }

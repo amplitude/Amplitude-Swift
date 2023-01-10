@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class Revenue {
+@objc public class Revenue : NSObject {
     enum Property: String {
         case REVENUE_PRODUCT_ID = "$productId"
         case REVENUE_QUANTITY = "$quantity"
@@ -18,7 +18,7 @@ public class Revenue {
         case REVENUE = "$revenue"
     }
 
-    public init() {}
+    public override init() {}
 
     private var _productId: String?
     public var productId: String? {

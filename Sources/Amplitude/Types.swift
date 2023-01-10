@@ -7,21 +7,21 @@
 
 import Foundation
 
-public struct Plan: Codable {
+@objc public class Plan: NSObject, Codable {
     var branch: String?
     var source: String?
     var version: String?
     var versionId: String?
 }
 
-public struct IngestionMetadata: Codable {
+@objc public class IngestionMetadata: NSObject, Codable {
     var sourceName: String?
     var sourceVersion: String?
 }
 
 public typealias EventCallback = (BaseEvent, Int, String) -> Void
 
-public struct LocationInfo {
+@objc public class LocationInfo : NSObject {
     public var lat: Double
     public var lng: Double
     public init(lat: Double, lng: Double) {
@@ -52,17 +52,59 @@ public protocol Storage {
     ) -> ResponseHandler
 }
 
-public enum StorageKey: String, CaseIterable {
-    case LAST_EVENT_ID = "last_event_id"
-    case PREVIOUS_SESSION_ID = "previous_session_id"
-    case LAST_EVENT_TIME = "last_event_time"
-    case OPT_OUT = "opt_out"
-    case EVENTS = "events"
-    case USER_ID = "user_id"
-    case DEVICE_ID = "device_id"
+@objc public enum StorageKey: Int, RawRepresentable, CaseIterable {
+    case LAST_EVENT_ID
+    case PREVIOUS_SESSION_ID
+    case LAST_EVENT_TIME
+    case OPT_OUT
+    case EVENTS
+    case USER_ID
+    case DEVICE_ID
+
+    public typealias RawValue = String
+
+    public var rawValue: RawValue {
+        switch self {
+            case .LAST_EVENT_ID:
+                return "last_event_id"
+            case .PREVIOUS_SESSION_ID:
+                return "previous_session_id"
+            case .LAST_EVENT_TIME:
+                return "last_event_time"
+            case .OPT_OUT:
+                return "opt_out"
+            case .EVENTS:
+                return "events"
+            case .USER_ID:
+                return "user_id"
+            case .DEVICE_ID:
+                return "device_id"
+            }
+        }
+
+    public init?(rawValue: RawValue) {
+        switch rawValue {
+            case "last_event_id":
+                self = .LAST_EVENT_ID
+            case "previous_session_id":
+                self = .PREVIOUS_SESSION_ID
+            case "last_event_time":
+                self = .LAST_EVENT_TIME
+            case "opt_out":
+                self = .OPT_OUT
+            case "events":
+                self = .EVENTS
+            case "user_id":
+                self = .USER_ID
+            case "device_id":
+                self = .DEVICE_ID
+            default:
+                return nil
+        }
+    }
 }
 
-public protocol Logger {
+ public protocol Logger {
     associatedtype LogLevel: RawRepresentable
     var logLevel: Int { get set }
     func error(message: String)
@@ -70,23 +112,66 @@ public protocol Logger {
     func log(message: String)
     func debug(message: String)
 }
-
-public enum PluginType: String, CaseIterable {
+/*
+@objc public enum PluginType: String, CaseIterable {
     case before = "Before"
     case enrichment = "Enrichment"
     case destination = "Destination"
     case utility = "Utility"
     case observe = "Observe"
 }
+*/
 
-public protocol Plugin: AnyObject {
-    var type: PluginType { get }
-    var amplitude: Amplitude? { get set }
-    func setup(amplitude: Amplitude)
-    func execute(event: BaseEvent?) -> BaseEvent?
+@objc public enum PluginType: Int, RawRepresentable, CaseIterable {
+        case before
+        case enrichment
+        case destination
+        case utility
+        case observe
+
+    public typealias RawValue = String
+
+    public var rawValue: RawValue {
+            switch self {
+                case .before:
+                    return "Before"
+                case .enrichment:
+                    return "Enrichment"
+                case .destination:
+                    return "Destination"
+                case .utility:
+                    return "Utility"
+                case .observe:
+                    return "Observe"
+            }
+        }
+
+    public init?(rawValue: RawValue) {
+        switch rawValue {
+            case "Before":
+                self = .before
+            case "Enrichment":
+                self = .enrichment
+            case "Destination":
+                self = .destination
+            case "Utility":
+                self = .utility
+            case "Observe":
+                self = .observe
+            default:
+                return nil
+        }
+    }
 }
 
-public protocol EventPlugin: Plugin {
+@objc public protocol Plugin: AnyObject {
+    @objc var type: PluginType { get }
+    @objc var amplitude: Amplitude? { get set }
+    @objc func setup(amplitude: Amplitude)
+    @objc func execute(event: BaseEvent?) -> BaseEvent?
+}
+
+@objc public protocol EventPlugin: Plugin {
     func track(event: BaseEvent) -> BaseEvent?
     func identify(event: IdentifyEvent) -> IdentifyEvent?
     func groupIdentify(event: GroupIdentifyEvent) -> GroupIdentifyEvent?

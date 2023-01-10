@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class EventOptions {
+@objc public class EventOptions : NSObject {
     public var userId: String?
     public var deviceId: String?
     public var timestamp: Int64?

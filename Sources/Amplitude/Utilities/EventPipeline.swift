@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class EventPipeline {
+@objc public class EventPipeline : NSObject {
     let amplitude: Amplitude
     var httpClient: HttpClient
     var storage: Storage? { amplitude.storage }
@@ -27,6 +27,7 @@ public class EventPipeline {
     init(amplitude: Amplitude) {
         self.amplitude = amplitude
         self.httpClient = HttpClient(configuration: amplitude.configuration)
+        super.init()
         self.flushTimer = QueueTimer(interval: getFlushInterval()) { [weak self] in
             self?.flush()
         }

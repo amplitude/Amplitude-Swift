@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class Configuration {
+@objc public class Configuration : NSObject {
     var apiKey: String
     var flushQueueSize: Int
     var flushIntervalMillis: Int

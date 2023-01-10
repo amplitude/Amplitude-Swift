@@ -4,8 +4,9 @@
 //
 //  Created by Hao Yu on 11/15/22.
 //
+import Foundation
 
-public protocol DestinationPlugin: EventPlugin {
+@objc public protocol DestinationPlugin: EventPlugin {
     var timeline: Timeline { get }
 }
 

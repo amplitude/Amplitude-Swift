@@ -1,6 +1,6 @@
 import Foundation
 
-public class Amplitude {
+@objc public class Amplitude : NSObject {
     var configuration: Configuration
     var instanceName: String
     var _inForeground = false
@@ -17,7 +17,7 @@ public class Amplitude {
          return locationInfo
      }
      */
-    public var locationInfoBlock: LocationInfoBlock?
+    @objc public var locationInfoBlock: LocationInfoBlock?
 
     lazy var storage: any Storage = {
         return self.configuration.storageProvider
@@ -33,7 +33,7 @@ public class Amplitude {
         return self.configuration.loggerProvider
     }()
 
-    public init(
+    @objc public init(
         configuration: Configuration,
         instanceName: String = Constants.Configuration.DEFAULT_INSTANCE
     ) {
@@ -42,6 +42,7 @@ public class Amplitude {
 
         let contextPlugin = ContextPlugin()
         self.contextPlugin = contextPlugin
+        super.init()
 
         // required plugin for specific platform, only has lifecyclePlugin now
         if let requiredPlugin = VendorSystem.current.requiredPlugin {
@@ -52,13 +53,13 @@ public class Amplitude {
         timeline.start()
     }
 
-    convenience init(apiKey: String, configuration: Configuration) {
+    @objc convenience init(apiKey: String, configuration: Configuration) {
         configuration.apiKey = apiKey
         self.init(configuration: configuration)
     }
 
     @discardableResult
-    public func track(event: BaseEvent, options: EventOptions? = nil, callback: EventCallback? = nil) -> Amplitude {
+    @objc public func track(event: BaseEvent, options: EventOptions? = nil, callback: EventCallback? = nil) -> Amplitude {
         if options != nil {
             event.mergeEventOptions(eventOptions: options!)
         }
@@ -70,7 +71,7 @@ public class Amplitude {
     }
 
     @discardableResult
-    public func track(eventType: String, eventProperties: [String: Any]? = nil, options: EventOptions? = nil)
+    @objc public func track(eventType: String, eventProperties: [String: Any]? = nil, options: EventOptions? = nil)
         -> Amplitude
     {
         let event = BaseEvent(eventType: eventType)
@@ -84,17 +85,17 @@ public class Amplitude {
 
     @discardableResult
     @available(*, deprecated, message: "use 'track' instead")
-    public func logEvent(event: BaseEvent) -> Amplitude {
+    @objc public func logEvent(event: BaseEvent) -> Amplitude {
         return track(event: event)
     }
 
     @discardableResult
-    public func identify(userProperties: [String: Any]?, options: EventOptions? = nil) -> Amplitude {
+    @objc public func identify(userProperties: [String: Any]?, options: EventOptions? = nil) -> Amplitude {
         return identify(identify: convertPropertiesToIdentify(userProperties: userProperties), options: options)
     }
 
     @discardableResult
-    public func identify(identify: Identify, options: EventOptions? = nil) -> Amplitude {
+    @objc public func identify(identify: Identify, options: EventOptions? = nil) -> Amplitude {
         let event = IdentifyEvent()
         event.userProperties = identify.properties as [String: Any]
         if let eventOptions = options {
@@ -119,6 +120,7 @@ public class Amplitude {
     }
 
     @discardableResult
+    @objc
     public func groupIdentify(
         groupType: String,
         groupName: String,
@@ -134,6 +136,7 @@ public class Amplitude {
     }
 
     @discardableResult
+    @objc
     public func groupIdentify(
         groupType: String,
         groupName: String,
@@ -153,6 +156,7 @@ public class Amplitude {
     }
 
     @discardableResult
+    @objc
     public func setGroup(
         groupType: String,
         groupName: String,
@@ -165,6 +169,7 @@ public class Amplitude {
     }
 
     @discardableResult
+    @objc(setGroupWithArray:::)
     public func setGroup(
         groupType: String,
         groupName: [String],
@@ -178,12 +183,12 @@ public class Amplitude {
 
     @discardableResult
     @available(*, deprecated, message: "use 'revenue' instead")
-    public func logRevenue() -> Amplitude {
+    @objc public func logRevenue() -> Amplitude {
         return self
     }
 
     @discardableResult
-    public func revenue(
+    @objc public func revenue(
         revenue: Revenue,
         options: EventOptions? = nil
     ) -> Amplitude {
@@ -201,26 +206,26 @@ public class Amplitude {
     }
 
     @discardableResult
-    public func revenue(event: RevenueEvent) -> Amplitude {
+    @objc public func revenue(event: RevenueEvent) -> Amplitude {
         process(event: event)
         return self
     }
 
     @discardableResult
-    public func add(plugin: Plugin) -> Amplitude {
+    @objc public func add(plugin: Plugin) -> Amplitude {
         plugin.setup(amplitude: self)
         timeline.add(plugin: plugin)
         return self
     }
 
     @discardableResult
-    public func remove(plugin: Plugin) -> Amplitude {
+    @objc public func remove(plugin: Plugin) -> Amplitude {
         timeline.remove(plugin: plugin)
         return self
     }
 
     @discardableResult
-    public func flush() -> Amplitude {
+    @objc public func flush() -> Amplitude {
         timeline.apply { plugin in
             if let _plugin = plugin as? EventPlugin {
                 _plugin.flush()
@@ -230,6 +235,7 @@ public class Amplitude {
     }
 
     @discardableResult
+    @objc
     public func setUserId(userId: String?) -> Amplitude {
         try? storage.write(key: .USER_ID, value: userId)
         state.userId = userId
@@ -237,6 +243,7 @@ public class Amplitude {
     }
 
     @discardableResult
+    @objc
     public func setDeviceId(deviceId: String?) -> Amplitude {
         try? storage.write(key: .DEVICE_ID, value: deviceId)
         state.deviceId = deviceId
@@ -244,6 +251,7 @@ public class Amplitude {
     }
 
     @discardableResult
+    @objc
     public func setSessionId(sessionId: Int64) -> Amplitude {
         _sessionId = sessionId
         _ = try? self.storage.write(key: .PREVIOUS_SESSION_ID, value: sessionId)
@@ -251,6 +259,7 @@ public class Amplitude {
     }
 
     @discardableResult
+    @objc
     func reset() -> Amplitude {
         _ = setUserId(userId: nil)
         _ = setDeviceId(deviceId: nil)
@@ -258,6 +267,7 @@ public class Amplitude {
         return self
     }
 
+    @objc
     public func apply(closure: (Plugin) -> Void) {
         timeline.apply(closure)
     }

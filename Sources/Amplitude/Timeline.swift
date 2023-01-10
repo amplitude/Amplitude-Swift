@@ -7,20 +7,21 @@
 
 import Foundation
 
-public class Timeline {
+@objc public class Timeline : NSObject {
     var amplitude: Amplitude?
     internal let plugins: [PluginType: Mediator]
     var sessionId: Int64 = -1
     var lastEventId: Int64 = 0
     var lastEventTime: Int64 = -1
 
-    init() {
+    override init() {
         self.plugins = [
             PluginType.before: Mediator(),
             PluginType.enrichment: Mediator(),
             PluginType.destination: Mediator(),
             PluginType.utility: Mediator(),
         ]
+        // super.init()
     }
 
     func start() {

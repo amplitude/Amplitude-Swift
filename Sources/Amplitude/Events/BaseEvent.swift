@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class BaseEvent: EventOptions, Codable {
+@objc public class BaseEvent: EventOptions, Codable {
     public var eventType: String
     public var eventProperties: [String: Any?]?
     public var userProperties: [String: Any?]?
