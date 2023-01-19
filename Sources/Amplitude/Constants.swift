@@ -63,4 +63,8 @@ public struct Constants {
     public struct Storage {
         public static let STORAGE_PREFIX = "amplitude-swift"
     }
+    
+    public struct Logger {
+        public static let LogLevel = LogLevelEnum.self
+    }
 }

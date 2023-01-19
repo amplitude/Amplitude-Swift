@@ -73,6 +73,14 @@
             }
 
         }
+        
+        func execute(event: BaseEvent?) -> BaseEvent? {
+            return event
+        }
+
+        func setup(amplitude: Amplitude) {
+            self.amplitude = amplitude
+        }
 
         func applicationWillEnterForeground(notification: NSNotification) {
             amplitude?.apply { (ext) in

@@ -15,7 +15,7 @@ import Foundation
     var optOut: Bool
     var storageProvider: any Storage
     var logLevel: LogLevelEnum
-    var loggerProvider: any Logger
+    var loggerProvider: Logger
     var minIdLength: Int?
     var partnerId: String?
     var callback: EventCallback?
@@ -39,7 +39,7 @@ import Foundation
         optOut: Bool = false,
         storageProvider: (any Storage)? = nil,
         logLevel: LogLevelEnum = LogLevelEnum.WARN,
-        loggerProvider: any Logger = ConsoleLogger(),
+        loggerProvider: Logger = ConsoleLogger(),
         minIdLength: Int? = nil,
         partnerId: String? = nil,
         callback: EventCallback? = nil,

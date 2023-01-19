@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os.log
 
 @objc public class Plan: NSObject, Codable {
     var branch: String?
@@ -104,23 +105,13 @@ public protocol Storage {
     }
 }
 
- public protocol Logger {
-    associatedtype LogLevel: RawRepresentable
+@objc public protocol Logger {
     var logLevel: Int { get set }
     func error(message: String)
     func warn(message: String)
     func log(message: String)
     func debug(message: String)
 }
-/*
-@objc public enum PluginType: String, CaseIterable {
-    case before = "Before"
-    case enrichment = "Enrichment"
-    case destination = "Destination"
-    case utility = "Utility"
-    case observe = "Observe"
-}
-*/
 
 @objc public enum PluginType: Int, RawRepresentable, CaseIterable {
         case before
@@ -165,10 +156,10 @@ public protocol Storage {
 }
 
 @objc public protocol Plugin: AnyObject {
-    @objc var type: PluginType { get }
-    @objc var amplitude: Amplitude? { get set }
-    @objc func setup(amplitude: Amplitude)
-    @objc func execute(event: BaseEvent?) -> BaseEvent?
+    var type: PluginType { get }
+    var amplitude: Amplitude? { get set }
+    func setup(amplitude: Amplitude)
+    func execute(event: BaseEvent?) -> BaseEvent?
 }
 
 @objc public protocol EventPlugin: Plugin {
@@ -177,17 +168,6 @@ public protocol Storage {
     func groupIdentify(event: GroupIdentifyEvent) -> GroupIdentifyEvent?
     func revenue(event: RevenueEvent) -> RevenueEvent?
     func flush()
-}
-
-extension Plugin {
-    // default behavior
-    public func execute(event: BaseEvent?) -> BaseEvent? {
-        return event
-    }
-
-    public func setup(amplitude: Amplitude) {
-        self.amplitude = amplitude
-    }
 }
 
 public protocol ResponseHandler {

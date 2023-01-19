@@ -9,7 +9,6 @@ import Foundation
 import os.log
 
 public class ConsoleLogger: Logger {
-    public typealias LogLevel = LogLevelEnum
 
     public var logLevel: Int
     private var logger: OSLog
@@ -20,25 +19,25 @@ public class ConsoleLogger: Logger {
     }
 
     public func error(message: String) {
-        if logLevel >= LogLevel.ERROR.rawValue {
+        if logLevel >= Constants.Logger.LogLevel.ERROR.rawValue {
             os_log("Error: %@", log: logger, type: .error, message)
         }
     }
 
     public func warn(message: String) {
-        if logLevel >= LogLevel.WARN.rawValue {
+        if logLevel >= Constants.Logger.LogLevel.WARN.rawValue {
             os_log("Warn: %@", log: logger, type: .default, message)
         }
     }
 
     public func log(message: String) {
-        if logLevel >= LogLevel.LOG.rawValue {
+        if logLevel >= Constants.Logger.LogLevel.LOG.rawValue {
             os_log("Log: %@", log: logger, type: .info, message)
         }
     }
 
     public func debug(message: String) {
-        if logLevel >= LogLevel.DEBUG.rawValue {
+        if logLevel >= Constants.Logger.LogLevel.DEBUG.rawValue {
             os_log("Debug: %@", log: logger, type: .debug, message)
         }
     }

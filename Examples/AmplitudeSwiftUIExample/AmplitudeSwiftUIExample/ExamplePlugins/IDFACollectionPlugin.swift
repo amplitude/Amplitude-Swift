@@ -25,6 +25,10 @@ class IDFACollectionPlugin: Plugin {
     let type = PluginType.enrichment
     weak var amplitude: Amplitude? = nil
 
+    func setup(amplitude: Amplitude) {
+        self.amplitude = amplitude
+    }
+
     func execute(event: BaseEvent?) -> BaseEvent? {
         let status = ATTrackingManager.trackingAuthorizationStatus
         var idfa = fallbackValue
