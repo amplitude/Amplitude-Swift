@@ -103,7 +103,7 @@ public class Amplitude {
                 _ = setUserId(userId: eventOptions.userId)
             }
             if eventOptions.deviceId != nil {
-                _ = setUserId(userId: eventOptions.deviceId)
+                _ = setDeviceId(deviceId: eventOptions.deviceId)
             }
         }
         process(event: event)
@@ -251,7 +251,7 @@ public class Amplitude {
     }
 
     @discardableResult
-    func reset() -> Amplitude {
+    public func reset() -> Amplitude {
         _ = setUserId(userId: nil)
         _ = setDeviceId(deviceId: nil)
         contextPlugin.initializeDeviceId()
