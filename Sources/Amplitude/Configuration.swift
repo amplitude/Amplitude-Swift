@@ -31,7 +31,7 @@ import Foundation
     var minTimeBetweenSessionsMillis: Int
     var trackingSessionEvents: Bool?
 
-    public init(
+    @objc public init(
         apiKey: String,
         flushQueueSize: Int = Constants.Configuration.FLUSH_QUEUE_SIZE,
         flushIntervalMillis: Int = Constants.Configuration.FLUSH_INTERVAL_MILLIS,
