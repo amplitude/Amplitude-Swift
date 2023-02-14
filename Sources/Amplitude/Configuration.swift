@@ -46,7 +46,7 @@ public class Configuration {
         flushMaxRetries: Int = Constants.Configuration.FLUSH_MAX_RETRIES,
         useBatch: Bool = false,
         serverZone: ServerZone = ServerZone.US,
-        serverUrl: String = Constants.DEFAULT_API_HOST,
+        serverUrl: String? = nil,
         plan: Plan? = nil,
         ingestionMetadata: IngestionMetadata? = nil,
         trackingOptions: TrackingOptions = TrackingOptions(),
