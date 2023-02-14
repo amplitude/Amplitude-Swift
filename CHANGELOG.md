@@ -1,3 +1,11 @@
+## [0.3.1](https://github.com/amplitude/Amplitude-Swift/compare/v0.3.0...v0.3.1) (2023-02-14)
+
+
+### Bug Fixes
+
+* fix userId is overwritten by deviceId and make reset public ([#33](https://github.com/amplitude/Amplitude-Swift/issues/33)) ([4f49720](https://github.com/amplitude/Amplitude-Swift/commit/4f497206cecd6cf7fd29f978b3613388076dbb57))
+* remove serverUrl as default value for configuration ([#34](https://github.com/amplitude/Amplitude-Swift/issues/34)) ([48d0921](https://github.com/amplitude/Amplitude-Swift/commit/48d092132762cc3f6e6abc586b550b964ba61602))
+
 # [0.3.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.2.0...v0.3.0) (2022-12-20)
 
 
