@@ -1,4 +1,5 @@
 import Foundation
+import XCTest
 
 @testable import Amplitude_Swift
 
@@ -75,6 +76,7 @@ class FakeInMemoryStorage: Storage {
     var keyValueStore = [String: Any?]()
     var eventsStore = [URL: [BaseEvent]]()
     var index = URL(string: "0")!
+    var interceptedIdentifyEvent: BaseEvent?
 
     func write(key: StorageKey, value: Any?) throws {
         switch key {
@@ -83,6 +85,10 @@ class FakeInMemoryStorage: Storage {
                 var chunk = eventsStore[index, default: [BaseEvent]()]
                 chunk.append(event)
                 eventsStore[index] = chunk
+            }
+        case .INTERCEPTED_IDENTIFY:
+            if let event = value as? BaseEvent? {
+                interceptedIdentifyEvent = event
             }
         default:
             keyValueStore[key.rawValue] = value
@@ -94,6 +100,8 @@ class FakeInMemoryStorage: Storage {
         switch key {
         case .EVENTS:
             result = Array(eventsStore.keys) as? T
+        case .INTERCEPTED_IDENTIFY:
+            result = interceptedIdentifyEvent as? T
         default:
             result = keyValueStore[key.rawValue] as? T
         }
@@ -114,9 +122,11 @@ class FakeInMemoryStorage: Storage {
     func reset() {
         keyValueStore.removeAll()
         eventsStore.removeAll()
+        interceptedIdentifyEvent = nil
     }
 
     func remove(eventBlock: EventBlock) {
+        eventsStore.removeValue(forKey: eventBlock)
     }
 
     func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) {
@@ -128,26 +138,60 @@ class FakeInMemoryStorage: Storage {
         eventBlock: EventBlock,
         eventsString: String
     ) -> ResponseHandler {
-        FakeResponseHandler()
+        FakeResponseHandler(configuration: configuration, storage: self, eventPipeline: eventPipeline, eventBlock: eventBlock, eventsString: eventsString)
     }
 }
 
 class FakeHttpClient: HttpClient {
-    var isUploadCalled: Bool = false
+    var uploadCount: Int = 0
+    var uploadedEvents: [String] = []
+    var uploadExpectations: [XCTestExpectation] = []
 
     override func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void)
         -> URLSessionDataTask?
     {
-        isUploadCalled = true
+        uploadCount += 1
+        uploadedEvents.append(events)
+        if !uploadExpectations.isEmpty {
+            uploadExpectations.removeFirst().fulfill()
+        }
+        completion(Result.success(200))
         return nil
     }
 }
 
 class FakeResponseHandler: ResponseHandler {
+    let configuration: Configuration
+    let storage: FakeInMemoryStorage
+    let eventPipeline: EventPipeline
+    let eventBlock: URL
+    let eventsString: String
+
+    init(
+        configuration: Configuration,
+        storage: FakeInMemoryStorage,
+        eventPipeline: EventPipeline,
+        eventBlock: URL,
+        eventsString: String
+    ) {
+        self.configuration = configuration
+        self.storage = storage
+        self.eventPipeline = eventPipeline
+        self.eventBlock = eventBlock
+        self.eventsString = eventsString
+    }
+
     func handle(result: Result<Int, Error>) {
+        switch result {
+        case .success(let code):
+            handleSuccessResponse(code: code)
+        default:
+            break
+        }
     }
 
     func handleSuccessResponse(code: Int) {
+        storage.remove(eventBlock: eventBlock)
     }
 
     func handleBadRequestResponse(data: [String: Any]) {

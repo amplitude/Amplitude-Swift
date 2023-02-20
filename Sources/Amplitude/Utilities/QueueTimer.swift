@@ -27,13 +27,13 @@ internal class QueueTimer {
         Self.timers.append(timer)
     }
 
-    init(interval: TimeInterval, queue: DispatchQueue = .main, handler: @escaping () -> Void) {
+    init(interval: TimeInterval, repeatInterval: TimeInterval? = nil, queue: DispatchQueue = .main, handler: @escaping () -> Void) {
         self.interval = interval
         self.queue = queue
         self.handler = handler
 
         timer = DispatchSource.makeTimerSource(flags: [], queue: queue)
-        timer.schedule(deadline: .now() + self.interval, repeating: self.interval)
+        timer.schedule(deadline: .now() + self.interval, repeating: repeatInterval ?? self.interval)
         timer.setEventHandler { [weak self] in
             self?.handler()
         }

@@ -21,6 +21,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */; };
+		BA9BEA4D299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
 		OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* AmplitudeDestinationPlugin.swift */; };
 		OBJ_102 /* ContextPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ContextPlugin.swift */; };
@@ -97,6 +99,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptor.swift; sourceTree = "<group>"; };
+		BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptorTests.swift; sourceTree = "<group>"; };
 		OBJ_10 /* ConsoleLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleLogger.swift; sourceTree = "<group>"; };
 		OBJ_11 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		OBJ_12 /* EventBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventBridge.swift; sourceTree = "<group>"; };
@@ -263,6 +267,7 @@
 				OBJ_50 /* QueueTimer.swift */,
 				OBJ_51 /* Session.swift */,
 				OBJ_52 /* UrlExtension.swift */,
+				BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -358,6 +363,7 @@
 				OBJ_72 /* HttpClientTests.swift */,
 				OBJ_73 /* PersistentStorageResponseHandlerTests.swift */,
 				OBJ_74 /* UrlExtensionTests.swift */,
+				BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -470,6 +476,7 @@
 				OBJ_146 /* GroupIdentifyEventTests.swift in Sources */,
 				OBJ_147 /* IdentifyEventTests.swift in Sources */,
 				OBJ_148 /* IdentifyTests.swift in Sources */,
+				BA9BEA4D299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift in Sources */,
 				OBJ_149 /* RevenueEventTests.swift in Sources */,
 				OBJ_150 /* RevenueTests.swift in Sources */,
 				OBJ_151 /* PersistentStorageTests.swift in Sources */,
@@ -512,6 +519,7 @@
 				OBJ_110 /* State.swift in Sources */,
 				OBJ_111 /* InMemoryStorage.swift in Sources */,
 				OBJ_112 /* PersistentStorage.swift in Sources */,
+				BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */,
 				OBJ_113 /* Timeline.swift in Sources */,
 				OBJ_114 /* TrackingOptions.swift in Sources */,
 				OBJ_115 /* Types.swift in Sources */,

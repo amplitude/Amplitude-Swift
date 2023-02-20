@@ -60,6 +60,7 @@ public enum StorageKey: String, CaseIterable {
     case EVENTS = "events"
     case USER_ID = "user_id"
     case DEVICE_ID = "device_id"
+    case INTERCEPTED_IDENTIFY = "intercepted_identify"
 }
 
 public protocol Logger {
@@ -116,7 +117,7 @@ public protocol ResponseHandler {
 }
 
 extension ResponseHandler {
-    func collectIndices(data: [String: [Int]]) -> Set<Int> {
+    static func collectIndices(data: [String: [Int]]) -> Set<Int> {
         var indices = Set<Int>()
         for (_, elements) in data {
             for el in elements {

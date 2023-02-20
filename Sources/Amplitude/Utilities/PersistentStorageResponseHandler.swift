@@ -58,10 +58,10 @@ class PersistentStorageResponseHandler: ResponseHandler {
 
         var dropIndexes = Set<Int>()
         if let eventsWithInvalidFields = data["events_with_invalid_fields"] as? [String: [Int]] {
-            dropIndexes.formUnion(collectIndices(data: eventsWithInvalidFields))
+            dropIndexes.formUnion(Self.collectIndices(data: eventsWithInvalidFields))
         }
         if let eventsWithMissingFields = data["events_with_missing_fields"] as? [String: [Int]] {
-            dropIndexes.formUnion(collectIndices(data: eventsWithMissingFields))
+            dropIndexes.formUnion(Self.collectIndices(data: eventsWithMissingFields))
         }
         if let silencedEvents = data["silenced_events"] as? [Int] {
             dropIndexes.formUnion(silencedEvents)

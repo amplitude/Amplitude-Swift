@@ -12,13 +12,11 @@ import XCTest
 
 final class TypesTests: XCTestCase {
     func testResponseHandler_collectIndices() {
-        let responseHandler = FakeResponseHandler()
-
         let dataToCollectIndices = [
             "time": [1, 2, 3],
             "event_type": [3, 4],
         ]
-        let result = responseHandler.collectIndices(data: dataToCollectIndices)
+        let result = FakeResponseHandler.collectIndices(data: dataToCollectIndices)
 
         XCTAssertEqual(result, Set([1, 2, 3, 4]))
     }

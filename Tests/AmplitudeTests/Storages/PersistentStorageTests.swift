@@ -49,4 +49,41 @@ final class PersistentStorageTests: XCTestCase {
         XCTAssertNotEqual(eventFiles?[0].pathExtension, PersistentStorage.TEMP_FILE_EXTENSION)
         persistentStorage.reset()
     }
+
+    func testWriteReadInterceptedIdentifyEvent() {
+        let persistentStorage = PersistentStorage(apiKey: "xxx-api-key")
+
+        var event: BaseEvent? = persistentStorage.read(key: StorageKey.INTERCEPTED_IDENTIFY)
+        XCTAssertNil(event)
+
+        try? persistentStorage.write(
+            key: StorageKey.INTERCEPTED_IDENTIFY,
+            value: IdentifyEvent(userId: "user-1", eventType: "$identify")
+        )
+        event = persistentStorage.read(key: StorageKey.INTERCEPTED_IDENTIFY)
+        XCTAssertEqual(event?.eventType, "$identify")
+        XCTAssertEqual(event?.userId, "user-1")
+
+        try? persistentStorage.write(
+                key: StorageKey.INTERCEPTED_IDENTIFY,
+                value: nil
+        )
+        event = persistentStorage.read(key: StorageKey.INTERCEPTED_IDENTIFY)
+        XCTAssertNil(event)
+
+        persistentStorage.reset()
+
+        event = persistentStorage.read(key: StorageKey.INTERCEPTED_IDENTIFY)
+        XCTAssertNil(event)
+
+        try? persistentStorage.write(
+                key: StorageKey.INTERCEPTED_IDENTIFY,
+                value: IdentifyEvent(userId: "user-2", eventType: "$identify")
+        )
+        event = persistentStorage.read(key: StorageKey.INTERCEPTED_IDENTIFY)
+        XCTAssertEqual(event?.eventType, "$identify")
+        XCTAssertEqual(event?.userId, "user-2")
+
+        persistentStorage.reset()
+    }
 }
