@@ -154,6 +154,12 @@ final class IdentifyInterceptorTests: XCTestCase {
                 event2: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
             )
         )
+        XCTAssertFalse(
+            interceptor.canMergeIdentifyEvents(
+                event1: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]),
+                event2: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()])
+            )
+        )
     }
 
     func testMergeIdentifyEvents() {
@@ -194,9 +200,7 @@ final class IdentifyInterceptorTests: XCTestCase {
             event1: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]),
             event2: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
         )
-        XCTAssertNotNil(mergedEvent)
-        XCTAssertNotNil(mergedEvent!.userProperties)
-        XCTAssertTrue(NSDictionary(dictionary: mergedEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+        XCTAssertNil(mergedEvent)
 
         mergedEvent = interceptor.mergeIdentifyEvents(
             event1: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]]),

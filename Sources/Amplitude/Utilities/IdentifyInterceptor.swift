@@ -11,7 +11,9 @@ public class IdentifyInterceptor {
             return nil
         }
 
-        event1.userProperties = mergeUserProperties(userProperties1: event1.userProperties, userProperties2: event2.userProperties)
+        if let mergedUserProperties = mergeUserProperties(userProperties1: event1.userProperties, userProperties2: event2.userProperties) {
+            event1.userProperties = mergedUserProperties
+        }
         return event1
     }
 
@@ -48,6 +50,8 @@ public class IdentifyInterceptor {
         return event1.userId == event2.userId && event1.deviceId == event2.deviceId
             && canMergeIdentifyEvent(event1)
             && canMergeIdentifyEvent(event2)
+            && (event1.userProperties?[Identify.Operation.CLEAR_ALL.rawValue] == nil
+                || event2.userProperties?[Identify.Operation.SET.rawValue] == nil)
     }
 
     public func canMergeIdentifyEvent(_ event: BaseEvent) -> Bool {
