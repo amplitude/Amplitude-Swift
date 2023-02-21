@@ -7,11 +7,14 @@
 
 public class AmplitudeDestinationPlugin: DestinationPlugin {
     private var pipeline: EventPipeline?
+    private var identifyInterceptor: IdentifyInterceptor?
 
     internal func enqueue(event: BaseEvent?) {
-        if let e = event {
-            if e.isValid() {
-                pipeline?.put(event: e)
+        if let event {
+            if event.isValid() {
+                if let event = identifyInterceptor?.intercept(event: event) {
+                    pipeline?.put(event: event)
+                }
             } else {
                 logger?.error(message: "Event is invalid for missing information like userId and deviceId")
             }
@@ -39,12 +42,14 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
     }
 
     public override func flush() {
+        _ = identifyInterceptor?.transferInterceptedIdentifyEvent()
         pipeline?.flush()
     }
 
     public override func setup(amplitude: Amplitude) {
         self.amplitude = amplitude
         pipeline = EventPipeline(amplitude: amplitude)
+        identifyInterceptor = IdentifyInterceptor(amplitude: amplitude, pipeline: pipeline!)
         pipeline?.start()
 
         add(plugin: IdentityEventSender())

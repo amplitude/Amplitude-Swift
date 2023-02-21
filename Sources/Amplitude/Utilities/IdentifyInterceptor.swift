@@ -1,12 +1,106 @@
 import Foundation
 
 public class IdentifyInterceptor {
-    private let allowedOperations = Set([
+    private static let allowedOperations = Set([
         Identify.Operation.CLEAR_ALL.rawValue,
         Identify.Operation.SET.rawValue
     ])
 
-    public func mergeIdentifyEvents(event1: BaseEvent, event2: BaseEvent) -> BaseEvent? {
+    private let amplitude: Amplitude
+    private let pipeline: EventPipeline
+    private var identifyUploadTimer: QueueTimer? = nil
+    private let minIdentifyUploadInterval: Int
+
+    private lazy var storage: any Storage = {
+        return self.amplitude.configuration.storageProvider
+    }()
+
+    init(amplitude: Amplitude, pipeline: EventPipeline, minIdentifyUploadInterval: Int = Constants.Configuration.MIN_IDENTIFY_UPLOAD_INTERVAL_MILLIS) {
+        self.amplitude = amplitude
+        self.pipeline = pipeline
+        self.minIdentifyUploadInterval = minIdentifyUploadInterval
+    }
+
+    public func intercept(event: BaseEvent) -> BaseEvent? {
+        do {
+            if !amplitude.configuration.disableIdentifyBatching {
+                return try interceptIdentifyEvent(event)
+            } else {
+                _ = transferInterceptedIdentifyEvent()
+                return event
+            }
+        } catch {
+            amplitude.logger?.error(message: "Error when storing event: \(error.localizedDescription)")
+        }
+
+        return event
+    }
+
+    private func interceptIdentifyEvent(_ event: BaseEvent) throws -> BaseEvent? {
+        var mergedInterceptedIdentifyEvent: BaseEvent?
+        let interceptedIdentifyEvent = try getInterceptedIdentifyEventFromStorage()
+        if let interceptedIdentifyEvent {
+            mergedInterceptedIdentifyEvent = mergeIdentifyEvents(event1: interceptedIdentifyEvent, event2: event)
+        }
+
+        if let mergedInterceptedIdentifyEvent {
+            try writeInterceptedIdentifyEventToStorage(mergedInterceptedIdentifyEvent)
+            return nil
+        } else {
+            _ = transferInterceptedIdentifyEvent()
+
+            if canMergeIdentifyEvent(event) {
+                try writeInterceptedIdentifyEventToStorage(event)
+                return nil
+            } else {
+                return event
+            }
+        }
+    }
+
+    func transferInterceptedIdentifyEvent() -> Bool {
+        do {
+            if let interceptedIdentifyEvent = try getInterceptedIdentifyEventFromStorage() {
+                pipeline.put(event: interceptedIdentifyEvent)
+                try removeInterceptedIdentifyEventFromStorage()
+                return true
+            }
+        } catch {
+            amplitude.logger?.error(message: "Error when transfer intercepted identify event: \(error.localizedDescription)")
+        }
+        return false
+    }
+
+    private func getInterceptedIdentifyEventFromStorage() throws -> BaseEvent? {
+        return storage.read(key: StorageKey.INTERCEPTED_IDENTIFY)
+    }
+
+    private func writeInterceptedIdentifyEventToStorage(_ event: BaseEvent) throws {
+        try storage.write(key: StorageKey.INTERCEPTED_IDENTIFY, value: event)
+        scheduleInterceptedIdentifyFlush()
+    }
+
+    private func removeInterceptedIdentifyEventFromStorage() throws {
+        try storage.write(key: StorageKey.INTERCEPTED_IDENTIFY, value: nil)
+        identifyUploadTimer = nil
+    }
+
+    private func scheduleInterceptedIdentifyFlush() {
+        guard identifyUploadTimer == nil else {
+            return
+        }
+
+        identifyUploadTimer = QueueTimer(interval: getIdentifyUploadInterval(), repeatInterval: .infinity) { [weak self] in
+            let transferred = self?.transferInterceptedIdentifyEvent() == true
+            let flush = self?.pipeline.flush
+            self?.identifyUploadTimer = nil
+            if transferred {
+                flush?(nil)
+            }
+        }
+    }
+
+    func mergeIdentifyEvents(event1: BaseEvent, event2: BaseEvent) -> BaseEvent? {
         guard canMergeIdentifyEvents(event1: event1, event2: event2) else {
             return nil
         }
@@ -46,7 +140,7 @@ public class IdentifyInterceptor {
         return result
     }
 
-    public func canMergeIdentifyEvents(event1: BaseEvent, event2: BaseEvent) -> Bool {
+    func canMergeIdentifyEvents(event1: BaseEvent, event2: BaseEvent) -> Bool {
         return event1.userId == event2.userId && event1.deviceId == event2.deviceId
             && canMergeIdentifyEvent(event1)
             && canMergeIdentifyEvent(event2)
@@ -54,7 +148,7 @@ public class IdentifyInterceptor {
                 || event2.userProperties?[Identify.Operation.SET.rawValue] == nil)
     }
 
-    public func canMergeIdentifyEvent(_ event: BaseEvent) -> Bool {
+    func canMergeIdentifyEvent(_ event: BaseEvent) -> Bool {
         return event.eventType == Constants.IDENTIFY_EVENT
             && isEmptyValues(event.groups)
             && hasAllowedOperationsOnly(event.userProperties)
@@ -65,6 +159,14 @@ public class IdentifyInterceptor {
     }
 
     private func hasAllowedOperationsOnly(_ values: [String: Any?]?) -> Bool {
-        return isEmptyValues(values) || values!.allSatisfy { key, _ in allowedOperations.contains(key) }
+        return isEmptyValues(values) || values!.allSatisfy { key, _ in Self.allowedOperations.contains(key) }
+    }
+
+    private func getIdentifyUploadInterval() -> TimeInterval {
+        let identifyUploadIntervalMillis = max(
+                amplitude.configuration.identifyUploadIntervalMillis,
+                minIdentifyUploadInterval
+        )
+        return TimeInterval.milliseconds(identifyUploadIntervalMillis)
     }
 }

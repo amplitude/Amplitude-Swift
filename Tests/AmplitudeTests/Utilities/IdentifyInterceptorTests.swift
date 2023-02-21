@@ -3,11 +3,31 @@ import XCTest
 @testable import Amplitude_Swift
 
 final class IdentifyInterceptorTests: XCTestCase {
+    private static let IDENTIFY_UPLOAD_INTERVAL_SECONDS = 1.5
+
+    private var storage: FakeInMemoryStorage!
+    private var httpClient: FakeHttpClient!
     private var interceptor: IdentifyInterceptor!
+    private var configuration: Configuration!
+    private var pipeline: EventPipeline!
 
     override func setUp() {
         super.setUp()
-        interceptor = IdentifyInterceptor()
+        storage = FakeInMemoryStorage()
+        configuration = Configuration(
+            apiKey: "testApiKey",
+            storageProvider: storage,
+            identifyUploadIntervalMillis: Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
+        )
+        let amplitude = Amplitude(configuration: configuration)
+        httpClient = FakeHttpClient(configuration: configuration)
+        pipeline = EventPipeline(amplitude: amplitude)
+        pipeline.httpClient = httpClient
+        interceptor = IdentifyInterceptor(
+            amplitude: amplitude,
+            pipeline: pipeline,
+            minIdentifyUploadInterval: Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
+        )
     }
 
     func testCanMergeIdentifyEvent() {
@@ -229,5 +249,149 @@ final class IdentifyInterceptorTests: XCTestCase {
             event2: BaseEvent(eventType: "someEvent", userProperties: ["$set": ["key-1": "value-1-2", "key-3": "value-3"]])
         )
         XCTAssertNil(mergedEvent)
+    }
+
+    func testInterceptIdentifyEvents() {
+        let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
+        let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
+
+        var event = interceptor.intercept(event: testEvent1)
+        XCTAssertNil(event)
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
+        XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+
+        event = interceptor.intercept(event: testEvent2)
+        XCTAssertNil(event)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
+        XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1", "key-2": "value-2"]]))
+    }
+
+    func testInterceptIdentifyEventsWithDisabledIdentifyBatching() {
+        configuration.disableIdentifyBatching = true
+        let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
+        let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
+
+        var event = interceptor.intercept(event: testEvent1)
+        XCTAssertNotNil(event)
+        XCTAssertEqual(event!.eventType, "$identify")
+        XCTAssertTrue(NSDictionary(dictionary: event!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertNil(storage.interceptedIdentifyEvent)
+
+        event = interceptor.intercept(event: testEvent2)
+        XCTAssertNotNil(event)
+        XCTAssertEqual(event!.eventType, "$identify")
+        XCTAssertTrue(NSDictionary(dictionary: event!.userProperties!).isEqual(to: ["$set": ["key-2": "value-2"]]))
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertNil(storage.interceptedIdentifyEvent)
+    }
+
+    func testInterceptIncompatibleIdentifyEvents() {
+        let testEvent1 = BaseEvent(userId: "user-1", eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
+        let testEvent2 = BaseEvent(userId: "user-2", eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
+
+        var event = interceptor.intercept(event: testEvent1)
+        XCTAssertNil(event)
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
+        XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+
+        event = interceptor.intercept(event: testEvent2)
+        XCTAssertNil(event)
+        XCTAssertEqual(pipeline.eventCount, 1)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
+        XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-2": "value-2"]]))
+    }
+
+    func testInterceptIdentifyAndSomeEvents() {
+        let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
+        let testEvent2 = BaseEvent(eventType: "someEvent")
+
+        var event = interceptor.intercept(event: testEvent1)
+        XCTAssertNil(event)
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
+        XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+
+        event = interceptor.intercept(event: testEvent2)
+        XCTAssertNotNil(event)
+        XCTAssertEqual(event!.eventType, "someEvent")
+        XCTAssertNil(event!.userProperties)
+        XCTAssertEqual(pipeline.eventCount, 1)
+        XCTAssertNil(storage.interceptedIdentifyEvent)
+    }
+
+    func testInterceptIdentifyEventAndWaitForUploadInterval() {
+        let upload1Expectation = expectation(description: "upload")
+        httpClient.uploadExpectations = [upload1Expectation]
+
+        let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
+
+        let event = interceptor.intercept(event: testEvent1)
+        XCTAssertNil(event)
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
+        XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+
+        let waitResult = XCTWaiter.wait(for: [upload1Expectation], timeout: Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS + 0.5)
+        XCTAssertNotEqual(waitResult, .timedOut)
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertEqual(httpClient.uploadCount, 1)
+        let uploadedEvents = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[0])
+        XCTAssertEqual(uploadedEvents?.count, 1)
+        XCTAssertEqual(uploadedEvents![0].eventType, "$identify")
+        XCTAssertTrue(NSDictionary(dictionary: uploadedEvents![0].userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+        XCTAssertNil(storage.interceptedIdentifyEvent)
+    }
+
+    func testPutIdentifyEventsAndWaitForUploadInterval() {
+        let upload1Expectation = expectation(description: "upload1")
+        let upload2Expectation = expectation(description: "upload2")
+        httpClient.uploadExpectations = [upload1Expectation, upload2Expectation]
+
+        let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
+
+        var event = interceptor.intercept(event: testEvent1)
+        XCTAssertNil(event)
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
+        XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+
+        var waitResult = XCTWaiter.wait(for: [upload1Expectation], timeout: Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS + 0.5)
+        XCTAssertNotEqual(waitResult, .timedOut)
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertEqual(httpClient.uploadCount, 1)
+        var uploadedEvents = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[0])
+        XCTAssertEqual(uploadedEvents?.count, 1)
+        XCTAssertEqual(uploadedEvents![0].eventType, "$identify")
+        XCTAssertTrue(NSDictionary(dictionary: uploadedEvents![0].userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+        XCTAssertNil(storage.interceptedIdentifyEvent)
+
+        let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
+
+        event = interceptor.intercept(event: testEvent2)
+        XCTAssertNil(event)
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
+        XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-2": "value-2"]]))
+
+        waitResult = XCTWaiter.wait(for: [upload2Expectation], timeout: Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS + 0.5)
+        XCTAssertNotEqual(waitResult, .timedOut)
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertEqual(httpClient.uploadCount, 2)
+        uploadedEvents = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[1])
+        XCTAssertEqual(uploadedEvents?.count, 1)
+        XCTAssertEqual(uploadedEvents![0].eventType, "$identify")
+        XCTAssertTrue(NSDictionary(dictionary: uploadedEvents![0].userProperties!).isEqual(to: ["$set": ["key-2": "value-2"]]))
+        XCTAssertNil(storage.interceptedIdentifyEvent)
     }
 }
