@@ -8,7 +8,7 @@ public class IdentifyInterceptor {
 
     private let amplitude: Amplitude
     private let pipeline: EventPipeline
-    private var identifyUploadTimer: QueueTimer? = nil
+    private var identifyUploadTimer: QueueTimer?
     private let minIdentifyUploadInterval: Int
 
     private lazy var storage: any Storage = {
