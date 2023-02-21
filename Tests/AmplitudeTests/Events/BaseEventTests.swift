@@ -13,6 +13,16 @@ import XCTest
 final class BaseEventTests: XCTestCase {
     func testToString() {
         let baseEvent = BaseEvent(
+            plan: Plan(
+                branch: "test-branch",
+                source: "test-source",
+                version: "test-version",
+                versionId: "test-version-id"
+            ),
+            ingestionMetadata: IngestionMetadata(
+                sourceName: "test-source-name",
+                sourceVersion: "test-source-version"
+            ),
             eventType: "test",
             eventProperties: [
                 "integer": 1,
@@ -39,6 +49,30 @@ final class BaseEventTests: XCTestCase {
         XCTAssertEqual(
             baseEventDict!["event_properties"]!["array" as NSString] as! Array,
             [1, 2, 3]
+        )
+        XCTAssertEqual(
+            baseEventDict!["plan"]!["branch" as NSString] as! String,
+            "test-branch"
+        )
+        XCTAssertEqual(
+            baseEventDict!["plan"]!["source" as NSString] as! String,
+            "test-source"
+        )
+        XCTAssertEqual(
+            baseEventDict!["plan"]!["version" as NSString] as! String,
+            "test-version"
+        )
+        XCTAssertEqual(
+            baseEventDict!["plan"]!["versionId" as NSString] as! String,
+            "test-version-id"
+        )
+        XCTAssertEqual(
+            baseEventDict!["ingestion_metadata"]!["source_name" as NSString] as! String,
+            "test-source-name"
+        )
+        XCTAssertEqual(
+            baseEventDict!["ingestion_metadata"]!["source_version" as NSString] as! String,
+            "test-source-version"
         )
     }
 
@@ -89,6 +123,16 @@ final class BaseEventTests: XCTestCase {
                     "integer": 1,
                     "string": "stringValue",
                     "array": [1, 2, 3]
+                },
+                "plan": {
+                    "branch": "test-branch",
+                    "source": "test-source",
+                    "version": "test-version",
+                    "versionId": "test-version-id",
+                },
+                "ingestion_metadata": {
+                    "source_name": "test-source-name",
+                    "source_version": "test-source-version"
                 }
             }
             """
@@ -109,6 +153,30 @@ final class BaseEventTests: XCTestCase {
         XCTAssertEqual(
             event?.eventProperties!["array"] as! [Double],
             [1, 2, 3]
+        )
+        XCTAssertEqual(
+            event?.plan?.branch,
+            "test-branch"
+        )
+        XCTAssertEqual(
+            event?.plan?.source,
+            "test-source"
+        )
+        XCTAssertEqual(
+            event?.plan?.version,
+            "test-version"
+        )
+        XCTAssertEqual(
+            event?.plan?.versionId,
+            "test-version-id"
+        )
+        XCTAssertEqual(
+            event?.ingestionMetadata?.sourceName,
+            "test-source-name"
+        )
+        XCTAssertEqual(
+            event?.ingestionMetadata?.sourceVersion,
+            "test-source-version"
         )
     }
 
