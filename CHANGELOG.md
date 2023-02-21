@@ -1,3 +1,10 @@
+## [0.3.2](https://github.com/amplitude/Amplitude-Swift/compare/v0.3.1...v0.3.2) (2023-02-21)
+
+
+### Bug Fixes
+
+* expose plan and ingestion metadata ([#41](https://github.com/amplitude/Amplitude-Swift/issues/41)) ([da85455](https://github.com/amplitude/Amplitude-Swift/commit/da85455c20b9eb8873032b016ede181ada1929f3))
+
 ## [0.3.1](https://github.com/amplitude/Amplitude-Swift/compare/v0.3.0...v0.3.1) (2023-02-14)
 
 
