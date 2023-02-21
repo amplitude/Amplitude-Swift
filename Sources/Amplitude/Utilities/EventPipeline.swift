@@ -198,7 +198,6 @@ extension EventPipeline {
         scheduleInterceptedIdentifyFlush()
     }
 
-
     private func removeInterceptedIdentifyEventFromStorage(_ storage: Storage) throws {
         try storage.write(key: StorageKey.INTERCEPTED_IDENTIFY, value: nil)
         identifyUploadTimer = nil
@@ -214,7 +213,7 @@ extension EventPipeline {
             let storage = self?.storage
             self?.identifyUploadTimer = nil
             if let flush, let storage {
-                if let _: BaseEvent = storage.read(key: StorageKey.INTERCEPTED_IDENTIFY) {
+                if storage.read(key: StorageKey.INTERCEPTED_IDENTIFY) as BaseEvent? != nil {
                     flush(true, nil)
                 }
             }

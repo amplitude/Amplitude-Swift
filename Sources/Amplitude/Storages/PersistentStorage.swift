@@ -21,7 +21,7 @@ class PersistentStorage: Storage {
 
     let syncQueue = DispatchQueue(label: "syncPersistentStorage.amplitude.com")
 
-    private var interceptedIdentifyEvent: BaseEvent? = nil
+    private var interceptedIdentifyEvent: BaseEvent?
     private var interceptedIdentifyEventCached: Bool = false
 
     init(apiKey: String = "") {
