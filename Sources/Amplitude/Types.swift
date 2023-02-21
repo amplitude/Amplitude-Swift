@@ -8,15 +8,38 @@
 import Foundation
 
 public struct Plan: Codable {
-    var branch: String?
-    var source: String?
-    var version: String?
-    var versionId: String?
+    public var branch: String?
+    public var source: String?
+    public var version: String?
+    public var versionId: String?
+
+    public init(branch: String? = nil, source: String? = nil, version: String? = nil, versionId: String? = nil) {
+        self.branch = branch
+        self.source = source
+        self.version = version
+        self.versionId = versionId
+    }
 }
 
 public struct IngestionMetadata: Codable {
-    var sourceName: String?
-    var sourceVersion: String?
+    public var sourceName: String?
+    public var sourceVersion: String?
+
+    enum CodingKeys: String, CodingKey {
+        case sourceName = "source_name"
+        case sourceVersion = "source_version"
+    }
+
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        sourceName = try values.decodeIfPresent(String.self, forKey: .sourceName)
+        sourceVersion = try values.decodeIfPresent(String.self, forKey: .sourceVersion)
+    }
+
+    public init(sourceName: String? = nil, sourceVersion: String? = nil) {
+        self.sourceName = sourceName
+        self.sourceVersion = sourceVersion
+    }
 }
 
 public typealias EventCallback = (BaseEvent, Int, String) -> Void
