@@ -24,8 +24,9 @@ final class IdentifyInterceptorTests: XCTestCase {
         pipeline = EventPipeline(amplitude: amplitude)
         pipeline.httpClient = httpClient
         interceptor = IdentifyInterceptor(
-            amplitude: amplitude,
+            configuration: configuration,
             pipeline: pipeline,
+            logger: nil,
             minIdentifyBatchInterval: Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
         )
     }

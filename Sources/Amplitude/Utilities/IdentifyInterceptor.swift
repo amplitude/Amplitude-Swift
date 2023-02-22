@@ -6,18 +6,25 @@ public class IdentifyInterceptor {
         Identify.Operation.SET.rawValue
     ])
 
-    private let amplitude: Amplitude
+    private let configuration: Configuration
     private let pipeline: EventPipeline
+    private let logger: (any Logger)?
     private var identifyTransferTimer: QueueTimer?
     private let minIdentifyBatchInterval: Int
 
     private lazy var storage: any Storage = {
-        return self.amplitude.configuration.storageProvider
+        return self.configuration.storageProvider
     }()
 
-    init(amplitude: Amplitude, pipeline: EventPipeline, minIdentifyBatchInterval: Int = Constants.Configuration.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS) {
-        self.amplitude = amplitude
+    init(
+        configuration: Configuration,
+        pipeline: EventPipeline,
+        logger: (any Logger)?,
+        minIdentifyBatchInterval: Int = Constants.Configuration.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS
+    ) {
+        self.configuration = configuration
         self.pipeline = pipeline
+        self.logger = logger
         self.minIdentifyBatchInterval = minIdentifyBatchInterval
     }
 
@@ -25,7 +32,7 @@ public class IdentifyInterceptor {
         do {
             return try interceptIdentifyEvent(event)
         } catch {
-            amplitude.logger?.error(message: "Error when intercept event: \(error.localizedDescription)")
+            logger?.error(message: "Error when intercept event: \(error.localizedDescription)")
             return event
         }
     }
@@ -60,7 +67,7 @@ public class IdentifyInterceptor {
                 return true
             }
         } catch {
-            amplitude.logger?.error(message: "Error when transfer intercepted identify event: \(error.localizedDescription)")
+            logger?.error(message: "Error when transfer intercepted identify event: \(error.localizedDescription)")
         }
         return false
     }
@@ -158,7 +165,7 @@ public class IdentifyInterceptor {
 
     private func getIdentifyBatchInterval() -> TimeInterval {
         let identifyBatchIntervalMillis = max(
-            amplitude.configuration.identifyBatchIntervalMillis,
+            configuration.identifyBatchIntervalMillis,
             minIdentifyBatchInterval
         )
         return TimeInterval.milliseconds(identifyBatchIntervalMillis)

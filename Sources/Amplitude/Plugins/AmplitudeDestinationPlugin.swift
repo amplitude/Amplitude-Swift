@@ -49,7 +49,11 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
     public override func setup(amplitude: Amplitude) {
         self.amplitude = amplitude
         pipeline = EventPipeline(amplitude: amplitude)
-        identifyInterceptor = IdentifyInterceptor(amplitude: amplitude, pipeline: pipeline!)
+        identifyInterceptor = IdentifyInterceptor(
+            configuration: amplitude.configuration,
+            pipeline: pipeline!,
+            logger: amplitude.logger
+        )
         pipeline?.start()
 
         add(plugin: IdentityEventSender())
