@@ -41,16 +41,22 @@ public class IdentifyInterceptor {
         var mergedInterceptedIdentifyEvent: BaseEvent?
         let interceptedIdentifyEvent = try getInterceptedIdentifyEventFromStorage()
         if let interceptedIdentifyEvent {
-            mergedInterceptedIdentifyEvent = mergeIdentifyEvents(event1: interceptedIdentifyEvent, event2: event)
+            mergedInterceptedIdentifyEvent = mergeEvents(destination: interceptedIdentifyEvent, source: event)
         }
 
         if let mergedInterceptedIdentifyEvent {
             try writeInterceptedIdentifyEventToStorage(mergedInterceptedIdentifyEvent)
             return nil
         } else {
-            transferInterceptedIdentifyEvent()
+            if let interceptedIdentifyEvent {
+                if let mergedEvent = mergeEvents(destination: event, source: interceptedIdentifyEvent) {
+                    try removeInterceptedIdentifyEventFromStorage()
+                    return mergedEvent
+                }
+                transferInterceptedIdentifyEvent()
+            }
 
-            if canMergeIdentifyEvent(event) {
+            if event.eventType == Constants.IDENTIFY_EVENT && isAllowedMergeDestination(event) {
                 try writeInterceptedIdentifyEventToStorage(event)
                 return nil
             } else {
@@ -96,15 +102,15 @@ public class IdentifyInterceptor {
         }
     }
 
-    func mergeIdentifyEvents(event1: BaseEvent, event2: BaseEvent) -> BaseEvent? {
-        guard canMergeIdentifyEvents(event1: event1, event2: event2) else {
+    func mergeEvents(destination: BaseEvent, source: BaseEvent) -> BaseEvent? {
+        guard canMergeEvents(destination: destination, source: source) else {
             return nil
         }
 
-        if let mergedUserProperties = mergeUserProperties(userProperties1: event1.userProperties, userProperties2: event2.userProperties) {
-            event1.userProperties = mergedUserProperties
+        if let mergedUserProperties = mergeUserProperties(userProperties1: destination.userProperties, userProperties2: source.userProperties) {
+            destination.userProperties = mergedUserProperties
         }
-        return event1
+        return destination
     }
 
     private func mergeUserProperties(userProperties1: [String: Any?]?, userProperties2: [String: Any?]?) -> [String: Any?]? {
@@ -136,15 +142,21 @@ public class IdentifyInterceptor {
         return result
     }
 
-    func canMergeIdentifyEvents(event1: BaseEvent, event2: BaseEvent) -> Bool {
-        return event1.userId == event2.userId && event1.deviceId == event2.deviceId
-            && canMergeIdentifyEvent(event1)
-            && canMergeIdentifyEvent(event2)
-            && (event1.userProperties?[Identify.Operation.CLEAR_ALL.rawValue] == nil
-                || event2.userProperties?[Identify.Operation.SET.rawValue] == nil)
+    func canMergeEvents(destination: BaseEvent, source: BaseEvent) -> Bool {
+        return destination.userId == source.userId && destination.deviceId == source.deviceId
+            && isAllowedMergeDestination(destination)
+            && isAllowedMergeSource(source)
+            && (destination.userProperties?[Identify.Operation.CLEAR_ALL.rawValue] == nil
+                || source.userProperties?[Identify.Operation.SET.rawValue] == nil)
     }
 
-    func canMergeIdentifyEvent(_ event: BaseEvent) -> Bool {
+    func isAllowedMergeDestination(_ event: BaseEvent) -> Bool {
+        return event.eventType != Constants.GROUP_IDENTIFY_EVENT
+            && isEmptyValues(event.groups)
+            && hasAllowedOperationsOnly(event.userProperties)
+    }
+
+    func isAllowedMergeSource(_ event: BaseEvent) -> Bool {
         return event.eventType == Constants.IDENTIFY_EVENT
             && isEmptyValues(event.groups)
             && hasAllowedOperationsOnly(event.userProperties)

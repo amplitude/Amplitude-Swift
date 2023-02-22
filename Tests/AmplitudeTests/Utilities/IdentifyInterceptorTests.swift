@@ -31,225 +31,293 @@ final class IdentifyInterceptorTests: XCTestCase {
         )
     }
 
-    func testCanMergeIdentifyEvent() {
+    func testIsAllowedMergeSource() {
         XCTAssertFalse(
-            interceptor.canMergeIdentifyEvent(BaseEvent(userId: "user-1", eventType: "testEvent"))
-        )
-        XCTAssertTrue(
-            interceptor.canMergeIdentifyEvent(BaseEvent(userId: "user-1", eventType: "$identify"))
-        )
-        XCTAssertTrue(
-            interceptor.canMergeIdentifyEvent(BaseEvent(eventType: "$identify", groups: [String: Any?]()))
+            interceptor.isAllowedMergeSource(BaseEvent(userId: "user-1", eventType: "testEvent"))
         )
         XCTAssertFalse(
-            interceptor.canMergeIdentifyEvent(BaseEvent(eventType: "$identify", groups: ["key-1": "value-1"]))
+            interceptor.isAllowedMergeSource(BaseEvent(userId: "user-1", eventType: "$groupidentify"))
         )
         XCTAssertTrue(
-            interceptor.canMergeIdentifyEvent(BaseEvent(eventType: "$identify", userProperties: [String: Any?]()))
+            interceptor.isAllowedMergeSource(BaseEvent(userId: "user-1", eventType: "$identify"))
         )
         XCTAssertTrue(
-            interceptor.canMergeIdentifyEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]))
+            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", groups: [String: Any?]()))
+        )
+        XCTAssertFalse(
+            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", groups: ["key-1": "value-1"]))
         )
         XCTAssertTrue(
-            interceptor.canMergeIdentifyEvent(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]))
+            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: [String: Any?]()))
         )
         XCTAssertTrue(
-            interceptor.canMergeIdentifyEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$clearAll": "-"]))
+            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]))
+        )
+        XCTAssertTrue(
+            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]))
+        )
+        XCTAssertTrue(
+            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$clearAll": "-"]))
         )
         XCTAssertFalse(
-            interceptor.canMergeIdentifyEvent(BaseEvent(eventType: "$identify", userProperties: ["$add": [String: Any?]()]))
+            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$add": [String: Any?]()]))
         )
         XCTAssertFalse(
-            interceptor.canMergeIdentifyEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$add": [String: Any?]()]))
+            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$add": [String: Any?]()]))
         )
         XCTAssertFalse(
-            interceptor.canMergeIdentifyEvent(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-", "$add": [String: Any?]()]))
+            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-", "$add": [String: Any?]()]))
         )
         XCTAssertFalse(
-            interceptor.canMergeIdentifyEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$clearAll": "-", "$add": [String: Any?]()]))
+            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$clearAll": "-", "$add": [String: Any?]()]))
         )
     }
 
-    func testCanMergeIdentifyEvents() {
+    func testIsAllowedMergeDestination() {
         XCTAssertTrue(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(userId: "user-1", eventType: "$identify"),
-                event2: BaseEvent(userId: "user-1", eventType: "$identify")
-            )
+            interceptor.isAllowedMergeDestination(BaseEvent(userId: "user-1", eventType: "testEvent"))
+        )
+        XCTAssertFalse(
+            interceptor.isAllowedMergeDestination(BaseEvent(userId: "user-1", eventType: "$groupidentify"))
         )
         XCTAssertTrue(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(deviceId: "device-1", eventType: "$identify"),
-                event2: BaseEvent(deviceId: "device-1", eventType: "$identify")
-            )
+            interceptor.isAllowedMergeDestination(BaseEvent(userId: "user-1", eventType: "$identify"))
         )
         XCTAssertTrue(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(userId: "user-1", deviceId: "device-1", eventType: "$identify"),
-                event2: BaseEvent(userId: "user-1", deviceId: "device-1", eventType: "$identify")
-            )
+            interceptor.isAllowedMergeDestination(BaseEvent(eventType: "$identify", groups: [String: Any?]()))
         )
+        XCTAssertFalse(
+            interceptor.isAllowedMergeDestination(BaseEvent(eventType: "testEvent", groups: ["key-1": "value-1"]))
+        )
+        XCTAssertTrue(
+            interceptor.isAllowedMergeDestination(BaseEvent(eventType: "$identify", userProperties: [String: Any?]()))
+        )
+        XCTAssertTrue(
+            interceptor.isAllowedMergeDestination(BaseEvent(eventType: "testEvent", userProperties: ["$set": [String: Any?]()]))
+        )
+        XCTAssertTrue(
+            interceptor.isAllowedMergeDestination(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]))
+        )
+        XCTAssertTrue(
+            interceptor.isAllowedMergeDestination(BaseEvent(eventType: "testEvent", userProperties: ["$set": [String: Any?](), "$clearAll": "-"]))
+        )
+        XCTAssertFalse(
+            interceptor.isAllowedMergeDestination(BaseEvent(eventType: "$identify", userProperties: ["$add": [String: Any?]()]))
+        )
+        XCTAssertFalse(
+            interceptor.isAllowedMergeDestination(BaseEvent(eventType: "testEvent", userProperties: ["$set": [String: Any?](), "$add": [String: Any?]()]))
+        )
+        XCTAssertFalse(
+            interceptor.isAllowedMergeDestination(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-", "$add": [String: Any?]()]))
+        )
+        XCTAssertFalse(
+            interceptor.isAllowedMergeDestination(BaseEvent(eventType: "testEvent", userProperties: ["$set": [String: Any?](), "$clearAll": "-", "$add": [String: Any?]()]))
+        )
+    }
 
-        XCTAssertFalse(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(userId: "user-1", eventType: "$identify"),
-                event2: BaseEvent(eventType: "$identify")
-            )
-        )
-        XCTAssertFalse(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(eventType: "$identify"),
-                event2: BaseEvent(deviceId: "device-1", eventType: "$identify")
-            )
-        )
-        XCTAssertFalse(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(userId: "user-1", eventType: "$identify"),
-                event2: BaseEvent(userId: "user-2", eventType: "$identify")
-            )
-        )
-        XCTAssertFalse(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(deviceId: "device-1", eventType: "$identify"),
-                event2: BaseEvent(deviceId: "device-2", eventType: "$identify")
-            )
-        )
-        XCTAssertFalse(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(userId: "user-1", deviceId: "device-1", eventType: "$identify"),
-                event2: BaseEvent(userId: "user-1", deviceId: "device-2", eventType: "$identify")
-            )
-        )
-        XCTAssertFalse(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(userId: "user-1", deviceId: "device-1", eventType: "$identify"),
-                event2: BaseEvent(userId: "user-2", deviceId: "device-1", eventType: "$identify")
-            )
-        )
-        XCTAssertFalse(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(userId: "user-1", eventType: "$identify"),
-                event2: BaseEvent(deviceId: "device-1", eventType: "$identify")
-            )
-        )
-
+    func testCanMergeEvents() {
         XCTAssertTrue(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]),
-                event2: BaseEvent(eventType: "$identify", userProperties: [String: Any?]())
+            interceptor.canMergeEvents(
+                destination: BaseEvent(userId: "user-1", eventType: "$identify"),
+                source: BaseEvent(userId: "user-1", eventType: "$identify")
             )
         )
         XCTAssertTrue(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(eventType: "$identify"),
-                event2: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
+            interceptor.canMergeEvents(
+                destination: BaseEvent(deviceId: "device-1", eventType: "$identify"),
+                source: BaseEvent(deviceId: "device-1", eventType: "$identify")
             )
         )
         XCTAssertTrue(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]),
-                event2: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()])
-            )
-        )
-        XCTAssertTrue(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]),
-                event2: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
-            )
-        )
-        XCTAssertTrue(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$clearAll": "-"]),
-                event2: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
-            )
-        )
-        XCTAssertTrue(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]),
-                event2: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$clearAll": "-"])
-            )
-        )
-        XCTAssertTrue(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]),
-                event2: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
+            interceptor.canMergeEvents(
+                destination: BaseEvent(userId: "user-1", deviceId: "device-1", eventType: "$identify"),
+                source: BaseEvent(userId: "user-1", deviceId: "device-1", eventType: "$identify")
             )
         )
         XCTAssertFalse(
-            interceptor.canMergeIdentifyEvents(
-                event1: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]),
-                event2: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()])
+            interceptor.canMergeEvents(
+                destination: BaseEvent(userId: "user-1", eventType: "$identify"),
+                source: BaseEvent(eventType: "$identify")
+            )
+        )
+        XCTAssertFalse(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(eventType: "$identify"),
+                source: BaseEvent(deviceId: "device-1", eventType: "$identify")
+            )
+        )
+        XCTAssertFalse(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(userId: "user-1", eventType: "$identify"),
+                source: BaseEvent(userId: "user-2", eventType: "$identify")
+            )
+        )
+        XCTAssertFalse(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(deviceId: "device-1", eventType: "$identify"),
+                source: BaseEvent(deviceId: "device-2", eventType: "$identify")
+            )
+        )
+        XCTAssertFalse(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(userId: "user-1", deviceId: "device-1", eventType: "$identify"),
+                source: BaseEvent(userId: "user-1", deviceId: "device-2", eventType: "$identify")
+            )
+        )
+        XCTAssertFalse(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(userId: "user-1", deviceId: "device-1", eventType: "$identify"),
+                source: BaseEvent(userId: "user-2", deviceId: "device-1", eventType: "$identify")
+            )
+        )
+        XCTAssertFalse(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(userId: "user-1", eventType: "$identify"),
+                source: BaseEvent(deviceId: "device-1", eventType: "$identify")
+            )
+        )
+        XCTAssertTrue(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]),
+                source: BaseEvent(eventType: "$identify", userProperties: [String: Any?]())
+            )
+        )
+        XCTAssertTrue(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(eventType: "$identify"),
+                source: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
+            )
+        )
+        XCTAssertTrue(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]),
+                source: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()])
+            )
+        )
+        XCTAssertTrue(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]),
+                source: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
+            )
+        )
+        XCTAssertTrue(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$clearAll": "-"]),
+                source: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
+            )
+        )
+        XCTAssertTrue(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]),
+                source: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$clearAll": "-"])
+            )
+        )
+        XCTAssertTrue(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]),
+                source: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
+            )
+        )
+        XCTAssertFalse(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]),
+                source: BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()])
+            )
+        )
+        XCTAssertTrue(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(eventType: "someEvent"),
+                source: BaseEvent(eventType: "$identify")
+            )
+        )
+        XCTAssertFalse(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(eventType: "$identify"),
+                source: BaseEvent(eventType: "someEvent")
+            )
+        )
+        XCTAssertFalse(
+            interceptor.canMergeEvents(
+                destination: BaseEvent(eventType: "someEvent"),
+                source: BaseEvent(eventType: "someEvent")
             )
         )
     }
 
     func testMergeIdentifyEvents() {
-        var mergedEvent = interceptor.mergeIdentifyEvents(
-            event1: BaseEvent(userId: "user-1", eventType: "$identify"),
-            event2: BaseEvent(userId: "user-1", eventType: "$identify")
+        var mergedEvent = interceptor.mergeEvents(
+            destination: BaseEvent(userId: "user-1", eventType: "$identify"),
+            source: BaseEvent(userId: "user-1", eventType: "$identify")
         )
         XCTAssertNotNil(mergedEvent)
         XCTAssertEqual(mergedEvent!.userId, "user-1")
         XCTAssertNil(mergedEvent!.userProperties)
 
-        mergedEvent = interceptor.mergeIdentifyEvents(
-            event1: BaseEvent(deviceId: "device-1", eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]]),
-            event2: BaseEvent(deviceId: "device-1", eventType: "$identify")
+        mergedEvent = interceptor.mergeEvents(
+            destination: BaseEvent(deviceId: "device-1", eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]]),
+            source: BaseEvent(deviceId: "device-1", eventType: "$identify")
         )
         XCTAssertNotNil(mergedEvent)
         XCTAssertEqual(mergedEvent!.deviceId, "device-1")
         XCTAssertNotNil(mergedEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: mergedEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
-        mergedEvent = interceptor.mergeIdentifyEvents(
-            event1: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]),
-            event2: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
+        mergedEvent = interceptor.mergeEvents(
+            destination: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]),
+            source: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
         )
         XCTAssertNotNil(mergedEvent)
         XCTAssertNotNil(mergedEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: mergedEvent!.userProperties!).isEqual(to: ["$clearAll": "-"]))
 
-        mergedEvent = interceptor.mergeIdentifyEvents(
-            event1: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]]),
-            event2: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
+        mergedEvent = interceptor.mergeEvents(
+            destination: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]]),
+            source: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
         )
         XCTAssertNotNil(mergedEvent)
         XCTAssertNotNil(mergedEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: mergedEvent!.userProperties!).isEqual(to: ["$clearAll": "-"]))
 
-        mergedEvent = interceptor.mergeIdentifyEvents(
-            event1: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]),
-            event2: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
+        mergedEvent = interceptor.mergeEvents(
+            destination: BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]),
+            source: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
         )
         XCTAssertNil(mergedEvent)
 
-        mergedEvent = interceptor.mergeIdentifyEvents(
-            event1: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]]),
-            event2: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-2", "key-3": "value-3"]])
+        mergedEvent = interceptor.mergeEvents(
+            destination: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]]),
+            source: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-2", "key-3": "value-3"]])
         )
         XCTAssertNotNil(mergedEvent)
         XCTAssertNotNil(mergedEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: mergedEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1-2", "key-2": "value-2", "key-3": "value-3"]]))
 
-        mergedEvent = interceptor.mergeIdentifyEvents(
-            event1: BaseEvent(eventType: "$identify"),
-            event2: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1", "key-2": "value-2"]])
+        mergedEvent = interceptor.mergeEvents(
+            destination: BaseEvent(eventType: "$identify"),
+            source: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1", "key-2": "value-2"]])
         )
         XCTAssertNotNil(mergedEvent)
         XCTAssertNotNil(mergedEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: mergedEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1", "key-2": "value-2"]]))
 
-        mergedEvent = interceptor.mergeIdentifyEvents(
-            event1: BaseEvent(userId: "user-1", eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]]),
-            event2: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-2", "key-3": "value-3"]])
+        mergedEvent = interceptor.mergeEvents(
+            destination: BaseEvent(userId: "user-1", eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]]),
+            source: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-2", "key-3": "value-3"]])
         )
         XCTAssertNil(mergedEvent)
 
-        mergedEvent = interceptor.mergeIdentifyEvents(
-            event1: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]]),
-            event2: BaseEvent(eventType: "someEvent", userProperties: ["$set": ["key-1": "value-1-2", "key-3": "value-3"]])
+        mergedEvent = interceptor.mergeEvents(
+            destination: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]]),
+            source: BaseEvent(eventType: "someEvent", userProperties: ["$set": ["key-1": "value-1-2", "key-3": "value-3"]])
         )
-        XCTAssertNil(mergedEvent)
+
+        mergedEvent = interceptor.mergeEvents(
+            destination: BaseEvent(eventType: "someEvent", userProperties: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]]),
+            source: BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-2", "key-3": "value-3"]])
+        )
+        XCTAssertNotNil(mergedEvent)
+        XCTAssertNotNil(mergedEvent!.userProperties)
+        XCTAssertTrue(NSDictionary(dictionary: mergedEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1-2", "key-2": "value-2", "key-3": "value-3"]]))
     }
 
     func testInterceptIdentifyEvents() {
@@ -289,9 +357,28 @@ final class IdentifyInterceptorTests: XCTestCase {
         XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-2": "value-2"]]))
     }
 
-    func testInterceptIdentifyAndSomeEvents() {
+    func testInterceptIdentifyAndSomeEvent() {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
         let testEvent2 = BaseEvent(eventType: "someEvent")
+
+        var event = interceptor.intercept(event: testEvent1)
+        XCTAssertNil(event)
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent)
+        XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
+        XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+
+        event = interceptor.intercept(event: testEvent2)
+        XCTAssertNotNil(event)
+        XCTAssertEqual(event!.eventType, "someEvent")
+        XCTAssertTrue(NSDictionary(dictionary: event!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertNil(storage.interceptedIdentifyEvent)
+    }
+
+    func testInterceptIdentifyAndSomeIncompatibleEvent() {
+        let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
+        let testEvent2 = BaseEvent(userId: "user-1", eventType: "someEvent")
 
         var event = interceptor.intercept(event: testEvent1)
         XCTAssertNil(event)
