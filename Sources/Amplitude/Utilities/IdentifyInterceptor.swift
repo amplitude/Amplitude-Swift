@@ -48,7 +48,7 @@ public class IdentifyInterceptor {
             try writeInterceptedIdentifyEventToStorage(mergedInterceptedIdentifyEvent)
             return nil
         } else {
-            _ = transferInterceptedIdentifyEvent()
+            transferInterceptedIdentifyEvent()
 
             if canMergeIdentifyEvent(event) {
                 try writeInterceptedIdentifyEventToStorage(event)
@@ -59,17 +59,15 @@ public class IdentifyInterceptor {
         }
     }
 
-    func transferInterceptedIdentifyEvent() -> Bool {
+    func transferInterceptedIdentifyEvent() {
         do {
             if let interceptedIdentifyEvent = try getInterceptedIdentifyEventFromStorage() {
                 pipeline.put(event: interceptedIdentifyEvent)
                 try removeInterceptedIdentifyEventFromStorage()
-                return true
             }
         } catch {
             logger?.error(message: "Error when transfer intercepted identify event: \(error.localizedDescription)")
         }
-        return false
     }
 
     private func getInterceptedIdentifyEventFromStorage() throws -> BaseEvent? {
@@ -78,7 +76,7 @@ public class IdentifyInterceptor {
 
     private func writeInterceptedIdentifyEventToStorage(_ event: BaseEvent) throws {
         try storage.write(key: StorageKey.INTERCEPTED_IDENTIFY, value: event)
-        scheduleInterceptedIdentifyFlush()
+        scheduleTransferInterceptedIdentifyEvent()
     }
 
     private func removeInterceptedIdentifyEventFromStorage() throws {
@@ -86,18 +84,15 @@ public class IdentifyInterceptor {
         identifyTransferTimer = nil
     }
 
-    private func scheduleInterceptedIdentifyFlush() {
+    private func scheduleTransferInterceptedIdentifyEvent() {
         guard identifyTransferTimer == nil else {
             return
         }
 
         identifyTransferTimer = QueueTimer(interval: getIdentifyBatchInterval(), once: true) { [weak self] in
-            let transferred = self?.transferInterceptedIdentifyEvent() == true
-            let flush = self?.pipeline.flush
+            let transferInterceptedIdentifyEvent = self?.transferInterceptedIdentifyEvent
             self?.identifyTransferTimer = nil
-            if transferred {
-                flush?(nil)
-            }
+            transferInterceptedIdentifyEvent?()
         }
     }
 

@@ -42,7 +42,7 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
     }
 
     public override func flush() {
-        _ = identifyInterceptor?.transferInterceptedIdentifyEvent()
+        identifyInterceptor?.transferInterceptedIdentifyEvent()
         pipeline?.flush()
     }
 

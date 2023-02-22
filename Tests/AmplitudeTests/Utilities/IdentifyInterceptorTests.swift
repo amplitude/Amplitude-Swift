@@ -309,9 +309,6 @@ final class IdentifyInterceptorTests: XCTestCase {
     }
 
     func testInterceptIdentifyEventAndWaitForUploadInterval() {
-        let upload1Expectation = expectation(description: "upload")
-        httpClient.uploadExpectations = [upload1Expectation]
-
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
 
         let event = interceptor.intercept(event: testEvent1)
@@ -321,22 +318,13 @@ final class IdentifyInterceptorTests: XCTestCase {
         XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
-        let waitResult = XCTWaiter.wait(for: [upload1Expectation], timeout: Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS + 0.5)
-        XCTAssertNotEqual(waitResult, .timedOut)
-        XCTAssertEqual(pipeline.eventCount, 0)
-        XCTAssertEqual(httpClient.uploadCount, 1)
-        let uploadedEvents = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[0])
-        XCTAssertEqual(uploadedEvents?.count, 1)
-        XCTAssertEqual(uploadedEvents![0].eventType, "$identify")
-        XCTAssertTrue(NSDictionary(dictionary: uploadedEvents![0].userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+        let dummyExpectation = expectation(description: "dummy")
+        _ = XCTWaiter.wait(for: [dummyExpectation], timeout: TimeInterval.seconds(Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS + 1)))
+        XCTAssertEqual(pipeline.eventCount, 1)
         XCTAssertNil(storage.interceptedIdentifyEvent)
     }
 
-    func testPutIdentifyEventsAndWaitForUploadInterval() {
-        let upload1Expectation = expectation(description: "upload1")
-        let upload2Expectation = expectation(description: "upload2")
-        httpClient.uploadExpectations = [upload1Expectation, upload2Expectation]
-
+    func testInterceptIdentifyEventsAndWaitForUploadInterval() {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
 
         var event = interceptor.intercept(event: testEvent1)
@@ -346,33 +334,23 @@ final class IdentifyInterceptorTests: XCTestCase {
         XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
-        var waitResult = XCTWaiter.wait(for: [upload1Expectation], timeout: Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS + 0.5)
-        XCTAssertNotEqual(waitResult, .timedOut)
-        XCTAssertEqual(pipeline.eventCount, 0)
-        XCTAssertEqual(httpClient.uploadCount, 1)
-        var uploadedEvents = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[0])
-        XCTAssertEqual(uploadedEvents?.count, 1)
-        XCTAssertEqual(uploadedEvents![0].eventType, "$identify")
-        XCTAssertTrue(NSDictionary(dictionary: uploadedEvents![0].userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
+        let dummy1Expectation = expectation(description: "dummy1")
+        _ = XCTWaiter.wait(for: [dummy1Expectation], timeout: TimeInterval.seconds(Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS + 1)))
+        XCTAssertEqual(pipeline.eventCount, 1)
         XCTAssertNil(storage.interceptedIdentifyEvent)
 
         let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
 
         event = interceptor.intercept(event: testEvent2)
         XCTAssertNil(event)
-        XCTAssertEqual(pipeline.eventCount, 0)
+        XCTAssertEqual(pipeline.eventCount, 1)
         XCTAssertNotNil(storage.interceptedIdentifyEvent)
         XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-2": "value-2"]]))
 
-        waitResult = XCTWaiter.wait(for: [upload2Expectation], timeout: Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS + 0.5)
-        XCTAssertNotEqual(waitResult, .timedOut)
-        XCTAssertEqual(pipeline.eventCount, 0)
-        XCTAssertEqual(httpClient.uploadCount, 2)
-        uploadedEvents = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[1])
-        XCTAssertEqual(uploadedEvents?.count, 1)
-        XCTAssertEqual(uploadedEvents![0].eventType, "$identify")
-        XCTAssertTrue(NSDictionary(dictionary: uploadedEvents![0].userProperties!).isEqual(to: ["$set": ["key-2": "value-2"]]))
+        let dummy2Expectation = expectation(description: "dummy2")
+        _ = XCTWaiter.wait(for: [dummy2Expectation], timeout: TimeInterval.seconds(Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS + 1)))
+        XCTAssertEqual(pipeline.eventCount, 2)
         XCTAssertNil(storage.interceptedIdentifyEvent)
     }
 }
