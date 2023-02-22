@@ -30,7 +30,7 @@ public class Configuration {
     var flushEventsOnClose: Bool?
     var minTimeBetweenSessionsMillis: Int
     var trackingSessionEvents: Bool?
-    var identifyUploadIntervalMillis: Int
+    var identifyBatchIntervalMillis: Int
 
     public init(
         apiKey: String,
@@ -53,10 +53,9 @@ public class Configuration {
         trackingOptions: TrackingOptions = TrackingOptions(),
         enableCoppaControl: Bool = false,
         flushEventsOnClose: Bool = true,
-        minTimeBetweenSessionsMillis: Int = Constants.Configuration
-            .MIN_TIME_BETWEEN_SESSIONS_MILLIS,
+        minTimeBetweenSessionsMillis: Int = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS,
         trackingSessionEvents: Bool = true,
-        identifyUploadIntervalMillis: Int = Constants.Configuration.IDENTIFY_UPLOAD_INTERVAL_MILLIS
+        identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS
     ) {
         self.apiKey = apiKey
         self.flushQueueSize = flushQueueSize
@@ -80,7 +79,7 @@ public class Configuration {
         self.flushEventsOnClose = flushEventsOnClose
         self.minTimeBetweenSessionsMillis = minTimeBetweenSessionsMillis
         self.trackingSessionEvents = trackingSessionEvents
-        self.identifyUploadIntervalMillis = identifyUploadIntervalMillis
+        self.identifyBatchIntervalMillis = identifyBatchIntervalMillis
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
     }

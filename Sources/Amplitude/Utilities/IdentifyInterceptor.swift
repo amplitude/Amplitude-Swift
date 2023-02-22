@@ -8,17 +8,17 @@ public class IdentifyInterceptor {
 
     private let amplitude: Amplitude
     private let pipeline: EventPipeline
-    private var identifyUploadTimer: QueueTimer?
-    private let minIdentifyUploadInterval: Int
+    private var identifyTransferTimer: QueueTimer?
+    private let minIdentifyBatchInterval: Int
 
     private lazy var storage: any Storage = {
         return self.amplitude.configuration.storageProvider
     }()
 
-    init(amplitude: Amplitude, pipeline: EventPipeline, minIdentifyUploadInterval: Int = Constants.Configuration.MIN_IDENTIFY_UPLOAD_INTERVAL_MILLIS) {
+    init(amplitude: Amplitude, pipeline: EventPipeline, minIdentifyBatchInterval: Int = Constants.Configuration.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS) {
         self.amplitude = amplitude
         self.pipeline = pipeline
-        self.minIdentifyUploadInterval = minIdentifyUploadInterval
+        self.minIdentifyBatchInterval = minIdentifyBatchInterval
     }
 
     public func intercept(event: BaseEvent) -> BaseEvent? {
@@ -76,18 +76,18 @@ public class IdentifyInterceptor {
 
     private func removeInterceptedIdentifyEventFromStorage() throws {
         try storage.write(key: StorageKey.INTERCEPTED_IDENTIFY, value: nil)
-        identifyUploadTimer = nil
+        identifyTransferTimer = nil
     }
 
     private func scheduleInterceptedIdentifyFlush() {
-        guard identifyUploadTimer == nil else {
+        guard identifyTransferTimer == nil else {
             return
         }
 
-        identifyUploadTimer = QueueTimer(interval: getIdentifyUploadInterval(), repeatInterval: .infinity) { [weak self] in
+        identifyTransferTimer = QueueTimer(interval: getIdentifyBatchInterval(), repeatInterval: .infinity) { [weak self] in
             let transferred = self?.transferInterceptedIdentifyEvent() == true
             let flush = self?.pipeline.flush
-            self?.identifyUploadTimer = nil
+            self?.identifyTransferTimer = nil
             if transferred {
                 flush?(nil)
             }
@@ -156,11 +156,11 @@ public class IdentifyInterceptor {
         return isEmptyValues(values) || values!.allSatisfy { key, _ in Self.allowedOperations.contains(key) }
     }
 
-    private func getIdentifyUploadInterval() -> TimeInterval {
-        let identifyUploadIntervalMillis = max(
-                amplitude.configuration.identifyUploadIntervalMillis,
-                minIdentifyUploadInterval
+    private func getIdentifyBatchInterval() -> TimeInterval {
+        let identifyBatchIntervalMillis = max(
+            amplitude.configuration.identifyBatchIntervalMillis,
+            minIdentifyBatchInterval
         )
-        return TimeInterval.milliseconds(identifyUploadIntervalMillis)
+        return TimeInterval.milliseconds(identifyBatchIntervalMillis)
     }
 }

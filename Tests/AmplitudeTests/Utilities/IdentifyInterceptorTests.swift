@@ -17,7 +17,7 @@ final class IdentifyInterceptorTests: XCTestCase {
         configuration = Configuration(
             apiKey: "testApiKey",
             storageProvider: storage,
-            identifyUploadIntervalMillis: Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
+            identifyBatchIntervalMillis: Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
         )
         let amplitude = Amplitude(configuration: configuration)
         httpClient = FakeHttpClient(configuration: configuration)
@@ -26,7 +26,7 @@ final class IdentifyInterceptorTests: XCTestCase {
         interceptor = IdentifyInterceptor(
             amplitude: amplitude,
             pipeline: pipeline,
-            minIdentifyUploadInterval: Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
+            minIdentifyBatchInterval: Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
         )
     }
 
