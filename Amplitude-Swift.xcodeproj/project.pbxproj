@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
 		BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */; };
 		BA9BEA4D299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
@@ -99,6 +100,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueueTimeTests.swift; sourceTree = "<group>"; };
 		BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptor.swift; sourceTree = "<group>"; };
 		BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptorTests.swift; sourceTree = "<group>"; };
 		OBJ_10 /* ConsoleLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleLogger.swift; sourceTree = "<group>"; };
@@ -364,6 +366,7 @@
 				OBJ_73 /* PersistentStorageResponseHandlerTests.swift */,
 				OBJ_74 /* UrlExtensionTests.swift */,
 				BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */,
+				8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -487,6 +490,7 @@
 				OBJ_156 /* HttpClientTests.swift in Sources */,
 				OBJ_157 /* PersistentStorageResponseHandlerTests.swift in Sources */,
 				OBJ_158 /* UrlExtensionTests.swift in Sources */,
+				8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

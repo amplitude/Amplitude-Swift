@@ -91,7 +91,7 @@ public class IdentifyInterceptor {
             return
         }
 
-        identifyTransferTimer = QueueTimer(interval: getIdentifyBatchInterval(), repeatInterval: .infinity) { [weak self] in
+        identifyTransferTimer = QueueTimer(interval: getIdentifyBatchInterval(), once: true) { [weak self] in
             let transferred = self?.transferInterceptedIdentifyEvent() == true
             let flush = self?.pipeline.flush
             self?.identifyTransferTimer = nil
