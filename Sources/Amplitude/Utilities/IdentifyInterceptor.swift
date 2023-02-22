@@ -28,16 +28,15 @@ public class IdentifyInterceptor {
         self.minIdentifyBatchInterval = minIdentifyBatchInterval
     }
 
-    public func intercept(event: BaseEvent) -> BaseEvent? {
+    public func intercept(event: BaseEvent) {
         do {
-            return try interceptIdentifyEvent(event)
+            try interceptIdentifyEvent(event)
         } catch {
             logger?.error(message: "Error when intercept event: \(error.localizedDescription)")
-            return event
         }
     }
 
-    private func interceptIdentifyEvent(_ event: BaseEvent) throws -> BaseEvent? {
+    private func interceptIdentifyEvent(_ event: BaseEvent) throws {
         var mergedInterceptedIdentifyEvent: BaseEvent?
         let interceptedIdentifyEvent = try getInterceptedIdentifyEventFromStorage()
         if let interceptedIdentifyEvent {
@@ -46,21 +45,22 @@ public class IdentifyInterceptor {
 
         if let mergedInterceptedIdentifyEvent {
             try writeInterceptedIdentifyEventToStorage(mergedInterceptedIdentifyEvent)
-            return nil
+            return
         } else {
             if let interceptedIdentifyEvent {
                 if let mergedEvent = mergeEvents(destination: event, source: interceptedIdentifyEvent) {
+                    pipeline.put(event: mergedEvent)
                     try removeInterceptedIdentifyEventFromStorage()
-                    return mergedEvent
+                    return
                 }
+
                 transferInterceptedIdentifyEvent()
             }
 
             if event.eventType == Constants.IDENTIFY_EVENT && isAllowedMergeDestination(event) {
                 try writeInterceptedIdentifyEventToStorage(event)
-                return nil
             } else {
-                return event
+                pipeline.put(event: event)
             }
         }
     }

@@ -10,7 +10,7 @@ final class QueueTimerTests: XCTestCase {
             XCTestExpectation(description: "tick 3")
         ]
         var currentExpectationIndex: Int = 0
-        var timer: QueueTimer? = QueueTimer(interval: TimeInterval.milliseconds(100)) {
+        let timer: QueueTimer? = QueueTimer(interval: TimeInterval.milliseconds(100)) {
             if currentExpectationIndex < expectations.count {
                 expectations[currentExpectationIndex].fulfill()
                 currentExpectationIndex += 1
@@ -18,7 +18,7 @@ final class QueueTimerTests: XCTestCase {
         }
 
         let waitResult = XCTWaiter.wait(for: expectations, timeout: 1)
-        timer = nil
+        timer?.suspend()
         XCTAssertNotEqual(waitResult, .timedOut)
         XCTAssertEqual(currentExpectationIndex, expectations.count)
     }
@@ -30,7 +30,7 @@ final class QueueTimerTests: XCTestCase {
             XCTestExpectation(description: "tick 3")
         ]
         var currentExpectationIndex: Int = 0
-        var timer: QueueTimer? = QueueTimer(interval: TimeInterval.milliseconds(100), once: true) {
+        let timer: QueueTimer? = QueueTimer(interval: TimeInterval.milliseconds(100), once: true) {
             if currentExpectationIndex < expectations.count {
                 expectations[currentExpectationIndex].fulfill()
                 currentExpectationIndex += 1
@@ -38,7 +38,7 @@ final class QueueTimerTests: XCTestCase {
         }
 
         let waitResult = XCTWaiter.wait(for: expectations, timeout: 1)
-        timer = nil
+        timer?.suspend()
         XCTAssertEqual(waitResult, .timedOut)
         XCTAssertEqual(currentExpectationIndex, 1)
     }

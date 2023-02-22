@@ -324,15 +324,14 @@ final class IdentifyInterceptorTests: XCTestCase {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
         let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
 
-        var event = interceptor.intercept(event: testEvent1)
-        XCTAssertNil(event)
+        interceptor.intercept(event: testEvent1)
         XCTAssertEqual(pipeline.eventCount, 0)
         XCTAssertNotNil(storage.interceptedIdentifyEvent)
         XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
-        event = interceptor.intercept(event: testEvent2)
-        XCTAssertNil(event)
+        interceptor.intercept(event: testEvent2)
+        XCTAssertEqual(pipeline.eventCount, 0)
         XCTAssertNotNil(storage.interceptedIdentifyEvent)
         XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1", "key-2": "value-2"]]))
@@ -342,15 +341,13 @@ final class IdentifyInterceptorTests: XCTestCase {
         let testEvent1 = BaseEvent(userId: "user-1", eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
         let testEvent2 = BaseEvent(userId: "user-2", eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
 
-        var event = interceptor.intercept(event: testEvent1)
-        XCTAssertNil(event)
+        interceptor.intercept(event: testEvent1)
         XCTAssertEqual(pipeline.eventCount, 0)
         XCTAssertNotNil(storage.interceptedIdentifyEvent)
         XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
-        event = interceptor.intercept(event: testEvent2)
-        XCTAssertNil(event)
+        interceptor.intercept(event: testEvent2)
         XCTAssertEqual(pipeline.eventCount, 1)
         XCTAssertNotNil(storage.interceptedIdentifyEvent)
         XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
@@ -361,18 +358,14 @@ final class IdentifyInterceptorTests: XCTestCase {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
         let testEvent2 = BaseEvent(eventType: "someEvent")
 
-        var event = interceptor.intercept(event: testEvent1)
-        XCTAssertNil(event)
+        interceptor.intercept(event: testEvent1)
         XCTAssertEqual(pipeline.eventCount, 0)
         XCTAssertNotNil(storage.interceptedIdentifyEvent)
         XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
-        event = interceptor.intercept(event: testEvent2)
-        XCTAssertNotNil(event)
-        XCTAssertEqual(event!.eventType, "someEvent")
-        XCTAssertTrue(NSDictionary(dictionary: event!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
-        XCTAssertEqual(pipeline.eventCount, 0)
+        interceptor.intercept(event: testEvent2)
+        XCTAssertEqual(pipeline.eventCount, 1)
         XCTAssertNil(storage.interceptedIdentifyEvent)
     }
 
@@ -380,26 +373,21 @@ final class IdentifyInterceptorTests: XCTestCase {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
         let testEvent2 = BaseEvent(userId: "user-1", eventType: "someEvent")
 
-        var event = interceptor.intercept(event: testEvent1)
-        XCTAssertNil(event)
+        interceptor.intercept(event: testEvent1)
         XCTAssertEqual(pipeline.eventCount, 0)
         XCTAssertNotNil(storage.interceptedIdentifyEvent)
         XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
         XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
-        event = interceptor.intercept(event: testEvent2)
-        XCTAssertNotNil(event)
-        XCTAssertEqual(event!.eventType, "someEvent")
-        XCTAssertNil(event!.userProperties)
-        XCTAssertEqual(pipeline.eventCount, 1)
+        interceptor.intercept(event: testEvent2)
+        XCTAssertEqual(pipeline.eventCount, 2)
         XCTAssertNil(storage.interceptedIdentifyEvent)
     }
 
     func testInterceptIdentifyEventAndWaitForUploadInterval() {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
 
-        let event = interceptor.intercept(event: testEvent1)
-        XCTAssertNil(event)
+        interceptor.intercept(event: testEvent1)
         XCTAssertEqual(pipeline.eventCount, 0)
         XCTAssertNotNil(storage.interceptedIdentifyEvent)
         XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
@@ -414,8 +402,7 @@ final class IdentifyInterceptorTests: XCTestCase {
     func testInterceptIdentifyEventsAndWaitForUploadInterval() {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
 
-        var event = interceptor.intercept(event: testEvent1)
-        XCTAssertNil(event)
+        interceptor.intercept(event: testEvent1)
         XCTAssertEqual(pipeline.eventCount, 0)
         XCTAssertNotNil(storage.interceptedIdentifyEvent)
         XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
@@ -428,8 +415,7 @@ final class IdentifyInterceptorTests: XCTestCase {
 
         let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
 
-        event = interceptor.intercept(event: testEvent2)
-        XCTAssertNil(event)
+        interceptor.intercept(event: testEvent2)
         XCTAssertEqual(pipeline.eventCount, 1)
         XCTAssertNotNil(storage.interceptedIdentifyEvent)
         XCTAssertNotNil(storage.interceptedIdentifyEvent!.userProperties)
