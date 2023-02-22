@@ -23,17 +23,11 @@ public class IdentifyInterceptor {
 
     public func intercept(event: BaseEvent) -> BaseEvent? {
         do {
-            if !amplitude.configuration.disableIdentifyBatching {
-                return try interceptIdentifyEvent(event)
-            } else {
-                _ = transferInterceptedIdentifyEvent()
-                return event
-            }
+            return try interceptIdentifyEvent(event)
         } catch {
-            amplitude.logger?.error(message: "Error when storing event: \(error.localizedDescription)")
+            amplitude.logger?.error(message: "Error when intercept event: \(error.localizedDescription)")
+            return event
         }
-
-        return event
     }
 
     private func interceptIdentifyEvent(_ event: BaseEvent) throws -> BaseEvent? {

@@ -269,26 +269,6 @@ final class IdentifyInterceptorTests: XCTestCase {
         XCTAssertTrue(NSDictionary(dictionary: storage.interceptedIdentifyEvent!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1", "key-2": "value-2"]]))
     }
 
-    func testInterceptIdentifyEventsWithDisabledIdentifyBatching() {
-        configuration.disableIdentifyBatching = true
-        let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
-        let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
-
-        var event = interceptor.intercept(event: testEvent1)
-        XCTAssertNotNil(event)
-        XCTAssertEqual(event!.eventType, "$identify")
-        XCTAssertTrue(NSDictionary(dictionary: event!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
-        XCTAssertEqual(pipeline.eventCount, 0)
-        XCTAssertNil(storage.interceptedIdentifyEvent)
-
-        event = interceptor.intercept(event: testEvent2)
-        XCTAssertNotNil(event)
-        XCTAssertEqual(event!.eventType, "$identify")
-        XCTAssertTrue(NSDictionary(dictionary: event!.userProperties!).isEqual(to: ["$set": ["key-2": "value-2"]]))
-        XCTAssertEqual(pipeline.eventCount, 0)
-        XCTAssertNil(storage.interceptedIdentifyEvent)
-    }
-
     func testInterceptIncompatibleIdentifyEvents() {
         let testEvent1 = BaseEvent(userId: "user-1", eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
         let testEvent2 = BaseEvent(userId: "user-2", eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
