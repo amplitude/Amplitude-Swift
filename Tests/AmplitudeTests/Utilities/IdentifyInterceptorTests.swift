@@ -29,7 +29,6 @@ final class IdentifyInterceptorTests: XCTestCase {
         interceptor = IdentifyInterceptor(
             configuration: configuration,
             pipeline: pipeline,
-            logger: nil,
             minIdentifyBatchInterval: Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
         )
     }

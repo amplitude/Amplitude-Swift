@@ -31,12 +31,11 @@ public class IdentifyInterceptor {
     init(
         configuration: Configuration,
         pipeline: EventPipeline,
-        logger: (any Logger)?,
         minIdentifyBatchInterval: Int = Constants.Configuration.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS
     ) {
         self.configuration = configuration
         self.pipeline = pipeline
-        self.logger = logger
+        self.logger = configuration.loggerProvider
         self.minIdentifyBatchInterval = minIdentifyBatchInterval
     }
 
