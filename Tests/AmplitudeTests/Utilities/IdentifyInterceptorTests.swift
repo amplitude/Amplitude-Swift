@@ -32,9 +32,9 @@ final class IdentifyInterceptorTests: XCTestCase {
             minIdentifyBatchInterval: Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
         )
     }
-    
+
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
-        return NSDictionary(dictionary: props as [AnyHashable : Any])
+        return NSDictionary(dictionary: props as [AnyHashable: Any])
     }
 
     func testIsAllowedMergeSource() {
@@ -78,7 +78,7 @@ final class IdentifyInterceptorTests: XCTestCase {
 
     func testMergeUserProperties() {
         var merged = interceptor.mergeUserProperties(destination: nil, source: nil)
-        XCTAssertTrue(NSDictionary(dictionary: merged as [AnyHashable : Any]).isEqual(
+        XCTAssertTrue(getDictionary(merged).isEqual(
             to: ["$set": [:]])
         )
 
