@@ -50,7 +50,7 @@ public class IdentifyInterceptor {
 
     private func interceptIdentifyEvent(_ event: BaseEvent) throws {
         let eventState = EventState(event)
-        if (lastEventState != eventState) {
+        if lastEventState != eventState {
             transferInterceptedIdentifyEvent(destination: nil)
             lastEventState = eventState
         }
@@ -81,7 +81,7 @@ public class IdentifyInterceptor {
         let eventFiles: [URL]? = storage.read(key: StorageKey.EVENTS)
 
         if let eventFiles {
-            var destinationUserProperties: [String: Any?]? = nil
+            var destinationUserProperties: [String: Any?]?
             if let destination, let setProperties = destination.userProperties?[Identify.Operation.SET.rawValue] as? [String: Any?]? {
                 destinationUserProperties = [Identify.Operation.SET.rawValue: setProperties]
                 destination.userProperties![Identify.Operation.SET.rawValue] = [:]

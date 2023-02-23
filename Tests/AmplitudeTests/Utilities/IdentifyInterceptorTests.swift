@@ -257,7 +257,7 @@ final class IdentifyInterceptorTests: XCTestCase {
 
     func testInterceptIdentifyAndIdentifyClearEvent() {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
-        let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$clearAll":"-"])
+        let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
 
         interceptor.intercept(event: testEvent1)
         XCTAssertEqual(pipeline.eventCount, 0)
