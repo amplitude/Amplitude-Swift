@@ -1,6 +1,16 @@
 import Foundation
 
 public class IdentifyInterceptor {
+    private struct EventState: Equatable {
+        let userId: String?
+        let deviceId: String?
+
+        init(_ event: BaseEvent) {
+            userId = event.userId
+            deviceId = event.deviceId
+        }
+    }
+
     private static let allowedOperations = Set([
         Identify.Operation.CLEAR_ALL.rawValue,
         Identify.Operation.SET.rawValue
@@ -12,8 +22,10 @@ public class IdentifyInterceptor {
     private var identifyTransferTimer: QueueTimer?
     private let minIdentifyBatchInterval: Int
 
+    private var lastEventState: EventState?
+
     private lazy var storage: any Storage = {
-        return self.configuration.storageProvider
+        return self.configuration.identifyStorageProvider
     }()
 
     init(
@@ -37,57 +49,89 @@ public class IdentifyInterceptor {
     }
 
     private func interceptIdentifyEvent(_ event: BaseEvent) throws {
-        var mergedInterceptedIdentifyEvent: BaseEvent?
-        let interceptedIdentifyEvent = try getInterceptedIdentifyEventFromStorage()
-        if let interceptedIdentifyEvent {
-            mergedInterceptedIdentifyEvent = mergeEvents(destination: interceptedIdentifyEvent, source: event)
+        let eventState = EventState(event)
+        if (lastEventState != eventState) {
+            transferInterceptedIdentifyEvent(destination: nil)
+            lastEventState = eventState
         }
 
-        if let mergedInterceptedIdentifyEvent {
-            try writeInterceptedIdentifyEventToStorage(mergedInterceptedIdentifyEvent)
-            return
-        } else {
-            if let interceptedIdentifyEvent {
-                if let mergedEvent = mergeEvents(destination: event, source: interceptedIdentifyEvent) {
-                    pipeline.put(event: mergedEvent)
-                    try removeInterceptedIdentifyEventFromStorage()
-                    return
+        switch event.eventType  {
+        case Constants.IDENTIFY_EVENT:
+            if isAllowedMergeSource(event) {
+                try writeEventToStorage(event)
+            } else if hasOperation(properties: event.userProperties, operation: Identify.Operation.CLEAR_ALL) {
+                removeEventsFromStorage()
+            } else {
+                transferInterceptedIdentifyEvent(destination: event)
+            }
+        case Constants.GROUP_IDENTIFY_EVENT:
+            pipeline.put(event: event)
+        default:
+            if hasOperation(properties: event.userProperties, operation: Identify.Operation.CLEAR_ALL) {
+                removeEventsFromStorage()
+                pipeline.put(event: event)
+            } else {
+                transferInterceptedIdentifyEvent(destination: event)
+            }
+        }
+    }
+
+    func transferInterceptedIdentifyEvent(destination: BaseEvent?) {
+        var interceptedEvent = destination
+        let eventFiles: [URL]? = storage.read(key: StorageKey.EVENTS)
+
+        if let eventFiles {
+            var destinationUserProperties: [String: Any?]? = nil
+            if let destination, let setProperties = destination.userProperties?[Identify.Operation.SET.rawValue] as? [String: Any?]? {
+                destinationUserProperties = [Identify.Operation.SET.rawValue: setProperties]
+                destination.userProperties![Identify.Operation.SET.rawValue] = [:]
+            }
+
+            for eventFile in eventFiles {
+                guard let eventsString = storage.getEventsString(eventBlock: eventFile) else {
+                    continue
+                }
+                if eventsString.isEmpty {
+                    continue
                 }
 
-                transferInterceptedIdentifyEvent()
+                if let events = BaseEvent.fromArrayString(jsonString: eventsString) {
+                    for event in events {
+                        if let dest = interceptedEvent {
+                            interceptedEvent!.userProperties = mergeUserProperties(destination: dest.userProperties, source: event.userProperties)
+                        } else {
+                            interceptedEvent = event
+                        }
+                    }
+                }
             }
 
-            if event.eventType == Constants.IDENTIFY_EVENT && isAllowedMergeDestination(event) {
-                try writeInterceptedIdentifyEventToStorage(event)
-            } else {
-                pipeline.put(event: event)
+            if let destinationUserProperties {
+                interceptedEvent!.userProperties = mergeUserProperties(destination: interceptedEvent!.userProperties, source: destinationUserProperties)
+            }
+        }
+
+        if let interceptedEvent {
+            pipeline.put(event: interceptedEvent)
+        }
+
+        if let eventFiles {
+            for eventFile in eventFiles {
+                storage.remove(eventBlock: eventFile)
             }
         }
     }
 
-    func transferInterceptedIdentifyEvent() {
-        do {
-            if let interceptedIdentifyEvent = try getInterceptedIdentifyEventFromStorage() {
-                pipeline.put(event: interceptedIdentifyEvent)
-                try removeInterceptedIdentifyEventFromStorage()
-            }
-        } catch {
-            logger?.error(message: "Error when transfer intercepted identify event: \(error.localizedDescription)")
-        }
-    }
-
-    private func getInterceptedIdentifyEventFromStorage() throws -> BaseEvent? {
-        return storage.read(key: StorageKey.INTERCEPTED_IDENTIFY)
-    }
-
-    private func writeInterceptedIdentifyEventToStorage(_ event: BaseEvent) throws {
-        try storage.write(key: StorageKey.INTERCEPTED_IDENTIFY, value: event)
+    private func writeEventToStorage(_ event: BaseEvent) throws {
+        try storage.write(key: StorageKey.EVENTS, value: event)
         scheduleTransferInterceptedIdentifyEvent()
     }
 
-    private func removeInterceptedIdentifyEventFromStorage() throws {
-        try storage.write(key: StorageKey.INTERCEPTED_IDENTIFY, value: nil)
-        identifyTransferTimer = nil
+    private func removeEventsFromStorage() {
+        guard let eventFiles: [URL] = storage.read(key: StorageKey.EVENTS) else { return }
+        for eventFile in eventFiles {
+            storage.remove(eventBlock: eventFile)
+        }
     }
 
     private func scheduleTransferInterceptedIdentifyEvent() {
@@ -98,76 +142,35 @@ public class IdentifyInterceptor {
         identifyTransferTimer = QueueTimer(interval: getIdentifyBatchInterval(), once: true) { [weak self] in
             let transferInterceptedIdentifyEvent = self?.transferInterceptedIdentifyEvent
             self?.identifyTransferTimer = nil
-            transferInterceptedIdentifyEvent?()
+            transferInterceptedIdentifyEvent?(nil)
         }
     }
 
-    func mergeEvents(destination: BaseEvent, source: BaseEvent) -> BaseEvent? {
-        guard canMergeEvents(destination: destination, source: source) else {
-            return nil
-        }
+    func mergeUserProperties(destination: [String: Any?]?, source: [String: Any?]?) -> [String: Any?] {
+        let destinationSetProperties = destination?[Identify.Operation.SET.rawValue] as? [String: Any?] ?? [:]
+        let sourceSetProperties = source?[Identify.Operation.SET.rawValue] as? [String: Any?] ?? [:]
 
-        if let mergedUserProperties = mergeUserProperties(userProperties1: destination.userProperties, userProperties2: source.userProperties) {
-            destination.userProperties = mergedUserProperties
-        }
-        return destination
-    }
-
-    private func mergeUserProperties(userProperties1: [String: Any?]?, userProperties2: [String: Any?]?) -> [String: Any?]? {
-        if isEmptyValues(userProperties1) {
-            return userProperties2
-        }
-        if isEmptyValues(userProperties2) {
-            return userProperties1
-        }
-        if userProperties1?[Identify.Operation.CLEAR_ALL.rawValue] != nil {
-            return userProperties2
-        }
-        if userProperties2?[Identify.Operation.CLEAR_ALL.rawValue] != nil {
-            return userProperties2
-        }
-
-        let userSetProperties1 = userProperties1?[Identify.Operation.SET.rawValue] as? [String: Any?]
-        let userSetProperties2 = userProperties2?[Identify.Operation.SET.rawValue] as? [String: Any?]
-
-        if isEmptyValues(userSetProperties1) {
-            return userProperties2
-        }
-        if isEmptyValues(userSetProperties2) {
-            return userProperties1
-        }
-
-        var result = userProperties1!
-        result[Identify.Operation.SET.rawValue] = userSetProperties1!.merging(userSetProperties2!) { _, new in new }
+        var result = destination ?? [:]
+        result[Identify.Operation.SET.rawValue] = destinationSetProperties.merging(sourceSetProperties) { _, new in new }
         return result
-    }
-
-    func canMergeEvents(destination: BaseEvent, source: BaseEvent) -> Bool {
-        return destination.userId == source.userId && destination.deviceId == source.deviceId
-            && isAllowedMergeDestination(destination)
-            && isAllowedMergeSource(source)
-            && (destination.userProperties?[Identify.Operation.CLEAR_ALL.rawValue] == nil
-                || source.userProperties?[Identify.Operation.SET.rawValue] == nil)
-    }
-
-    func isAllowedMergeDestination(_ event: BaseEvent) -> Bool {
-        return event.eventType != Constants.GROUP_IDENTIFY_EVENT
-            && isEmptyValues(event.groups)
-            && hasAllowedOperationsOnly(event.userProperties)
     }
 
     func isAllowedMergeSource(_ event: BaseEvent) -> Bool {
         return event.eventType == Constants.IDENTIFY_EVENT
             && isEmptyValues(event.groups)
-            && hasAllowedOperationsOnly(event.userProperties)
+            && hasOnlyOperation(properties: event.userProperties, operation: Identify.Operation.SET)
     }
 
     private func isEmptyValues(_ values: [String: Any?]?) -> Bool {
         return values == nil || values?.isEmpty == true
     }
 
-    private func hasAllowedOperationsOnly(_ values: [String: Any?]?) -> Bool {
-        return isEmptyValues(values) || values!.allSatisfy { key, _ in Self.allowedOperations.contains(key) }
+    private func hasOnlyOperation(properties: [String: Any?]?, operation: Identify.Operation) -> Bool {
+        return hasOperation(properties: properties, operation: operation) && properties?.count == 1
+    }
+
+    private func hasOperation(properties: [String: Any?]?, operation: Identify.Operation) -> Bool {
+        return !isEmptyValues(properties) && properties![operation.rawValue] != nil
     }
 
     private func getIdentifyBatchInterval() -> TimeInterval {

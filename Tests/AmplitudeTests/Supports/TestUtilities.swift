@@ -76,7 +76,6 @@ class FakeInMemoryStorage: Storage {
     var keyValueStore = [String: Any?]()
     var eventsStore = [URL: [BaseEvent]]()
     var index = URL(string: "0")!
-    var interceptedIdentifyEvent: BaseEvent?
 
     func write(key: StorageKey, value: Any?) throws {
         switch key {
@@ -85,10 +84,6 @@ class FakeInMemoryStorage: Storage {
                 var chunk = eventsStore[index, default: [BaseEvent]()]
                 chunk.append(event)
                 eventsStore[index] = chunk
-            }
-        case .INTERCEPTED_IDENTIFY:
-            if let event = value as? BaseEvent? {
-                interceptedIdentifyEvent = event
             }
         default:
             keyValueStore[key.rawValue] = value
@@ -100,8 +95,6 @@ class FakeInMemoryStorage: Storage {
         switch key {
         case .EVENTS:
             result = Array(eventsStore.keys) as? T
-        case .INTERCEPTED_IDENTIFY:
-            result = interceptedIdentifyEvent as? T
         default:
             result = keyValueStore[key.rawValue] as? T
         }
@@ -122,7 +115,6 @@ class FakeInMemoryStorage: Storage {
     func reset() {
         keyValueStore.removeAll()
         eventsStore.removeAll()
-        interceptedIdentifyEvent = nil
     }
 
     func remove(eventBlock: EventBlock) {
@@ -130,6 +122,16 @@ class FakeInMemoryStorage: Storage {
     }
 
     func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) {
+    }
+
+    func events() -> [BaseEvent] {
+        var result: [BaseEvent] = []
+        for (_, value) in eventsStore {
+            for event in value {
+                result.append(event)
+            }
+        }
+        return result
     }
 
     nonisolated func getResponseHandler(

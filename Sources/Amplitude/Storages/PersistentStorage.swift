@@ -21,12 +21,9 @@ class PersistentStorage: Storage {
 
     let syncQueue = DispatchQueue(label: "syncPersistentStorage.amplitude.com")
 
-    private var interceptedIdentifyEvent: BaseEvent?
-    private var interceptedIdentifyEventCached: Bool = false
-
-    init(apiKey: String = "") {
-        self.storagePrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(apiKey)"
-        self.userDefaults = UserDefaults(suiteName: "\(PersistentStorage.AMP_STORAGE_PREFIX).\(storagePrefix)")
+    init(apiKey: String, storagePrefix: String = PersistentStorage.DEFAULT_STORAGE_PREFIX) {
+        self.storagePrefix = "\(storagePrefix)-\(apiKey)"
+        self.userDefaults = UserDefaults(suiteName: "\(PersistentStorage.AMP_STORAGE_PREFIX).\(self.storagePrefix)")
         self.fileManager = FileManager.default
         self.eventCallbackMap = [String: EventCallback]()
     }
@@ -39,17 +36,6 @@ class PersistentStorage: Storage {
                     let eventStoreFile = getCurrentFile()
                     self.storeEvent(toFile: eventStoreFile, event: event)
                     if let eventCallback = event.callback, let eventInsertId = event.insertId {
-                        eventCallbackMap[eventInsertId] = eventCallback
-                    }
-                }
-            case .INTERCEPTED_IDENTIFY:
-                if let event = value as? BaseEvent? {
-                    interceptedIdentifyEventCached = true
-                    interceptedIdentifyEvent = event
-
-                    let eventStoreFile = getInterceptedIdentifyEventFile()
-                    self.storeInterceptedIdentifyEvent(toFile: eventStoreFile, event: event)
-                    if let event, let eventCallback = event.callback, let eventInsertId = event.insertId {
                         eventCallbackMap[eventInsertId] = eventCallback
                     }
                 }
@@ -69,18 +55,6 @@ class PersistentStorage: Storage {
             switch key {
             case .EVENTS:
                 result = getEventFiles() as? T
-            case .INTERCEPTED_IDENTIFY:
-                if !interceptedIdentifyEventCached {
-                    interceptedIdentifyEvent = nil
-                    let interceptedIdentifyEventFile = getInterceptedIdentifyEventFile()
-                    if fileManager?.fileExists(atPath: interceptedIdentifyEventFile.path) == true {
-                        if let eventString = getEventsString(eventBlock: interceptedIdentifyEventFile), eventString != "" {
-                           interceptedIdentifyEvent = BaseEvent.fromString(jsonString: eventString)
-                        }
-                    }
-                    interceptedIdentifyEventCached = true
-                }
-                result = interceptedIdentifyEvent as? T
             default:
                 result = userDefaults?.object(forKey: key.rawValue) as? T
             }
@@ -149,11 +123,6 @@ class PersistentStorage: Storage {
             for url in urls {
                 try? fileManager!.removeItem(atPath: url.path)
             }
-
-            interceptedIdentifyEvent = nil
-            interceptedIdentifyEventCached = false
-            let interceptedIdentifyEventFile = getInterceptedIdentifyEventFile()
-            try? fileManager!.removeItem(atPath: interceptedIdentifyEventFile.path)
         }
     }
 
@@ -212,10 +181,6 @@ extension PersistentStorage {
         return "\(storagePrefix).\(StorageKey.EVENTS.rawValue).index"
     }
 
-    private var interceptedIdentifyEventFileKey: String {
-        return "\(storagePrefix).\(StorageKey.INTERCEPTED_IDENTIFY.rawValue)"
-    }
-
     private func getCurrentFile() -> URL {
         var currentFileIndex = 0
         let index: Int = userDefaults?.integer(forKey: eventsFileKey) ?? 0
@@ -259,19 +224,7 @@ extension PersistentStorage {
         return result
     }
 
-    private func getInterceptedIdentifyEventFile() -> URL {
-        return getInterceptedIdentifyEventStorageDirectory().appendingPathComponent("event")
-    }
-
     private func getEventsStorageDirectory() -> URL {
-        return getStorageDirectory(eventsFileKey)
-    }
-
-    private func getInterceptedIdentifyEventStorageDirectory() -> URL {
-        return getStorageDirectory(interceptedIdentifyEventFileKey)
-    }
-
-    private func getStorageDirectory(_ fileKey: String) -> URL {
         // tvOS doesn't have access to document
         // macOS /Documents dir might be synced with iCloud
         #if os(tvOS) || os(macOS)
@@ -282,7 +235,7 @@ extension PersistentStorage {
 
         let urls = fileManager!.urls(for: searchPathDirectory, in: .userDomainMask)
         let docUrl = urls[0]
-        let storageUrl = docUrl.appendingPathComponent("amplitude/\(fileKey)/")
+        let storageUrl = docUrl.appendingPathComponent("amplitude/\(eventsFileKey)/")
         // try to create it, will fail if already exists.
         // tvOS, watchOS regularly clear out data.
         try? FileManager.default.createDirectory(at: storageUrl, withIntermediateDirectories: true, attributes: nil)
@@ -323,20 +276,6 @@ extension PersistentStorage {
                 try outputStream?.write(",")
             }
             try outputStream?.write(jsonString)
-        } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
-        }
-    }
-
-    private func storeInterceptedIdentifyEvent(toFile file: URL, event: BaseEvent?) {
-        let stream: OutputFileStream
-        do {
-            stream = try OutputFileStream(fileURL: file)
-            try stream.open()
-            if let event {
-                try stream.write(event.toString())
-            }
-            try stream.close()
         } catch {
             amplitude?.logger?.error(message: error.localizedDescription)
         }
