@@ -96,9 +96,9 @@ final class IdentifyInterceptorTests: XCTestCase {
 
         merged = interceptor.mergeUserProperties(
             destination: nil,
-            source:["key-2": "value-2"]
+            source: ["key-2": "value-2"]
         )
-        XCTAssertTrue(getDictionary(merged).isEqual(to:["key-2": "value-2"]))
+        XCTAssertTrue(getDictionary(merged).isEqual(to: ["key-2": "value-2"]))
 
         merged = interceptor.mergeUserProperties(
             destination: ["key-1": "value-1-1", "key-2": "value-2"],
@@ -108,7 +108,6 @@ final class IdentifyInterceptorTests: XCTestCase {
             to: ["key-1": "value-1-2", "key-2": "value-2", "key-3": "value-3"])
         )
     }
-
 
     func testMergeUserPropertyOperations() {
         var merged = interceptor.mergeUserPropertiesOperations(destination: nil, source: nil)
