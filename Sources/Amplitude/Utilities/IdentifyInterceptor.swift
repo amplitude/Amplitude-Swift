@@ -45,134 +45,53 @@ public class IdentifyInterceptor {
             logger?.error(message: "Error when intercept event: \(error.localizedDescription)")
         }
 
-        return event;
+        return event
     }
 
     private func isIdentityUpdated(_ event: BaseEvent) -> Bool {
-        let eventIdentity = Identity(event);
+        let eventIdentity = Identity(event)
 
-        if (eventIdentity != lastIdentity) {
-            lastIdentity = eventIdentity;
-            return true;
+        if eventIdentity != lastIdentity {
+            lastIdentity = eventIdentity
+            return true
         }
 
-        return false;
+        return false
     }
 
     private func interceptIdentifyEvent(_ event: BaseEvent) throws -> BaseEvent? {
         if isIdentityUpdated(event) {
-            transferInterceptedIdentifyEvent(destination: nil)
+            transferInterceptedIdentifyEvent()
         }
 
         switch event.eventType  {
         case Constants.IDENTIFY_EVENT:
             if isAllowedMergeSource(event) {
                 try writeEventToStorage(event)
-                return nil;
+                return nil
             } else if hasOperation(properties: event.userProperties, operation: Identify.Operation.CLEAR_ALL) {
                 removeEventsFromStorage()
+                return nil
             } else {
-                transferInterceptedIdentifyEvent(destination: event)
+                return mergeEventUserProperties(destination: event, source: getCombinedInterceptedIdentify())
             }
         case Constants.GROUP_IDENTIFY_EVENT:
-            return event;
+            return event
         default:
             if hasOperation(properties: event.userProperties, operation: Identify.Operation.CLEAR_ALL) {
                 removeEventsFromStorage()
+                return event
             } else {
-                transferInterceptedIdentifyEvent(destination: event)
+                return mergeEventUserProperties(destination: event, source: getCombinedInterceptedIdentify())
             }
         }
-
-        return event;
     }
 
     func getCombinedInterceptedIdentify() -> BaseEvent? {
-        var combinedInterceptedIdentify: BaseEvent? = nil
-        let eventFiles: [URL]? = storage.read(key: StorageKey.EVENTS)
-
-//        if let eventFiles {
-//            var combinedUserProperties: [String: Any?] = [:];
-//            if let destination, let setProperties = destination.userProperties?[Identify.Operation.SET.rawValue] as? [String: Any?]? {
-//                destinationUserProperties = [Identify.Operation.SET.rawValue: setProperties]
-//                destination.userProperties![Identify.Operation.SET.rawValue] = [:]
-//            }
-//
-//            for eventFile in eventFiles {
-//                guard let eventsString = storage.getEventsString(eventBlock: eventFile) else {
-//                    continue
-//                }
-//                if eventsString.isEmpty {
-//                    continue
-//                }
-//
-//                if let events = BaseEvent.fromArrayString(jsonString: eventsString) {
-//                    for event in events {
-//                        if let dest = interceptedEvent {
-//                            interceptedEvent!.userProperties = mergeUserProperties(destination: dest.userProperties, source: event.userProperties)
-//                        } else {
-//                            interceptedEvent = event
-//                        }
-//                    }
-//                }
-//            }
-//
-//            if let destinationUserProperties {
-//                interceptedEvent!.userProperties = mergeUserProperties(destination: interceptedEvent!.userProperties, source: destinationUserProperties)
-//            }
-//        }
-
-        return combinedInterceptedIdentify;
-    }
-
-    func mergeUserProperties(_ event: BaseEvent) -> BaseEvent {
-        let interceptIdentify = getCombinedInterceptedIdentify()
-
-//         if let eventFiles {
-//             var destinationUserProperties: [String: Any?]?
-//             if let destination, let setProperties = destination.userProperties?[Identify.Operation.SET.rawValue] as? [String: Any?]? {
-//                 destinationUserProperties = [Identify.Operation.SET.rawValue: setProperties]
-//                 destination.userProperties![Identify.Operation.SET.rawValue] = [:]
-//             }
-//
-//             for eventFile in eventFiles {
-//                 guard let eventsString = storage.getEventsString(eventBlock: eventFile) else {
-//                     continue
-//                 }
-//                 if eventsString.isEmpty {
-//                     continue
-//                 }
-//
-//                 if let events = BaseEvent.fromArrayString(jsonString: eventsString) {
-//                     for event in events {
-//                         if let dest = interceptedEvent {
-//                             interceptedEvent!.userProperties = mergeUserProperties(destination: dest.userProperties, source: event.userProperties)
-//                         } else {
-//                             interceptedEvent = event
-//                         }
-//                     }
-//                 }
-//             }
-//
-//             if let destinationUserProperties {
-//                 interceptedEvent!.userProperties = mergeUserProperties(destination: interceptedEvent!.userProperties, source: destinationUserProperties)
-//             }
-//         }
-
-        return event;
-    }
-
-    func transferInterceptedIdentifyEvent(destination: BaseEvent?) {
-        var interceptedEvent = destination
+        var combinedInterceptedIdentify: BaseEvent?
         let eventFiles: [URL]? = storage.read(key: StorageKey.EVENTS)
 
         if let eventFiles {
-            var destinationUserProperties: [String: Any?]?
-            if let destination, let setProperties = destination.userProperties?[Identify.Operation.SET.rawValue] as? [String: Any?]? {
-                destinationUserProperties = [Identify.Operation.SET.rawValue: setProperties]
-                destination.userProperties![Identify.Operation.SET.rawValue] = [:]
-            }
-
             for eventFile in eventFiles {
                 guard let eventsString = storage.getEventsString(eventBlock: eventFile) else {
                     continue
@@ -183,28 +102,49 @@ public class IdentifyInterceptor {
 
                 if let events = BaseEvent.fromArrayString(jsonString: eventsString) {
                     for event in events {
-                        if let dest = interceptedEvent {
-                            interceptedEvent!.userProperties = mergeUserProperties(destination: dest.userProperties, source: event.userProperties)
+                        if let dest = combinedInterceptedIdentify {
+                            combinedInterceptedIdentify = mergeEventUserProperties(destination: dest, source: event)
                         } else {
-                            interceptedEvent = event
+                            combinedInterceptedIdentify = event
                         }
                     }
                 }
             }
 
-            if let destinationUserProperties {
-                interceptedEvent!.userProperties = mergeUserProperties(destination: interceptedEvent!.userProperties, source: destinationUserProperties)
-            }
-        }
-
-        if let interceptedEvent {
-            pipeline.put(event: interceptedEvent)
-        }
-
-        if let eventFiles {
             for eventFile in eventFiles {
                 storage.remove(eventBlock: eventFile)
             }
+        }
+
+        return combinedInterceptedIdentify
+    }
+
+    func mergeEventUserProperties(destination: BaseEvent, source: BaseEvent?) -> BaseEvent {
+        if let source {
+            var destinationUserProperties: [String: Any?]?
+            if let setProperties = destination.userProperties?[Identify.Operation.SET.rawValue] as? [String: Any?]? {
+                destinationUserProperties = [Identify.Operation.SET.rawValue: setProperties]
+                destination.userProperties![Identify.Operation.SET.rawValue] = [:]
+            }
+
+            destination.userProperties = mergeUserProperties(
+                destination: destination.userProperties,
+                source: source.userProperties
+            )
+
+            if let destinationUserProperties {
+                destination.userProperties = mergeUserProperties(
+                    destination: destination.userProperties,
+                    source: destinationUserProperties
+                )
+            }
+        }
+        return destination
+    }
+
+    func transferInterceptedIdentifyEvent() {
+        if let interceptedEvent = getCombinedInterceptedIdentify() {
+            pipeline.put(event: interceptedEvent)
         }
     }
 
@@ -228,7 +168,7 @@ public class IdentifyInterceptor {
         identifyTransferTimer = QueueTimer(interval: getIdentifyBatchInterval(), once: true) { [weak self] in
             let transferInterceptedIdentifyEvent = self?.transferInterceptedIdentifyEvent
             self?.identifyTransferTimer = nil
-            transferInterceptedIdentifyEvent?(nil)
+            transferInterceptedIdentifyEvent?()
         }
     }
 

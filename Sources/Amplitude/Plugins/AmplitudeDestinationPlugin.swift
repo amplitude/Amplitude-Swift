@@ -13,8 +13,8 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
         if let event {
             if event.isValid() {
                 let e = identifyInterceptor?.intercept(event: event)
-                if (e != nil) {
-                    pipeline?.put(event: e!)
+                if let e {
+                    pipeline?.put(event: e)
                 }
             } else {
                 logger?.error(message: "Event is invalid for missing information like userId and deviceId")
@@ -43,7 +43,7 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
     }
 
     public override func flush() {
-        identifyInterceptor?.transferInterceptedIdentifyEvent(destination: nil)
+        identifyInterceptor?.transferInterceptedIdentifyEvent()
         pipeline?.flush()
     }
 
