@@ -66,7 +66,7 @@ public class IdentifyInterceptor {
                 return nil
             } else if hasOperation(properties: event.userProperties, operation: Identify.Operation.CLEAR_ALL) {
                 removeEventsFromStorage()
-                return event;
+                return event
             } else {
                 return mergeEventUserProperties(destination: event, source: getCombinedInterceptedIdentify())
             }
@@ -118,37 +118,37 @@ public class IdentifyInterceptor {
         if let setProperties = event.userProperties?[Identify.Operation.SET.rawValue] as? [String: Any?]? {
             return setProperties
         }
-        
+
         return nil
     }
-    
+
     func mergeEventUserProperties(destination: BaseEvent, source: BaseEvent?) -> BaseEvent {
         if let source {
             var sourceUserProperties: [String: Any?]?
             var destinationUserProperties: [String: Any?]?
-            let flattenUserProperties = destination.eventType != Constants.IDENTIFY_EVENT;
-            
+            let flattenUserProperties = destination.eventType != Constants.IDENTIFY_EVENT
+
             // note source is always an Identify
             sourceUserProperties = getUserPropertySetValues(source)
             destinationUserProperties = flattenUserProperties
             ? destination.userProperties
             : getUserPropertySetValues(destination)
-            
-            if (flattenUserProperties) {
+
+            if flattenUserProperties {
                 destination.userProperties = mergeUserProperties(
                     destination: destinationUserProperties,
                     source: sourceUserProperties
                 )
             } else {
-                destination.userProperties = destination.userProperties ?? [:];
+                destination.userProperties = destination.userProperties ?? [:]
                 destination.userProperties![Identify.Operation.SET.rawValue] = mergeUserProperties(
                     destination: destinationUserProperties,
                     source: sourceUserProperties
                 )
             }
-            
+
             if let destinationUserProperties {
-                if (flattenUserProperties) {
+                if flattenUserProperties {
                     destination.userProperties = mergeUserProperties(
                         destination: destination.userProperties,
                         source: destinationUserProperties
@@ -202,14 +202,14 @@ public class IdentifyInterceptor {
         result[Identify.Operation.SET.rawValue] = mergeUserProperties(
             destination: destinationSetProperties,
             source: sourceSetProperties
-        );
+        )
         return result
     }
-    
+
     func mergeUserProperties(destination: [String: Any?]?, source: [String: Any?]?) -> [String: Any?] {
         var result = destination ?? [:]
         result = result.merging(source ?? [:]) { _, new in new }
-        
+
         return result
     }
 
