@@ -12,7 +12,10 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
     internal func enqueue(event: BaseEvent?) {
         if let event {
             if event.isValid() {
-                identifyInterceptor?.intercept(event: event)
+                let e = identifyInterceptor?.intercept(event: event)
+                if (e != nil) {
+                    pipeline?.put(event: e!)
+                }
             } else {
                 logger?.error(message: "Event is invalid for missing information like userId and deviceId")
             }

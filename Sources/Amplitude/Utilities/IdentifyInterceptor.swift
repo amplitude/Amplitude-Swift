@@ -1,7 +1,7 @@
 import Foundation
 
 public class IdentifyInterceptor {
-    private struct EventState: Equatable {
+    private struct Identity: Equatable {
         let userId: String?
         let deviceId: String?
 
@@ -21,8 +21,7 @@ public class IdentifyInterceptor {
     private let logger: (any Logger)?
     private var identifyTransferTimer: QueueTimer?
     private let minIdentifyBatchInterval: Int
-
-    private var lastEventState: EventState?
+    private var lastIdentity: Identity?
 
     private lazy var storage: any Storage = {
         return self.configuration.identifyStorageProvider
@@ -39,40 +38,128 @@ public class IdentifyInterceptor {
         self.minIdentifyBatchInterval = minIdentifyBatchInterval
     }
 
-    public func intercept(event: BaseEvent) {
+    public func intercept(event: BaseEvent) -> BaseEvent? {
         do {
-            try interceptIdentifyEvent(event)
+            return try interceptIdentifyEvent(event)
         } catch {
             logger?.error(message: "Error when intercept event: \(error.localizedDescription)")
         }
+
+        return event;
     }
 
-    private func interceptIdentifyEvent(_ event: BaseEvent) throws {
-        let eventState = EventState(event)
-        if lastEventState != eventState {
+    private func isIdentityUpdated(_ event: BaseEvent) -> Bool {
+        let eventIdentity = Identity(event);
+
+        if (eventIdentity != lastIdentity) {
+            lastIdentity = eventIdentity;
+            return true;
+        }
+
+        return false;
+    }
+
+    private func interceptIdentifyEvent(_ event: BaseEvent) throws -> BaseEvent? {
+        if isIdentityUpdated(event) {
             transferInterceptedIdentifyEvent(destination: nil)
-            lastEventState = eventState
         }
 
         switch event.eventType  {
         case Constants.IDENTIFY_EVENT:
             if isAllowedMergeSource(event) {
                 try writeEventToStorage(event)
+                return nil;
             } else if hasOperation(properties: event.userProperties, operation: Identify.Operation.CLEAR_ALL) {
                 removeEventsFromStorage()
             } else {
                 transferInterceptedIdentifyEvent(destination: event)
             }
         case Constants.GROUP_IDENTIFY_EVENT:
-            pipeline.put(event: event)
+            return event;
         default:
             if hasOperation(properties: event.userProperties, operation: Identify.Operation.CLEAR_ALL) {
                 removeEventsFromStorage()
-                pipeline.put(event: event)
             } else {
                 transferInterceptedIdentifyEvent(destination: event)
             }
         }
+
+        return event;
+    }
+
+    func getCombinedInterceptedIdentify() -> BaseEvent? {
+        var combinedInterceptedIdentify: BaseEvent? = nil
+        let eventFiles: [URL]? = storage.read(key: StorageKey.EVENTS)
+
+//        if let eventFiles {
+//            var combinedUserProperties: [String: Any?] = [:];
+//            if let destination, let setProperties = destination.userProperties?[Identify.Operation.SET.rawValue] as? [String: Any?]? {
+//                destinationUserProperties = [Identify.Operation.SET.rawValue: setProperties]
+//                destination.userProperties![Identify.Operation.SET.rawValue] = [:]
+//            }
+//
+//            for eventFile in eventFiles {
+//                guard let eventsString = storage.getEventsString(eventBlock: eventFile) else {
+//                    continue
+//                }
+//                if eventsString.isEmpty {
+//                    continue
+//                }
+//
+//                if let events = BaseEvent.fromArrayString(jsonString: eventsString) {
+//                    for event in events {
+//                        if let dest = interceptedEvent {
+//                            interceptedEvent!.userProperties = mergeUserProperties(destination: dest.userProperties, source: event.userProperties)
+//                        } else {
+//                            interceptedEvent = event
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if let destinationUserProperties {
+//                interceptedEvent!.userProperties = mergeUserProperties(destination: interceptedEvent!.userProperties, source: destinationUserProperties)
+//            }
+//        }
+
+        return combinedInterceptedIdentify;
+    }
+
+    func mergeUserProperties(_ event: BaseEvent) -> BaseEvent {
+        let interceptIdentify = getCombinedInterceptedIdentify()
+
+//         if let eventFiles {
+//             var destinationUserProperties: [String: Any?]?
+//             if let destination, let setProperties = destination.userProperties?[Identify.Operation.SET.rawValue] as? [String: Any?]? {
+//                 destinationUserProperties = [Identify.Operation.SET.rawValue: setProperties]
+//                 destination.userProperties![Identify.Operation.SET.rawValue] = [:]
+//             }
+//
+//             for eventFile in eventFiles {
+//                 guard let eventsString = storage.getEventsString(eventBlock: eventFile) else {
+//                     continue
+//                 }
+//                 if eventsString.isEmpty {
+//                     continue
+//                 }
+//
+//                 if let events = BaseEvent.fromArrayString(jsonString: eventsString) {
+//                     for event in events {
+//                         if let dest = interceptedEvent {
+//                             interceptedEvent!.userProperties = mergeUserProperties(destination: dest.userProperties, source: event.userProperties)
+//                         } else {
+//                             interceptedEvent = event
+//                         }
+//                     }
+//                 }
+//             }
+//
+//             if let destinationUserProperties {
+//                 interceptedEvent!.userProperties = mergeUserProperties(destination: interceptedEvent!.userProperties, source: destinationUserProperties)
+//             }
+//         }
+
+        return event;
     }
 
     func transferInterceptedIdentifyEvent(destination: BaseEvent?) {
