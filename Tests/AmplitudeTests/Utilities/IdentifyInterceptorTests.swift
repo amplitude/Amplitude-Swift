@@ -37,58 +37,92 @@ final class IdentifyInterceptorTests: XCTestCase {
         return NSDictionary(dictionary: props as [AnyHashable: Any])
     }
 
-    func testIsAllowedMergeSource() {
+    func testIsInterceptEvent() {
         XCTAssertFalse(
-            interceptor.isAllowedMergeSource(BaseEvent(userId: "user-1", eventType: "testEvent"))
+            interceptor.isInterceptEvent(BaseEvent(userId: "user-1", eventType: "testEvent"))
         )
         XCTAssertFalse(
-            interceptor.isAllowedMergeSource(BaseEvent(userId: "user-1", eventType: "$groupidentify"))
+            interceptor.isInterceptEvent(BaseEvent(userId: "user-1", eventType: "$groupidentify"))
         )
         XCTAssertFalse(
-            interceptor.isAllowedMergeSource(BaseEvent(userId: "user-1", eventType: "$identify"))
+            interceptor.isInterceptEvent(BaseEvent(userId: "user-1", eventType: "$identify"))
         )
         XCTAssertFalse(
-            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", groups: [String: Any?]()))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", groups: [String: Any?]()))
         )
         XCTAssertFalse(
-            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", groups: ["key-1": "value-1"]))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", groups: ["key-1": "value-1"]))
         )
         XCTAssertFalse(
-            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: [String: Any?]()))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: [String: Any?]()))
         )
         XCTAssertTrue(
-            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]))
         )
         XCTAssertFalse(
-            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]))
         )
         XCTAssertFalse(
-            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$add": [String: Any?]()]))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$add": [String: Any?]()]))
         )
         XCTAssertFalse(
-            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$add": [String: Any?]()]))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$add": [String: Any?]()]))
         )
         XCTAssertFalse(
-            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-", "$add": [String: Any?]()]))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-", "$add": [String: Any?]()]))
         )
         XCTAssertFalse(
-            interceptor.isAllowedMergeSource(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$clearAll": "-", "$add": [String: Any?]()]))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$clearAll": "-", "$add": [String: Any?]()]))
         )
     }
 
     func testMergeUserProperties() {
         var merged = interceptor.mergeUserProperties(destination: nil, source: nil)
+        XCTAssertTrue(getDictionary(merged).isEqual(to: [:]))
+
+        merged = interceptor.mergeUserProperties(
+            destination: ["key-1": "value-1"],
+            source: [:]
+        )
+        XCTAssertTrue(getDictionary(merged).isEqual(to: ["key-1": "value-1"]))
+
+        merged = interceptor.mergeUserProperties(
+            destination: ["key-1": "value-1"],
+            source: ["key-2": "value-2"]
+        )
+        XCTAssertTrue(getDictionary(merged).isEqual(
+            to: ["key-1": "value-1", "key-2": "value-2"])
+        )
+
+        merged = interceptor.mergeUserProperties(
+            destination: nil,
+            source:["key-2": "value-2"]
+        )
+        XCTAssertTrue(getDictionary(merged).isEqual(to:["key-2": "value-2"]))
+
+        merged = interceptor.mergeUserProperties(
+            destination: ["key-1": "value-1-1", "key-2": "value-2"],
+            source: ["key-3": "value-3", "key-1": "value-1-2"]
+        )
+        XCTAssertTrue(getDictionary(merged).isEqual(
+            to: ["key-1": "value-1-2", "key-2": "value-2", "key-3": "value-3"])
+        )
+    }
+
+
+    func testMergeUserPropertyOperations() {
+        var merged = interceptor.mergeUserPropertiesOperations(destination: nil, source: nil)
         XCTAssertTrue(getDictionary(merged).isEqual(
             to: ["$set": [:]])
         )
 
-        merged = interceptor.mergeUserProperties(
+        merged = interceptor.mergeUserPropertiesOperations(
             destination: ["$set": ["key-1": "value-1"]],
             source: ["$set": [:]]
         )
         XCTAssertTrue(getDictionary(merged).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
-        merged = interceptor.mergeUserProperties(
+        merged = interceptor.mergeUserPropertiesOperations(
             destination: ["$set": ["key-1": "value-1"]],
             source: ["$set": ["key-2": "value-2"]]
         )
@@ -96,7 +130,7 @@ final class IdentifyInterceptorTests: XCTestCase {
             to: ["$set": ["key-1": "value-1", "key-2": "value-2"]])
         )
 
-        merged = interceptor.mergeUserProperties(
+        merged = interceptor.mergeUserPropertiesOperations(
             destination: nil,
             source: ["$set": ["key-2": "value-2"]]
         )
@@ -104,7 +138,7 @@ final class IdentifyInterceptorTests: XCTestCase {
             to: ["$set": ["key-2": "value-2"]])
         )
 
-        merged = interceptor.mergeUserProperties(
+        merged = interceptor.mergeUserPropertiesOperations(
             destination: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]],
             source: ["$set": ["key-3": "value-3", "key-1": "value-1-2"]]
         )
@@ -112,7 +146,7 @@ final class IdentifyInterceptorTests: XCTestCase {
             to: ["$set": ["key-1": "value-1-2", "key-2": "value-2", "key-3": "value-3"]])
         )
 
-        merged = interceptor.mergeUserProperties(
+        merged = interceptor.mergeUserPropertiesOperations(
             destination: ["$set": ["key-1": "value-1-1", "key-2": "value-2"], "$add": ["add-1": "add-2"]],
             source: ["$set": ["key-3": "value-3", "key-1": "value-1-2"]]
         )
@@ -125,12 +159,14 @@ final class IdentifyInterceptorTests: XCTestCase {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
         let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
 
+        // $set only event should be intercepted
         let e1 = interceptor.intercept(event: testEvent1)
         var events = identifyStorage.events()
         XCTAssertNil(e1)
         XCTAssertEqual(events.count, 1)
         XCTAssertTrue(getDictionary(events[0].userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
+        // second $set only event should be intercepted
         let e2 = interceptor.intercept(event: testEvent2)
         events = identifyStorage.events()
         XCTAssertNil(e2)
@@ -141,10 +177,11 @@ final class IdentifyInterceptorTests: XCTestCase {
         XCTAssertTrue(getDictionary(events[1].userProperties!).isEqual(to: ["$set": ["key-2": "value-2"]]))
     }
 
-    func testInterceptIncompatibleIdentifyEvents() {
+    func testInterceptedIdentifysSentOnUserIdChange() {
         let testEvent1 = BaseEvent(userId: "user-1", eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
         let testEvent2 = BaseEvent(userId: "user-2", eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
 
+        // $set only event with user1 should be intercepted
         let e1 = interceptor.intercept(event: testEvent1)
         var events = identifyStorage.events()
         XCTAssertNil(e1)
@@ -152,9 +189,12 @@ final class IdentifyInterceptorTests: XCTestCase {
         XCTAssertNotNil(events[0].userProperties)
         XCTAssertTrue(getDictionary(events[0].userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
+        // $set only event with user2 should be intercepted
         let e2 = interceptor.intercept(event: testEvent2)
-        events = storage.events()
         XCTAssertNil(e2)
+
+        // previous intercept with user1 should be transfered to event storage
+        events = storage.events()
         XCTAssertEqual(events.count, 1)
         XCTAssertEqual(events[0].eventType, "$identify")
         XCTAssertNotNil(events[0].userProperties)
@@ -165,32 +205,36 @@ final class IdentifyInterceptorTests: XCTestCase {
         XCTAssertTrue(getDictionary(events[0].userProperties!).isEqual(to: ["$set": ["key-2": "value-2"]]))
     }
 
-    func testInterceptTransferIdentifyEvents() {
+    func testInterceptTransferIdentifyEventsOnNonInterceptOperation() {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]])
         let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-2", "key-3": "value-3"], "$add": ["add-1": "add-2"]])
 
+        // $set only event should be intercepted
         let e1 = interceptor.intercept(event: testEvent1)
-        var events = identifyStorage.events()
         XCTAssertNil(e1)
+        var events = identifyStorage.events()
         XCTAssertEqual(events.count, 1)
         XCTAssertNotNil(events[0].userProperties)
         XCTAssertTrue(getDictionary(events[0].userProperties!).isEqual(to: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]]))
 
+        // identify with $add should receive merged user properties
         let e2 = interceptor.intercept(event: testEvent2)
         XCTAssertNotNil(e2)
         XCTAssertEqual(e2!.eventType, "$identify")
         XCTAssertNotNil(e2!.userProperties)
+        print(e2!.userProperties)
         XCTAssertTrue(getDictionary(e2!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1-2", "key-2": "value-2", "key-3": "value-3"], "$add": ["add-1": "add-2"]]))
-        events = storage.events()
-        XCTAssertEqual(events.count, 0)
         events = identifyStorage.events()
+        XCTAssertEqual(events.count, 0)
+        events = storage.events()
         XCTAssertEqual(events.count, 0)
     }
 
-    func testInterceptIdentifyAndSomeEvent() {
+    func testInterceptIdentifyAndStandardEvent() {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]])
-        let testEvent2 = BaseEvent(eventType: "someEvent", userProperties: ["$set": ["key-1": "value-1-2", "key-3": "value-3"], "$add": ["add-1": "add-2"]])
+        let testEvent2 = BaseEvent(eventType: "someEvent", userProperties: ["key-1": "value-1-2", "key-3": "value-3"])
 
+        // $set only event should be intercepted
         let e1 = interceptor.intercept(event: testEvent1)
         var events = identifyStorage.events()
         XCTAssertNil(e1)
@@ -198,42 +242,24 @@ final class IdentifyInterceptorTests: XCTestCase {
         XCTAssertNotNil(events[0].userProperties)
         XCTAssertTrue(getDictionary(events[0].userProperties!).isEqual(to: ["$set": ["key-1": "value-1-1", "key-2": "value-2"]]))
 
+        // standard event should be modified to include intercepted user properties, flattened
         let e2 = interceptor.intercept(event: testEvent2)
         XCTAssertNotNil(e2)
         XCTAssertEqual(e2!.eventType, "someEvent")
         XCTAssertNotNil(e2!.userProperties)
-        XCTAssertTrue(getDictionary(e2!.userProperties!).isEqual(to: ["$set": ["key-1": "value-1-2", "key-2": "value-2", "key-3": "value-3"], "$add": ["add-1": "add-2"]]))
+        print(e2!.userProperties)
+        XCTAssertTrue(getDictionary(e2!.userProperties!).isEqual(to: ["key-1": "value-1-2", "key-2": "value-2", "key-3": "value-3"]))
+        events = identifyStorage.events()
+        XCTAssertEqual(events.count, 0)
         events = storage.events()
         XCTAssertEqual(events.count, 0)
-        events = identifyStorage.events()
-        XCTAssertEqual(events.count, 0)
     }
 
-    func testInterceptIdentifyAndSomeClearEvent() {
-        let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
-        let testEvent2 = BaseEvent(eventType: "someEvent", userProperties: ["$clearAll": "-"])
-
-        let e1 = interceptor.intercept(event: testEvent1)
-        XCTAssertNil(e1)
-        XCTAssertEqual(pipeline.eventCount, 0)
-        var events = identifyStorage.events()
-        XCTAssertEqual(events.count, 1)
-        XCTAssertNotNil(events[0].userProperties)
-        XCTAssertTrue(getDictionary(events[0].userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
-
-        let e2 = interceptor.intercept(event: testEvent2)
-        events = identifyStorage.events()
-        XCTAssertNotNil(e2)
-        XCTAssertEqual(events.count, 0)
-        XCTAssertEqual(e2?.eventType, "someEvent")
-        XCTAssertNotNil(e2?.userProperties)
-        XCTAssertTrue(getDictionary((e2?.userProperties)!).isEqual(to: ["$clearAll": "-"]))
-    }
-
-    func testInterceptIdentifyAndSomeIncompatibleEvent() {
+    func testInterceptIdentifySentOnUserIdChange() {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
         let testEvent2 = BaseEvent(userId: "user-1", eventType: "someEvent")
 
+        // set only should be intercepted
         let e1 = interceptor.intercept(event: testEvent1)
         var events = identifyStorage.events()
         XCTAssertNil(e1)
@@ -242,12 +268,17 @@ final class IdentifyInterceptorTests: XCTestCase {
         XCTAssertNotNil(events[0].userProperties)
         XCTAssertTrue(getDictionary(events[0].userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
+        // standard event should be returned unmodified
         let e2 = interceptor.intercept(event: testEvent2)
         XCTAssertNotNil(e2)
         XCTAssertEqual(e2?.eventType, "someEvent")
         XCTAssertNil(e2?.userProperties)
+
+        // intercept storage should be cleared
         events = identifyStorage.events()
         XCTAssertEqual(events.count, 0)
+
+        // Identify for previous userId should be transfered to event storage
         events = storage.events()
         XCTAssertEqual(events.count, 1)
         XCTAssertEqual(events[0].eventType, "$identify")
@@ -259,31 +290,37 @@ final class IdentifyInterceptorTests: XCTestCase {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
         let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"])
 
-        interceptor.intercept(event: testEvent1)
-        XCTAssertEqual(pipeline.eventCount, 0)
+        // set only should be intercepted
+        let e1 = interceptor.intercept(event: testEvent1)
+        XCTAssertNil(e1)
         var events = identifyStorage.events()
         XCTAssertEqual(events.count, 1)
         XCTAssertNotNil(events[0].userProperties)
         XCTAssertTrue(getDictionary(events[0].userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
-        interceptor.intercept(event: testEvent2)
-        XCTAssertEqual(pipeline.eventCount, 0)
-        events = storage.events()
-        XCTAssertEqual(events.count, 0)
+        // clear-all should return clear-all event, clear intercept storage
+        let e2 = interceptor.intercept(event: testEvent2)
+        XCTAssertNotNil(e2)
+        XCTAssertEqual(e2?.eventType, "$identify")
+        XCTAssertNotNil(e2?.userProperties)
+        XCTAssertTrue(getDictionary((e2?.userProperties)!).isEqual(to: ["$clearAll": "-"]))
         events = identifyStorage.events()
         XCTAssertEqual(events.count, 0)
     }
 
-    func testInterceptIdentifyEventAndWaitForUploadInterval() {
+    func testInterceptIdentifyEventIsTransferedOnUploadInterval() {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
 
-        interceptor.intercept(event: testEvent1)
+        // set only should be intercepted
+        let e1 = interceptor.intercept(event: testEvent1)
+        XCTAssertNil(e1)
         XCTAssertEqual(pipeline.eventCount, 0)
         var events = identifyStorage.events()
         XCTAssertEqual(events.count, 1)
         XCTAssertNotNil(events[0].userProperties)
         XCTAssertTrue(getDictionary(events[0].userProperties!).isEqual(to: ["$set": ["key-1": "value-1"]]))
 
+        // intercepted event should be transfered on batch interval
         let dummyExpectation = expectation(description: "dummy")
         _ = XCTWaiter.wait(for: [dummyExpectation], timeout: TimeInterval.seconds(Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS + 1)))
         events = identifyStorage.events()
@@ -292,10 +329,12 @@ final class IdentifyInterceptorTests: XCTestCase {
         XCTAssertEqual(standardEvents.count, 1)
     }
 
-    func testInterceptIdentifyEventsAndWaitForUploadInterval() {
+    func testMultipleInterceptIdentifyEventsAreTransferedOnUploadInterval() {
         let testEvent1 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-1": "value-1"]])
 
-        interceptor.intercept(event: testEvent1)
+        // set only should be intercepted
+        let e1 = interceptor.intercept(event: testEvent1)
+        XCTAssertNil(e1)
         XCTAssertEqual(pipeline.eventCount, 0)
         var events = identifyStorage.events()
         XCTAssertEqual(events.count, 1)
@@ -310,7 +349,9 @@ final class IdentifyInterceptorTests: XCTestCase {
 
         let testEvent2 = BaseEvent(eventType: "$identify", userProperties: ["$set": ["key-2": "value-2"]])
 
-        interceptor.intercept(event: testEvent2)
+        // set only should be intercepted
+        let e2 = interceptor.intercept(event: testEvent2)
+        XCTAssertNil(e2)
         XCTAssertEqual(pipeline.eventCount, 1)
         events = identifyStorage.events()
         XCTAssertEqual(events.count, 1)

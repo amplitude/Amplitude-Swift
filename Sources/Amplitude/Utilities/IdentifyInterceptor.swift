@@ -11,11 +11,6 @@ public class IdentifyInterceptor {
         }
     }
 
-    private static let allowedOperations = Set([
-        Identify.Operation.CLEAR_ALL.rawValue,
-        Identify.Operation.SET.rawValue
-    ])
-
     private let configuration: Configuration
     private let pipeline: EventPipeline
     private let logger: (any Logger)?
@@ -66,12 +61,12 @@ public class IdentifyInterceptor {
 
         switch event.eventType  {
         case Constants.IDENTIFY_EVENT:
-            if isAllowedMergeSource(event) {
+            if isInterceptEvent(event) {
                 try writeEventToStorage(event)
                 return nil
             } else if hasOperation(properties: event.userProperties, operation: Identify.Operation.CLEAR_ALL) {
                 removeEventsFromStorage()
-                return nil
+                return event;
             } else {
                 return mergeEventUserProperties(destination: event, source: getCombinedInterceptedIdentify())
             }
@@ -119,24 +114,51 @@ public class IdentifyInterceptor {
         return combinedInterceptedIdentify
     }
 
+    func getUserPropertySetValues(_ event: BaseEvent) -> [String: Any?]? {
+        if let setProperties = event.userProperties?[Identify.Operation.SET.rawValue] as? [String: Any?]? {
+            return setProperties
+        }
+        
+        return nil
+    }
+    
     func mergeEventUserProperties(destination: BaseEvent, source: BaseEvent?) -> BaseEvent {
         if let source {
+            var sourceUserProperties: [String: Any?]?
             var destinationUserProperties: [String: Any?]?
-            if let setProperties = destination.userProperties?[Identify.Operation.SET.rawValue] as? [String: Any?]? {
-                destinationUserProperties = [Identify.Operation.SET.rawValue: setProperties]
-                destination.userProperties![Identify.Operation.SET.rawValue] = [:]
-            }
-
-            destination.userProperties = mergeUserProperties(
-                destination: destination.userProperties,
-                source: source.userProperties
-            )
-
-            if let destinationUserProperties {
+            let flattenUserProperties = destination.eventType != Constants.IDENTIFY_EVENT;
+            
+            // note source is always an Identify
+            sourceUserProperties = getUserPropertySetValues(source)
+            destinationUserProperties = flattenUserProperties
+            ? destination.userProperties
+            : getUserPropertySetValues(destination)
+            
+            if (flattenUserProperties) {
                 destination.userProperties = mergeUserProperties(
-                    destination: destination.userProperties,
-                    source: destinationUserProperties
+                    destination: destinationUserProperties,
+                    source: sourceUserProperties
                 )
+            } else {
+                destination.userProperties = destination.userProperties ?? [:];
+                destination.userProperties![Identify.Operation.SET.rawValue] = mergeUserProperties(
+                    destination: destinationUserProperties,
+                    source: sourceUserProperties
+                )
+            }
+            
+            if let destinationUserProperties {
+                if (flattenUserProperties) {
+                    destination.userProperties = mergeUserProperties(
+                        destination: destination.userProperties,
+                        source: destinationUserProperties
+                    )
+                } else {
+                    destination.userProperties = mergeUserPropertiesOperations(
+                        destination: destination.userProperties,
+                        source: [Identify.Operation.SET.rawValue: destinationUserProperties]
+                    )
+                }
             }
         }
         return destination
@@ -172,16 +194,29 @@ public class IdentifyInterceptor {
         }
     }
 
-    func mergeUserProperties(destination: [String: Any?]?, source: [String: Any?]?) -> [String: Any?] {
+    func mergeUserPropertiesOperations(destination: [String: Any?]?, source: [String: Any?]?) -> [String: Any?] {
         let destinationSetProperties = destination?[Identify.Operation.SET.rawValue] as? [String: Any?] ?? [:]
         let sourceSetProperties = source?[Identify.Operation.SET.rawValue] as? [String: Any?] ?? [:]
 
         var result = destination ?? [:]
-        result[Identify.Operation.SET.rawValue] = destinationSetProperties.merging(sourceSetProperties) { _, new in new }
+        result[Identify.Operation.SET.rawValue] = mergeUserProperties(
+            destination: destinationSetProperties,
+            source: sourceSetProperties
+        );
+        return result
+    }
+    
+    func mergeUserProperties(destination: [String: Any?]?, source: [String: Any?]?) -> [String: Any?] {
+        var result = destination ?? [:]
+        result = result.merging(source ?? [:]) { _, new in new }
+        
         return result
     }
 
-    func isAllowedMergeSource(_ event: BaseEvent) -> Bool {
+    /**
+     * Returns true if the given event should be intercepted
+     */
+    func isInterceptEvent(_ event: BaseEvent) -> Bool {
         return event.eventType == Constants.IDENTIFY_EVENT
             && isEmptyValues(event.groups)
             && hasOnlyOperation(properties: event.userProperties, operation: Identify.Operation.SET)
