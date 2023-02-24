@@ -228,3 +228,29 @@ class FakePersistentStorage: PersistentStorage {
         haveBeenCalledWith.append("write(key: \(key.rawValue), \(String(describing: value!)))")
     }
 }
+
+class TestPersistentStorage: PersistentStorage {
+    func events() -> [BaseEvent] {
+        var result: [BaseEvent] = []
+
+        let eventFiles: [URL]? = read(key: StorageKey.EVENTS)
+        if let eventFiles {
+            for eventFile in eventFiles {
+                guard let eventsString = getEventsString(eventBlock: eventFile) else {
+                    continue
+                }
+                if eventsString.isEmpty {
+                    continue
+                }
+
+                if let events = BaseEvent.fromArrayString(jsonString: eventsString) {
+                    for event in events {
+                        result.append(event)
+                    }
+                }
+            }
+        }
+
+        return result
+    }
+}

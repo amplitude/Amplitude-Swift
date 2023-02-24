@@ -13,6 +13,9 @@ final class AmplitudeTests: XCTestCase {
     private var storageMem: FakeInMemoryStorage!
     private var interceptStorageMem: FakeInMemoryStorage!
 
+    private var storageTest: TestPersistentStorage!
+    private var interceptStorageTest: TestPersistentStorage!
+
     override func setUp() {
         super.setUp()
         let apiKey = "testApiKey"
@@ -152,5 +155,40 @@ final class AmplitudeTests: XCTestCase {
         events = storageMem.events()
         XCTAssertEqual(intercepts.count, 0)
         XCTAssertEqual(events.count, 1)
+    }
+
+    func testInterceptedIdentifyWithPersistentStorage() {
+        let apiKey = "testApiKeyPersist"
+        storageTest = TestPersistentStorage(apiKey: apiKey);
+        interceptStorageTest = TestPersistentStorage(apiKey: apiKey, storagePrefix: "identify")
+        let amplitude = Amplitude(configuration:Configuration(
+              apiKey: apiKey,
+              storageProvider: storageTest,
+              identifyStorageProvider: interceptStorageTest,
+              trackingSessionEvents: false
+          ))
+
+        amplitude.setUserId(userId: "test-user")
+
+        // send 2 $set only Identify's, should be intercepted
+        amplitude.identify(identify: Identify().set(property: "key-1", value: "value-1"))
+        amplitude.identify(identify: Identify().set(property: "key-2", value: "value-2"))
+
+        var intercepts = interceptStorageTest.events()
+        var events = storageTest.events()
+        XCTAssertEqual(intercepts.count, 2)
+        XCTAssertEqual(events.count, 0)
+
+        // setGroup event should not be intercepted
+        amplitude.setGroup(groupType: "group-type", groupName: "group-name")
+
+        intercepts = interceptStorageTest.events()
+        events = storageTest.events()
+        XCTAssertEqual(intercepts.count, 0)
+        XCTAssertEqual(events.count, 1)
+
+        // clear storages
+        storageTest.reset();
+        interceptStorageTest.reset();
     }
 }
