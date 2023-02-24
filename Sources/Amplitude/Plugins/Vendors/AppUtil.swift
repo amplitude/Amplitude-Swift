@@ -28,7 +28,7 @@ import Foundation
         }
 
         override var os_name: String {
-            return device.systemName
+            return device.systemName.lowercased()
         }
 
         override var os_version: String {
@@ -36,6 +36,16 @@ import Foundation
         }
 
         override var platform: String {
+            #if os(tvOS)
+                return "tvOS"
+            #elseif targetEnvironment(macCatalyst)
+                return "macOS"
+            #else
+                return "iOS"
+            #endif
+        }
+
+        private func getPlatformString() -> String {
             var name: [Int32] = [CTL_HW, HW_MACHINE]
             var size: Int = 2
             sysctl(&name, 2, nil, &size, nil, 0)
@@ -46,7 +56,7 @@ import Foundation
         }
 
         private func deviceModel() -> String {
-            let platform = self.platform
+            let platform = getPlatformString()
             return getDeviceModel(platform: platform)
         }
 
@@ -79,7 +89,7 @@ import Foundation
         }
 
         override var os_name: String {
-            return "macOS"
+            return "macos"
         }
 
         override var os_version: String {
@@ -96,6 +106,10 @@ import Foundation
         }
 
         override var platform: String {
+            return "macOS"
+        }
+
+        private func getPlatformString() -> String {
             var systemInfo = utsname()
             uname(&systemInfo)
             let machineMirror = Mirror(reflecting: systemInfo.machine)
@@ -107,7 +121,7 @@ import Foundation
         }
 
         private func deviceModel() -> String {
-            let platform = self.platform
+            let platform = getPlatformString()
             return getDeviceModel(platform: platform)
         }
 
@@ -174,7 +188,7 @@ import Foundation
         }
 
         override var os_name: String {
-            return device.systemName
+            return "watchos"
         }
 
         override var os_version: String {
@@ -182,6 +196,10 @@ import Foundation
         }
 
         override var platform: String {
+            return "watchOS"
+        }
+
+        private func getPlatformString() -> String {
             var name: [Int32] = [CTL_HW, HW_MACHINE]
             var size: Int = 2
             sysctl(&name, 2, nil, &size, nil, 0)
@@ -192,7 +210,7 @@ import Foundation
         }
 
         private func deviceModel() -> String {
-            let platform = self.platform
+            let platform = getPlatformString()
             return getDeviceModel(platform: platform)
         }
 
