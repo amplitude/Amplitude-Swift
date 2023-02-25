@@ -1,3 +1,15 @@
+# [0.4.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.3.2...v0.4.0) (2023-02-25)
+
+
+### Bug Fixes
+
+* fix platform value ([#43](https://github.com/amplitude/Amplitude-Swift/issues/43)) ([dc78228](https://github.com/amplitude/Amplitude-Swift/commit/dc78228635dbad0a9bfc9c679f11cb8a38fff688))
+
+
+### Features
+
+* add identify interceptor to reduce identify volumes ([#40](https://github.com/amplitude/Amplitude-Swift/issues/40)) ([835a6f6](https://github.com/amplitude/Amplitude-Swift/commit/835a6f6e65bc8b9cd2326ae50a9ad7f7c4408a8c))
+
 ## [0.3.2](https://github.com/amplitude/Amplitude-Swift/compare/v0.3.1...v0.3.2) (2023-02-21)
 
 
