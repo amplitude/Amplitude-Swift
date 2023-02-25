@@ -14,6 +14,7 @@ public class Configuration {
     var instanceName: String
     var optOut: Bool
     var storageProvider: any Storage
+    var identifyStorageProvider: any Storage
     var logLevel: LogLevelEnum
     var loggerProvider: any Logger
     var minIdLength: Int?
@@ -30,6 +31,7 @@ public class Configuration {
     var flushEventsOnClose: Bool?
     var minTimeBetweenSessionsMillis: Int
     var trackingSessionEvents: Bool?
+    var identifyBatchIntervalMillis: Int
 
     public init(
         apiKey: String,
@@ -38,6 +40,7 @@ public class Configuration {
         instanceName: String = Constants.Configuration.DEFAULT_INSTANCE,
         optOut: Bool = false,
         storageProvider: (any Storage)? = nil,
+        identifyStorageProvider: (any Storage)? = nil,
         logLevel: LogLevelEnum = LogLevelEnum.WARN,
         loggerProvider: any Logger = ConsoleLogger(),
         minIdLength: Int? = nil,
@@ -52,9 +55,9 @@ public class Configuration {
         trackingOptions: TrackingOptions = TrackingOptions(),
         enableCoppaControl: Bool = false,
         flushEventsOnClose: Bool = true,
-        minTimeBetweenSessionsMillis: Int = Constants.Configuration
-            .MIN_TIME_BETWEEN_SESSIONS_MILLIS,
-        trackingSessionEvents: Bool = true
+        minTimeBetweenSessionsMillis: Int = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS,
+        trackingSessionEvents: Bool = true,
+        identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS
     ) {
         self.apiKey = apiKey
         self.flushQueueSize = flushQueueSize
@@ -62,6 +65,8 @@ public class Configuration {
         self.instanceName = instanceName
         self.optOut = optOut
         self.storageProvider = storageProvider ?? PersistentStorage(apiKey: apiKey)
+        self.identifyStorageProvider = identifyStorageProvider
+            ?? PersistentStorage(apiKey: apiKey, storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify")
         self.logLevel = logLevel
         self.loggerProvider = loggerProvider
         self.minIdLength = minIdLength
@@ -78,6 +83,7 @@ public class Configuration {
         self.flushEventsOnClose = flushEventsOnClose
         self.minTimeBetweenSessionsMillis = minTimeBetweenSessionsMillis
         self.trackingSessionEvents = trackingSessionEvents
+        self.identifyBatchIntervalMillis = identifyBatchIntervalMillis
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
     }

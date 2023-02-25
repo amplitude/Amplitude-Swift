@@ -1,4 +1,5 @@
 import Foundation
+import XCTest
 
 @testable import Amplitude_Swift
 
@@ -117,9 +118,20 @@ class FakeInMemoryStorage: Storage {
     }
 
     func remove(eventBlock: EventBlock) {
+        eventsStore.removeValue(forKey: eventBlock)
     }
 
     func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) {
+    }
+
+    func events() -> [BaseEvent] {
+        var result: [BaseEvent] = []
+        for (_, value) in eventsStore {
+            for event in value {
+                result.append(event)
+            }
+        }
+        return result
     }
 
     nonisolated func getResponseHandler(
@@ -128,26 +140,60 @@ class FakeInMemoryStorage: Storage {
         eventBlock: EventBlock,
         eventsString: String
     ) -> ResponseHandler {
-        FakeResponseHandler()
+        FakeResponseHandler(configuration: configuration, storage: self, eventPipeline: eventPipeline, eventBlock: eventBlock, eventsString: eventsString)
     }
 }
 
 class FakeHttpClient: HttpClient {
-    var isUploadCalled: Bool = false
+    var uploadCount: Int = 0
+    var uploadedEvents: [String] = []
+    var uploadExpectations: [XCTestExpectation] = []
 
     override func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void)
         -> URLSessionDataTask?
     {
-        isUploadCalled = true
+        uploadCount += 1
+        uploadedEvents.append(events)
+        if !uploadExpectations.isEmpty {
+            uploadExpectations.removeFirst().fulfill()
+        }
+        completion(Result.success(200))
         return nil
     }
 }
 
 class FakeResponseHandler: ResponseHandler {
+    let configuration: Configuration
+    let storage: FakeInMemoryStorage
+    let eventPipeline: EventPipeline
+    let eventBlock: URL
+    let eventsString: String
+
+    init(
+        configuration: Configuration,
+        storage: FakeInMemoryStorage,
+        eventPipeline: EventPipeline,
+        eventBlock: URL,
+        eventsString: String
+    ) {
+        self.configuration = configuration
+        self.storage = storage
+        self.eventPipeline = eventPipeline
+        self.eventBlock = eventBlock
+        self.eventsString = eventsString
+    }
+
     func handle(result: Result<Int, Error>) {
+        switch result {
+        case .success(let code):
+            handleSuccessResponse(code: code)
+        default:
+            break
+        }
     }
 
     func handleSuccessResponse(code: Int) {
+        storage.remove(eventBlock: eventBlock)
     }
 
     func handleBadRequestResponse(data: [String: Any]) {
@@ -180,5 +226,46 @@ class FakePersistentStorage: PersistentStorage {
 
     override func write(key: StorageKey, value: Any?) throws {
         haveBeenCalledWith.append("write(key: \(key.rawValue), \(String(describing: value!)))")
+    }
+}
+
+class TestPersistentStorage: PersistentStorage {
+    func events() -> [BaseEvent] {
+        var result: [BaseEvent] = []
+
+        let eventFiles: [URL]? = read(key: StorageKey.EVENTS)
+        if let eventFiles {
+            for eventFile in eventFiles {
+                guard let eventsString = getEventsString(eventBlock: eventFile) else {
+                    continue
+                }
+                if eventsString.isEmpty {
+                    continue
+                }
+
+                if let events = BaseEvent.fromArrayString(jsonString: eventsString) {
+                    for event in events {
+                        result.append(event)
+                    }
+                }
+            }
+        }
+
+        return result
+    }
+}
+
+class TestIdentifyInterceptor: IdentifyInterceptor {
+    private var overridenIdentifyBatchIntervalMillis: Int?
+
+    override func getIdentifyBatchInterval() -> TimeInterval {
+        if let overridenIdentifyBatchIntervalMillis {
+            return TimeInterval.milliseconds(overridenIdentifyBatchIntervalMillis)
+        }
+        return super.getIdentifyBatchInterval()
+    }
+
+    public func setIdentifyBatchInterval(_ identifyBatchIntervalMillis: Int) {
+        overridenIdentifyBatchIntervalMillis = identifyBatchIntervalMillis
     }
 }

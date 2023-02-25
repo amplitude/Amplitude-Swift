@@ -139,7 +139,7 @@ public protocol ResponseHandler {
 }
 
 extension ResponseHandler {
-    func collectIndices(data: [String: [Int]]) -> Set<Int> {
+    static func collectIndices(data: [String: [Int]]) -> Set<Int> {
         var indices = Set<Int>()
         for (_, elements) in data {
             for el in elements {

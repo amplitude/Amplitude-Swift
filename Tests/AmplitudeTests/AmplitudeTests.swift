@@ -3,18 +3,40 @@ import XCTest
 @testable import Amplitude_Swift
 
 final class AmplitudeTests: XCTestCase {
-    private var storage: FakePersistentStorage!
     private var configuration: Configuration!
+
     private var configurationWithFakeStorage: Configuration!
+    private var storage: FakePersistentStorage!
+    private var interceptStorage: FakePersistentStorage!
+
+    private var configurationWithFakeMemoryStorage: Configuration!
+    private var storageMem: FakeInMemoryStorage!
+    private var interceptStorageMem: FakeInMemoryStorage!
+
+    private var storageTest: TestPersistentStorage!
+    private var interceptStorageTest: TestPersistentStorage!
 
     override func setUp() {
         super.setUp()
         let apiKey = "testApiKey"
-        storage = FakePersistentStorage(apiKey: apiKey)
+
         configuration = Configuration(apiKey: apiKey)
+
+        storage = FakePersistentStorage(apiKey: apiKey)
+        interceptStorage = FakePersistentStorage(apiKey: apiKey)
         configurationWithFakeStorage = Configuration(
             apiKey: apiKey,
-            storageProvider: storage
+            storageProvider: storage,
+            identifyStorageProvider: interceptStorage
+        )
+
+        storageMem = FakeInMemoryStorage()
+        interceptStorageMem = FakeInMemoryStorage()
+        configurationWithFakeMemoryStorage = Configuration(
+            apiKey: apiKey,
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            trackingSessionEvents: false
         )
     }
 
@@ -113,5 +135,60 @@ final class AmplitudeTests: XCTestCase {
         amplitude.setDeviceId(deviceId: "test-device")
         XCTAssertEqual(amplitude.state.deviceId, "test-device")
         XCTAssertEqual(storage.haveBeenCalledWith[1], "write(key: \(StorageKey.DEVICE_ID.rawValue), test-device)")
+    }
+
+    func testInterceptedIdentifyIsSentOnFlush() {
+        let amplitude = Amplitude(configuration: configurationWithFakeMemoryStorage)
+
+        amplitude.setUserId(userId: "test-user")
+        amplitude.identify(identify: Identify().set(property: "key-1", value: "value-1"))
+        amplitude.identify(identify: Identify().set(property: "key-2", value: "value-2"))
+
+        var intercepts = interceptStorageMem.events()
+        var events = storageMem.events()
+        XCTAssertEqual(intercepts.count, 2)
+        XCTAssertEqual(events.count, 0)
+
+        amplitude.flush()
+
+        intercepts = interceptStorageMem.events()
+        events = storageMem.events()
+        XCTAssertEqual(intercepts.count, 0)
+        XCTAssertEqual(events.count, 1)
+    }
+
+    func testInterceptedIdentifyWithPersistentStorage() {
+        let apiKey = "testApiKeyPersist"
+        storageTest = TestPersistentStorage(apiKey: apiKey)
+        interceptStorageTest = TestPersistentStorage(apiKey: apiKey, storagePrefix: "identify")
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: apiKey,
+            storageProvider: storageTest,
+            identifyStorageProvider: interceptStorageTest,
+            trackingSessionEvents: false
+        ))
+
+        amplitude.setUserId(userId: "test-user")
+
+        // send 2 $set only Identify's, should be intercepted
+        amplitude.identify(identify: Identify().set(property: "key-1", value: "value-1"))
+        amplitude.identify(identify: Identify().set(property: "key-2", value: "value-2"))
+
+        var intercepts = interceptStorageTest.events()
+        var events = storageTest.events()
+        XCTAssertEqual(intercepts.count, 2)
+        XCTAssertEqual(events.count, 0)
+
+        // setGroup event should not be intercepted
+        amplitude.setGroup(groupType: "group-type", groupName: "group-name")
+
+        intercepts = interceptStorageTest.events()
+        events = storageTest.events()
+        XCTAssertEqual(intercepts.count, 0)
+        XCTAssertEqual(events.count, 1)
+
+        // clear storages
+        storageTest.reset()
+        interceptStorageTest.reset()
     }
 }

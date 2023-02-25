@@ -21,9 +21,9 @@ class PersistentStorage: Storage {
 
     let syncQueue = DispatchQueue(label: "syncPersistentStorage.amplitude.com")
 
-    init(apiKey: String = "") {
-        self.storagePrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(apiKey)"
-        self.userDefaults = UserDefaults(suiteName: "\(PersistentStorage.AMP_STORAGE_PREFIX).\(storagePrefix)")
+    init(apiKey: String, storagePrefix: String = PersistentStorage.DEFAULT_STORAGE_PREFIX) {
+        self.storagePrefix = "\(storagePrefix)-\(apiKey)"
+        self.userDefaults = UserDefaults(suiteName: "\(PersistentStorage.AMP_STORAGE_PREFIX).\(self.storagePrefix)")
         self.fileManager = FileManager.default
         self.eventCallbackMap = [String: EventCallback]()
     }

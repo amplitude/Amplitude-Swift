@@ -11,7 +11,7 @@ import XCTest
 
 final class PersistentStorageTests: XCTestCase {
     func testIsBasicType() {
-        let persistentStorage = PersistentStorage()
+        let persistentStorage = PersistentStorage(apiKey: "")
         var isValueBasicType = persistentStorage.isBasicType(value: 111)
         XCTAssertEqual(isValueBasicType, true)
 
