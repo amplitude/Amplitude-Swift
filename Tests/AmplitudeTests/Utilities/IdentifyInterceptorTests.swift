@@ -16,7 +16,7 @@ final class IdentifyInterceptorTests: XCTestCase {
         super.setUp()
         storage = FakeInMemoryStorage()
         identifyStorage = FakeInMemoryStorage()
-        let identifyBatchIntervalMillis = Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000);
+        let identifyBatchIntervalMillis = Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
         configuration = Configuration(
             apiKey: "testApiKey",
             storageProvider: storage,
@@ -31,7 +31,7 @@ final class IdentifyInterceptorTests: XCTestCase {
             configuration: configuration,
             pipeline: pipeline
         )
-        interceptor.setIdentifyBatchInterval(identifyBatchIntervalMillis);
+        interceptor.setIdentifyBatchInterval(identifyBatchIntervalMillis)
     }
 
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
@@ -42,20 +42,20 @@ final class IdentifyInterceptorTests: XCTestCase {
         var identifyBatchIntervalMillis = 0
         var interceptor1 = IdentifyInterceptor(configuration: configuration, pipeline: pipeline, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
         XCTAssertEqual(interceptor1.getIdentifyBatchInterval(), TimeInterval.milliseconds(Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS))
-        
+
         identifyBatchIntervalMillis = Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS - 1
         interceptor1 = IdentifyInterceptor(configuration: configuration, pipeline: pipeline, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
         XCTAssertEqual(interceptor1.getIdentifyBatchInterval(), TimeInterval.milliseconds(Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS))
-        
+
         identifyBatchIntervalMillis = Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS
         interceptor1 = IdentifyInterceptor(configuration: configuration, pipeline: pipeline, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
         XCTAssertEqual(interceptor1.getIdentifyBatchInterval(), TimeInterval.milliseconds(identifyBatchIntervalMillis))
-        
+
         identifyBatchIntervalMillis = Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS * 2
         interceptor1 = IdentifyInterceptor(configuration: configuration, pipeline: pipeline, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
         XCTAssertEqual(interceptor1.getIdentifyBatchInterval(), TimeInterval.milliseconds(identifyBatchIntervalMillis))
     }
-    
+
     func testIsInterceptEvent() {
         XCTAssertFalse(
             interceptor.isInterceptEvent(BaseEvent(userId: "user-1", eventType: "testEvent"))

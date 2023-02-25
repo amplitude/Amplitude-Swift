@@ -159,14 +159,14 @@ final class AmplitudeTests: XCTestCase {
 
     func testInterceptedIdentifyWithPersistentStorage() {
         let apiKey = "testApiKeyPersist"
-        storageTest = TestPersistentStorage(apiKey: apiKey);
+        storageTest = TestPersistentStorage(apiKey: apiKey)
         interceptStorageTest = TestPersistentStorage(apiKey: apiKey, storagePrefix: "identify")
-        let amplitude = Amplitude(configuration:Configuration(
-              apiKey: apiKey,
-              storageProvider: storageTest,
-              identifyStorageProvider: interceptStorageTest,
-              trackingSessionEvents: false
-          ))
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: apiKey,
+            storageProvider: storageTest,
+            identifyStorageProvider: interceptStorageTest,
+            trackingSessionEvents: false
+        ))
 
         amplitude.setUserId(userId: "test-user")
 
@@ -188,7 +188,7 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(events.count, 1)
 
         // clear storages
-        storageTest.reset();
-        interceptStorageTest.reset();
+        storageTest.reset()
+        interceptStorageTest.reset()
     }
 }

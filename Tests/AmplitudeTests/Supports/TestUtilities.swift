@@ -255,18 +255,17 @@ class TestPersistentStorage: PersistentStorage {
     }
 }
 
-
 class TestIdentifyInterceptor: IdentifyInterceptor {
-    private var overridenIdentifyBatchIntervalMillis: Int? = nil;
-    
+    private var overridenIdentifyBatchIntervalMillis: Int?
+
     override func getIdentifyBatchInterval() -> TimeInterval {
         if let overridenIdentifyBatchIntervalMillis {
-            return TimeInterval.milliseconds(overridenIdentifyBatchIntervalMillis);
+            return TimeInterval.milliseconds(overridenIdentifyBatchIntervalMillis)
         }
-        return super.getIdentifyBatchInterval();
+        return super.getIdentifyBatchInterval()
     }
-    
+
     public func setIdentifyBatchInterval(_ identifyBatchIntervalMillis: Int) {
-        overridenIdentifyBatchIntervalMillis = identifyBatchIntervalMillis;
+        overridenIdentifyBatchIntervalMillis = identifyBatchIntervalMillis
     }
 }

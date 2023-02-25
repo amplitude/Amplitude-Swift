@@ -30,7 +30,7 @@ public class IdentifyInterceptor {
         self.configuration = configuration
         self.pipeline = pipeline
         self.logger = configuration.loggerProvider
-        if (identifyBatchIntervalMillis < Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS) {
+        if identifyBatchIntervalMillis < Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS {
             self.logger?.warn(message: "Minimum `identifyBatchIntervalMillis` is \(Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS).")
         }
         self.identifyBatchIntervalMillis = max(identifyBatchIntervalMillis, Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS)
