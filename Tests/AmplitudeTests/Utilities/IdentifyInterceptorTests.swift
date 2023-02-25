@@ -8,7 +8,7 @@ final class IdentifyInterceptorTests: XCTestCase {
     private var storage: FakeInMemoryStorage!
     private var identifyStorage: FakeInMemoryStorage!
     private var httpClient: FakeHttpClient!
-    private var interceptor: IdentifyInterceptor!
+    private var interceptor: TestIdentifyInterceptor!
     private var configuration: Configuration!
     private var pipeline: EventPipeline!
 
@@ -16,27 +16,46 @@ final class IdentifyInterceptorTests: XCTestCase {
         super.setUp()
         storage = FakeInMemoryStorage()
         identifyStorage = FakeInMemoryStorage()
+        let identifyBatchIntervalMillis = Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000);
         configuration = Configuration(
             apiKey: "testApiKey",
             storageProvider: storage,
             identifyStorageProvider: identifyStorage,
-            identifyBatchIntervalMillis: Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
+            identifyBatchIntervalMillis: identifyBatchIntervalMillis
         )
         let amplitude = Amplitude(configuration: configuration)
         httpClient = FakeHttpClient(configuration: configuration)
         pipeline = EventPipeline(amplitude: amplitude)
         pipeline.httpClient = httpClient
-        interceptor = IdentifyInterceptor(
+        interceptor = TestIdentifyInterceptor(
             configuration: configuration,
-            pipeline: pipeline,
-            minIdentifyBatchInterval: Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
+            pipeline: pipeline
         )
+        interceptor.setIdentifyBatchInterval(identifyBatchIntervalMillis);
     }
 
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
         return NSDictionary(dictionary: props as [AnyHashable: Any])
     }
 
+    func testMinimumIdentifyBatchInterval() {
+        var identifyBatchIntervalMillis = 0
+        var interceptor1 = IdentifyInterceptor(configuration: configuration, pipeline: pipeline, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
+        XCTAssertEqual(interceptor1.getIdentifyBatchInterval(), TimeInterval.milliseconds(Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS))
+        
+        identifyBatchIntervalMillis = Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS - 1
+        interceptor1 = IdentifyInterceptor(configuration: configuration, pipeline: pipeline, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
+        XCTAssertEqual(interceptor1.getIdentifyBatchInterval(), TimeInterval.milliseconds(Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS))
+        
+        identifyBatchIntervalMillis = Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS
+        interceptor1 = IdentifyInterceptor(configuration: configuration, pipeline: pipeline, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
+        XCTAssertEqual(interceptor1.getIdentifyBatchInterval(), TimeInterval.milliseconds(identifyBatchIntervalMillis))
+        
+        identifyBatchIntervalMillis = Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS * 2
+        interceptor1 = IdentifyInterceptor(configuration: configuration, pipeline: pipeline, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
+        XCTAssertEqual(interceptor1.getIdentifyBatchInterval(), TimeInterval.milliseconds(identifyBatchIntervalMillis))
+    }
+    
     func testIsInterceptEvent() {
         XCTAssertFalse(
             interceptor.isInterceptEvent(BaseEvent(userId: "user-1", eventType: "testEvent"))

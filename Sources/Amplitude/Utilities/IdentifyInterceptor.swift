@@ -15,7 +15,7 @@ public class IdentifyInterceptor {
     private let pipeline: EventPipeline
     private let logger: (any Logger)?
     private var identifyTransferTimer: QueueTimer?
-    private let minIdentifyBatchInterval: Int
+    private let identifyBatchIntervalMillis: Int
     private var lastIdentity: Identity?
 
     private lazy var storage: any Storage = {
@@ -25,12 +25,15 @@ public class IdentifyInterceptor {
     init(
         configuration: Configuration,
         pipeline: EventPipeline,
-        minIdentifyBatchInterval: Int = Constants.Configuration.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS
+        identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS
     ) {
         self.configuration = configuration
         self.pipeline = pipeline
         self.logger = configuration.loggerProvider
-        self.minIdentifyBatchInterval = minIdentifyBatchInterval
+        if (identifyBatchIntervalMillis < Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS) {
+            self.logger?.warn(message: "Minimum `identifyBatchIntervalMillis` is \(Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS).")
+        }
+        self.identifyBatchIntervalMillis = max(identifyBatchIntervalMillis, Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS)
     }
 
     public func intercept(event: BaseEvent) -> BaseEvent? {
@@ -234,11 +237,7 @@ public class IdentifyInterceptor {
         return !isEmptyValues(properties) && properties![operation.rawValue] != nil
     }
 
-    private func getIdentifyBatchInterval() -> TimeInterval {
-        let identifyBatchIntervalMillis = max(
-            configuration.identifyBatchIntervalMillis,
-            minIdentifyBatchInterval
-        )
-        return TimeInterval.milliseconds(identifyBatchIntervalMillis)
+    public func getIdentifyBatchInterval() -> TimeInterval {
+        return TimeInterval.milliseconds(self.identifyBatchIntervalMillis)
     }
 }
