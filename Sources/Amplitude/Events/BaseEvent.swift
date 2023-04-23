@@ -298,10 +298,10 @@ extension BaseEvent {
 }
 
 extension BaseEvent {
-    static func fromArrayString(jsonString: String) -> [BaseEvent]? {
+    static func fromArrayString<T: BaseEvent>(jsonString: String) -> [T]? {
         let jsonData = jsonString.data(using: .utf8)!
         let decoder = JSONDecoder()
-        return try? decoder.decode([BaseEvent].self, from: jsonData)
+        return try? decoder.decode([T].self, from: jsonData)
     }
 
     static func fromString<T: BaseEvent>(jsonString: String) -> T? {
