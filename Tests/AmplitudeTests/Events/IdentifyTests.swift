@@ -85,3 +85,4 @@ final class IdentifyTests: XCTestCase {
         )
     }
 }
+// swiftlint:enable force_cast

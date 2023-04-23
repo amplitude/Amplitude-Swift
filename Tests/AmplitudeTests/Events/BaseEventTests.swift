@@ -216,3 +216,4 @@ final class BaseEventTests: XCTestCase {
         )
     }
 }
+// swiftlint:enable force_cast
