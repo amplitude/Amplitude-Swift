@@ -126,3 +126,4 @@ final class RevenueTests: XCTestCase {
         )
     }
 }
+// swiftlint:enable force_cast
