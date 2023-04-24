@@ -69,22 +69,20 @@ public class IdentifyInterceptor {
                 return nil
             } else if hasOperation(properties: event.userProperties, operation: Identify.Operation.CLEAR_ALL) {
                 removeEventsFromStorage()
-                return event
             } else {
                 transferInterceptedIdentifyEvent()
-                return event
             }
         case Constants.GROUP_IDENTIFY_EVENT:
-            return event
+            break
         default:
             if hasOperation(properties: event.userProperties, operation: Identify.Operation.CLEAR_ALL) {
                 removeEventsFromStorage()
-                return event
             } else {
                 transferInterceptedIdentifyEvent()
-                return event
             }
         }
+
+        return event;
     }
 
     func getCombinedInterceptedIdentify() -> IdentifyEvent? {
