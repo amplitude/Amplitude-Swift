@@ -211,7 +211,7 @@ public class IdentifyInterceptor {
 
     func mergeUserProperties(destination: [String: Any?]?, source: [String: Any?]?) -> [String: Any?] {
         var result = destination ?? [:]
-        result = result.merging(source ?? [:]) { _, new in new }
+        result = result.merging(source ?? [:]) { old, new in (new == nil || new is NSNull) ? old : new }
 
         return result
     }
