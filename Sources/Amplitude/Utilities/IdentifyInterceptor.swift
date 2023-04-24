@@ -82,7 +82,7 @@ public class IdentifyInterceptor {
             }
         }
 
-        return event;
+        return event
     }
 
     func getCombinedInterceptedIdentify() -> IdentifyEvent? {
