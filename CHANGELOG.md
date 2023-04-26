@@ -1,3 +1,11 @@
+## [0.4.1](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.0...v0.4.1) (2023-04-26)
+
+
+### Bug Fixes
+
+* update identify collapsing logic to send actions on separate identify event ([#48](https://github.com/amplitude/Amplitude-Swift/issues/48)) ([6040632](https://github.com/amplitude/Amplitude-Swift/commit/604063266ef41a80e121e3f2a99edf9813ad7140))
+* updated identify merging logic to ignore nil values ([#49](https://github.com/amplitude/Amplitude-Swift/issues/49)) ([0320451](https://github.com/amplitude/Amplitude-Swift/commit/03204512c6d2a70c61355c196fcd990d63b9f3d1))
+
 # [0.4.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.3.2...v0.4.0) (2023-02-25)
 
 
