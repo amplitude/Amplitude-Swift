@@ -183,12 +183,30 @@ final class AmplitudeTests: XCTestCase {
         amplitude.setGroup(groupType: "group-type", groupName: "group-name")
 
         intercepts = interceptStorageTest.events()
-        events = storageTest.events()
         XCTAssertEqual(intercepts.count, 0)
-        XCTAssertEqual(events.count, 1)
+
+        // setGroup event should not be intercepted
+        events = storageTest.events()
+        XCTAssertEqual(events.count, 2)
+
+        let e1 = events[0]
+        XCTAssertEqual(e1.eventType, "$identify")
+        XCTAssertNil(e1.groups)
+        XCTAssertNotNil(e1.userProperties)
+        XCTAssertTrue(getDictionary(e1.userProperties!).isEqual(to: ["$set": ["key-1": "value-1", "key-2": "value-2"]]))
+
+        let e2 = events[1]
+        XCTAssertEqual(e2.eventType, "$identify")
+        XCTAssertNil(e2.userProperties)
+        XCTAssertNotNil(e2.groups)
+        XCTAssertTrue(getDictionary(e2.groups!).isEqual(to: ["group-type": "group-name"]))
 
         // clear storages
         storageTest.reset()
         interceptStorageTest.reset()
+    }
+
+    func getDictionary(_ props: [String: Any?]) -> NSDictionary {
+        return NSDictionary(dictionary: props as [AnyHashable: Any])
     }
 }

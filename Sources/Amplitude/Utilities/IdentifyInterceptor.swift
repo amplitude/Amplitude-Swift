@@ -69,24 +69,24 @@ public class IdentifyInterceptor {
                 return nil
             } else if hasOperation(properties: event.userProperties, operation: Identify.Operation.CLEAR_ALL) {
                 removeEventsFromStorage()
-                return event
             } else {
-                return mergeEventUserProperties(destination: event, source: getCombinedInterceptedIdentify())
+                transferInterceptedIdentifyEvent()
             }
         case Constants.GROUP_IDENTIFY_EVENT:
-            return event
+            break
         default:
             if hasOperation(properties: event.userProperties, operation: Identify.Operation.CLEAR_ALL) {
                 removeEventsFromStorage()
-                return event
             } else {
-                return mergeEventUserProperties(destination: event, source: getCombinedInterceptedIdentify())
+                transferInterceptedIdentifyEvent()
             }
         }
+
+        return event
     }
 
-    func getCombinedInterceptedIdentify() -> BaseEvent? {
-        var combinedInterceptedIdentify: BaseEvent?
+    func getCombinedInterceptedIdentify() -> IdentifyEvent? {
+        var combinedInterceptedIdentify: IdentifyEvent?
         let eventFiles: [URL]? = storage.read(key: StorageKey.EVENTS)
 
         if let eventFiles {
@@ -98,7 +98,7 @@ public class IdentifyInterceptor {
                     continue
                 }
 
-                if let events = BaseEvent.fromArrayString(jsonString: eventsString) {
+                if let events: [IdentifyEvent] = BaseEvent.fromArrayString(jsonString: eventsString) {
                     for event in events {
                         if let dest = combinedInterceptedIdentify {
                             combinedInterceptedIdentify = mergeEventUserProperties(destination: dest, source: event)
@@ -125,45 +125,20 @@ public class IdentifyInterceptor {
         return nil
     }
 
-    func mergeEventUserProperties(destination: BaseEvent, source: BaseEvent?) -> BaseEvent {
-        if let source {
-            var sourceUserProperties: [String: Any?]?
-            var destinationUserProperties: [String: Any?]?
-            let flattenUserProperties = destination.eventType != Constants.IDENTIFY_EVENT
+    func mergeEventUserProperties(destination: IdentifyEvent, source: IdentifyEvent) -> IdentifyEvent {
+        var sourceUserProperties: [String: Any?]?
+        var destinationUserProperties: [String: Any?]?
 
-            // note source is always an Identify
-            sourceUserProperties = getUserPropertySetValues(source)
-            destinationUserProperties = flattenUserProperties
-            ? destination.userProperties
-            : getUserPropertySetValues(destination)
+        // note destination/source contain only $set properties
+        sourceUserProperties = getUserPropertySetValues(source)
+        destinationUserProperties = getUserPropertySetValues(destination)
 
-            if flattenUserProperties {
-                destination.userProperties = mergeUserProperties(
-                    destination: destinationUserProperties,
-                    source: sourceUserProperties
-                )
-            } else {
-                destination.userProperties = destination.userProperties ?? [:]
-                destination.userProperties![Identify.Operation.SET.rawValue] = mergeUserProperties(
-                    destination: destinationUserProperties,
-                    source: sourceUserProperties
-                )
-            }
+        destination.userProperties = destination.userProperties ?? [:]
+        destination.userProperties![Identify.Operation.SET.rawValue] = mergeUserProperties(
+            destination: destinationUserProperties,
+            source: sourceUserProperties
+        )
 
-            if let destinationUserProperties {
-                if flattenUserProperties {
-                    destination.userProperties = mergeUserProperties(
-                        destination: destination.userProperties,
-                        source: destinationUserProperties
-                    )
-                } else {
-                    destination.userProperties = mergeUserPropertiesOperations(
-                        destination: destination.userProperties,
-                        source: [Identify.Operation.SET.rawValue: destinationUserProperties]
-                    )
-                }
-            }
-        }
         return destination
     }
 
@@ -195,18 +170,6 @@ public class IdentifyInterceptor {
             self?.identifyTransferTimer = nil
             transferInterceptedIdentifyEvent?()
         }
-    }
-
-    func mergeUserPropertiesOperations(destination: [String: Any?]?, source: [String: Any?]?) -> [String: Any?] {
-        let destinationSetProperties = destination?[Identify.Operation.SET.rawValue] as? [String: Any?] ?? [:]
-        let sourceSetProperties = source?[Identify.Operation.SET.rawValue] as? [String: Any?] ?? [:]
-
-        var result = destination ?? [:]
-        result[Identify.Operation.SET.rawValue] = mergeUserProperties(
-            destination: destinationSetProperties,
-            source: sourceSetProperties
-        )
-        return result
     }
 
     func mergeUserProperties(destination: [String: Any?]?, source: [String: Any?]?) -> [String: Any?] {
