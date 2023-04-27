@@ -1,3 +1,10 @@
+## [0.4.2](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.1...v0.4.2) (2023-04-27)
+
+
+### Bug Fixes
+
+* updated license to current year ([#52](https://github.com/amplitude/Amplitude-Swift/issues/52)) ([61f5812](https://github.com/amplitude/Amplitude-Swift/commit/61f581272f6f230c02288e4193e261cfb4e3c287))
+
 ## [0.4.1](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.0...v0.4.1) (2023-04-26)
 
 
