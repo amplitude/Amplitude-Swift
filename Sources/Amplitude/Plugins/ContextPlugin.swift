@@ -67,7 +67,7 @@ class ContextPlugin: Plugin {
         }
 
         var carrier = "Unknown"
-        #if os(iOS)
+        #if os(iOS) && !targetEnvironment(simulator)
         let networkInfo = CTTelephonyNetworkInfo()
         if let providers = networkInfo.serviceSubscriberCellularProviders {
             for (_, provider) in providers where provider.mobileNetworkCode != nil {
