@@ -15,7 +15,7 @@ public class Timeline {
     private(set) var sessionId: Int64 {
         get { _sessionId }
         set {
-            _sessionId = newValue;
+            _sessionId = newValue
             do {
                 try amplitude.storage.write(key: StorageKey.PREVIOUS_SESSION_ID, value: _sessionId)
             } catch {
@@ -28,7 +28,7 @@ public class Timeline {
     private(set) var lastEventId: Int64 {
         get { _lastEventId }
         set {
-            _lastEventId = newValue;
+            _lastEventId = newValue
             do {
                 try amplitude.storage.write(key: StorageKey.LAST_EVENT_ID, value: _lastEventId)
             } catch {
@@ -41,7 +41,7 @@ public class Timeline {
     var lastEventTime: Int64 {
         get { _lastEventTime }
         set {
-            _lastEventTime = newValue;
+            _lastEventTime = newValue
             do {
                 try amplitude.storage.write(key: StorageKey.LAST_EVENT_TIME, value: _lastEventTime)
             } catch {
@@ -95,14 +95,14 @@ public class Timeline {
 
         sessionEvents?.forEach({ sessionEvent in
             if sessionEvent.eventId == nil {
-                newLastEventId = newLastEventId + 1
+                newLastEventId += 1
                 sessionEvent.eventId = newLastEventId
             }
         })
 
         if !skipEvent {
             if event.eventId == nil {
-                newLastEventId = newLastEventId + 1
+                newLastEventId += 1
                 event.eventId = newLastEventId
             }
         }

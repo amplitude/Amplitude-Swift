@@ -6,7 +6,7 @@ public class Amplitude {
     private var inForeground = false
 
     var sessionId: Int64 {
-        get { timeline.sessionId }
+        timeline.sessionId
     }
 
     var state: State = State()
