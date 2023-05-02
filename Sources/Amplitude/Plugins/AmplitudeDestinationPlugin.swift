@@ -55,8 +55,6 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
             pipeline: pipeline!
         )
         pipeline?.start()
-
-        add(plugin: IdentityEventSender())
     }
 
     public override func execute(event: BaseEvent?) -> BaseEvent? {

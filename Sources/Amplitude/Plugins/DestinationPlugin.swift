@@ -8,7 +8,6 @@
 open class DestinationPlugin: EventPlugin {
     public let type: PluginType = .destination
     public var amplitude: Amplitude?
-    private var timeline = Timeline()
 
     public init() {
     }
@@ -50,26 +49,13 @@ extension DestinationPlugin {
         return self.amplitude?.logger
     }
 
-    @discardableResult
-    func add(plugin: Plugin) -> Plugin {
-        plugin.amplitude = self.amplitude
-        timeline.add(plugin: plugin)
-        return plugin
-    }
-
-    func remove(plugin: Plugin) {
-        timeline.remove(plugin: plugin)
-    }
-
     func process(event: BaseEvent?) -> BaseEvent? {
         // Skip this destination if it is disabled via settings
         if !enabled {
             return nil
         }
-        let beforeResult = timeline.applyPlugin(pluginType: .before, event: event)
-        let enrichmentResult = timeline.applyPlugin(pluginType: .enrichment, event: beforeResult)
         var destinationResult: BaseEvent?
-        switch enrichmentResult {
+        switch event {
         case let e as IdentifyEvent:
             destinationResult = identify(event: e)
         case let e as GroupIdentifyEvent:
@@ -82,9 +68,5 @@ extension DestinationPlugin {
             break
         }
         return destinationResult
-    }
-
-    public func apply(closure: (Plugin) -> Void) {
-        timeline.apply(closure)
     }
 }

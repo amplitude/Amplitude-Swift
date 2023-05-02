@@ -24,7 +24,7 @@ internal class Mediator {
         plugins.forEach { plugin in
             if let r = result {
                 if let p = plugin as? DestinationPlugin {
-                    _ = p.process(event: r)
+                    p.process(event: r)
                 } else if let p = plugin as? EventPlugin {
                     if let rr = result {
                         if let identifyEvent = rr as? IdentifyEvent {

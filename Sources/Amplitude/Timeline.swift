@@ -8,13 +8,50 @@
 import Foundation
 
 public class Timeline {
-    var amplitude: Amplitude?
+    private let amplitude: Amplitude
     internal let plugins: [PluginType: Mediator]
-    var sessionId: Int64 = -1
-    var lastEventId: Int64 = 0
-    var lastEventTime: Int64 = -1
 
-    init() {
+    private var _sessionId: Int64 = -1
+    private(set) var sessionId: Int64 {
+        get { _sessionId }
+        set {
+            _sessionId = newValue;
+            do {
+                try amplitude.storage.write(key: StorageKey.PREVIOUS_SESSION_ID, value: _sessionId)
+            } catch {
+                print("Can't write PREVIOUS_SESSION_ID to storage: \(error)")
+            }
+        }
+    }
+
+    private var _lastEventId: Int64 = 0
+    private(set) var lastEventId: Int64 {
+        get { _lastEventId }
+        set {
+            _lastEventId = newValue;
+            do {
+                try amplitude.storage.write(key: StorageKey.LAST_EVENT_ID, value: _lastEventId)
+            } catch {
+                print("Can't write LAST_EVENT_ID to storage: \(error)")
+            }
+        }
+    }
+
+    private var _lastEventTime: Int64 = -1
+    private(set) var lastEventTime: Int64 {
+        get { _lastEventTime }
+        set {
+            _lastEventTime = newValue;
+            do {
+                try amplitude.storage.write(key: StorageKey.LAST_EVENT_TIME, value: _lastEventTime)
+            } catch {
+                print("Can't write LAST_EVENT_TIME to storage: \(error)")
+            }
+        }
+    }
+
+    init(amplitude: Amplitude) {
+        self.amplitude = amplitude
         self.plugins = [
             PluginType.before: Mediator(),
             PluginType.enrichment: Mediator(),
@@ -24,62 +61,58 @@ public class Timeline {
     }
 
     func start() {
-        sessionId = amplitude?.storage.read(key: .PREVIOUS_SESSION_ID) ?? -1
-        lastEventId = amplitude?.storage.read(key: .LAST_EVENT_ID) ?? -1
-        lastEventTime = amplitude?.storage.read(key: .LAST_EVENT_TIME) ?? -1
+        self._sessionId = amplitude.storage.read(key: .PREVIOUS_SESSION_ID) ?? -1
+        self._lastEventId = amplitude.storage.read(key: .LAST_EVENT_ID) ?? 0
+        self._lastEventTime = amplitude.storage.read(key: .LAST_EVENT_TIME) ?? -1
     }
 
-    func process(event: BaseEvent) {
+    func process(event: BaseEvent, inForeground: Bool) {
+        event.timestamp = event.timestamp ?? Int64(NSDate().timeIntervalSince1970 * 1000)
         let eventTimeStamp = event.timestamp!
         var skipEvent: Bool = false
         var sessionEvents: [BaseEvent]?
 
         if event.eventType == Constants.AMP_SESSION_START_EVENT {
-            if event.sessionId! < 0 {
+            if event.sessionId < 0 { // dummy start_session event
                 skipEvent = true
-                sessionEvents = self.amplitude?.startOrContinueSession(timestamp: eventTimeStamp)
+                sessionEvents = self.startNewSessionIfNeeded(timestamp: eventTimeStamp, inForeground: inForeground)
             } else {
-                _ = self.amplitude?.setSessionId(sessionId: eventTimeStamp)
-                self.amplitude?.refreshSessionTime(timestamp: eventTimeStamp)
+                self.sessionId = event.sessionId
+                self.lastEventTime = eventTimeStamp
             }
         } else if event.eventType == Constants.AMP_SESSION_END_EVENT {
             // do nothing
         } else {
-            if !(self.amplitude?._inForeground ?? false) {
-                sessionEvents = self.amplitude?.startOrContinueSession(timestamp: eventTimeStamp)
-            } else {
-                _ = self.amplitude?.refreshSessionTime(timestamp: eventTimeStamp)
-            }
+            sessionEvents = self.startNewSessionIfNeeded(timestamp: eventTimeStamp, inForeground: inForeground)
         }
 
-        if !skipEvent && event.sessionId! < 0 {
-            event.sessionId = sessionId
+        if !skipEvent && event.sessionId < 0 {
+            event.sessionId = self.sessionId
         }
 
-        let savedLastEventId = lastEventId
+        let currentLastEventId = self.lastEventId
+        var newLastEventId = currentLastEventId
 
         sessionEvents?.forEach({ sessionEvent in
             if sessionEvent.eventId == nil {
-                let newEventId = lastEventId + 1
-                sessionEvent.eventId = newEventId
-                lastEventId = newEventId
+                newLastEventId = newLastEventId + 1
+                sessionEvent.eventId = newLastEventId
             }
         })
 
         if !skipEvent {
-            let newEventId = lastEventId + 1
-            event.eventId = newEventId
-            lastEventId = newEventId
-        }
-
-        if lastEventId > savedLastEventId {
-            do {
-                _ = try? self.amplitude?.storage.write(key: .LAST_EVENT_ID, value: lastEventId)
+            if event.eventId == nil {
+                newLastEventId = newLastEventId + 1
+                event.eventId = newLastEventId
             }
         }
 
+        if newLastEventId > currentLastEventId {
+            self.lastEventId = newLastEventId
+        }
+
         sessionEvents?.forEach({ sessionEvent in
-            self.processEvent(event: sessionEvent)
+            processEvent(event: sessionEvent)
         })
 
         if !skipEvent {
@@ -127,11 +160,53 @@ public class Timeline {
             if let mediator = plugins[type] {
                 mediator.plugins.forEach { (plugin) in
                     closure(plugin)
-                    if let destPlugin = plugin as? DestinationPlugin {
-                        destPlugin.apply(closure: closure)
-                    }
                 }
             }
         }
+    }
+
+    private func isWithinMinTimeBetweenSessions(timestamp: Int64) -> Bool {
+        let timeDelta = timestamp - self.lastEventTime
+        return timeDelta < amplitude.configuration.minTimeBetweenSessionsMillis
+    }
+
+    public func startNewSessionIfNeeded(timestamp: Int64, inForeground: Bool) -> [BaseEvent]? {
+        if self.sessionId >= 0 && (inForeground || isWithinMinTimeBetweenSessions(timestamp: timestamp)) {
+            // if with in the same session extend the session and update the session time
+            self.lastEventTime = timestamp
+            return nil
+        }
+
+        return startNewSession(timestamp: timestamp)
+    }
+
+    public func startNewSession(timestamp: Int64) -> [BaseEvent] {
+        var sessionEvents: [BaseEvent] = Array()
+        let trackingSessionEvents = amplitude.configuration.trackingSessionEvents
+
+        // end previous session
+        if trackingSessionEvents == true && self.sessionId >= 0 {
+            let sessionEndEvent = BaseEvent(
+                timestamp: self.lastEventTime > 0 ? self.lastEventTime : nil,
+                sessionId: self.sessionId,
+                eventType: Constants.AMP_SESSION_END_EVENT
+            )
+            sessionEvents.append(sessionEndEvent)
+
+        }
+
+        // start new session
+        self.sessionId = timestamp
+        self.lastEventTime = timestamp
+        if trackingSessionEvents == true {
+            let sessionStartEvent = BaseEvent(
+                timestamp: timestamp,
+                sessionId: timestamp,
+                eventType: Constants.AMP_SESSION_START_EVENT
+            )
+            sessionEvents.append(sessionStartEvent)
+        }
+
+        return sessionEvents
     }
 }

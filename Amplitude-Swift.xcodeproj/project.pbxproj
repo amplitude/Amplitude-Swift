@@ -28,7 +28,6 @@
 		OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* AmplitudeDestinationPlugin.swift */; };
 		OBJ_102 /* ContextPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ContextPlugin.swift */; };
 		OBJ_103 /* DestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* DestinationPlugin.swift */; };
-		OBJ_104 /* IdentityEventSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* IdentityEventSender.swift */; };
 		OBJ_105 /* MacOSLifecycleMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* MacOSLifecycleMonitor.swift */; };
 		OBJ_106 /* AppUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* AppUtil.swift */; };
 		OBJ_107 /* VendorSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* VendorSystem.swift */; };
@@ -47,7 +46,6 @@
 		OBJ_120 /* OutputFileStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_48 /* OutputFileStream.swift */; };
 		OBJ_121 /* PersistentStorageResponseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* PersistentStorageResponseHandler.swift */; };
 		OBJ_122 /* QueueTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* QueueTimer.swift */; };
-		OBJ_123 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_51 /* Session.swift */; };
 		OBJ_124 /* UrlExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_52 /* UrlExtension.swift */; };
 		OBJ_131 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_142 /* AmplitudeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_54 /* AmplitudeTests.swift */; };
@@ -87,14 +85,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = "amplitude-swift::Amplitude-Swift";
+			remoteGlobalIDString = amplitude-swift::Amplitude-Swift;
 			remoteInfo = "Amplitude-Swift";
 		};
 		580FD1F1294A56F60036777B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = "amplitude-swift::Amplitude-SwiftTests";
+			remoteGlobalIDString = amplitude-swift::Amplitude-SwiftTests;
 			remoteInfo = "Amplitude-SwiftTests";
 		};
 /* End PBXContainerItemProxy section */
@@ -117,7 +115,6 @@
 		OBJ_23 /* AmplitudeDestinationPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmplitudeDestinationPlugin.swift; sourceTree = "<group>"; };
 		OBJ_24 /* ContextPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextPlugin.swift; sourceTree = "<group>"; };
 		OBJ_25 /* DestinationPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationPlugin.swift; sourceTree = "<group>"; };
-		OBJ_26 /* IdentityEventSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityEventSender.swift; sourceTree = "<group>"; };
 		OBJ_28 /* MacOSLifecycleMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacOSLifecycleMonitor.swift; sourceTree = "<group>"; };
 		OBJ_30 /* AppUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUtil.swift; sourceTree = "<group>"; };
 		OBJ_31 /* VendorSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VendorSystem.swift; sourceTree = "<group>"; };
@@ -136,7 +133,6 @@
 		OBJ_48 /* OutputFileStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputFileStream.swift; sourceTree = "<group>"; };
 		OBJ_49 /* PersistentStorageResponseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentStorageResponseHandler.swift; sourceTree = "<group>"; };
 		OBJ_50 /* QueueTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueueTimer.swift; sourceTree = "<group>"; };
-		OBJ_51 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		OBJ_52 /* UrlExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlExtension.swift; sourceTree = "<group>"; };
 		OBJ_54 /* AmplitudeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmplitudeTests.swift; sourceTree = "<group>"; };
 		OBJ_55 /* ConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationTests.swift; sourceTree = "<group>"; };
@@ -206,7 +202,6 @@
 				OBJ_23 /* AmplitudeDestinationPlugin.swift */,
 				OBJ_24 /* ContextPlugin.swift */,
 				OBJ_25 /* DestinationPlugin.swift */,
-				OBJ_26 /* IdentityEventSender.swift */,
 				OBJ_27 /* Mac */,
 				OBJ_29 /* Vendors */,
 				OBJ_32 /* iOS */,
@@ -267,7 +262,6 @@
 				OBJ_48 /* OutputFileStream.swift */,
 				OBJ_49 /* PersistentStorageResponseHandler.swift */,
 				OBJ_50 /* QueueTimer.swift */,
-				OBJ_51 /* Session.swift */,
 				OBJ_52 /* UrlExtension.swift */,
 				BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */,
 			);
@@ -514,7 +508,6 @@
 				OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */,
 				OBJ_102 /* ContextPlugin.swift in Sources */,
 				OBJ_103 /* DestinationPlugin.swift in Sources */,
-				OBJ_104 /* IdentityEventSender.swift in Sources */,
 				OBJ_105 /* MacOSLifecycleMonitor.swift in Sources */,
 				OBJ_106 /* AppUtil.swift in Sources */,
 				OBJ_107 /* VendorSystem.swift in Sources */,
@@ -534,7 +527,6 @@
 				OBJ_120 /* OutputFileStream.swift in Sources */,
 				OBJ_121 /* PersistentStorageResponseHandler.swift in Sources */,
 				OBJ_122 /* QueueTimer.swift in Sources */,
-				OBJ_123 /* Session.swift in Sources */,
 				OBJ_124 /* UrlExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

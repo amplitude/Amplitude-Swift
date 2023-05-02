@@ -62,7 +62,7 @@ public class BaseEvent: EventOptions, Codable {
         deviceId: String? = nil,
         timestamp: Int64? = nil,
         eventId: Int64? = nil,
-        sessionId: Int64? = -1,
+        sessionId: Int64 = -1,
         insertId: String? = nil,
         locationLat: Double? = nil,
         locationLng: Double? = nil,
@@ -152,7 +152,7 @@ public class BaseEvent: EventOptions, Codable {
         deviceId = deviceId ?? eventOptions.deviceId
         timestamp = timestamp ?? eventOptions.timestamp
         eventId = eventId ?? eventOptions.eventId
-        sessionId = (sessionId == nil || sessionId! < 0) ? eventOptions.sessionId : sessionId
+        sessionId = (sessionId < 0) ? eventOptions.sessionId : sessionId
         insertId = insertId ?? eventOptions.insertId
         locationLat = locationLat ?? eventOptions.locationLat
         locationLng = locationLng ?? eventOptions.locationLng
@@ -203,7 +203,7 @@ public class BaseEvent: EventOptions, Codable {
         deviceId = try values.decodeIfPresent(String.self, forKey: .deviceId)
         timestamp = try values.decodeIfPresent(Int64.self, forKey: .timestamp)
         eventId = try values.decodeIfPresent(Int64.self, forKey: .eventId)
-        sessionId = try values.decodeIfPresent(Int64.self, forKey: .sessionId)
+        sessionId = try values.decodeIfPresent(Int64.self, forKey: .sessionId) ?? -1
         insertId = try values.decodeIfPresent(String.self, forKey: .insertId)
         locationLat = try values.decodeIfPresent(Double.self, forKey: .locationLat)
         locationLng = try values.decodeIfPresent(Double.self, forKey: .locationLng)
