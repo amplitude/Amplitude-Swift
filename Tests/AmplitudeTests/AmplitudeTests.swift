@@ -421,7 +421,6 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(event.eventId, lastEventId+9)
     }
 
-
     func testEventSessionsRestore() throws {
         let configuration = Configuration(
             apiKey: "testApiKey",
