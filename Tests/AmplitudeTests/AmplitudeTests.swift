@@ -174,7 +174,7 @@ final class AmplitudeTests: XCTestCase {
         currentTimestamp = 1700
         amplitude.track(event: BaseEvent(userId: "user", timestamp: currentTimestamp, eventType: "test event 5"))
 
-        amplitude.onExitForeground()
+        amplitude.onExitForeground(timestamp: 1720)
 
         currentTimestamp = 1750
         amplitude.track(event: BaseEvent(userId: "user", timestamp: currentTimestamp, eventType: "test event 6"))
@@ -186,9 +186,14 @@ final class AmplitudeTests: XCTestCase {
         currentTimestamp = 2200
         amplitude.track(event: BaseEvent(userId: "user", timestamp: currentTimestamp, eventType: "test event 8"))
 
+        amplitude.onExitForeground(timestamp: 2250)
+
+        currentTimestamp = 2400
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: currentTimestamp, eventType: "test event 9"))
+
         let collectedEvents = eventCollector.events
 
-        XCTAssertEqual(collectedEvents.count, 17)
+        XCTAssertEqual(collectedEvents.count, 20)
 
         var event = collectedEvents[0]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
@@ -291,6 +296,24 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(event.timestamp, 2200)
         XCTAssertEqual(event.sessionId, 2000)
         XCTAssertEqual(event.eventId, lastEventId+17)
+
+        event = collectedEvents[17]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
+        XCTAssertEqual(event.timestamp, 2250)
+        XCTAssertEqual(event.sessionId, 2000)
+        XCTAssertEqual(event.eventId, lastEventId+18)
+
+        event = collectedEvents[18]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
+        XCTAssertEqual(event.timestamp, 2400)
+        XCTAssertEqual(event.sessionId, 2400)
+        XCTAssertEqual(event.eventId, lastEventId+19)
+
+        event = collectedEvents[19]
+        XCTAssertEqual(event.eventType, "test event 9")
+        XCTAssertEqual(event.timestamp, 2400)
+        XCTAssertEqual(event.sessionId, 2400)
+        XCTAssertEqual(event.eventId, lastEventId+20)
     }
 
     func testEventSessionsWithoutTrackingSessionEvents() throws {
@@ -322,7 +345,7 @@ final class AmplitudeTests: XCTestCase {
         currentTimestamp = 1700
         amplitude.track(event: BaseEvent(userId: "user", timestamp: currentTimestamp, eventType: "test event 5"))
 
-        amplitude.onExitForeground()
+        amplitude.onExitForeground(timestamp: 1720)
 
         currentTimestamp = 1750
         amplitude.track(event: BaseEvent(userId: "user", timestamp: currentTimestamp, eventType: "test event 6"))
@@ -334,9 +357,14 @@ final class AmplitudeTests: XCTestCase {
         currentTimestamp = 2200
         amplitude.track(event: BaseEvent(userId: "user", timestamp: currentTimestamp, eventType: "test event 8"))
 
+        amplitude.onExitForeground(timestamp: 2250)
+
+        currentTimestamp = 2400
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: currentTimestamp, eventType: "test event 9"))
+
         let collectedEvents = eventCollector.events
 
-        XCTAssertEqual(collectedEvents.count, 8)
+        XCTAssertEqual(collectedEvents.count, 9)
 
         var event = collectedEvents[0]
         XCTAssertEqual(event.eventType, "test event 1")
@@ -385,6 +413,12 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(event.timestamp, 2200)
         XCTAssertEqual(event.sessionId, 2000)
         XCTAssertEqual(event.eventId, lastEventId+8)
+
+        event = collectedEvents[8]
+        XCTAssertEqual(event.eventType, "test event 9")
+        XCTAssertEqual(event.timestamp, 2400)
+        XCTAssertEqual(event.sessionId, 2400)
+        XCTAssertEqual(event.eventId, lastEventId+9)
     }
 
 

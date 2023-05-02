@@ -275,8 +275,9 @@ public class Amplitude {
         timeline.process(event: dummySessionStartEvent, inForeground: false)
     }
 
-    func onExitForeground() {
+    func onExitForeground(timestamp: Int64) {
         inForeground = false
+        timeline.lastEventTime = timestamp
         if configuration.flushEventsOnClose == true {
             _ = self.flush()
         }

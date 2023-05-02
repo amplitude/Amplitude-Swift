@@ -38,7 +38,7 @@ public class Timeline {
     }
 
     private var _lastEventTime: Int64 = -1
-    private(set) var lastEventTime: Int64 {
+    var lastEventTime: Int64 {
         get { _lastEventTime }
         set {
             _lastEventTime = newValue;
