@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */; };
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
 		8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
 		BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */; };
@@ -100,6 +101,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeSessionTests.swift; sourceTree = "<group>"; };
 		8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sessions.swift; sourceTree = "<group>"; };
 		8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueueTimeTests.swift; sourceTree = "<group>"; };
 		BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptor.swift; sourceTree = "<group>"; };
@@ -301,6 +303,7 @@
 				OBJ_68 /* TimelineTests.swift */,
 				OBJ_69 /* TypesTests.swift */,
 				OBJ_70 /* Utilities */,
+				8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */,
 			);
 			name = Tests;
 			path = Tests/AmplitudeTests;
@@ -491,6 +494,7 @@
 				OBJ_157 /* PersistentStorageResponseHandlerTests.swift in Sources */,
 				OBJ_158 /* UrlExtensionTests.swift in Sources */,
 				8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */,
+				8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
