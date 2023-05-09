@@ -122,7 +122,6 @@ public class Sessions {
                 eventType: Constants.AMP_SESSION_END_EVENT
             )
             sessionEvents.append(sessionEndEvent)
-
         }
 
         // start new session
