@@ -6,7 +6,7 @@ public class Amplitude {
     private var inForeground = false
 
     var sessionId: Int64 {
-        timeline.sessionId
+        sessions.sessionId
     }
 
     var state: State = State()
@@ -27,8 +27,11 @@ public class Amplitude {
     }()
 
     lazy var timeline: Timeline = {
-        let timeline = Timeline(amplitude: self)
-        return timeline
+        return Timeline()
+    }()
+
+    lazy var sessions: Sessions = {
+        return Sessions(amplitude: self)
     }()
 
     public lazy var logger: (any Logger)? = {
@@ -51,7 +54,6 @@ public class Amplitude {
         }
         _ = add(plugin: contextPlugin)
         _ = add(plugin: AmplitudeDestinationPlugin())
-        timeline.start()
     }
 
     convenience init(apiKey: String, configuration: Configuration) {
@@ -262,7 +264,8 @@ public class Amplitude {
             logger?.log(message: "Skip event based on opt out configuration")
             return
         }
-        timeline.process(event: event, inForeground: inForeground)
+        let events = sessions.processEvent(event: event, inForeground: inForeground)
+        events.forEach { e in timeline.processEvent(event: e) }
     }
 
     func onEnterForeground(timestamp: Int64) {
@@ -272,12 +275,13 @@ public class Amplitude {
             sessionId: -1,
             eventType: Constants.AMP_SESSION_START_EVENT
         )
-        timeline.process(event: dummySessionStartEvent, inForeground: false)
+        let events = sessions.processEvent(event: dummySessionStartEvent, inForeground: false)
+        events.forEach { e in timeline.processEvent(event: e) }
     }
 
     func onExitForeground(timestamp: Int64) {
         inForeground = false
-        timeline.lastEventTime = timestamp
+        sessions.lastEventTime = timestamp
         if configuration.flushEventsOnClose == true {
             _ = self.flush()
         }

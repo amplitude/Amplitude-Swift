@@ -22,12 +22,14 @@
 
 /* Begin PBXBuildFile section */
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
+		8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
 		BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */; };
 		BA9BEA4D299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
 		OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* AmplitudeDestinationPlugin.swift */; };
 		OBJ_102 /* ContextPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ContextPlugin.swift */; };
 		OBJ_103 /* DestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* DestinationPlugin.swift */; };
+		OBJ_104 /* IdentityEventSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* IdentityEventSender.swift */; };
 		OBJ_105 /* MacOSLifecycleMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* MacOSLifecycleMonitor.swift */; };
 		OBJ_106 /* AppUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* AppUtil.swift */; };
 		OBJ_107 /* VendorSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* VendorSystem.swift */; };
@@ -98,6 +100,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sessions.swift; sourceTree = "<group>"; };
 		8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueueTimeTests.swift; sourceTree = "<group>"; };
 		BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptor.swift; sourceTree = "<group>"; };
 		BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptorTests.swift; sourceTree = "<group>"; };
@@ -115,6 +118,7 @@
 		OBJ_23 /* AmplitudeDestinationPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmplitudeDestinationPlugin.swift; sourceTree = "<group>"; };
 		OBJ_24 /* ContextPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextPlugin.swift; sourceTree = "<group>"; };
 		OBJ_25 /* DestinationPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationPlugin.swift; sourceTree = "<group>"; };
+		OBJ_26 /* IdentityEventSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityEventSender.swift; sourceTree = "<group>"; };
 		OBJ_28 /* MacOSLifecycleMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacOSLifecycleMonitor.swift; sourceTree = "<group>"; };
 		OBJ_30 /* AppUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUtil.swift; sourceTree = "<group>"; };
 		OBJ_31 /* VendorSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VendorSystem.swift; sourceTree = "<group>"; };
@@ -202,6 +206,7 @@
 				OBJ_23 /* AmplitudeDestinationPlugin.swift */,
 				OBJ_24 /* ContextPlugin.swift */,
 				OBJ_25 /* DestinationPlugin.swift */,
+				OBJ_26 /* IdentityEventSender.swift */,
 				OBJ_27 /* Mac */,
 				OBJ_29 /* Vendors */,
 				OBJ_32 /* iOS */,
@@ -347,6 +352,7 @@
 				OBJ_41 /* TrackingOptions.swift */,
 				OBJ_42 /* Types.swift */,
 				OBJ_43 /* Utilities */,
+				8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */,
 			);
 			name = Sources;
 			path = Sources/Amplitude;
@@ -508,6 +514,7 @@
 				OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */,
 				OBJ_102 /* ContextPlugin.swift in Sources */,
 				OBJ_103 /* DestinationPlugin.swift in Sources */,
+				OBJ_104 /* IdentityEventSender.swift in Sources */,
 				OBJ_105 /* MacOSLifecycleMonitor.swift in Sources */,
 				OBJ_106 /* AppUtil.swift in Sources */,
 				OBJ_107 /* VendorSystem.swift in Sources */,
@@ -528,6 +535,7 @@
 				OBJ_121 /* PersistentStorageResponseHandler.swift in Sources */,
 				OBJ_122 /* QueueTimer.swift in Sources */,
 				OBJ_124 /* UrlExtension.swift in Sources */,
+				8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

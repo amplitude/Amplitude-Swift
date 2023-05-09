@@ -434,37 +434,37 @@ final class AmplitudeTests: XCTestCase {
         amplitude1.onEnterForeground(timestamp: 1000)
 
         XCTAssertEqual(amplitude1.sessionId, 1000)
-        XCTAssertEqual(amplitude1.timeline.sessionId, 1000)
-        XCTAssertEqual(amplitude1.timeline.lastEventTime, 1000)
-        XCTAssertEqual(amplitude1.timeline.lastEventId, 1)
+        XCTAssertEqual(amplitude1.sessions.sessionId, 1000)
+        XCTAssertEqual(amplitude1.sessions.lastEventTime, 1000)
+        XCTAssertEqual(amplitude1.sessions.lastEventId, 1)
 
         amplitude1.track(event: BaseEvent(userId: "user", timestamp: 1200, eventType: "test event 1"))
 
         XCTAssertEqual(amplitude1.sessionId, 1000)
-        XCTAssertEqual(amplitude1.timeline.sessionId, 1000)
-        XCTAssertEqual(amplitude1.timeline.lastEventTime, 1200)
-        XCTAssertEqual(amplitude1.timeline.lastEventId, 2)
+        XCTAssertEqual(amplitude1.sessions.sessionId, 1000)
+        XCTAssertEqual(amplitude1.sessions.lastEventTime, 1200)
+        XCTAssertEqual(amplitude1.sessions.lastEventId, 2)
 
         let amplitude2 = Amplitude(configuration: configuration)
 
         XCTAssertEqual(amplitude2.sessionId, 1000)
-        XCTAssertEqual(amplitude2.timeline.sessionId, 1000)
-        XCTAssertEqual(amplitude2.timeline.lastEventTime, 1200)
-        XCTAssertEqual(amplitude2.timeline.lastEventId, 2)
+        XCTAssertEqual(amplitude2.sessions.sessionId, 1000)
+        XCTAssertEqual(amplitude2.sessions.lastEventTime, 1200)
+        XCTAssertEqual(amplitude2.sessions.lastEventId, 2)
 
         let amplitude3 = Amplitude(configuration: configuration)
 
         XCTAssertEqual(amplitude3.sessionId, 1000)
-        XCTAssertEqual(amplitude3.timeline.sessionId, 1000)
-        XCTAssertEqual(amplitude3.timeline.lastEventTime, 1200)
-        XCTAssertEqual(amplitude3.timeline.lastEventId, 2)
+        XCTAssertEqual(amplitude3.sessions.sessionId, 1000)
+        XCTAssertEqual(amplitude3.sessions.lastEventTime, 1200)
+        XCTAssertEqual(amplitude3.sessions.lastEventId, 2)
 
         amplitude3.onEnterForeground(timestamp: 1400)
 
         XCTAssertEqual(amplitude3.sessionId, 1400)
-        XCTAssertEqual(amplitude3.timeline.sessionId, 1400)
-        XCTAssertEqual(amplitude3.timeline.lastEventTime, 1400)
-        XCTAssertEqual(amplitude3.timeline.lastEventId, 4)
+        XCTAssertEqual(amplitude3.sessions.sessionId, 1400)
+        XCTAssertEqual(amplitude3.sessions.lastEventTime, 1400)
+        XCTAssertEqual(amplitude3.sessions.lastEventId, 4)
     }
 
     func testSetUserId() {
