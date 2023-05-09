@@ -59,6 +59,9 @@ public class Timeline {
             if let mediator = plugins[type] {
                 mediator.plugins.forEach { (plugin) in
                     closure(plugin)
+                    if let destPlugin = plugin as? DestinationPlugin {
+                        destPlugin.apply(closure: closure)
+                    }
                 }
             }
         }
