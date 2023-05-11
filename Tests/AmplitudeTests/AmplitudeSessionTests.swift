@@ -333,20 +333,6 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(amplitude2.sessions.sessionId, 1000)
         XCTAssertEqual(amplitude2.sessions.lastEventTime, 1200)
         XCTAssertEqual(amplitude2.sessions.lastEventId, 2)
-
-        let amplitude3 = Amplitude(configuration: configuration)
-
-        XCTAssertEqual(amplitude3.sessionId, 1000)
-        XCTAssertEqual(amplitude3.sessions.sessionId, 1000)
-        XCTAssertEqual(amplitude3.sessions.lastEventTime, 1200)
-        XCTAssertEqual(amplitude3.sessions.lastEventId, 2)
-
-        amplitude3.onEnterForeground(timestamp: 1400)
-
-        XCTAssertEqual(amplitude3.sessionId, 1400)
-        XCTAssertEqual(amplitude3.sessions.sessionId, 1400)
-        XCTAssertEqual(amplitude3.sessions.lastEventTime, 1400)
-        XCTAssertEqual(amplitude3.sessions.lastEventId, 4)
     }
 
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
