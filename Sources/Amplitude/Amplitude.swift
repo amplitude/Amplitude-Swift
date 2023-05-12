@@ -3,8 +3,11 @@ import Foundation
 public class Amplitude {
     var configuration: Configuration
     var instanceName: String
-    var _inForeground = false
-    internal var _sessionId: Int64 = -1
+    private var inForeground = false
+
+    var sessionId: Int64 {
+        sessions.sessionId
+    }
 
     var state: State = State()
     var contextPlugin: ContextPlugin
@@ -24,9 +27,11 @@ public class Amplitude {
     }()
 
     lazy var timeline: Timeline = {
-        let timeline = Timeline()
-        timeline.amplitude = self
-        return timeline
+        return Timeline()
+    }()
+
+    lazy var sessions: Sessions = {
+        return Sessions(amplitude: self)
     }()
 
     public lazy var logger: (any Logger)? = {
@@ -49,7 +54,6 @@ public class Amplitude {
         }
         _ = add(plugin: contextPlugin)
         _ = add(plugin: AmplitudeDestinationPlugin())
-        timeline.start()
     }
 
     convenience init(apiKey: String, configuration: Configuration) {
@@ -244,13 +248,6 @@ public class Amplitude {
     }
 
     @discardableResult
-    public func setSessionId(sessionId: Int64) -> Amplitude {
-        _sessionId = sessionId
-        _ = try? self.storage.write(key: .PREVIOUS_SESSION_ID, value: sessionId)
-        return self
-    }
-
-    @discardableResult
     public func reset() -> Amplitude {
         _ = setUserId(userId: nil)
         _ = setDeviceId(deviceId: nil)
@@ -267,22 +264,23 @@ public class Amplitude {
             logger?.log(message: "Skip event based on opt out configuration")
             return
         }
-        event.timestamp = event.timestamp ?? Int64(NSDate().timeIntervalSince1970 * 1000)
-        timeline.process(event: event)
+        let events = sessions.processEvent(event: event, inForeground: inForeground)
+        events.forEach { e in timeline.processEvent(event: e) }
     }
 
     func onEnterForeground(timestamp: Int64) {
-        _inForeground = true
+        inForeground = true
         let dummySessionStartEvent = BaseEvent(
             timestamp: timestamp,
-            sessionId: -1,
             eventType: Constants.AMP_SESSION_START_EVENT
         )
-        timeline.process(event: dummySessionStartEvent)
+        let events = sessions.processEvent(event: dummySessionStartEvent, inForeground: false)
+        events.forEach { e in timeline.processEvent(event: e) }
     }
 
-    func onExitForeground() {
-        _inForeground = false
+    func onExitForeground(timestamp: Int64) {
+        inForeground = false
+        sessions.lastEventTime = timestamp
         if configuration.flushEventsOnClose == true {
             _ = self.flush()
         }

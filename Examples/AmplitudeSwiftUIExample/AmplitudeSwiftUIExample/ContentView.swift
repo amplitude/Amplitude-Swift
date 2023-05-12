@@ -31,7 +31,7 @@ struct ContentView: View {
     var body: some View {
         VStack {
             LazyVStack {
-                Text("Amplitude Exmaple")
+                Text("Amplitude Example")
                     .bold()
                     .padding()
                     .frame(maxWidth: .infinity)

@@ -21,7 +21,9 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */; };
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
+		8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
 		BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */; };
 		BA9BEA4D299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
@@ -47,7 +49,6 @@
 		OBJ_120 /* OutputFileStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_48 /* OutputFileStream.swift */; };
 		OBJ_121 /* PersistentStorageResponseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* PersistentStorageResponseHandler.swift */; };
 		OBJ_122 /* QueueTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* QueueTimer.swift */; };
-		OBJ_123 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_51 /* Session.swift */; };
 		OBJ_124 /* UrlExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_52 /* UrlExtension.swift */; };
 		OBJ_131 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_142 /* AmplitudeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_54 /* AmplitudeTests.swift */; };
@@ -87,19 +88,21 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = "amplitude-swift::Amplitude-Swift";
+			remoteGlobalIDString = amplitude-swift::Amplitude-Swift;
 			remoteInfo = "Amplitude-Swift";
 		};
 		580FD1F1294A56F60036777B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = "amplitude-swift::Amplitude-SwiftTests";
+			remoteGlobalIDString = amplitude-swift::Amplitude-SwiftTests;
 			remoteInfo = "Amplitude-SwiftTests";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeSessionTests.swift; sourceTree = "<group>"; };
+		8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sessions.swift; sourceTree = "<group>"; };
 		8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueueTimeTests.swift; sourceTree = "<group>"; };
 		BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptor.swift; sourceTree = "<group>"; };
 		BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptorTests.swift; sourceTree = "<group>"; };
@@ -136,7 +139,6 @@
 		OBJ_48 /* OutputFileStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputFileStream.swift; sourceTree = "<group>"; };
 		OBJ_49 /* PersistentStorageResponseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentStorageResponseHandler.swift; sourceTree = "<group>"; };
 		OBJ_50 /* QueueTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueueTimer.swift; sourceTree = "<group>"; };
-		OBJ_51 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		OBJ_52 /* UrlExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlExtension.swift; sourceTree = "<group>"; };
 		OBJ_54 /* AmplitudeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmplitudeTests.swift; sourceTree = "<group>"; };
 		OBJ_55 /* ConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationTests.swift; sourceTree = "<group>"; };
@@ -267,7 +269,6 @@
 				OBJ_48 /* OutputFileStream.swift */,
 				OBJ_49 /* PersistentStorageResponseHandler.swift */,
 				OBJ_50 /* QueueTimer.swift */,
-				OBJ_51 /* Session.swift */,
 				OBJ_52 /* UrlExtension.swift */,
 				BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */,
 			);
@@ -302,6 +303,7 @@
 				OBJ_68 /* TimelineTests.swift */,
 				OBJ_69 /* TypesTests.swift */,
 				OBJ_70 /* Utilities */,
+				8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */,
 			);
 			name = Tests;
 			path = Tests/AmplitudeTests;
@@ -353,6 +355,7 @@
 				OBJ_41 /* TrackingOptions.swift */,
 				OBJ_42 /* Types.swift */,
 				OBJ_43 /* Utilities */,
+				8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */,
 			);
 			name = Sources;
 			path = Sources/Amplitude;
@@ -491,6 +494,7 @@
 				OBJ_157 /* PersistentStorageResponseHandlerTests.swift in Sources */,
 				OBJ_158 /* UrlExtensionTests.swift in Sources */,
 				8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */,
+				8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -534,8 +538,8 @@
 				OBJ_120 /* OutputFileStream.swift in Sources */,
 				OBJ_121 /* PersistentStorageResponseHandler.swift in Sources */,
 				OBJ_122 /* QueueTimer.swift in Sources */,
-				OBJ_123 /* Session.swift in Sources */,
 				OBJ_124 /* UrlExtension.swift in Sources */,
+				8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
