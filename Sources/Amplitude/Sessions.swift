@@ -56,11 +56,11 @@ public class Sessions {
         var sessionEvents: [BaseEvent]?
 
         if event.eventType == Constants.AMP_SESSION_START_EVENT {
-            if event.sessionId < 0 { // dummy start_session event
+            if event.sessionId == nil { // dummy start_session event
                 skipEvent = true
                 sessionEvents = self.startNewSessionIfNeeded(timestamp: eventTimeStamp, inForeground: inForeground)
             } else {
-                self.sessionId = event.sessionId
+                self.sessionId = event.sessionId!
                 self.lastEventTime = eventTimeStamp
             }
         } else if event.eventType == Constants.AMP_SESSION_END_EVENT {
@@ -69,7 +69,7 @@ public class Sessions {
             sessionEvents = self.startNewSessionIfNeeded(timestamp: eventTimeStamp, inForeground: inForeground)
         }
 
-        if !skipEvent && event.sessionId < 0 {
+        if !skipEvent && event.sessionId == nil {
             event.sessionId = self.sessionId
         }
 

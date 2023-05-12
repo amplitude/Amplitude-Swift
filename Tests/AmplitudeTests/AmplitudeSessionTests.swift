@@ -335,6 +335,90 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(amplitude2.sessions.lastEventId, 2)
     }
 
+    func testExplicitSessionForEventShouldBePreserved() throws {
+        let lastEventId: Int64 = 123
+        try storageMem.write(key: StorageKey.LAST_EVENT_ID, value: lastEventId)
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        let eventCollector = EventCollectorPlugin()
+        amplitude.add(plugin: eventCollector)
+
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 1000, eventType: "test event 1"))
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 1050, sessionId: 3000, eventType: "test event 2"))
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 1100, eventType: "test event 3"))
+
+        let collectedEvents = eventCollector.events
+
+        XCTAssertEqual(collectedEvents.count, 4)
+
+        var event = collectedEvents[0]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
+        XCTAssertEqual(event.sessionId, 1000)
+        XCTAssertEqual(event.timestamp, 1000)
+        XCTAssertEqual(event.eventId, lastEventId+1)
+
+        event = collectedEvents[1]
+        XCTAssertEqual(event.eventType, "test event 1")
+        XCTAssertEqual(event.sessionId, 1000)
+        XCTAssertEqual(event.timestamp, 1000)
+        XCTAssertEqual(event.eventId, lastEventId+2)
+
+        event = collectedEvents[2]
+        XCTAssertEqual(event.eventType, "test event 2")
+        XCTAssertEqual(event.sessionId, 3000)
+        XCTAssertEqual(event.timestamp, 1050)
+        XCTAssertEqual(event.eventId, lastEventId+3)
+
+        event = collectedEvents[3]
+        XCTAssertEqual(event.eventType, "test event 3")
+        XCTAssertEqual(event.sessionId, 1000)
+        XCTAssertEqual(event.timestamp, 1100)
+        XCTAssertEqual(event.eventId, lastEventId+4)
+    }
+
+    func testExplicitNoSessionForEventShouldBePreserved() throws {
+        let lastEventId: Int64 = 123
+        try storageMem.write(key: StorageKey.LAST_EVENT_ID, value: lastEventId)
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        let eventCollector = EventCollectorPlugin()
+        amplitude.add(plugin: eventCollector)
+
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 1000, eventType: "test event 1"))
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 1050, sessionId: -1, eventType: "test event 2"))
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 1100, eventType: "test event 3"))
+
+        let collectedEvents = eventCollector.events
+
+        XCTAssertEqual(collectedEvents.count, 4)
+
+        var event = collectedEvents[0]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
+        XCTAssertEqual(event.sessionId, 1000)
+        XCTAssertEqual(event.timestamp, 1000)
+        XCTAssertEqual(event.eventId, lastEventId+1)
+
+        event = collectedEvents[1]
+        XCTAssertEqual(event.eventType, "test event 1")
+        XCTAssertEqual(event.sessionId, 1000)
+        XCTAssertEqual(event.timestamp, 1000)
+        XCTAssertEqual(event.eventId, lastEventId+2)
+
+        event = collectedEvents[2]
+        XCTAssertEqual(event.eventType, "test event 2")
+        XCTAssertEqual(event.sessionId, -1)
+        XCTAssertEqual(event.timestamp, 1050)
+        XCTAssertEqual(event.eventId, lastEventId+3)
+
+        event = collectedEvents[3]
+        XCTAssertEqual(event.eventType, "test event 3")
+        XCTAssertEqual(event.sessionId, 1000)
+        XCTAssertEqual(event.timestamp, 1100)
+        XCTAssertEqual(event.eventId, lastEventId+4)
+    }
+
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
         return NSDictionary(dictionary: props as [AnyHashable: Any])
     }

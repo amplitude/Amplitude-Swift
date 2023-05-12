@@ -272,7 +272,6 @@ public class Amplitude {
         inForeground = true
         let dummySessionStartEvent = BaseEvent(
             timestamp: timestamp,
-            sessionId: -1,
             eventType: Constants.AMP_SESSION_START_EVENT
         )
         let events = sessions.processEvent(event: dummySessionStartEvent, inForeground: false)
