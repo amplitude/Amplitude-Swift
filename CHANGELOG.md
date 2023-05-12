@@ -1,3 +1,10 @@
+## [0.4.3](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.2...v0.4.3) (2023-05-12)
+
+
+### Bug Fixes
+
+* session not behaving as expected ([#53](https://github.com/amplitude/Amplitude-Swift/issues/53)) ([c02b64a](https://github.com/amplitude/Amplitude-Swift/commit/c02b64a8d6b913848cabc71494f478c622d5930c))
+
 ## [0.4.2](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.1...v0.4.2) (2023-04-27)
 
 
