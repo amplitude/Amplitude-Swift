@@ -1,3 +1,10 @@
+## [0.4.4](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.3...v0.4.4) (2023-05-25)
+
+
+### Bug Fixes
+
+* fix disable tracking options ([#54](https://github.com/amplitude/Amplitude-Swift/issues/54)) ([6185ac1](https://github.com/amplitude/Amplitude-Swift/commit/6185ac184a806ea7ade4b8067226cad6164a94e1))
+
 ## [0.4.3](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.2...v0.4.3) (2023-05-12)
 
 
