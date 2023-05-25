@@ -79,6 +79,36 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertNotNil(lastEvent?.locationLng)
     }
 
+    func testContextWithDisableTrackingOptions() {
+        let apiKey = "testApiKeyForDisableTrackingOptions"
+        let trackingOptions = TrackingOptions()
+        _ = trackingOptions.disableTrackIpAddress()
+            .disableCarrier()
+            .disableTrackIDFV()
+            .disableTrackLatLng()
+            .disableTrackCountry()
+        let configuration = Configuration(apiKey: apiKey, trackingOptions: trackingOptions)
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        let locationInfo = LocationInfo(lat: 123, lng: 123)
+        amplitude.locationInfoBlock = {
+            return locationInfo
+        }
+
+        let outputReader = OutputReaderPlugin()
+        amplitude.add(plugin: outputReader)
+        amplitude.track(event: BaseEvent(eventType: "testEvent"))
+
+        let lastEvent = outputReader.lastEvent
+        XCTAssertNil(lastEvent?.ip)
+        XCTAssertNil(lastEvent?.carrier)
+        XCTAssertNil(lastEvent?.idfv)
+        XCTAssertNil(lastEvent?.locationLat)
+        XCTAssertNil(lastEvent?.locationLng)
+        XCTAssertNil(lastEvent?.country)
+    }
+
     func testSetUserId() {
         let amplitude = Amplitude(configuration: configurationWithFakeStorage)
         XCTAssertEqual(amplitude.state.userId, nil)
