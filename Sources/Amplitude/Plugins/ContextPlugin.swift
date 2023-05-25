@@ -104,10 +104,6 @@ class ContextPlugin: Plugin {
                 event.partnerId = pId
             }
         }
-        if event.ip == nil {
-            // get the ip in server side if there is no event level ip
-            event.ip = "$remote"
-        }
         let configuration = self.amplitude?.configuration
         let trackingOptions = configuration?.trackingOptions
 
@@ -134,9 +130,9 @@ class ContextPlugin: Plugin {
             event.carrier = context["carrier"] as? String
         }
         if trackingOptions?.shouldTrackIpAddress() ?? false {
-            guard event.ip != nil else {
+            if event.ip == nil  {
+                // get the ip in server side if there is no event level ip
                 event.ip = "$remote"
-                return
             }
         }
         if trackingOptions?.shouldTrackCountry() ?? false && event.ip != "$remote" {
