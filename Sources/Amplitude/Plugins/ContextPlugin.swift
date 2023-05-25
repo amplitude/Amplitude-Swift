@@ -59,7 +59,6 @@ class ContextPlugin: Plugin {
         staticContext["device_manufacturer"] = device.manufacturer
         staticContext["device_model"] = device.model
         staticContext["idfv"] = device.identifierForVendor
-        print(device.identifierForVendor)
         staticContext["os_name"] = device.os_name
         staticContext["os_version"] = device.os_version
         staticContext["platform"] = device.platform
