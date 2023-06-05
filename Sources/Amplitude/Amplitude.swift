@@ -246,7 +246,7 @@ public class Amplitude {
         state.deviceId = deviceId
         return self
     }
-    
+
     public func getUserId() -> String? {
         return state.userId
     }
