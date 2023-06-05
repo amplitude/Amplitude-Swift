@@ -1,3 +1,10 @@
+## [0.4.5](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.4...v0.4.5) (2023-06-05)
+
+
+### Bug Fixes
+
+* add getUserId() and getDeviceId() methods ([#57](https://github.com/amplitude/Amplitude-Swift/issues/57)) ([3f17782](https://github.com/amplitude/Amplitude-Swift/commit/3f17782cca403873a0beb734b59724df3fbadaf0))
+
 ## [0.4.4](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.3...v0.4.4) (2023-05-25)
 
 
