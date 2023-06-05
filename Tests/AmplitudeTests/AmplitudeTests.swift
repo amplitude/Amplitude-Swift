@@ -49,8 +49,8 @@ final class AmplitudeTests: XCTestCase {
 
     func testInitContextPlugin_setsDeviceId() {
         let amplitude = Amplitude(configuration: configurationWithFakeStorage)
-        XCTAssertEqual(amplitude.state.deviceId != nil, true)
-        let deviceIdUuid = amplitude.state.deviceId!
+        XCTAssertEqual(amplitude.getDeviceId() != nil, true)
+        let deviceIdUuid = amplitude.getDeviceId()!
         XCTAssertEqual(storage.haveBeenCalledWith, ["write(key: \(StorageKey.DEVICE_ID.rawValue), \(deviceIdUuid))"])
     }
 
@@ -111,20 +111,20 @@ final class AmplitudeTests: XCTestCase {
 
     func testSetUserId() {
         let amplitude = Amplitude(configuration: configurationWithFakeStorage)
-        XCTAssertEqual(amplitude.state.userId, nil)
+        XCTAssertEqual(amplitude.getUserId(), nil)
 
         amplitude.setUserId(userId: "test-user")
-        XCTAssertEqual(amplitude.state.userId, "test-user")
+        XCTAssertEqual(amplitude.getUserId(), "test-user")
         XCTAssertEqual(storage.haveBeenCalledWith[1], "write(key: \(StorageKey.USER_ID.rawValue), test-user)")
     }
 
     func testSetDeviceId() {
         let amplitude = Amplitude(configuration: configurationWithFakeStorage)
         // init deviceId is set by ContextPlugin
-        XCTAssertEqual(amplitude.state.deviceId != nil, true)
+        XCTAssertEqual(amplitude.getDeviceId() != nil, true)
 
         amplitude.setDeviceId(deviceId: "test-device")
-        XCTAssertEqual(amplitude.state.deviceId, "test-device")
+        XCTAssertEqual(amplitude.getDeviceId(), "test-device")
         XCTAssertEqual(storage.haveBeenCalledWith[1], "write(key: \(StorageKey.DEVICE_ID.rawValue), test-device)")
     }
 

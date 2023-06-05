@@ -246,6 +246,14 @@ public class Amplitude {
         state.deviceId = deviceId
         return self
     }
+    
+    public func getUserId() -> String? {
+        return state.userId
+    }
+
+    public func getDeviceId() -> String? {
+        return state.deviceId
+    }
 
     @discardableResult
     public func reset() -> Amplitude {
