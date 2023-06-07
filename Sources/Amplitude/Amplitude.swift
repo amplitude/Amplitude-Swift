@@ -255,6 +255,10 @@ public class Amplitude {
         return state.deviceId
     }
 
+    public func getSessionId() -> Int64 {
+        return sessions.sessionId
+    }
+
     @discardableResult
     public func reset() -> Amplitude {
         _ = setUserId(userId: nil)
