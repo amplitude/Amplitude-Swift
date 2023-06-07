@@ -38,6 +38,7 @@ final class AmplitudeSessionTests: XCTestCase {
         let collectedEvents = eventCollector.events
 
         XCTAssertEqual(collectedEvents.count, 3)
+        XCTAssertEqual(amplitude.getSessionId(), 1000)
 
         var event = collectedEvents[0]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
