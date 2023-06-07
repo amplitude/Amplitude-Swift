@@ -1,3 +1,10 @@
+## [0.4.6](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.5...v0.4.6) (2023-06-07)
+
+
+### Bug Fixes
+
+* added getSessionId() method ([#58](https://github.com/amplitude/Amplitude-Swift/issues/58)) ([b990f2a](https://github.com/amplitude/Amplitude-Swift/commit/b990f2a3b226fc7e37fc6584589007b21bd384c6))
+
 ## [0.4.5](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.4...v0.4.5) (2023-06-05)
 
 
