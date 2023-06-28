@@ -16,6 +16,8 @@ struct AmplitudeSwiftUIExampleApp: App {
     // Overriding the initializer in the App in order to config amplitude
     init() {
         Amplitude.testInstance.add(plugin: IDFACollectionPlugin())
+        // add the trouble shooting plugin for debugging
+        Amplitude.testInstance.add(plugin: ToubleShootingPlugin())
     }
 
     var body: some Scene {
