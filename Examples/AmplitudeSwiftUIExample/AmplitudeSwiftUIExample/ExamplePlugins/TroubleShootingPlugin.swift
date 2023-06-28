@@ -8,7 +8,7 @@
 import Foundation
 import Amplitude_Swift
 
-class ToubleShootingPlugin: DestinationPlugin {
+class TroubleShootingPlugin: DestinationPlugin {
     open override func setup(amplitude: Amplitude) {
         self.amplitude = amplitude
         let apiKey = amplitude.configuration.apiKey;
