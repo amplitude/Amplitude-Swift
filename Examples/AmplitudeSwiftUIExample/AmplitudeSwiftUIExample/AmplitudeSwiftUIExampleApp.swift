@@ -17,7 +17,7 @@ struct AmplitudeSwiftUIExampleApp: App {
     init() {
         Amplitude.testInstance.add(plugin: IDFACollectionPlugin())
         // add the trouble shooting plugin for debugging
-        Amplitude.testInstance.add(plugin: ToubleShootingPlugin())
+        Amplitude.testInstance.add(plugin: TroubleShootingPlugin())
     }
 
     var body: some Scene {
