@@ -1,7 +1,7 @@
 import Foundation
 
 public class Amplitude {
-    public var configuration: Configuration
+    public private(set) var configuration: Configuration
     var instanceName: String
     private var inForeground = false
 
