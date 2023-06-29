@@ -8,30 +8,30 @@
 import Foundation
 
 public class Configuration {
-    var apiKey: String
-    var flushQueueSize: Int
-    var flushIntervalMillis: Int
-    var instanceName: String
-    var optOut: Bool
-    var storageProvider: any Storage
-    var identifyStorageProvider: any Storage
-    var logLevel: LogLevelEnum
-    var loggerProvider: any Logger
-    var minIdLength: Int?
-    var partnerId: String?
-    var callback: EventCallback?
-    var flushMaxRetries: Int
-    var useBatch: Bool
-    var serverZone: ServerZone
-    var serverUrl: String?
-    var plan: Plan?
-    var ingestionMetadata: IngestionMetadata?
-    var trackingOptions: TrackingOptions?
-    var enableCoppaControl: Bool?
-    var flushEventsOnClose: Bool?
-    var minTimeBetweenSessionsMillis: Int
-    var trackingSessionEvents: Bool?
-    var identifyBatchIntervalMillis: Int
+    public var apiKey: String
+    public var flushQueueSize: Int
+    public var flushIntervalMillis: Int
+    public var instanceName: String
+    public var optOut: Bool
+    public var storageProvider: any Storage
+    public var identifyStorageProvider: any Storage
+    public var logLevel: LogLevelEnum
+    public var loggerProvider: any Logger
+    public var minIdLength: Int?
+    public var partnerId: String?
+    public var callback: EventCallback?
+    public var flushMaxRetries: Int
+    public var useBatch: Bool
+    public var serverZone: ServerZone
+    public var serverUrl: String?
+    public var plan: Plan?
+    public var ingestionMetadata: IngestionMetadata?
+    public var trackingOptions: TrackingOptions?
+    public var enableCoppaControl: Bool?
+    public var flushEventsOnClose: Bool?
+    public var minTimeBetweenSessionsMillis: Int
+    public var trackingSessionEvents: Bool?
+    public var identifyBatchIntervalMillis: Int
 
     public init(
         apiKey: String,
