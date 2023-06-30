@@ -24,6 +24,10 @@
 		8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */; };
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
 		8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
+		BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA0359C92A51585D007C383B /* legacy_v3.sqlite */; };
+		BA0639F62A4DD491000F1CEE /* LegacyDatabaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */; };
+		BA994B9A2A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */; };
+		BA994B9D2A4F4FCB00D0913F /* legacy_v4.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */; };
 		BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */; };
 		BA9BEA4D299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
@@ -88,14 +92,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = amplitude-swift::Amplitude-Swift;
+			remoteGlobalIDString = "amplitude-swift::Amplitude-Swift";
 			remoteInfo = "Amplitude-Swift";
 		};
 		580FD1F1294A56F60036777B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = amplitude-swift::Amplitude-SwiftTests;
+			remoteGlobalIDString = "amplitude-swift::Amplitude-SwiftTests";
 			remoteInfo = "Amplitude-SwiftTests";
 		};
 /* End PBXContainerItemProxy section */
@@ -104,6 +108,10 @@
 		8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeSessionTests.swift; sourceTree = "<group>"; };
 		8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sessions.swift; sourceTree = "<group>"; };
 		8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueueTimeTests.swift; sourceTree = "<group>"; };
+		BA0359C92A51585D007C383B /* legacy_v3.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v3.sqlite; sourceTree = "<group>"; };
+		BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorage.swift; sourceTree = "<group>"; };
+		BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorageTests.swift; sourceTree = "<group>"; };
+		BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v4.sqlite; sourceTree = "<group>"; };
 		BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptor.swift; sourceTree = "<group>"; };
 		BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptorTests.swift; sourceTree = "<group>"; };
 		OBJ_10 /* ConsoleLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleLogger.swift; sourceTree = "<group>"; };
@@ -188,6 +196,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BA0639F42A4DD46E000F1CEE /* Migration */ = {
+			isa = PBXGroup;
+			children = (
+				BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */,
+			);
+			path = Migration;
+			sourceTree = "<group>";
+		};
+		BA994B972A4F484E00D0913F /* Migration */ = {
+			isa = PBXGroup;
+			children = (
+				BA0359C92A51585D007C383B /* legacy_v3.sqlite */,
+				BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */,
+				BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */,
+			);
+			path = Migration;
+			sourceTree = "<group>";
+		};
 		OBJ_13 /* Events */ = {
 			isa = PBXGroup;
 			children = (
@@ -275,7 +301,7 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -288,12 +314,12 @@
 				OBJ_81 /* CONTRIBUTING.md */,
 				OBJ_82 /* AmplitudeSwift.podspec */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_53 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				BA994B972A4F484E00D0913F /* Migration */,
 				OBJ_54 /* AmplitudeTests.swift */,
 				OBJ_55 /* ConfigurationTests.swift */,
 				OBJ_56 /* ConsoleLoggerTests.swift */,
@@ -341,6 +367,7 @@
 		OBJ_7 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				BA0639F42A4DD46E000F1CEE /* Migration */,
 				OBJ_8 /* Amplitude.swift */,
 				OBJ_9 /* Configuration.swift */,
 				OBJ_10 /* ConsoleLogger.swift */,
@@ -408,6 +435,7 @@
 			buildPhases = (
 				OBJ_141 /* Sources */,
 				OBJ_159 /* Frameworks */,
+				BA994B9C2A4F4FBE00D0913F /* Resources */,
 			);
 			buildRules = (
 			);
@@ -449,7 +477,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_75 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -461,6 +489,18 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BA994B9C2A4F4FBE00D0913F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BA994B9D2A4F4FCB00D0913F /* legacy_v4.sqlite in Resources */,
+				BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		OBJ_130 /* Sources */ = {
@@ -495,6 +535,7 @@
 				OBJ_158 /* UrlExtensionTests.swift in Sources */,
 				8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */,
 				8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */,
+				BA994B9A2A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -528,6 +569,7 @@
 				OBJ_111 /* InMemoryStorage.swift in Sources */,
 				OBJ_112 /* PersistentStorage.swift in Sources */,
 				BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */,
+				BA0639F62A4DD491000F1CEE /* LegacyDatabaseStorage.swift in Sources */,
 				OBJ_113 /* Timeline.swift in Sources */,
 				OBJ_114 /* TrackingOptions.swift in Sources */,
 				OBJ_115 /* Types.swift in Sources */,
