@@ -9,11 +9,11 @@ class LegacyDatabaseStorage {
     private static let STORE_TABLE_NAME = "store"
     private static let LONG_STORE_TABLE_NAME = "long_store"
 
-    private static var instances: [String: LegacyDatabaseStorage] = [:];
+    private static var instances: [String: LegacyDatabaseStorage] = [:]
     private static let instanceQueue = DispatchQueue(label: "legacyDatabaseStorage.amplitude.com")
 
-    let databasePath: String;
-    let logger: (any Logger)?;
+    let databasePath: String
+    let logger: (any Logger)?
 
     public static func getStorage(_ instanceName: String, _ logger: (any Logger)?) -> LegacyDatabaseStorage {
         instanceQueue.sync {
@@ -160,8 +160,8 @@ class LegacyDatabaseStorage {
     private func readEventsFromTable(_ table: String) -> [[String: Any]] {
         let query = "SELECT id, event FROM \(table) ORDER BY id;"
         return executeQuery(query) { stmt in
-            var events: [[String: Any]] = [];
-            while (sqlite3_step(stmt) == SQLITE_ROW) {
+            var events: [[String: Any]] = []
+            while sqlite3_step(stmt) == SQLITE_ROW {
                 let rowId = sqlite3_column_int64(stmt, 0)
                 let rawEventData = sqlite3_column_text(stmt, 1)
                 if rawEventData != nil {
@@ -176,7 +176,7 @@ class LegacyDatabaseStorage {
                 }
             }
             return events
-        } ?? [];
+        } ?? []
     }
 
     private func executeQuery<T>(_ query: String, _ block: (_ stmt: OpaquePointer) -> T) -> T? {
