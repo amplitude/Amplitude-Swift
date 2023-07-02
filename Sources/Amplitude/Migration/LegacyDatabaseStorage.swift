@@ -8,6 +8,7 @@ class LegacyDatabaseStorage {
     private static let INTERCEPTED_IDENTIFY_TABLE_NAME = "intercepted_identifys"
     private static let STORE_TABLE_NAME = "store"
     private static let LONG_STORE_TABLE_NAME = "long_store"
+    private static let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
     private static var instances: [String: LegacyDatabaseStorage] = [:]
     private static let instanceQueue = DispatchQueue(label: "legacyDatabaseStorage.amplitude.com")
@@ -64,7 +65,7 @@ class LegacyDatabaseStorage {
     private func getValueFromTable(_ table: String, _ key: String) -> Any? {
         let query = "SELECT key, value FROM \(table) WHERE key = ?;"
         return executeQuery(query) { stmt in
-            let bindResult = sqlite3_bind_text(stmt, 1, key, -1, nil)
+            let bindResult = sqlite3_bind_text(stmt, 1, key, -1, LegacyDatabaseStorage.SQLITE_TRANSIENT)
             if bindResult != SQLITE_OK {
                 logger?.error(message: "bind query parameter failed with result: \(bindResult)")
                 return
@@ -102,7 +103,7 @@ class LegacyDatabaseStorage {
     private func removeValueFromTable(_ table: String, _ key: String) {
         let query = "DELETE FROM \(table) WHERE key = ?;"
         _ = executeQuery(query) { stmt in
-            let bindResult = sqlite3_bind_text(stmt, 1, key, -1, nil)
+            let bindResult = sqlite3_bind_text(stmt, 1, key, -1, LegacyDatabaseStorage.SQLITE_TRANSIENT)
             if bindResult != SQLITE_OK {
                 logger?.error(message: "bind query parameter failed with result: \(bindResult)")
                 return
@@ -139,7 +140,7 @@ class LegacyDatabaseStorage {
 
             let stepResult = sqlite3_step(stmt)
             if stepResult != SQLITE_DONE {
-                logger?.error(message: "execute query failed with result: \(bindResult)")
+                logger?.error(message: "execute query failed with result: \(stepResult)")
                 return
             }
         }

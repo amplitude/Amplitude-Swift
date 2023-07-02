@@ -138,9 +138,9 @@ final class LegacyDatabaseStorageTests: XCTestCase {
         XCTAssertEqual(events.count, 2)
 
         storage!.removeInterceptedIdentify(rowId: 2)
+        storage!.removeInterceptedIdentify(rowId: 1)
 
         events = storage!.readInterceptedIdentifies()
-        XCTAssertEqual(events.count, 1)
-        XCTAssertEqual(events[0]["$rowId"] as? Int64, 1)
+        XCTAssertEqual(events.count, 0)
     }
 }
