@@ -89,18 +89,18 @@ class RemnantDataMigration {
 
     private func moveEvent(_ event: [String: Any], _ destinationStorage: Storage, _ removeFromSource: (_ rowId: Int64) -> Void) {
         do {
-            let rowId = event["$rowId"] as! Int64
-            let converted = convertLegacyEvent(rowId, event)
+            let rowId = event["$rowId"] as? Int64
+            let converted = convertLegacyEvent(rowId!, event)
             let jsonData = try JSONSerialization.data(withJSONObject: converted)
             let convertedEvent = BaseEvent.fromString(jsonString: String(data: jsonData, encoding: .utf8)!)
             try destinationStorage.write(key: StorageKey.EVENTS, value: convertedEvent)
-            removeFromSource(rowId)
+            removeFromSource(rowId!)
         } catch {
             amplitude.logger?.error(message: "event migration failed: \(error)")
         }
     }
 
-    private func convertLegacyEvent(_ eventId: Int64, _ event: [String: Any]) -> [String:Any] {
+    private func convertLegacyEvent(_ eventId: Int64, _ event: [String: Any]) -> [String: Any] {
         var convertedEvent = event
 
         convertedEvent["event_id"] = eventId
