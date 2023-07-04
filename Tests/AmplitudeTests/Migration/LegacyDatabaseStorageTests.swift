@@ -28,9 +28,9 @@ final class LegacyDatabaseStorageTests: XCTestCase {
     }
 
     func testGetValues() throws {
-        let deviceId = storage!.getValue(key: "device_id")
-        let userId = storage!.getValue(key: "user_id")
-        let missing = storage!.getValue(key: "missing")
+        let deviceId = storage!.getValue("device_id")
+        let userId = storage!.getValue("user_id")
+        let missing = storage!.getValue("missing")
 
         XCTAssertEqual(deviceId, "22833898-c487-4536-b213-40f207abdce0R")
         XCTAssertEqual(userId, "ios-sample-user-legacy")
@@ -38,11 +38,11 @@ final class LegacyDatabaseStorageTests: XCTestCase {
     }
 
     func testGetLongValues() throws {
-        let previousSessionId = storage!.getLongValue(key: "previous_session_id")
-        let lastEventId = storage!.getLongValue(key: "last_event_id")
-        let lastIdentifyId = storage!.getLongValue(key: "last_identify_id")
-        let lastEventTime = storage!.getLongValue(key: "last_event_time")
-        let missing = storage!.getLongValue(key: "missing")
+        let previousSessionId = storage!.getLongValue("previous_session_id")
+        let lastEventId = storage!.getLongValue("last_event_id")
+        let lastIdentifyId = storage!.getLongValue("last_identify_id")
+        let lastEventTime = storage!.getLongValue("last_event_time")
+        let missing = storage!.getLongValue("missing")
 
         XCTAssertEqual(previousSessionId, 1684219150343)
         XCTAssertEqual(lastEventId, 2)
@@ -94,20 +94,20 @@ final class LegacyDatabaseStorageTests: XCTestCase {
     }
 
     func testRemoveValue() throws {
-        var deviceId = storage!.getValue(key: "device_id")
+        var deviceId = storage!.getValue("device_id")
         XCTAssertEqual(deviceId, "22833898-c487-4536-b213-40f207abdce0R")
 
-        storage!.removeValue(key: "device_id")
-        deviceId = storage!.getValue(key: "device_id")
+        storage!.removeValue("device_id")
+        deviceId = storage!.getValue("device_id")
         XCTAssertNil(deviceId)
     }
 
     func testRemoveLongValue() throws {
-        var previousSessionId = storage!.getLongValue(key: "previous_session_id")
+        var previousSessionId = storage!.getLongValue("previous_session_id")
         XCTAssertEqual(previousSessionId, 1684219150343)
 
-        storage!.removeLongValue(key: "previous_session_id")
-        previousSessionId = storage!.getLongValue(key: "previous_session_id")
+        storage!.removeLongValue("previous_session_id")
+        previousSessionId = storage!.getLongValue("previous_session_id")
         XCTAssertNil(previousSessionId)
     }
 
@@ -115,7 +115,7 @@ final class LegacyDatabaseStorageTests: XCTestCase {
         var events = storage!.readEvents()
         XCTAssertEqual(events.count, 2)
 
-        storage!.removeEvent(rowId: 2)
+        storage!.removeEvent(2)
 
         events = storage!.readEvents()
         XCTAssertEqual(events.count, 1)
@@ -126,7 +126,7 @@ final class LegacyDatabaseStorageTests: XCTestCase {
         var events = storage!.readIdentifies()
         XCTAssertEqual(events.count, 2)
 
-        storage!.removeIdentify(rowId: 1)
+        storage!.removeIdentify(1)
 
         events = storage!.readIdentifies()
         XCTAssertEqual(events.count, 1)
@@ -137,8 +137,8 @@ final class LegacyDatabaseStorageTests: XCTestCase {
         var events = storage!.readInterceptedIdentifies()
         XCTAssertEqual(events.count, 2)
 
-        storage!.removeInterceptedIdentify(rowId: 2)
-        storage!.removeInterceptedIdentify(rowId: 1)
+        storage!.removeInterceptedIdentify(2)
+        storage!.removeInterceptedIdentify(1)
 
         events = storage!.readInterceptedIdentifies()
         XCTAssertEqual(events.count, 0)

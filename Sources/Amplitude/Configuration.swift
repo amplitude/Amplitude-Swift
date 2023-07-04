@@ -32,6 +32,7 @@ public class Configuration {
     public var minTimeBetweenSessionsMillis: Int
     public var trackingSessionEvents: Bool?
     public var identifyBatchIntervalMillis: Int
+    public let migrateLegacyData: Bool
 
     public init(
         apiKey: String,
@@ -57,16 +58,17 @@ public class Configuration {
         flushEventsOnClose: Bool = true,
         minTimeBetweenSessionsMillis: Int = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS,
         trackingSessionEvents: Bool = true,
-        identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS
+        identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
+        migrateLegacyData: Bool = true
     ) {
         self.apiKey = apiKey
         self.flushQueueSize = flushQueueSize
         self.flushIntervalMillis = flushIntervalMillis
         self.instanceName = instanceName
         self.optOut = optOut
-        self.storageProvider = storageProvider ?? PersistentStorage(apiKey: apiKey)
+        self.storageProvider = storageProvider ?? PersistentStorage(apiKey: apiKey, storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(instanceName)")
         self.identifyStorageProvider = identifyStorageProvider
-            ?? PersistentStorage(apiKey: apiKey, storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify")
+            ?? PersistentStorage(apiKey: apiKey, storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(instanceName)-identify")
         self.logLevel = logLevel
         self.loggerProvider = loggerProvider
         self.minIdLength = minIdLength
@@ -84,6 +86,7 @@ public class Configuration {
         self.minTimeBetweenSessionsMillis = minTimeBetweenSessionsMillis
         self.trackingSessionEvents = trackingSessionEvents
         self.identifyBatchIntervalMillis = identifyBatchIntervalMillis
+        self.migrateLegacyData = migrateLegacyData
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
     }

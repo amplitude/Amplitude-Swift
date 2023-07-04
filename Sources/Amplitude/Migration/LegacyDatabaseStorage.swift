@@ -19,19 +19,19 @@ class LegacyDatabaseStorage {
     public static func getStorage(_ instanceName: String, _ logger: (any Logger)?) -> LegacyDatabaseStorage {
         instanceQueue.sync {
             var normalizedInstanceName = instanceName.lowercased()
-            if normalizedInstanceName == "$default_instance" {
+            if normalizedInstanceName == Constants.Configuration.DEFAULT_INSTANCE {
                 normalizedInstanceName = ""
             }
             if let storage = instances[normalizedInstanceName] {
                 return storage
             }
-            let storage = LegacyDatabaseStorage(getDatabasePath(normalizedInstanceName), logger)
+            let storage = LegacyDatabaseStorage(getDatabasePath(normalizedInstanceName).path, logger)
             instances[normalizedInstanceName] = storage
             return storage
         }
     }
 
-    private static func getDatabasePath(_ instanceName: String) -> String {
+    static func getDatabasePath(_ instanceName: String) -> URL {
         #if os(tvOS)
         let searchPathDirectory = FileManager.SearchPathDirectory.cachesDirectory
         #else
@@ -46,7 +46,7 @@ class LegacyDatabaseStorage {
             databaseName += "_\(instanceName)"
         }
         databaseUrl.appendPathComponent(databaseName)
-        return databaseUrl.absoluteString
+        return databaseUrl
     }
 
     public init(_ databasePath: String, _ logger: (any Logger)?) {
@@ -54,11 +54,11 @@ class LegacyDatabaseStorage {
         self.logger = logger
     }
 
-    func getValue(key: String) -> String? {
+    func getValue(_ key: String) -> String? {
         getValueFromTable(LegacyDatabaseStorage.STORE_TABLE_NAME, key) as? String
     }
 
-    func getLongValue(key: String) -> Int64? {
+    func getLongValue(_ key: String) -> Int64? {
         getValueFromTable(LegacyDatabaseStorage.LONG_STORE_TABLE_NAME, key) as? Int64
     }
 
@@ -73,7 +73,7 @@ class LegacyDatabaseStorage {
 
             let stepResult = sqlite3_step(stmt)
             if stepResult != SQLITE_ROW {
-                logger?.error(message: "execute query failed with result: \(stepResult)")
+                logger?.error(message: "execute query '\(query)' failed with result: \(stepResult)")
                 return
             }
 
@@ -92,11 +92,11 @@ class LegacyDatabaseStorage {
         }
     }
 
-    func removeValue(key: String) {
+    func removeValue(_ key: String) {
         removeValueFromTable(LegacyDatabaseStorage.STORE_TABLE_NAME, key)
     }
 
-    func removeLongValue(key: String) {
+    func removeLongValue(_ key: String) {
         removeValueFromTable(LegacyDatabaseStorage.LONG_STORE_TABLE_NAME, key)
     }
 
@@ -111,21 +111,21 @@ class LegacyDatabaseStorage {
 
             let stepResult = sqlite3_step(stmt)
             if stepResult != SQLITE_DONE {
-                logger?.error(message: "execute query failed with result: \(stepResult)")
+                logger?.error(message: "execute query '\(query)' failed with result: \(stepResult)")
                 return
             }
         }
     }
 
-    func removeEvent(rowId: Int64) {
+    func removeEvent(_ rowId: Int64) {
         removeEventFromTable(LegacyDatabaseStorage.EVENT_TABLE_NAME, rowId)
     }
 
-    func removeIdentify(rowId: Int64) {
+    func removeIdentify(_ rowId: Int64) {
         removeEventFromTable(LegacyDatabaseStorage.IDENTIFY_TABLE_NAME, rowId)
     }
 
-    func removeInterceptedIdentify(rowId: Int64) {
+    func removeInterceptedIdentify(_ rowId: Int64) {
         removeEventFromTable(LegacyDatabaseStorage.INTERCEPTED_IDENTIFY_TABLE_NAME, rowId)
     }
 
@@ -140,7 +140,7 @@ class LegacyDatabaseStorage {
 
             let stepResult = sqlite3_step(stmt)
             if stepResult != SQLITE_DONE {
-                logger?.error(message: "execute query failed with result: \(stepResult)")
+                logger?.error(message: "execute query '\(query)' failed with result: \(stepResult)")
                 return
             }
         }

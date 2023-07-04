@@ -26,6 +26,10 @@ public class Amplitude {
         return self.configuration.storageProvider
     }()
 
+    lazy var identifyStorage: any Storage = {
+        return self.configuration.identifyStorageProvider
+    }()
+
     lazy var timeline: Timeline = {
         return Timeline()
     }()
@@ -47,6 +51,10 @@ public class Amplitude {
 
         let contextPlugin = ContextPlugin()
         self.contextPlugin = contextPlugin
+
+        if configuration.migrateLegacyData {
+            RemnantDataMigration(self).execute()
+        }
 
         // required plugin for specific platform, only has lifecyclePlugin now
         if let requiredPlugin = VendorSystem.current.requiredPlugin {
