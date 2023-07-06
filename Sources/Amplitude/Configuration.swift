@@ -66,9 +66,9 @@ public class Configuration {
         self.flushIntervalMillis = flushIntervalMillis
         self.instanceName = instanceName
         self.optOut = optOut
-        self.storageProvider = storageProvider ?? PersistentStorage(apiKey: apiKey, storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(instanceName)")
+        self.storageProvider = storageProvider ?? PersistentStorage(apiKey: apiKey)
         self.identifyStorageProvider = identifyStorageProvider
-            ?? PersistentStorage(apiKey: apiKey, storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(instanceName)-identify")
+            ?? PersistentStorage(apiKey: apiKey, storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify")
         self.logLevel = logLevel
         self.loggerProvider = loggerProvider
         self.minIdLength = minIdLength
