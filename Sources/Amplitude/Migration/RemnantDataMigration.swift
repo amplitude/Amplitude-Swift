@@ -3,8 +3,7 @@ import Foundation
 class RemnantDataMigration {
     private static let DEVICE_ID_KEY = "device_id"
     private static let USER_ID_KEY = "user_id"
-    private static let LAST_EVENT_TIME_KEY = "last_event_time"
-    private static let LAST_EVENT_ID_KEY = "last_event_id"
+    private static let PREVIOUS_SESSION_TIME_KEY = "previous_session_time"
     private static let PREVIOUS_SESSION_ID_KEY = "previous_session_id"
 
     private let amplitude: Amplitude
@@ -21,11 +20,22 @@ class RemnantDataMigration {
         moveDeviceAndUserId()
         moveSessionData()
 
+        var maxIdentifyId: Int64 = -1
         if firstRunSinceUpgrade {
             moveInterceptedIdentifies()
-            moveIdentifies()
+            maxIdentifyId = moveIdentifies()
         }
-        moveEvents()
+        var maxEventId = moveEvents()
+        if maxEventId < maxIdentifyId {
+            maxEventId = maxIdentifyId
+        }
+
+        if maxEventId > 0 {
+            let currentLastEventId = amplitude.sessions.lastEventId
+            if currentLastEventId <= 0 {
+                amplitude.sessions.lastEventId = maxEventId
+            }
+        }
     }
 
     private func moveDeviceAndUserId() {
@@ -44,11 +54,9 @@ class RemnantDataMigration {
     private func moveSessionData() {
         let currentSessionId = amplitude.sessions.sessionId
         let currentLastEventTime = amplitude.sessions.lastEventTime
-        let currentLastEventId = amplitude.sessions.lastEventId
 
         let previousSessionId = storage.getLongValue(RemnantDataMigration.PREVIOUS_SESSION_ID_KEY)
-        let lastEventTime = storage.getLongValue(RemnantDataMigration.LAST_EVENT_TIME_KEY)
-        let lastEventId = storage.getLongValue(RemnantDataMigration.LAST_EVENT_ID_KEY)
+        let lastEventTime = storage.getLongValue(RemnantDataMigration.PREVIOUS_SESSION_TIME_KEY)
 
         if currentSessionId < 0 && previousSessionId != nil && previousSessionId! >= 0 {
             amplitude.sessions.sessionId = previousSessionId!
@@ -57,37 +65,42 @@ class RemnantDataMigration {
 
         if currentLastEventTime < 0 && lastEventTime != nil && lastEventTime! >= 0 {
             amplitude.sessions.lastEventTime = lastEventTime!
-            storage.removeLongValue(RemnantDataMigration.LAST_EVENT_TIME_KEY)
-        }
-
-        if currentLastEventId <= 0 && lastEventId != nil && lastEventId! > 0 {
-            amplitude.sessions.lastEventId = lastEventId!
-            storage.removeLongValue(RemnantDataMigration.LAST_EVENT_ID_KEY)
+            storage.removeLongValue(RemnantDataMigration.PREVIOUS_SESSION_TIME_KEY)
         }
     }
 
-    private func moveEvents() {
+    private func moveEvents() -> Int64 {
+        var maxEventId: Int64 = -1
         let remnantEvents = storage.readEvents()
         remnantEvents.forEach { event in
-            moveEvent(event, amplitude.storage, storage.removeEvent)
+            let eventId = moveEvent(event, amplitude.storage, storage.removeEvent)
+            if maxEventId < eventId {
+                maxEventId = eventId
+            }
         }
+        return maxEventId
     }
 
-    private func moveIdentifies() {
+    private func moveIdentifies() -> Int64 {
+        var maxEventId: Int64 = -1
         let remnantEvents = storage.readIdentifies()
         remnantEvents.forEach { event in
-            moveEvent(event, amplitude.storage, storage.removeIdentify)
+            let eventId = moveEvent(event, amplitude.storage, storage.removeIdentify)
+            if maxEventId < eventId {
+                maxEventId = eventId
+            }
         }
+        return maxEventId
     }
 
     private func moveInterceptedIdentifies() {
         let remnantEvents = storage.readInterceptedIdentifies()
         remnantEvents.forEach { event in
-            moveEvent(event, amplitude.identifyStorage, storage.removeInterceptedIdentify)
+            _ = moveEvent(event, amplitude.identifyStorage, storage.removeInterceptedIdentify)
         }
     }
 
-    private func moveEvent(_ event: [String: Any], _ destinationStorage: Storage, _ removeFromSource: (_ rowId: Int64) -> Void) {
+    private func moveEvent(_ event: [String: Any], _ destinationStorage: Storage, _ removeFromSource: (_ rowId: Int64) -> Void) -> Int64 {
         do {
             let rowId = event["$rowId"] as? Int64
             let converted = convertLegacyEvent(rowId!, event)
@@ -95,8 +108,10 @@ class RemnantDataMigration {
             let convertedEvent = BaseEvent.fromString(jsonString: String(data: jsonData, encoding: .utf8)!)
             try destinationStorage.write(key: StorageKey.EVENTS, value: convertedEvent)
             removeFromSource(rowId!)
+            return rowId!
         } catch {
             amplitude.logger?.error(message: "event migration failed: \(error)")
+            return -1
         }
     }
 

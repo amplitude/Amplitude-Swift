@@ -32,22 +32,18 @@ final class LegacyDatabaseStorageTests: XCTestCase {
         let userId = storage!.getValue("user_id")
         let missing = storage!.getValue("missing")
 
-        XCTAssertEqual(deviceId, "22833898-c487-4536-b213-40f207abdce0R")
+        XCTAssertEqual(deviceId, "9B574574-74A7-4EDF-969D-164CB151B6C3")
         XCTAssertEqual(userId, "ios-sample-user-legacy")
         XCTAssertNil(missing)
     }
 
     func testGetLongValues() throws {
         let previousSessionId = storage!.getLongValue("previous_session_id")
-        let lastEventId = storage!.getLongValue("last_event_id")
-        let lastIdentifyId = storage!.getLongValue("last_identify_id")
-        let lastEventTime = storage!.getLongValue("last_event_time")
+        let lastEventTime = storage!.getLongValue("previous_session_time")
         let missing = storage!.getLongValue("missing")
 
-        XCTAssertEqual(previousSessionId, 1684219150343)
-        XCTAssertEqual(lastEventId, 2)
-        XCTAssertEqual(lastIdentifyId, 2)
-        XCTAssertEqual(lastEventTime, 1684219150344)
+        XCTAssertEqual(previousSessionId, 1688622822100)
+        XCTAssertEqual(lastEventTime, 1688622822150)
         XCTAssertNil(missing)
     }
 
@@ -95,7 +91,7 @@ final class LegacyDatabaseStorageTests: XCTestCase {
 
     func testRemoveValue() throws {
         var deviceId = storage!.getValue("device_id")
-        XCTAssertEqual(deviceId, "22833898-c487-4536-b213-40f207abdce0R")
+        XCTAssertEqual(deviceId, "9B574574-74A7-4EDF-969D-164CB151B6C3")
 
         storage!.removeValue("device_id")
         deviceId = storage!.getValue("device_id")
@@ -104,7 +100,7 @@ final class LegacyDatabaseStorageTests: XCTestCase {
 
     func testRemoveLongValue() throws {
         var previousSessionId = storage!.getLongValue("previous_session_id")
-        XCTAssertEqual(previousSessionId, 1684219150343)
+        XCTAssertEqual(previousSessionId, 1688622822100)
 
         storage!.removeLongValue("previous_session_id")
         previousSessionId = storage!.getLongValue("previous_session_id")
