@@ -11,7 +11,7 @@ class RemnantDataMigration {
 
     init(_ amplitude: Amplitude) {
         self.amplitude = amplitude
-        self.storage = LegacyDatabaseStorage.getStorage(amplitude.instanceName, amplitude.logger)
+        self.storage = LegacyDatabaseStorage.getStorage(amplitude.configuration.instanceName, amplitude.logger)
     }
 
     func execute() {

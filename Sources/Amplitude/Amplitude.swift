@@ -2,7 +2,6 @@ import Foundation
 
 public class Amplitude {
     public private(set) var configuration: Configuration
-    var instanceName: String
     private var inForeground = false
 
     var sessionId: Int64 {
@@ -43,11 +42,9 @@ public class Amplitude {
     }()
 
     public init(
-        configuration: Configuration,
-        instanceName: String = Constants.Configuration.DEFAULT_INSTANCE
+        configuration: Configuration
     ) {
         self.configuration = configuration
-        self.instanceName = instanceName
 
         let contextPlugin = ContextPlugin()
         self.contextPlugin = contextPlugin
