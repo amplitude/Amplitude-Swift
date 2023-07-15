@@ -42,7 +42,7 @@ final class AmplitudeTests: XCTestCase {
 
     func testInit() {
         XCTAssertEqual(
-            Amplitude(configuration: configuration).instanceName,
+            Amplitude(configuration: configuration).configuration.instanceName,
             Constants.Configuration.DEFAULT_INSTANCE
         )
     }
