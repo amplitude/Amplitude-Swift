@@ -12,7 +12,7 @@ class PersistentStorage: Storage {
 
     let storagePrefix: String
     let userDefaults: UserDefaults?
-    let fileManager: FileManager?
+    let fileManager: FileManager
     private var outputStream: OutputFileStream?
     internal weak var amplitude: Amplitude?
 
@@ -21,8 +21,10 @@ class PersistentStorage: Storage {
 
     let syncQueue = DispatchQueue(label: "syncPersistentStorage.amplitude.com")
 
-    init(apiKey: String, storagePrefix: String = PersistentStorage.DEFAULT_STORAGE_PREFIX) {
-        self.storagePrefix = "\(storagePrefix)-\(apiKey)"
+    init(storagePrefix: String) {
+        self.storagePrefix = storagePrefix == PersistentStorage.DEFAULT_STORAGE_PREFIX || storagePrefix.starts(with: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-")
+            ? storagePrefix
+            : "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(storagePrefix)";
         self.userDefaults = UserDefaults(suiteName: "\(PersistentStorage.AMP_STORAGE_PREFIX).\(self.storagePrefix)")
         self.fileManager = FileManager.default
         self.eventCallbackMap = [String: EventCallback]()
@@ -33,7 +35,7 @@ class PersistentStorage: Storage {
             switch key {
             case .EVENTS:
                 if let event = value as? BaseEvent {
-                    let eventStoreFile = getCurrentFile()
+                    let eventStoreFile = getCurrentEventFile()
                     self.storeEvent(toFile: eventStoreFile, event: event)
                     if let eventCallback = event.callback, let eventInsertId = event.insertId {
                         eventCallbackMap[eventInsertId] = eventCallback
@@ -75,7 +77,7 @@ class PersistentStorage: Storage {
     func remove(eventBlock: EventBlock) {
         syncQueue.sync {
             do {
-                try fileManager!.removeItem(atPath: eventBlock.path)
+                try fileManager.removeItem(atPath: eventBlock.path)
             } catch {
                 amplitude?.logger?.error(message: error.localizedDescription)
             }
@@ -91,7 +93,7 @@ class PersistentStorage: Storage {
             storeEventsInNewFile(toFile: eventBlock.appendFileNameSuffix(suffix: "-1"), events: leftSplit)
             storeEventsInNewFile(toFile: eventBlock.appendFileNameSuffix(suffix: "-2"), events: rightSplit)
             do {
-                try fileManager!.removeItem(atPath: eventBlock.path)
+                try fileManager.removeItem(atPath: eventBlock.path)
             } catch {
                 amplitude?.logger?.error(message: error.localizedDescription)
             }
@@ -121,18 +123,21 @@ class PersistentStorage: Storage {
                 userDefaults?.removeObject(forKey: key)
             }
             for url in urls {
-                try? fileManager!.removeItem(atPath: url.path)
+                try? fileManager.removeItem(atPath: url.path)
             }
         }
     }
 
     func rollover() {
         syncQueue.sync {
-            let currentFile = getCurrentFile()
-            if fileManager?.fileExists(atPath: currentFile.path) == false {
+            if getCurrentEventFileIndex() == nil {
                 return
             }
-            if let attributes = try? fileManager?.attributesOfItem(atPath: currentFile.path),
+            let currentFile = getCurrentEventFile()
+            if fileManager.fileExists(atPath: currentFile.path) == false {
+                return
+            }
+            if let attributes = try? fileManager.attributesOfItem(atPath: currentFile.path),
                 let fileSize = attributes[FileAttributeKey.size] as? UInt64,
                 fileSize >= 0
             {
@@ -177,16 +182,30 @@ extension PersistentStorage {
 }
 
 extension PersistentStorage {
-    private var eventsFileKey: String {
+    internal var eventsFileKey: String {
         return "\(storagePrefix).\(StorageKey.EVENTS.rawValue).index"
     }
 
-    private func getCurrentFile() -> URL {
+    private func getCurrentEventFile() -> URL {
         var currentFileIndex = 0
-        let index: Int = userDefaults?.integer(forKey: eventsFileKey) ?? 0
+        let index: Int = getCurrentEventFileIndex() ?? 0
         userDefaults?.set(index, forKey: eventsFileKey)
         currentFileIndex = index
         return getEventsFile(index: currentFileIndex)
+    }
+
+    private func getCurrentEventFileIndex() -> Int? {
+        if userDefaults == nil || userDefaults?.object(forKey: eventsFileKey) == nil {
+            return nil
+        }
+        return userDefaults?.integer(forKey: eventsFileKey)
+    }
+
+    internal func hasWrittenEvents() -> Bool {
+        if getCurrentEventFileIndex() != nil {
+            return true
+        }
+        return getEventFiles(includeUnfinished: true).count > 0
     }
 
     private func getEventsFile(index: Int) -> URL {
@@ -197,14 +216,14 @@ extension PersistentStorage {
         return fileURL
     }
 
-    private func getEventFiles(includeUnfinished: Bool = false) -> [URL] {
+    internal func getEventFiles(includeUnfinished: Bool = false) -> [URL] {
         var result = [URL]()
 
         // finish out any file in progress
-        let index = userDefaults?.integer(forKey: eventsFileKey) ?? 0
+        let index = getCurrentEventFileIndex() ?? 0
         finish(file: getEventsFile(index: index))
 
-        let allFiles = try? fileManager!.contentsOfDirectory(
+        let allFiles = try? fileManager.contentsOfDirectory(
             at: getEventsStorageDirectory(),
             includingPropertiesForKeys: [],
             options: .skipsHiddenFiles
@@ -233,7 +252,7 @@ extension PersistentStorage {
             let searchPathDirectory = FileManager.SearchPathDirectory.documentDirectory
         #endif
 
-        let urls = fileManager!.urls(for: searchPathDirectory, in: .userDomainMask)
+        let urls = fileManager.urls(for: searchPathDirectory, in: .userDomainMask)
         let docUrl = urls[0]
         let storageUrl = docUrl.appendingPathComponent("amplitude/\(eventsFileKey)/")
         // try to create it, will fail if already exists.
@@ -246,7 +265,7 @@ extension PersistentStorage {
         var storeFile = file
 
         var newFile = false
-        if fileManager?.fileExists(atPath: storeFile.path) == false {
+        if fileManager.fileExists(atPath: storeFile.path) == false {
             start(file: storeFile)
             newFile = true
         } else if outputStream == nil {
@@ -255,13 +274,13 @@ extension PersistentStorage {
         }
 
         // Verify file size isn't too large
-        if let attributes = try? fileManager?.attributesOfItem(atPath: storeFile.path),
+        if let attributes = try? fileManager.attributesOfItem(atPath: storeFile.path),
             let fileSize = attributes[FileAttributeKey.size] as? UInt64,
             fileSize >= PersistentStorage.MAX_FILE_SIZE
         {
             finish(file: storeFile)
             // Set the new file path
-            storeFile = getCurrentFile()
+            storeFile = getCurrentEventFile()
             start(file: storeFile)
             newFile = true
         }
@@ -284,7 +303,7 @@ extension PersistentStorage {
     private func storeEventsInNewFile(toFile file: URL, events: [BaseEvent]) {
         let storeFile = file
 
-        guard fileManager?.fileExists(atPath: storeFile.path) != true else {
+        guard fileManager.fileExists(atPath: storeFile.path) != true else {
             return
         }
 
@@ -342,12 +361,12 @@ extension PersistentStorage {
 
         let fileWithoutTemp = file.deletingPathExtension()
         do {
-            try fileManager?.moveItem(at: file, to: fileWithoutTemp)
+            try fileManager.moveItem(at: file, to: fileWithoutTemp)
         } catch {
             amplitude?.logger?.error(message: "Unable to rename file: \(file.path)")
         }
 
-        let currentFileIndex: Int = (userDefaults?.integer(forKey: eventsFileKey) ?? 0) + 1
+        let currentFileIndex: Int = (getCurrentEventFileIndex() ?? 0) + 1
         userDefaults?.set(currentFileIndex, forKey: eventsFileKey)
     }
 }

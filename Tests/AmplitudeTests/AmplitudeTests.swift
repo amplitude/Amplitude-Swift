@@ -22,8 +22,8 @@ final class AmplitudeTests: XCTestCase {
 
         configuration = Configuration(apiKey: apiKey)
 
-        storage = FakePersistentStorage(apiKey: apiKey)
-        interceptStorage = FakePersistentStorage(apiKey: apiKey)
+        storage = FakePersistentStorage(storagePrefix: "storage")
+        interceptStorage = FakePersistentStorage(storagePrefix: "intercept")
         configurationWithFakeStorage = Configuration(
             apiKey: apiKey,
             storageProvider: storage,
@@ -150,8 +150,8 @@ final class AmplitudeTests: XCTestCase {
 
     func testInterceptedIdentifyWithPersistentStorage() {
         let apiKey = "testApiKeyPersist"
-        storageTest = TestPersistentStorage(apiKey: apiKey)
-        interceptStorageTest = TestPersistentStorage(apiKey: apiKey, storagePrefix: "identify")
+        storageTest = TestPersistentStorage(storagePrefix: "storage")
+        interceptStorageTest = TestPersistentStorage(storagePrefix: "identify")
         let amplitude = Amplitude(configuration: Configuration(
             apiKey: apiKey,
             storageProvider: storageTest,
