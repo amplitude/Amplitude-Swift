@@ -24,7 +24,7 @@ class PersistentStorage: Storage {
     init(storagePrefix: String) {
         self.storagePrefix = storagePrefix == PersistentStorage.DEFAULT_STORAGE_PREFIX || storagePrefix.starts(with: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-")
             ? storagePrefix
-            : "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(storagePrefix)";
+            : "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(storagePrefix)"
         self.userDefaults = UserDefaults(suiteName: "\(PersistentStorage.AMP_STORAGE_PREFIX).\(self.storagePrefix)")
         self.fileManager = FileManager.default
         self.eventCallbackMap = [String: EventCallback]()
