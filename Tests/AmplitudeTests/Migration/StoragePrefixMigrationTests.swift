@@ -33,7 +33,7 @@ final class StoragePrefixMigrationTests: XCTestCase {
         destinationEventsFileKey = destination.userDefaults?.object(forKey: destination.eventsFileKey)
         XCTAssertEqual(destinationDeviceId, "source-device")
         XCTAssertEqual(destinationLastEventId, 12345)
-        XCTAssertEqual(destinationEventsFileKey as! Int, 789)
+        XCTAssertEqual(destinationEventsFileKey as? Int, 789)
     }
 
     func testEventFiles() throws {
