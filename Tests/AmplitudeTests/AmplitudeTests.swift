@@ -51,7 +51,11 @@ final class AmplitudeTests: XCTestCase {
         let amplitude = Amplitude(configuration: configurationWithFakeStorage)
         XCTAssertEqual(amplitude.getDeviceId() != nil, true)
         let deviceIdUuid = amplitude.getDeviceId()!
-        XCTAssertEqual(storage.haveBeenCalledWith, ["write(key: \(StorageKey.DEVICE_ID.rawValue), \(deviceIdUuid))"])
+        XCTAssertEqual(storage.haveBeenCalledWith, [
+            "read(key: device_id)",
+            "read(key: user_id)",
+            "write(key: \(StorageKey.DEVICE_ID.rawValue), \(deviceIdUuid))"
+        ])
     }
 
     func testContext() {
@@ -115,7 +119,7 @@ final class AmplitudeTests: XCTestCase {
 
         amplitude.setUserId(userId: "test-user")
         XCTAssertEqual(amplitude.getUserId(), "test-user")
-        XCTAssertEqual(storage.haveBeenCalledWith[1], "write(key: \(StorageKey.USER_ID.rawValue), test-user)")
+        XCTAssertEqual(storage.haveBeenCalledWith[3], "write(key: \(StorageKey.USER_ID.rawValue), test-user)")
     }
 
     func testSetDeviceId() {
@@ -125,7 +129,7 @@ final class AmplitudeTests: XCTestCase {
 
         amplitude.setDeviceId(deviceId: "test-device")
         XCTAssertEqual(amplitude.getDeviceId(), "test-device")
-        XCTAssertEqual(storage.haveBeenCalledWith[1], "write(key: \(StorageKey.DEVICE_ID.rawValue), test-device)")
+        XCTAssertEqual(storage.haveBeenCalledWith[3], "write(key: \(StorageKey.DEVICE_ID.rawValue), test-device)")
     }
 
     func testInterceptedIdentifyIsSentOnFlush() {

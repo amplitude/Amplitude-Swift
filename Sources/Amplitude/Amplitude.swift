@@ -47,6 +47,13 @@ public class Amplitude {
 
         migrateApiKeyStorages()
 
+        if let deviceId: String? = configuration.storageProvider.read(key: .DEVICE_ID) {
+            state.deviceId = deviceId
+        }
+        if let userId: String? = configuration.storageProvider.read(key: .USER_ID) {
+            state.userId = userId
+        }
+
         // required plugin for specific platform, only has lifecyclePlugin now
         if let requiredPlugin = VendorSystem.current.requiredPlugin {
             _ = add(plugin: requiredPlugin)
