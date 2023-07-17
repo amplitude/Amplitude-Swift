@@ -29,7 +29,11 @@ class StoragePrefixMigration {
            let destinationUserDefaults = destination.userDefaults {
             for entry in sourceUserDefaults {
                 if destinationUserDefaults.object(forKey: entry.key) == nil {
-                    destinationUserDefaults.set(entry.value, forKey: entry.key)
+                    var key = entry.key
+                    if key == source.eventsFileKey {
+                        key = destination.eventsFileKey
+                    }
+                    destinationUserDefaults.set(entry.value, forKey: key)
                 }
                 source.userDefaults?.removeObject(forKey: entry.key)
             }
@@ -37,8 +41,14 @@ class StoragePrefixMigration {
     }
 
     private func moveEventFiles() {
-        let fileManager = FileManager.default
         let sourceEventFiles = source.getEventFiles(includeUnfinished: true)
+        if sourceEventFiles.count == 0 {
+            return
+        }
+        // Ensure destination directory exists.
+        _ = destination.getEventsStorageDirectory(createDirectory: true)
+
+        let fileManager = FileManager.default
         for sourceEventFile in sourceEventFiles {
             let destinationEventFile = sourceEventFile.path.replacingOccurrences(of: "/\(source.eventsFileKey)/", with: "/\(destination.eventsFileKey)/")
             if !fileManager.fileExists(atPath: destinationEventFile) {

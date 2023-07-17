@@ -9,24 +9,31 @@ final class StoragePrefixMigrationTests: XCTestCase {
 
         try source.write(key: StorageKey.DEVICE_ID, value: "source-device")
         try source.write(key: StorageKey.LAST_EVENT_ID, value: 12345)
+        source.userDefaults?.set(789, forKey: source.eventsFileKey)
 
         var destinationDeviceId: String? = destination.read(key: StorageKey.DEVICE_ID)
         var destinationLastEventId: Int64? = destination.read(key: StorageKey.LAST_EVENT_ID)
+        var destinationEventsFileKey = destination.userDefaults?.object(forKey: destination.eventsFileKey)
         XCTAssertNil(destinationDeviceId)
         XCTAssertNil(destinationLastEventId)
+        XCTAssertNil(destinationEventsFileKey)
 
         let migration = StoragePrefixMigration(source: source, destination: destination)
         migration.execute()
 
         let sourceDeviceId: String? = source.read(key: StorageKey.DEVICE_ID)
         let sourceLastEventId: Int64? = source.read(key: StorageKey.LAST_EVENT_ID)
+        let sourceEventsFileKey = source.userDefaults?.object(forKey: source.eventsFileKey)
         XCTAssertNil(sourceDeviceId)
         XCTAssertNil(sourceLastEventId)
+        XCTAssertNil(sourceEventsFileKey)
 
         destinationDeviceId = destination.read(key: StorageKey.DEVICE_ID)
         destinationLastEventId = destination.read(key: StorageKey.LAST_EVENT_ID)
+        destinationEventsFileKey = destination.userDefaults?.object(forKey: destination.eventsFileKey)
         XCTAssertEqual(destinationDeviceId, "source-device")
         XCTAssertEqual(destinationLastEventId, 12345)
+        XCTAssertEqual(destinationEventsFileKey as! Int, 789)
     }
 
     func testEventFiles() throws {
@@ -82,6 +89,9 @@ final class StoragePrefixMigrationTests: XCTestCase {
 
         let destinationEventFiles = destination.getEventFiles(includeUnfinished: true)
         XCTAssertEqual(destinationEventFiles.count, 0)
+
+        let sourceEventsStorageDirectory = source.getEventsStorageDirectory(createDirectory: false)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: sourceEventsStorageDirectory.path))
     }
 
     func testDoNotMoveEventFilesToDestinationWithWrittenEvents() throws {

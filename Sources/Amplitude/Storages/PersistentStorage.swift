@@ -219,6 +219,11 @@ extension PersistentStorage {
     internal func getEventFiles(includeUnfinished: Bool = false) -> [URL] {
         var result = [URL]()
 
+        let eventsStorageDirectory = getEventsStorageDirectory(createDirectory: false)
+        if !fileManager.fileExists(atPath: eventsStorageDirectory.path) {
+            return result
+        }
+
         // finish out any file in progress
         let index = getCurrentEventFileIndex() ?? 0
         finish(file: getEventsFile(index: index))
@@ -243,7 +248,7 @@ extension PersistentStorage {
         return result
     }
 
-    private func getEventsStorageDirectory() -> URL {
+    internal func getEventsStorageDirectory(createDirectory: Bool = true) -> URL {
         // tvOS doesn't have access to document
         // macOS /Documents dir might be synced with iCloud
         #if os(tvOS) || os(macOS)
@@ -255,9 +260,11 @@ extension PersistentStorage {
         let urls = fileManager.urls(for: searchPathDirectory, in: .userDomainMask)
         let docUrl = urls[0]
         let storageUrl = docUrl.appendingPathComponent("amplitude/\(eventsFileKey)/")
-        // try to create it, will fail if already exists.
-        // tvOS, watchOS regularly clear out data.
-        try? FileManager.default.createDirectory(at: storageUrl, withIntermediateDirectories: true, attributes: nil)
+        if createDirectory {
+            // try to create it, will fail if already exists.
+            // tvOS, watchOS regularly clear out data.
+            try? FileManager.default.createDirectory(at: storageUrl, withIntermediateDirectories: true, attributes: nil)
+        }
         return storageUrl
     }
 
