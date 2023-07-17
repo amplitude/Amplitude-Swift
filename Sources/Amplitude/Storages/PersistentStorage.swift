@@ -195,14 +195,11 @@ extension PersistentStorage {
     }
 
     private func getCurrentEventFileIndex() -> Int? {
-        if userDefaults == nil || userDefaults?.object(forKey: eventsFileKey) == nil {
-            return nil
-        }
-        return userDefaults?.integer(forKey: eventsFileKey)
+        return userDefaults?.object(forKey: eventsFileKey) as? Int
     }
 
     internal func hasWrittenEvents() -> Bool {
-        if getCurrentEventFileIndex() != nil {
+        if getCurrentEventFileIndex() ?? 0 > 0 {
             return true
         }
         return getEventFiles(includeUnfinished: true).count > 0
