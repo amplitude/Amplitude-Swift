@@ -25,96 +25,12 @@ class StoragePrefixMigration {
     }
 
     private func moveUserDefaults() {
-        if let sourceDeviceId: String = source.read(key: StorageKey.DEVICE_ID) {
-            if destination.read(key: StorageKey.DEVICE_ID) == nil {
-                do {
-                    try destination.write(key: StorageKey.DEVICE_ID, value: sourceDeviceId)
-                } catch {
-                    logger?.warn(message: "can't write destination DEVICE_ID: \(error)")
-                }
-            }
-
-            do {
-                try source.write(key: StorageKey.DEVICE_ID, value: nil)
-            } catch {
-                logger?.warn(message: "can't write source DEVICE_ID: \(error)")
-            }
-        }
-
-        if let sourceUserId: String = source.read(key: StorageKey.USER_ID) {
-            if destination.read(key: StorageKey.USER_ID) == nil {
-                do {
-                    try destination.write(key: StorageKey.USER_ID, value: sourceUserId)
-                } catch {
-                    logger?.warn(message: "can't write destination USER_ID: \(error)")
-                }
-            }
-
-            do {
-                try source.write(key: StorageKey.USER_ID, value: nil)
-            } catch {
-                logger?.warn(message: "can't clear source USER_ID: \(error)")
-            }
-        }
-
-        if let sourcePreviousSessionId: Int = source.read(key: StorageKey.PREVIOUS_SESSION_ID) {
-            let destinationPreviousSessionId: Int? = destination.read(key: StorageKey.PREVIOUS_SESSION_ID)
-            if destinationPreviousSessionId == nil || destinationPreviousSessionId! < sourcePreviousSessionId {
-                do {
-                    try destination.write(key: StorageKey.PREVIOUS_SESSION_ID, value: sourcePreviousSessionId)
-                } catch {
-                    logger?.warn(message: "can't write destination PREVIOUS_SESSION_ID: \(error)")
-                }
-            }
-
-            do {
-                try source.write(key: StorageKey.PREVIOUS_SESSION_ID, value: nil)
-            } catch {
-                logger?.warn(message: "can't clear source PREVIOUS_SESSION_ID: \(error)")
-            }
-        }
-
-        if let sourceLastEventTime: Int = source.read(key: StorageKey.LAST_EVENT_TIME) {
-            let destinationLastEventTime: Int? = destination.read(key: StorageKey.LAST_EVENT_TIME)
-            if destinationLastEventTime == nil || destinationLastEventTime! < sourceLastEventTime {
-                do {
-                    try destination.write(key: StorageKey.LAST_EVENT_TIME, value: sourceLastEventTime)
-                } catch {
-                    logger?.warn(message: "can't write destination LAST_EVENT_TIME: \(error)")
-                }
-            }
-
-            do {
-                try source.write(key: StorageKey.LAST_EVENT_TIME, value: nil)
-            } catch {
-                logger?.warn(message: "can't clear source LAST_EVENT_TIME: \(error)")
-            }
-        }
-
-        if let sourceLastEventId: Int = source.read(key: StorageKey.LAST_EVENT_ID) {
-            let destinationLastEventId: Int? = destination.read(key: StorageKey.LAST_EVENT_ID)
-            if destinationLastEventId == nil || destinationLastEventId! < sourceLastEventId {
-                do {
-                    try destination.write(key: StorageKey.LAST_EVENT_ID, value: sourceLastEventId)
-                } catch {
-                    logger?.warn(message: "can't write destination LAST_EVENT_ID: \(error)")
-                }
-            }
-
-            do {
-                try source.write(key: StorageKey.LAST_EVENT_ID, value: nil)
-            } catch {
-                logger?.warn(message: "can't clear source LAST_EVENT_ID: \(error)")
-            }
-        }
-
-        if let sourceEventFileKey: Int = source.userDefaults?.integer(forKey: source.eventsFileKey) {
-            let destinationEventFileKey: Int? = destination.userDefaults?.integer(forKey: destination.eventsFileKey)
-            if destinationEventFileKey == nil || destinationEventFileKey! < sourceEventFileKey {
-                destination.userDefaults?.set(sourceEventFileKey, forKey: destination.eventsFileKey)
-            }
-        }
-        source.userDefaults?.removeObject(forKey: source.eventsFileKey)
+        moveStringProperty(StorageKey.DEVICE_ID)
+        moveStringProperty(StorageKey.USER_ID)
+        moveIntegerProperty(StorageKey.PREVIOUS_SESSION_ID)
+        moveIntegerProperty(StorageKey.LAST_EVENT_TIME)
+        moveIntegerProperty(StorageKey.LAST_EVENT_ID)
+        moveEventsFileKey()
     }
 
     private func moveSourceEventFilesToDestination() {
@@ -154,5 +70,56 @@ class StoragePrefixMigration {
                 logger?.warn(message: "Can't remove \(sourceEventFile)")
             }
         }
+    }
+
+    private func moveStringProperty(_ key: StorageKey) {
+        guard let sourceValue: String = source.read(key: key) else {
+            return
+        }
+
+        if destination.read(key: key) == nil {
+            do {
+                try destination.write(key: key, value: sourceValue)
+            } catch {
+                logger?.warn(message: "can't write destination \(key): \(error)")
+            }
+        }
+
+        do {
+            try source.write(key: key, value: nil)
+        } catch {
+            logger?.warn(message: "can't write source \(key): \(error)")
+        }
+    }
+
+    private func moveIntegerProperty(_ key: StorageKey) {
+        guard let sourceValue: Int = source.read(key: key) else {
+            return
+        }
+
+        let destinationValue: Int? = destination.read(key: key)
+        if destinationValue == nil || destinationValue! < sourceValue {
+            do {
+                try destination.write(key: key, value: sourceValue)
+            } catch {
+                logger?.warn(message: "can't write destination \(key): \(error)")
+            }
+        }
+
+        do {
+            try source.write(key: key, value: nil)
+        } catch {
+            logger?.warn(message: "can't clear source \(key): \(error)")
+        }
+    }
+
+    private func moveEventsFileKey() {
+        if let sourceEventFileKey: Int = source.userDefaults?.integer(forKey: source.eventsFileKey) {
+            let destinationEventFileKey: Int? = destination.userDefaults?.integer(forKey: destination.eventsFileKey)
+            if destinationEventFileKey == nil || destinationEventFileKey! < sourceEventFileKey {
+                destination.userDefaults?.set(sourceEventFileKey, forKey: destination.eventsFileKey)
+            }
+        }
+        source.userDefaults?.removeObject(forKey: source.eventsFileKey)
     }
 }

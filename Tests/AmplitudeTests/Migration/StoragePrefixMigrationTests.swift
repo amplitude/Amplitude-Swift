@@ -8,13 +8,22 @@ final class StoragePrefixMigrationTests: XCTestCase {
         let destination = PersistentStorage(storagePrefix: NSUUID().uuidString)
 
         try source.write(key: StorageKey.DEVICE_ID, value: "source-device")
-        try source.write(key: StorageKey.LAST_EVENT_ID, value: 12345)
-        source.userDefaults?.set(789, forKey: source.eventsFileKey)
+        try source.write(key: StorageKey.USER_ID, value: "source-user")
+        try source.write(key: StorageKey.PREVIOUS_SESSION_ID, value: 123)
+        try source.write(key: StorageKey.LAST_EVENT_TIME, value: 456)
+        try source.write(key: StorageKey.LAST_EVENT_ID, value: 789)
+        source.userDefaults?.set(12345, forKey: source.eventsFileKey)
 
         var destinationDeviceId: String? = destination.read(key: StorageKey.DEVICE_ID)
-        var destinationLastEventId: Int64? = destination.read(key: StorageKey.LAST_EVENT_ID)
+        var destinationUserId: String? = destination.read(key: StorageKey.DEVICE_ID)
+        var destinationPreviousSessionId: Int? = destination.read(key: StorageKey.PREVIOUS_SESSION_ID)
+        var destinationLastEventTime: Int? = destination.read(key: StorageKey.LAST_EVENT_TIME)
+        var destinationLastEventId: Int? = destination.read(key: StorageKey.LAST_EVENT_ID)
         var destinationEventsFileKey = destination.userDefaults?.object(forKey: destination.eventsFileKey)
         XCTAssertNil(destinationDeviceId)
+        XCTAssertNil(destinationUserId)
+        XCTAssertNil(destinationPreviousSessionId)
+        XCTAssertNil(destinationLastEventTime)
         XCTAssertNil(destinationLastEventId)
         XCTAssertNil(destinationEventsFileKey)
 
@@ -22,18 +31,30 @@ final class StoragePrefixMigrationTests: XCTestCase {
         migration.execute()
 
         let sourceDeviceId: String? = source.read(key: StorageKey.DEVICE_ID)
-        let sourceLastEventId: Int64? = source.read(key: StorageKey.LAST_EVENT_ID)
+        let sourceUserId: String? = source.read(key: StorageKey.USER_ID)
+        let sourcePreviousSessionId: Int? = source.read(key: StorageKey.PREVIOUS_SESSION_ID)
+        let sourceLastEventTime: Int? = source.read(key: StorageKey.LAST_EVENT_TIME)
+        let sourceLastEventId: Int? = source.read(key: StorageKey.LAST_EVENT_ID)
         let sourceEventsFileKey = source.userDefaults?.object(forKey: source.eventsFileKey)
         XCTAssertNil(sourceDeviceId)
+        XCTAssertNil(sourceUserId)
+        XCTAssertNil(sourcePreviousSessionId)
+        XCTAssertNil(sourceLastEventTime)
         XCTAssertNil(sourceLastEventId)
         XCTAssertNil(sourceEventsFileKey)
 
         destinationDeviceId = destination.read(key: StorageKey.DEVICE_ID)
+        destinationUserId = destination.read(key: StorageKey.USER_ID)
+        destinationPreviousSessionId = destination.read(key: StorageKey.PREVIOUS_SESSION_ID)
+        destinationLastEventTime = destination.read(key: StorageKey.LAST_EVENT_TIME)
         destinationLastEventId = destination.read(key: StorageKey.LAST_EVENT_ID)
         destinationEventsFileKey = destination.userDefaults?.object(forKey: destination.eventsFileKey)
         XCTAssertEqual(destinationDeviceId, "source-device")
-        XCTAssertEqual(destinationLastEventId, 12345)
-        XCTAssertEqual(destinationEventsFileKey as? Int, 789)
+        XCTAssertEqual(destinationUserId, "source-user")
+        XCTAssertEqual(destinationPreviousSessionId, 123)
+        XCTAssertEqual(destinationLastEventTime, 456)
+        XCTAssertEqual(destinationLastEventId, 789)
+        XCTAssertEqual(destinationEventsFileKey as? Int, 12345)
     }
 
     func testEventFiles() throws {
@@ -75,7 +96,7 @@ final class StoragePrefixMigrationTests: XCTestCase {
         let destination = PersistentStorage(storagePrefix: NSUUID().uuidString)
 
         var destinationDeviceId: String? = destination.read(key: StorageKey.DEVICE_ID)
-        var destinationLastEventId: Int64? = destination.read(key: StorageKey.LAST_EVENT_ID)
+        var destinationLastEventId: Int? = destination.read(key: StorageKey.LAST_EVENT_ID)
         XCTAssertNil(destinationDeviceId)
         XCTAssertNil(destinationLastEventId)
 
