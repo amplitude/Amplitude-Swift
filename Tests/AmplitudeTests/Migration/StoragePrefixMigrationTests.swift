@@ -115,26 +115,26 @@ final class StoragePrefixMigrationTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: sourceEventsStorageDirectory.path))
     }
 
-    func testDoNotMoveEventFilesToDestinationWithWrittenEvents() throws {
+    func testMoveEventFilesWithDuplicatedName() throws {
         let source = PersistentStorage(storagePrefix: NSUUID().uuidString)
         let destination = PersistentStorage(storagePrefix: NSUUID().uuidString)
 
         try source.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "event-1"))
         source.rollover()
-        try source.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "event-3"))
+        try source.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "event-11"))
 
         var sourceEventFiles = source.getEventFiles(includeUnfinished: true)
         XCTAssertEqual(sourceEventFiles.count, 2)
 
-        try destination.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "event-A"))
+        let sourceFileSizes = try sourceEventFiles.map{ try getFileSize($0) }
+
+        try destination.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "event-ABC"))
         destination.rollover()
 
         var destinationEventFiles = destination.getEventFiles(includeUnfinished: true)
         XCTAssertEqual(destinationEventFiles.count, 1)
 
-        destination.remove(eventBlock: destinationEventFiles[0])
-        destinationEventFiles = destination.getEventFiles(includeUnfinished: true)
-        XCTAssertEqual(destinationEventFiles.count, 0)
+        let destinationFileSizes = try destinationEventFiles.map{ try getFileSize($0) }
 
         let migration = StoragePrefixMigration(source: source, destination: destination, logger: ConsoleLogger())
         migration.execute()
@@ -143,7 +143,12 @@ final class StoragePrefixMigrationTests: XCTestCase {
         XCTAssertEqual(sourceEventFiles.count, 0)
 
         destinationEventFiles = destination.getEventFiles(includeUnfinished: true)
-        XCTAssertEqual(destinationEventFiles.count, 0)
+        XCTAssertEqual(destinationEventFiles[0].lastPathComponent, "1")
+        XCTAssertEqual(destinationEventFiles[1].lastPathComponent.prefix(2), "0-")
+        XCTAssertEqual(destinationEventFiles[2].lastPathComponent, "0")
+        XCTAssertEqual(try getFileSize(destinationEventFiles[0]), sourceFileSizes[0])
+        XCTAssertEqual(try getFileSize(destinationEventFiles[1]), sourceFileSizes[1])
+        XCTAssertEqual(try getFileSize(destinationEventFiles[2]), destinationFileSizes[0])
     }
 
     private func getFileSize(_ url: URL) throws -> Int {

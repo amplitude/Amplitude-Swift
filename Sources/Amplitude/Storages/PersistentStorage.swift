@@ -198,13 +198,6 @@ extension PersistentStorage {
         return userDefaults?.object(forKey: eventsFileKey) as? Int
     }
 
-    internal func hasWrittenEvents() -> Bool {
-        if getCurrentEventFileIndex() ?? 0 > 0 {
-            return true
-        }
-        return getEventFiles(includeUnfinished: true).count > 0
-    }
-
     private func getEventsFile(index: Int) -> URL {
         let dir = getEventsStorageDirectory()
         let fileURL = dir.appendingPathComponent("\(index)").appendingPathExtension(

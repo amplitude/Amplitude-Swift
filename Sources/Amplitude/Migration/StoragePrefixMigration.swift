@@ -16,11 +16,7 @@ class StoragePrefixMigration {
             return
         }
 
-        if destination.hasWrittenEvents() {
-            removeSourceEventFiles()
-        } else {
-            moveSourceEventFilesToDestination()
-        }
+        moveSourceEventFilesToDestination()
         moveUserDefaults()
     }
 
@@ -43,31 +39,18 @@ class StoragePrefixMigration {
 
         let fileManager = FileManager.default
         for sourceEventFile in sourceEventFiles {
-            let destinationEventFile = sourceEventFile.path.replacingOccurrences(of: "/\(source.eventsFileKey)/", with: "/\(destination.eventsFileKey)/")
-            if !fileManager.fileExists(atPath: destinationEventFile) {
-                do {
-                    try fileManager.moveItem(atPath: sourceEventFile.path, toPath: destinationEventFile)
-                } catch {
-                    logger?.warn(message: "Can't move \(sourceEventFile) to \(destinationEventFile): \(error)")
+            var destinationEventFile = sourceEventFile.path.replacingOccurrences(of: "/\(source.eventsFileKey)/", with: "/\(destination.eventsFileKey)/")
+            if fileManager.fileExists(atPath: destinationEventFile) {
+                var fileExtension = sourceEventFile.pathExtension
+                if fileExtension != "" {
+                    fileExtension = ".\(fileExtension)"
                 }
-            } else {
-                do {
-                    try fileManager.removeItem(at: sourceEventFile)
-                } catch {
-                    logger?.warn(message: "Can't remove \(sourceEventFile)")
-                }
+                destinationEventFile = "\((destinationEventFile as NSString).deletingPathExtension)-\(NSUUID().uuidString)\(fileExtension)"
             }
-        }
-    }
-
-    private func removeSourceEventFiles() {
-        let fileManager = FileManager.default
-        let sourceEventFiles = source.getEventFiles(includeUnfinished: true)
-        for sourceEventFile in sourceEventFiles {
             do {
-                try fileManager.removeItem(at: sourceEventFile)
+                try fileManager.moveItem(atPath: sourceEventFile.path, toPath: destinationEventFile)
             } catch {
-                logger?.warn(message: "Can't remove \(sourceEventFile)")
+                logger?.warn(message: "Can't move \(sourceEventFile) to \(destinationEventFile): \(error)")
             }
         }
     }
