@@ -2,7 +2,6 @@ import Foundation
 
 public class Amplitude {
     public private(set) var configuration: Configuration
-    var instanceName: String
     private var inForeground = false
 
     var sessionId: Int64 {
@@ -39,14 +38,21 @@ public class Amplitude {
     }()
 
     public init(
-        configuration: Configuration,
-        instanceName: String = Constants.Configuration.DEFAULT_INSTANCE
+        configuration: Configuration
     ) {
         self.configuration = configuration
-        self.instanceName = instanceName
 
         let contextPlugin = ContextPlugin()
         self.contextPlugin = contextPlugin
+
+        migrateApiKeyStorages()
+
+        if let deviceId: String? = configuration.storageProvider.read(key: .DEVICE_ID) {
+            state.deviceId = deviceId
+        }
+        if let userId: String? = configuration.storageProvider.read(key: .USER_ID) {
+            state.userId = userId
+        }
 
         // required plugin for specific platform, only has lifecyclePlugin now
         if let requiredPlugin = VendorSystem.current.requiredPlugin {
@@ -295,6 +301,18 @@ public class Amplitude {
         sessions.lastEventTime = timestamp
         if configuration.flushEventsOnClose == true {
             _ = self.flush()
+        }
+    }
+
+    private func migrateApiKeyStorages() {
+        if let persistentStorage = configuration.storageProvider as? PersistentStorage {
+            let apiKeyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(configuration.apiKey)")
+            StoragePrefixMigration(source: apiKeyStorage, destination: persistentStorage, logger: logger).execute()
+        }
+
+        if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
+            let apiKeyIdentifyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(configuration.apiKey)")
+            StoragePrefixMigration(source: apiKeyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
     }
 }
