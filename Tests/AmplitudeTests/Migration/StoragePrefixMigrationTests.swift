@@ -18,7 +18,7 @@ final class StoragePrefixMigrationTests: XCTestCase {
         XCTAssertNil(destinationLastEventId)
         XCTAssertNil(destinationEventsFileKey)
 
-        let migration = StoragePrefixMigration(source: source, destination: destination)
+        let migration = StoragePrefixMigration(source: source, destination: destination, logger: ConsoleLogger())
         migration.execute()
 
         let sourceDeviceId: String? = source.read(key: StorageKey.DEVICE_ID)
@@ -55,7 +55,7 @@ final class StoragePrefixMigrationTests: XCTestCase {
         var destinationEventFiles = destination.getEventFiles(includeUnfinished: true)
         XCTAssertEqual(destinationEventFiles.count, 0)
 
-        let migration = StoragePrefixMigration(source: source, destination: destination)
+        let migration = StoragePrefixMigration(source: source, destination: destination, logger: ConsoleLogger())
         migration.execute()
 
         sourceEventFiles = source.getEventFiles(includeUnfinished: true)
@@ -79,7 +79,7 @@ final class StoragePrefixMigrationTests: XCTestCase {
         XCTAssertNil(destinationDeviceId)
         XCTAssertNil(destinationLastEventId)
 
-        let migration = StoragePrefixMigration(source: source, destination: destination)
+        let migration = StoragePrefixMigration(source: source, destination: destination, logger: ConsoleLogger())
         migration.execute()
 
         destinationDeviceId = destination.read(key: StorageKey.DEVICE_ID)
@@ -115,7 +115,7 @@ final class StoragePrefixMigrationTests: XCTestCase {
         destinationEventFiles = destination.getEventFiles(includeUnfinished: true)
         XCTAssertEqual(destinationEventFiles.count, 0)
 
-        let migration = StoragePrefixMigration(source: source, destination: destination)
+        let migration = StoragePrefixMigration(source: source, destination: destination, logger: ConsoleLogger())
         migration.execute()
 
         sourceEventFiles = source.getEventFiles(includeUnfinished: true)

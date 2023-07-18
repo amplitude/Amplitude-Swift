@@ -3,10 +3,12 @@ import Foundation
 class StoragePrefixMigration {
     let source: PersistentStorage
     let destination: PersistentStorage
+    let logger: (any Logger)?
 
-    init(source: PersistentStorage, destination: PersistentStorage) {
+    init(source: PersistentStorage, destination: PersistentStorage, logger: (any Logger)?) {
         self.source = source
         self.destination = destination
+        self.logger = logger
     }
 
     func execute() {
@@ -28,14 +30,14 @@ class StoragePrefixMigration {
                 do {
                     try destination.write(key: StorageKey.DEVICE_ID, value: sourceDeviceId)
                 } catch {
-                    print("can't write destination DEVICE_ID: \(error)")
+                    logger?.warn(message: "can't write destination DEVICE_ID: \(error)")
                 }
             }
 
             do {
                 try source.write(key: StorageKey.DEVICE_ID, value: nil)
             } catch {
-                print("can't write source DEVICE_ID: \(error)")
+                logger?.warn(message: "can't write source DEVICE_ID: \(error)")
             }
         }
 
@@ -44,14 +46,14 @@ class StoragePrefixMigration {
                 do {
                     try destination.write(key: StorageKey.USER_ID, value: sourceUserId)
                 } catch {
-                    print("can't write destination USER_ID: \(error)")
+                    logger?.warn(message: "can't write destination USER_ID: \(error)")
                 }
             }
 
             do {
                 try source.write(key: StorageKey.USER_ID, value: nil)
             } catch {
-                print("can't clear source USER_ID: \(error)")
+                logger?.warn(message: "can't clear source USER_ID: \(error)")
             }
         }
 
@@ -61,14 +63,14 @@ class StoragePrefixMigration {
                 do {
                     try destination.write(key: StorageKey.PREVIOUS_SESSION_ID, value: sourcePreviousSessionId)
                 } catch {
-                    print("can't write destination PREVIOUS_SESSION_ID: \(error)")
+                    logger?.warn(message: "can't write destination PREVIOUS_SESSION_ID: \(error)")
                 }
             }
 
             do {
                 try source.write(key: StorageKey.PREVIOUS_SESSION_ID, value: nil)
             } catch {
-                print("can't clear source PREVIOUS_SESSION_ID: \(error)")
+                logger?.warn(message: "can't clear source PREVIOUS_SESSION_ID: \(error)")
             }
         }
 
@@ -78,14 +80,14 @@ class StoragePrefixMigration {
                 do {
                     try destination.write(key: StorageKey.LAST_EVENT_TIME, value: sourceLastEventTime)
                 } catch {
-                    print("can't write destination LAST_EVENT_TIME: \(error)")
+                    logger?.warn(message: "can't write destination LAST_EVENT_TIME: \(error)")
                 }
             }
 
             do {
                 try source.write(key: StorageKey.LAST_EVENT_TIME, value: nil)
             } catch {
-                print("can't clear source LAST_EVENT_TIME: \(error)")
+                logger?.warn(message: "can't clear source LAST_EVENT_TIME: \(error)")
             }
         }
 
@@ -95,14 +97,14 @@ class StoragePrefixMigration {
                 do {
                     try destination.write(key: StorageKey.LAST_EVENT_ID, value: sourceLastEventId)
                 } catch {
-                    print("can't write destination LAST_EVENT_ID: \(error)")
+                    logger?.warn(message: "can't write destination LAST_EVENT_ID: \(error)")
                 }
             }
 
             do {
                 try source.write(key: StorageKey.LAST_EVENT_ID, value: nil)
             } catch {
-                print("can't clear source LAST_EVENT_ID: \(error)")
+                logger?.warn(message: "can't clear source LAST_EVENT_ID: \(error)")
             }
         }
 
@@ -130,13 +132,13 @@ class StoragePrefixMigration {
                 do {
                     try fileManager.moveItem(atPath: sourceEventFile.path, toPath: destinationEventFile)
                 } catch {
-                    print("Can't move \(sourceEventFile) to \(destinationEventFile): \(error)")
+                    logger?.warn(message: "Can't move \(sourceEventFile) to \(destinationEventFile): \(error)")
                 }
             } else {
                 do {
                     try fileManager.removeItem(at: sourceEventFile)
                 } catch {
-                    print("Can't remove \(sourceEventFile)")
+                    logger?.warn(message: "Can't remove \(sourceEventFile)")
                 }
             }
         }
@@ -149,7 +151,7 @@ class StoragePrefixMigration {
             do {
                 try fileManager.removeItem(at: sourceEventFile)
             } catch {
-                print("Can't remove \(sourceEventFile)")
+                logger?.warn(message: "Can't remove \(sourceEventFile)")
             }
         }
     }

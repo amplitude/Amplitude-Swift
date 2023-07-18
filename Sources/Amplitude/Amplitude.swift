@@ -307,12 +307,12 @@ public class Amplitude {
     private func migrateApiKeyStorages() {
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
             let apiKeyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(configuration.apiKey)")
-            StoragePrefixMigration(source: apiKeyStorage, destination: persistentStorage).execute()
+            StoragePrefixMigration(source: apiKeyStorage, destination: persistentStorage, logger: logger).execute()
         }
 
         if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
             let apiKeyIdentifyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(configuration.apiKey)")
-            StoragePrefixMigration(source: apiKeyIdentifyStorage, destination: persistentIdentifyStorage).execute()
+            StoragePrefixMigration(source: apiKeyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
     }
 }
