@@ -32,6 +32,7 @@ public class Configuration {
     public var minTimeBetweenSessionsMillis: Int
     public var trackingSessionEvents: Bool?
     public var identifyBatchIntervalMillis: Int
+    public let migrateLegacyData: Bool
 
     public init(
         apiKey: String,
@@ -57,7 +58,8 @@ public class Configuration {
         flushEventsOnClose: Bool = true,
         minTimeBetweenSessionsMillis: Int = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS,
         trackingSessionEvents: Bool = true,
-        identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS
+        identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
+        migrateLegacyData: Bool = true
     ) {
         self.apiKey = apiKey
         self.flushQueueSize = flushQueueSize
@@ -85,6 +87,7 @@ public class Configuration {
         self.minTimeBetweenSessionsMillis = minTimeBetweenSessionsMillis
         self.trackingSessionEvents = trackingSessionEvents
         self.identifyBatchIntervalMillis = identifyBatchIntervalMillis
+        self.migrateLegacyData = migrateLegacyData
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
     }

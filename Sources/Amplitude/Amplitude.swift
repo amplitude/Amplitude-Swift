@@ -25,6 +25,10 @@ public class Amplitude {
         return self.configuration.storageProvider
     }()
 
+    lazy var identifyStorage: any Storage = {
+        return self.configuration.identifyStorageProvider
+    }()
+
     lazy var timeline: Timeline = {
         return Timeline()
     }()
@@ -46,6 +50,10 @@ public class Amplitude {
         self.contextPlugin = contextPlugin
 
         migrateApiKeyStorages()
+
+        if configuration.migrateLegacyData {
+            RemnantDataMigration(self).execute()
+        }
 
         if let deviceId: String? = configuration.storageProvider.read(key: .DEVICE_ID) {
             state.deviceId = deviceId

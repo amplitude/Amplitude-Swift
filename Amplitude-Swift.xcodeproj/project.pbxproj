@@ -22,10 +22,16 @@
 
 /* Begin PBXBuildFile section */
 		8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */; };
+		8EDEC2E0CC80DF79F5463ACC /* RemnantDataMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */; };
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
 		8EDEC972AEB33E4528F7FEEB /* StoragePrefixMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */; };
 		8EDECD602E181B3E2E85D4DF /* StoragePrefixMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */; };
+		8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */; };
 		8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
+		BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA0359C92A51585D007C383B /* legacy_v3.sqlite */; };
+		BA0639F62A4DD491000F1CEE /* LegacyDatabaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */; };
+		BA994B9A2A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */; };
+		BA994B9D2A4F4FCB00D0913F /* legacy_v4.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */; };
 		BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */; };
 		BA9BEA4D299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
@@ -104,10 +110,16 @@
 
 /* Begin PBXFileReference section */
 		8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeSessionTests.swift; sourceTree = "<group>"; };
+		8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigration.swift; sourceTree = "<group>"; };
 		8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sessions.swift; sourceTree = "<group>"; };
 		8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueueTimeTests.swift; sourceTree = "<group>"; };
 		8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigrationTests.swift; sourceTree = "<group>"; };
 		8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigration.swift; sourceTree = "<group>"; };
+		8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigrationTests.swift; sourceTree = "<group>"; };
+		BA0359C92A51585D007C383B /* legacy_v3.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v3.sqlite; sourceTree = "<group>"; };
+		BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorage.swift; sourceTree = "<group>"; };
+		BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorageTests.swift; sourceTree = "<group>"; };
+		BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v4.sqlite; sourceTree = "<group>"; };
 		BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptor.swift; sourceTree = "<group>"; };
 		BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptorTests.swift; sourceTree = "<group>"; };
 		OBJ_10 /* ConsoleLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleLogger.swift; sourceTree = "<group>"; };
@@ -196,6 +208,8 @@
 			isa = PBXGroup;
 			children = (
 				8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */,
+				BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */,
+				8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */,
 			);
 			path = Migration;
 			sourceTree = "<group>";
@@ -204,6 +218,10 @@
 			isa = PBXGroup;
 			children = (
 				8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */,
+				BA0359C92A51585D007C383B /* legacy_v3.sqlite */,
+				BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */,
+				BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */,
+				8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */,
 			);
 			path = Migration;
 			sourceTree = "<group>";
@@ -430,6 +448,7 @@
 			buildPhases = (
 				OBJ_141 /* Sources */,
 				OBJ_159 /* Frameworks */,
+				BA994B9C2A4F4FBE00D0913F /* Resources */,
 			);
 			buildRules = (
 			);
@@ -484,6 +503,18 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		BA994B9C2A4F4FBE00D0913F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BA994B9D2A4F4FCB00D0913F /* legacy_v4.sqlite in Resources */,
+				BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		OBJ_130 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -518,6 +549,8 @@
 				8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */,
 				8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */,
 				8EDEC972AEB33E4528F7FEEB /* StoragePrefixMigrationTests.swift in Sources */,
+				BA994B9A2A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift in Sources */,
+				8EDEC2E0CC80DF79F5463ACC /* RemnantDataMigrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -551,6 +584,7 @@
 				OBJ_111 /* InMemoryStorage.swift in Sources */,
 				OBJ_112 /* PersistentStorage.swift in Sources */,
 				BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */,
+				BA0639F62A4DD491000F1CEE /* LegacyDatabaseStorage.swift in Sources */,
 				OBJ_113 /* Timeline.swift in Sources */,
 				OBJ_114 /* TrackingOptions.swift in Sources */,
 				OBJ_115 /* Types.swift in Sources */,
@@ -564,6 +598,7 @@
 				OBJ_124 /* UrlExtension.swift in Sources */,
 				8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */,
 				8EDECD602E181B3E2E85D4DF /* StoragePrefixMigration.swift in Sources */,
+				8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
