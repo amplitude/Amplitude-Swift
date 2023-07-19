@@ -47,7 +47,7 @@ public class EventOptions {
     public var partnerId: String?
     internal var attempts: Int
 
-    init(
+    public init(
         userId: String? = nil,
         deviceId: String? = nil,
         timestamp: Int64? = nil,

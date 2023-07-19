@@ -49,8 +49,17 @@ public class Amplitude {
         let contextPlugin = ContextPlugin()
         self.contextPlugin = contextPlugin
 
+        migrateApiKeyStorages()
+
         if configuration.migrateLegacyData {
             RemnantDataMigration(self).execute()
+        }
+
+        if let deviceId: String? = configuration.storageProvider.read(key: .DEVICE_ID) {
+            state.deviceId = deviceId
+        }
+        if let userId: String? = configuration.storageProvider.read(key: .USER_ID) {
+            state.userId = userId
         }
 
         // required plugin for specific platform, only has lifecyclePlugin now
@@ -300,6 +309,18 @@ public class Amplitude {
         sessions.lastEventTime = timestamp
         if configuration.flushEventsOnClose == true {
             _ = self.flush()
+        }
+    }
+
+    private func migrateApiKeyStorages() {
+        if let persistentStorage = configuration.storageProvider as? PersistentStorage {
+            let apiKeyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(configuration.apiKey)")
+            StoragePrefixMigration(source: apiKeyStorage, destination: persistentStorage, logger: logger).execute()
+        }
+
+        if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
+            let apiKeyIdentifyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(configuration.apiKey)")
+            StoragePrefixMigration(source: apiKeyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
     }
 }

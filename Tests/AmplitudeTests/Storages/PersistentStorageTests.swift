@@ -11,7 +11,7 @@ import XCTest
 
 final class PersistentStorageTests: XCTestCase {
     func testIsBasicType() {
-        let persistentStorage = PersistentStorage(apiKey: "")
+        let persistentStorage = PersistentStorage(storagePrefix: "storage")
         var isValueBasicType = persistentStorage.isBasicType(value: 111)
         XCTAssertEqual(isValueBasicType, true)
 
@@ -35,7 +35,7 @@ final class PersistentStorageTests: XCTestCase {
     }
 
     func testWrite() {
-        let persistentStorage = PersistentStorage(apiKey: "xxx-api-key")
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance")
         try? persistentStorage.write(
             key: StorageKey.EVENTS,
             value: BaseEvent(eventType: "test1")
@@ -45,7 +45,7 @@ final class PersistentStorageTests: XCTestCase {
             value: BaseEvent(eventType: "test2")
         )
         let eventFiles: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
-        XCTAssertEqual(eventFiles?[0].absoluteString.contains("xxx-api-key.events.index"), true)
+        XCTAssertEqual(eventFiles?[0].absoluteString.contains("xxx-instance.events.index"), true)
         XCTAssertNotEqual(eventFiles?[0].pathExtension, PersistentStorage.TEMP_FILE_EXTENSION)
         persistentStorage.reset()
     }

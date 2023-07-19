@@ -24,6 +24,8 @@
 		8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */; };
 		8EDEC2E0CC80DF79F5463ACC /* RemnantDataMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */; };
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
+		8EDEC972AEB33E4528F7FEEB /* StoragePrefixMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */; };
+		8EDECD602E181B3E2E85D4DF /* StoragePrefixMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */; };
 		8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */; };
 		8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
 		BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA0359C92A51585D007C383B /* legacy_v3.sqlite */; };
@@ -111,6 +113,8 @@
 		8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigration.swift; sourceTree = "<group>"; };
 		8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sessions.swift; sourceTree = "<group>"; };
 		8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueueTimeTests.swift; sourceTree = "<group>"; };
+		8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigrationTests.swift; sourceTree = "<group>"; };
+		8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigration.swift; sourceTree = "<group>"; };
 		8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigrationTests.swift; sourceTree = "<group>"; };
 		BA0359C92A51585D007C383B /* legacy_v3.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v3.sqlite; sourceTree = "<group>"; };
 		BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorage.swift; sourceTree = "<group>"; };
@@ -200,18 +204,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		BA0639F42A4DD46E000F1CEE /* Migration */ = {
+		8EDEC33A32439724A363C433 /* Migration */ = {
 			isa = PBXGroup;
 			children = (
+				8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */,
 				BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */,
 				8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */,
 			);
 			path = Migration;
 			sourceTree = "<group>";
 		};
-		BA994B972A4F484E00D0913F /* Migration */ = {
+		8EDECBC5925DC68913C7CB89 /* Migration */ = {
 			isa = PBXGroup;
 			children = (
+				8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */,
 				BA0359C92A51585D007C383B /* legacy_v3.sqlite */,
 				BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */,
 				BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */,
@@ -307,7 +313,7 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
-		OBJ_5 = {
+		OBJ_5 /*  */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -320,12 +326,12 @@
 				OBJ_81 /* CONTRIBUTING.md */,
 				OBJ_82 /* AmplitudeSwift.podspec */,
 			);
+			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_53 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				BA994B972A4F484E00D0913F /* Migration */,
 				OBJ_54 /* AmplitudeTests.swift */,
 				OBJ_55 /* ConfigurationTests.swift */,
 				OBJ_56 /* ConsoleLoggerTests.swift */,
@@ -336,6 +342,7 @@
 				OBJ_69 /* TypesTests.swift */,
 				OBJ_70 /* Utilities */,
 				8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */,
+				8EDECBC5925DC68913C7CB89 /* Migration */,
 			);
 			name = Tests;
 			path = Tests/AmplitudeTests;
@@ -373,7 +380,6 @@
 		OBJ_7 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				BA0639F42A4DD46E000F1CEE /* Migration */,
 				OBJ_8 /* Amplitude.swift */,
 				OBJ_9 /* Configuration.swift */,
 				OBJ_10 /* ConsoleLogger.swift */,
@@ -389,6 +395,7 @@
 				OBJ_42 /* Types.swift */,
 				OBJ_43 /* Utilities */,
 				8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */,
+				8EDEC33A32439724A363C433 /* Migration */,
 			);
 			name = Sources;
 			path = Sources/Amplitude;
@@ -483,7 +490,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5;
+			mainGroup = OBJ_5 /*  */;
 			productRefGroup = OBJ_75 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -541,6 +548,7 @@
 				OBJ_158 /* UrlExtensionTests.swift in Sources */,
 				8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */,
 				8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */,
+				8EDEC972AEB33E4528F7FEEB /* StoragePrefixMigrationTests.swift in Sources */,
 				BA994B9A2A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift in Sources */,
 				8EDEC2E0CC80DF79F5463ACC /* RemnantDataMigrationTests.swift in Sources */,
 			);
@@ -589,6 +597,7 @@
 				OBJ_122 /* QueueTimer.swift in Sources */,
 				OBJ_124 /* UrlExtension.swift in Sources */,
 				8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */,
+				8EDECD602E181B3E2E85D4DF /* StoragePrefixMigration.swift in Sources */,
 				8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

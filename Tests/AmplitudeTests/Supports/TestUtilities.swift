@@ -224,6 +224,11 @@ class FakePersistentStorage: PersistentStorage {
     override func write(key: StorageKey, value: Any?) throws {
         haveBeenCalledWith.append("write(key: \(key.rawValue), \(String(describing: value!)))")
     }
+
+    override func read<T>(key: StorageKey) -> T? {
+        haveBeenCalledWith.append("read(key: \(key.rawValue))")
+        return nil
+    }
 }
 
 class TestPersistentStorage: PersistentStorage {

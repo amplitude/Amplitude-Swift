@@ -19,9 +19,9 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        configuration = Configuration(apiKey: "testApiKey")
+        storage = PersistentStorage(storagePrefix: "storage")
+        configuration = Configuration(apiKey: "testApiKey", storageProvider: storage)
         amplitude = Amplitude(configuration: configuration)
-        storage = PersistentStorage(apiKey: "testApiKey")
         eventPipeline = EventPipeline(amplitude: amplitude)
         eventBlock = URL(string: "test")
     }
@@ -50,7 +50,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
               {"event_type":"test","insert_id":"c8d58999-7539-4184-8a7d-54302697baf0","user_id":"test-user"}
             ]
             """
-        let fakePersistentStorage = FakePersistentStorage(apiKey: "testApiKey")
+        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage")
         let handler = PersistentStorageResponseHandler(
             configuration: configuration,
             storage: fakePersistentStorage,
@@ -83,7 +83,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             ]
             """
 
-        let fakePersistentStorage = FakePersistentStorage(apiKey: "testApiKey")
+        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage")
         let handler = PersistentStorageResponseHandler(
             configuration: configuration,
             storage: fakePersistentStorage,
@@ -108,7 +108,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             ]
             """
 
-        let fakePersistentStorage = FakePersistentStorage(apiKey: "testApiKey")
+        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage")
         let handler = PersistentStorageResponseHandler(
             configuration: configuration,
             storage: fakePersistentStorage,
