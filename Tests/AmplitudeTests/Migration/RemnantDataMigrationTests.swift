@@ -44,8 +44,8 @@ final class RemnantDataMigrationTests: XCTestCase {
         let configuration = Configuration(
             apiKey: apiKey,
             instanceName: instanceName,
-            storageProvider: PersistentStorage(apiKey: apiKey, storagePrefix: "\(instanceName)-default"),
-            identifyStorageProvider: PersistentStorage(apiKey: apiKey, storagePrefix: "\(instanceName)-identify"),
+            storageProvider: PersistentStorage(storagePrefix: "\(instanceName)-default"),
+            identifyStorageProvider: PersistentStorage(storagePrefix: "\(instanceName)-identify"),
             migrateLegacyData: migrateLegacyData
         )
         let amplitude = Amplitude(configuration: configuration)

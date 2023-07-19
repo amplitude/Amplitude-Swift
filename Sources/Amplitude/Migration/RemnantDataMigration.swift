@@ -31,40 +31,43 @@ class RemnantDataMigration {
         }
 
         if maxEventId > 0 {
-            let currentLastEventId = amplitude.sessions.lastEventId
-            if currentLastEventId <= 0 {
-                amplitude.sessions.lastEventId = maxEventId
+            let currentLastEventId: Int64? = amplitude.storage.read(key: StorageKey.LAST_EVENT_ID)
+            if currentLastEventId == nil || currentLastEventId! <= 0 {
+                try? amplitude.storage.write(key: StorageKey.LAST_EVENT_ID, value: maxEventId)
             }
         }
     }
 
     private func moveDeviceAndUserId() {
-        let deviceId = storage.getValue(RemnantDataMigration.DEVICE_ID_KEY)
-        let userId = storage.getValue(RemnantDataMigration.USER_ID_KEY)
-
-        if deviceId != nil {
-            amplitude.setDeviceId(deviceId: deviceId)
+        let currentDeviceId: String? = amplitude.storage.read(key: StorageKey.DEVICE_ID)
+        if currentDeviceId == nil || currentDeviceId! == "" {
+            if let deviceId = storage.getValue(RemnantDataMigration.DEVICE_ID_KEY) {
+                try? amplitude.storage.write(key: StorageKey.DEVICE_ID, value: deviceId)
+            }
         }
 
-        if userId != nil {
-            amplitude.setUserId(userId: userId)
+        let currentUserId: String? = amplitude.storage.read(key: StorageKey.USER_ID)
+        if currentUserId == nil || currentUserId == "" {
+            if let userId = storage.getValue(RemnantDataMigration.USER_ID_KEY) {
+                try? amplitude.storage.write(key: StorageKey.USER_ID, value: userId)
+            }
         }
     }
 
     private func moveSessionData() {
-        let currentSessionId = amplitude.sessions.sessionId
-        let currentLastEventTime = amplitude.sessions.lastEventTime
+        let currentSessionId: Int64? = amplitude.storage.read(key: StorageKey.PREVIOUS_SESSION_ID)
+        let currentLastEventTime: Int64? = amplitude.storage.read(key: StorageKey.LAST_EVENT_TIME)
 
         let previousSessionId = storage.getLongValue(RemnantDataMigration.PREVIOUS_SESSION_ID_KEY)
         let lastEventTime = storage.getLongValue(RemnantDataMigration.PREVIOUS_SESSION_TIME_KEY)
 
-        if currentSessionId < 0 && previousSessionId != nil && previousSessionId! >= 0 {
-            amplitude.sessions.sessionId = previousSessionId!
+        if (currentSessionId == nil || currentSessionId! < 0) && previousSessionId != nil && previousSessionId! >= 0 {
+            try? amplitude.storage.write(key: StorageKey.PREVIOUS_SESSION_ID, value: previousSessionId)
             storage.removeLongValue(RemnantDataMigration.PREVIOUS_SESSION_ID_KEY)
         }
 
-        if currentLastEventTime < 0 && lastEventTime != nil && lastEventTime! >= 0 {
-            amplitude.sessions.lastEventTime = lastEventTime!
+        if (currentLastEventTime == nil || currentLastEventTime! < 0) && lastEventTime != nil && lastEventTime! >= 0 {
+            try? amplitude.storage.write(key: StorageKey.LAST_EVENT_TIME, value: lastEventTime)
             storage.removeLongValue(RemnantDataMigration.PREVIOUS_SESSION_TIME_KEY)
         }
     }
