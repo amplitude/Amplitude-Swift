@@ -1,3 +1,12 @@
+## [0.4.7](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.6...v0.4.7) (2023-07-19)
+
+
+### Bug Fixes
+
+* made EventOptions.init public ([#64](https://github.com/amplitude/Amplitude-Swift/issues/64)) ([74992ce](https://github.com/amplitude/Amplitude-Swift/commit/74992cee7c10d8bde20aaf1a17f5f02611359d4e))
+* migrate 'api key' storage data to 'instance name' storage ([#63](https://github.com/amplitude/Amplitude-Swift/issues/63)) ([9199039](https://github.com/amplitude/Amplitude-Swift/commit/919903905f237d845fc7fd22266b0cb93bbbec4b))
+* migrate legacy data ([#62](https://github.com/amplitude/Amplitude-Swift/issues/62)) ([d1c6b32](https://github.com/amplitude/Amplitude-Swift/commit/d1c6b324a155681d9326ecf1806da44768de557f))
+
 ## [0.4.6](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.5...v0.4.6) (2023-06-07)
 
 
