@@ -9,13 +9,17 @@ import Foundation
 
 class HttpClient {
     let configuration: Configuration
-    internal var session: URLSession
+    internal let session: URLSession
 
     init(configuration: Configuration) {
         self.configuration = configuration
-        // shared instance has limitations but think we are not affected
-        // https://developer.apple.com/documentation/foundation/urlsession/1409000-shared
-        self.session = URLSession.shared
+        // an exclusive ephemeral session avoids contention (fewer request timeouts)
+        let sessionConfiguration = URLSessionConfiguration.ephemeral
+        // add some throughput
+        sessionConfiguration.httpMaximumConnectionsPerHost = 2
+        // avoid keeping app background task alive for too long
+        sessionConfiguration.timeoutIntervalForRequest = 20
+        self.session = URLSession(configuration: sessionConfiguration)
     }
 
     func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {

@@ -62,15 +62,19 @@ public class EventPipeline {
                 if eventsString.isEmpty {
                     continue
                 }
-                let uploadTask = httpClient.upload(events: eventsString) { [weak self] result in
+                let backgroundRequestCompletion = VendorSystem.current.beginBackgroundRequest()
+                // A strong self is fine here as self will only be retained for the duration of
+                // the upload task (and self is needed to perform end of task cleanup)
+                let uploadTask = httpClient.upload(events: eventsString) { result in
                     let responseHandler = storage.getResponseHandler(
-                        configuration: self!.amplitude.configuration,
-                        eventPipeline: self!,
+                        configuration: self.amplitude.configuration,
+                        eventPipeline: self,
                         eventBlock: eventFile,
                         eventsString: eventsString
                     )
                     responseHandler.handle(result: result)
-                    self?.cleanupUploads()
+                    self.cleanupUploads()
+                    backgroundRequestCompletion?(result)
                 }
                 if let upload = uploadTask {
                     add(uploadTask: UploadTaskInfo(events: eventsString, task: upload))
