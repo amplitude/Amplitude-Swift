@@ -147,7 +147,7 @@ public class BaseEvent: EventOptions, Codable {
         )
     }
 
-    func mergeEventOptions(eventOptions: EventOptions) {
+    public func mergeEventOptions(eventOptions: EventOptions) {
         userId = eventOptions.userId ?? userId
         deviceId = eventOptions.deviceId ?? deviceId
         timestamp = eventOptions.timestamp ?? timestamp
