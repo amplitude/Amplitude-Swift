@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "amplitude-swift::Amplitude-Swift"
-               BuildableName = "Amplitude_Swift.framework"
+               BuildableName = "AmplitudeSwift.framework"
                BlueprintName = "Amplitude-Swift"
                ReferencedContainer = "container:Amplitude-Swift.xcodeproj">
             </BuildableReference>

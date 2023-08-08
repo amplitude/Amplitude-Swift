@@ -783,7 +783,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3,4";
-				TARGET_NAME = "Amplitude-Swift";
+				TARGET_NAME = "AmplitudeSwift";
 				TVOS_DEPLOYMENT_TARGET = 13.0;
 				WATCHOS_DEPLOYMENT_TARGET = 7.0;
 			};
@@ -817,7 +817,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3,4";
-				TARGET_NAME = "Amplitude-Swift";
+				TARGET_NAME = "AmplitudeSwift";
 				TVOS_DEPLOYMENT_TARGET = 13.0;
 				WATCHOS_DEPLOYMENT_TARGET = 7.0;
 			};
