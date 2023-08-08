@@ -7,7 +7,7 @@
 
 import XCTest
 
-@testable import Amplitude_Swift
+@testable import AmplitudeSwift
 
 // swiftlint:disable force_cast
 final class RevenueTests: XCTestCase {

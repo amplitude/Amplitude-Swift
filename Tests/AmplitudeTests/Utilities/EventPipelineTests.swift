@@ -7,7 +7,7 @@
 
 import XCTest
 
-@testable import Amplitude_Swift
+@testable import AmplitudeSwift
 
 final class EventPipelineTests: XCTestCase {
     private static let FLUSH_INTERVAL_SECONDS = 1.0

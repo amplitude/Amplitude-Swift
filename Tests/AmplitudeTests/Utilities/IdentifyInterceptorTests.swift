@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import Amplitude_Swift
+@testable import AmplitudeSwift
 
 final class IdentifyInterceptorTests: XCTestCase {
     private static let IDENTIFY_UPLOAD_INTERVAL_SECONDS = 1.5
