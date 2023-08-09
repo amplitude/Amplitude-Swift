@@ -1,3 +1,11 @@
+## [0.4.8](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.7...v0.4.8) (2023-08-09)
+
+
+### Bug Fixes
+
+* make 'mergeEventOptions' public ([#67](https://github.com/amplitude/Amplitude-Swift/issues/67)) ([5a946f7](https://github.com/amplitude/Amplitude-Swift/commit/5a946f7c0d8632a16a5838afb80cc1e0c4e7831c))
+* normalize package names for all package managers ([#69](https://github.com/amplitude/Amplitude-Swift/issues/69)) ([251ebdf](https://github.com/amplitude/Amplitude-Swift/commit/251ebdf602e90957ececd06a4d82925fc2b8d3b6))
+
 ## [0.4.7](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.6...v0.4.7) (2023-07-19)
 
 
