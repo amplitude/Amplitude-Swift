@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 
-@testable import Amplitude_Swift
+@testable import AmplitudeSwift
 
 class TestEnrichmentPlugin: Plugin {
     let type: PluginType

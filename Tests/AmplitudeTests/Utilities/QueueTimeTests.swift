@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import Amplitude_Swift
+@testable import AmplitudeSwift
 
 final class QueueTimerTests: XCTestCase {
     func testRepeat() {

@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 
-@testable import Amplitude_Swift
+@testable import AmplitudeSwift
 
 final class TimelineTests: XCTestCase {
     private var timeline: Timeline!

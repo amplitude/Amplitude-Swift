@@ -7,7 +7,7 @@
 
 import XCTest
 
-@testable import Amplitude_Swift
+@testable import AmplitudeSwift
 
 final class HttpClientTests: XCTestCase {
     private var configuration: Configuration!
