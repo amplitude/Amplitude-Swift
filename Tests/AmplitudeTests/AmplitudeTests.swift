@@ -40,7 +40,16 @@ final class AmplitudeTests: XCTestCase {
         )
     }
 
-    func testInit() {
+    func testInit_defaultInstanceName() {
+        let configuration = Configuration(apiKey: "api-key")
+        XCTAssertEqual(
+            Amplitude(configuration: configuration).configuration.instanceName,
+            Constants.Configuration.DEFAULT_INSTANCE
+        )
+    }
+
+    func testInit_emptyInstanceName() {
+        let configuration = Configuration(apiKey: "api-key", instanceName: "")
         XCTAssertEqual(
             Amplitude(configuration: configuration).configuration.instanceName,
             Constants.Configuration.DEFAULT_INSTANCE
