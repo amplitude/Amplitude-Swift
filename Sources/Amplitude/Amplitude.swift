@@ -176,8 +176,10 @@ public class Amplitude {
         groupName: String,
         options: EventOptions? = nil
     ) -> Amplitude {
+        let identify = Identify().set(property: groupType, value: groupName)
         let event = IdentifyEvent()
         event.groups = [groupType: groupName]
+        event.userProperties = identify.properties
         track(event: event, options: options)
         return self
     }
@@ -188,8 +190,10 @@ public class Amplitude {
         groupName: [String],
         options: EventOptions? = nil
     ) -> Amplitude {
+        let identify = Identify().set(property: groupType, value: groupName)
         let event = IdentifyEvent()
         event.groups = [groupType: groupName]
+        event.userProperties = identify.properties
         track(event: event, options: options)
         return self
     }
