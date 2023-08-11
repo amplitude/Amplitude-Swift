@@ -1,3 +1,10 @@
+## [0.4.10](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.9...v0.4.10) (2023-08-11)
+
+
+### Bug Fixes
+
+* move mergeEventOptions() function to EventOptions class ([#72](https://github.com/amplitude/Amplitude-Swift/issues/72)) ([7a78576](https://github.com/amplitude/Amplitude-Swift/commit/7a78576c5a307605de4c607dfb2e991391a2bf00))
+
 ## [0.4.9](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.8...v0.4.9) (2023-08-11)
 
 
