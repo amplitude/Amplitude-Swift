@@ -8,13 +8,13 @@
 import Foundation
 
 public class Configuration {
-    public var apiKey: String
+    public internal(set) var apiKey: String
     public var flushQueueSize: Int
     public var flushIntervalMillis: Int
-    public var instanceName: String
+    public let instanceName: String
     public var optOut: Bool
-    public var storageProvider: any Storage
-    public var identifyStorageProvider: any Storage
+    public let storageProvider: any Storage
+    public let identifyStorageProvider: any Storage
     public var logLevel: LogLevelEnum
     public var loggerProvider: any Logger
     public var minIdLength: Int?
@@ -38,7 +38,7 @@ public class Configuration {
         apiKey: String,
         flushQueueSize: Int = Constants.Configuration.FLUSH_QUEUE_SIZE,
         flushIntervalMillis: Int = Constants.Configuration.FLUSH_INTERVAL_MILLIS,
-        instanceName: String = Constants.Configuration.DEFAULT_INSTANCE,
+        instanceName: String = "",
         optOut: Bool = false,
         storageProvider: (any Storage)? = nil,
         identifyStorageProvider: (any Storage)? = nil,
@@ -61,15 +61,17 @@ public class Configuration {
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
         migrateLegacyData: Bool = true
     ) {
+        let normalizedInstanceName = instanceName == "" ? Constants.Configuration.DEFAULT_INSTANCE : instanceName
+
         self.apiKey = apiKey
         self.flushQueueSize = flushQueueSize
         self.flushIntervalMillis = flushIntervalMillis
-        self.instanceName = instanceName
+        self.instanceName = normalizedInstanceName
         self.optOut = optOut
         self.storageProvider = storageProvider
-            ?? PersistentStorage(storagePrefix: "storage-\(instanceName)")
+            ?? PersistentStorage(storagePrefix: "storage-\(normalizedInstanceName)")
         self.identifyStorageProvider = identifyStorageProvider
-            ?? PersistentStorage(storagePrefix: "identify-\(instanceName)")
+            ?? PersistentStorage(storagePrefix: "identify-\(normalizedInstanceName)")
         self.logLevel = logLevel
         self.loggerProvider = loggerProvider
         self.minIdLength = minIdLength
