@@ -188,7 +188,8 @@ final class AmplitudeTests: XCTestCase {
 
         let e2 = events[1]
         XCTAssertEqual(e2.eventType, "$identify")
-        XCTAssertNil(e2.userProperties)
+        XCTAssertNotNil(e2.userProperties)
+        XCTAssertTrue(getDictionary(e2.userProperties!).isEqual(to: ["$set": ["group-type": "group-name"]]))
         XCTAssertNotNil(e2.groups)
         XCTAssertTrue(getDictionary(e2.groups!).isEqual(to: ["group-type": "group-name"]))
 
