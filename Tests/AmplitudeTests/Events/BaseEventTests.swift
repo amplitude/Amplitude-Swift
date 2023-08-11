@@ -216,7 +216,7 @@ final class BaseEventTests: XCTestCase {
         )
     }
 
-    func testMergeEventOptions() {
+    func testMergeEventOptionsToEvent() {
         let event = BaseEvent(
             userId: "userId-event",
             deviceId: "deviceId-event",
@@ -240,6 +240,30 @@ final class BaseEventTests: XCTestCase {
         XCTAssertEqual(event.country, "country-options")
         XCTAssertEqual(event.city, "city-options")
         XCTAssertEqual(event.eventType, "eventType-event")
+    }
+
+    func testMergeEventOptionsToOptions() {
+        let options = EventOptions(
+            userId: "userId",
+            deviceId: "deviceId",
+            sessionId: 111,
+            city: "city"
+        )
+
+        let sourceOptions = EventOptions(
+            userId: "userId-options",
+            sessionId: -1,
+            country: "country-options",
+            city: "city-options"
+        )
+
+        options.mergeEventOptions(eventOptions: sourceOptions)
+
+        XCTAssertEqual(options.userId, "userId-options")
+        XCTAssertEqual(options.deviceId, "deviceId")
+        XCTAssertEqual(options.sessionId, -1)
+        XCTAssertEqual(options.country, "country-options")
+        XCTAssertEqual(options.city, "city-options")
     }
 }
 // swiftlint:enable force_cast
