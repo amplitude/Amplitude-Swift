@@ -1,3 +1,10 @@
+## [0.4.9](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.8...v0.4.9) (2023-08-11)
+
+
+### Bug Fixes
+
+* setGroup() should set event.userProperties ([#70](https://github.com/amplitude/Amplitude-Swift/issues/70)) ([109f33c](https://github.com/amplitude/Amplitude-Swift/commit/109f33cce36459f7359192e751704e23be496822))
+
 ## [0.4.8](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.7...v0.4.8) (2023-08-09)
 
 
