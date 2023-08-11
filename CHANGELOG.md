@@ -1,3 +1,10 @@
+## [0.4.11](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.10...v0.4.11) (2023-08-11)
+
+
+### Bug Fixes
+
+* normalize explicit empty instance name ([#71](https://github.com/amplitude/Amplitude-Swift/issues/71)) ([ac60e5e](https://github.com/amplitude/Amplitude-Swift/commit/ac60e5e38e30729782ace2242ec7b9a215d6f871))
+
 ## [0.4.10](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.9...v0.4.10) (2023-08-11)
 
 
