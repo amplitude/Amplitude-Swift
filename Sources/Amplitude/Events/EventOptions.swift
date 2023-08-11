@@ -126,4 +126,44 @@ public class EventOptions {
         self.partnerId = partnerId
         self.attempts = attempts
     }
+
+    public func mergeEventOptions(eventOptions: EventOptions) {
+        userId = eventOptions.userId ?? userId
+        deviceId = eventOptions.deviceId ?? deviceId
+        timestamp = eventOptions.timestamp ?? timestamp
+        eventId = eventOptions.eventId ?? eventId
+        sessionId = eventOptions.sessionId ?? sessionId
+        insertId = eventOptions.insertId ?? insertId
+        locationLat = eventOptions.locationLat ?? locationLat
+        locationLng = eventOptions.locationLng ?? locationLng
+        appVersion = eventOptions.appVersion ?? appVersion
+        versionName = eventOptions.versionName ?? versionName
+        platform = eventOptions.platform ?? platform
+        osName = eventOptions.osName ?? osName
+        osVersion = eventOptions.osVersion ?? osVersion
+        deviceBrand = eventOptions.deviceBrand ?? deviceBrand
+        deviceManufacturer = eventOptions.deviceManufacturer ?? deviceManufacturer
+        deviceModel = eventOptions.deviceModel ?? deviceModel
+        carrier = eventOptions.carrier ?? carrier
+        country = eventOptions.country ?? country
+        region = eventOptions.region ?? region
+        city = eventOptions.city ?? city
+        dma = eventOptions.dma ?? dma
+        idfa = eventOptions.idfa ?? idfa
+        idfv = eventOptions.idfv ?? idfv
+        adid = eventOptions.adid ?? adid
+        language = eventOptions.language ?? language
+        library = eventOptions.library ?? library
+        ip = eventOptions.ip ?? ip
+        plan = eventOptions.plan ?? plan
+        ingestionMetadata = eventOptions.ingestionMetadata ?? ingestionMetadata
+        revenue = eventOptions.revenue ?? revenue
+        price = eventOptions.price ?? price
+        quantity = eventOptions.quantity ?? quantity
+        productId = eventOptions.productId ?? productId
+        revenueType = eventOptions.revenueType ?? revenueType
+        extra = eventOptions.extra ?? extra
+        callback = eventOptions.callback ?? callback
+        partnerId = eventOptions.partnerId ?? partnerId
+    }
 }
