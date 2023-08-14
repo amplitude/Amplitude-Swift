@@ -28,22 +28,19 @@
         ) {}
     }
 
-    class IOSLifecycleMonitor: Plugin {
-        weak var amplitude: Amplitude?
-
-        let type = PluginType.utility
-
+    class IOSLifecycleMonitor: UtilityPlugin {
         private var application: UIApplication?
         private var appNotifications: [NSNotification.Name] = [
             UIApplication.didEnterBackgroundNotification,
             UIApplication.willEnterForegroundNotification,
         ]
 
-        required init() {
+        override init() {
             // TODO: Check if lifecycle plugin works for app extension
             // App extensions can't use UIAppication.shared, so
             // funnel it through something to check; Could be nil.
             application = UIApplication.value(forKeyPath: "sharedApplication") as? UIApplication
+            super.init()
             setupListeners()
         }
 

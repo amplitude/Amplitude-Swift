@@ -10,17 +10,15 @@ import CoreTelephony
 #endif
 import Foundation
 
-class ContextPlugin: Plugin {
-    var type: PluginType = PluginType.before
-    public weak var amplitude: Amplitude?
+class ContextPlugin: BeforePlugin {
     internal static var device = VendorSystem.current
 
-    func setup(amplitude: Amplitude) {
-        self.amplitude = amplitude
+    override func setup(amplitude: Amplitude) {
+        super.setup(amplitude: amplitude)
         initializeDeviceId()
     }
 
-    func execute(event: BaseEvent?) -> BaseEvent? {
+    override func execute(event: BaseEvent?) -> BaseEvent? {
         guard let workingEvent = event else { return event }
 
         let context = staticContext

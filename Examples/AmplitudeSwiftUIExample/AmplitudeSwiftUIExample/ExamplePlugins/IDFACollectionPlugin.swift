@@ -21,10 +21,7 @@ import SwiftUI
 /// Upon completion of user entry a track event is issued showing the choice user made.
 ///
 /// Don't forget to add "NSUserTrackingUsageDescription" with a description to your Info.plist.
-class IDFACollectionPlugin: Plugin {
-    let type = PluginType.enrichment
-    weak var amplitude: Amplitude? = nil
-
+class IDFACollectionPlugin: EnrichmentPlugin {
     func execute(event: BaseEvent?) -> BaseEvent? {
         let status = ATTrackingManager.trackingAuthorizationStatus
         var idfa = fallbackValue

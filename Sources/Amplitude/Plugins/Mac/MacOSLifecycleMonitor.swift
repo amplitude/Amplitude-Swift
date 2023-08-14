@@ -20,12 +20,7 @@
         public func applicationWillResignActive() {}
     }
 
-    class MacOSLifecycleMonitor: Plugin {
-
-        weak var amplitude: Amplitude?
-
-        let type = PluginType.utility
-
+    class MacOSLifecycleMonitor: UtilityPlugin {
         private var application: NSApplication
         private var appNotifications: [NSNotification.Name] =
             [
@@ -33,8 +28,9 @@
                 NSApplication.willResignActiveNotification,
             ]
 
-        required init() {
+        override init() {
             self.application = NSApplication.shared
+            super.init()
             setupListeners()
         }
 

@@ -104,16 +104,15 @@ public enum PluginType: String, CaseIterable {
 
 public protocol Plugin: AnyObject {
     var type: PluginType { get }
-    var amplitude: Amplitude? { get set }
     func setup(amplitude: Amplitude)
     func execute(event: BaseEvent?) -> BaseEvent?
 }
 
 public protocol EventPlugin: Plugin {
-    func track(event: BaseEvent) -> BaseEvent?
-    func identify(event: IdentifyEvent) -> IdentifyEvent?
-    func groupIdentify(event: GroupIdentifyEvent) -> GroupIdentifyEvent?
-    func revenue(event: RevenueEvent) -> RevenueEvent?
+    func track(event: BaseEvent)
+    func identify(event: IdentifyEvent)
+    func groupIdentify(event: GroupIdentifyEvent)
+    func revenue(event: RevenueEvent)
     func flush()
 }
 
@@ -124,7 +123,6 @@ extension Plugin {
     }
 
     public func setup(amplitude: Amplitude) {
-        self.amplitude = amplitude
     }
 }
 

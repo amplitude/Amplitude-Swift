@@ -22,24 +22,20 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
         }
     }
 
-    public override func track(event: BaseEvent) -> BaseEvent? {
+    public override func track(event: BaseEvent) {
         enqueue(event: event)
-        return event
     }
 
-    public override func identify(event: IdentifyEvent) -> IdentifyEvent? {
+    public override func identify(event: IdentifyEvent) {
         enqueue(event: event)
-        return event
     }
 
-    public override func groupIdentify(event: GroupIdentifyEvent) -> GroupIdentifyEvent? {
+    public override func groupIdentify(event: GroupIdentifyEvent) {
         enqueue(event: event)
-        return event
     }
 
-    public override func revenue(event: RevenueEvent) -> RevenueEvent? {
+    public override func revenue(event: RevenueEvent) {
         enqueue(event: event)
-        return event
     }
 
     public override func flush() {
@@ -48,7 +44,7 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
     }
 
     public override func setup(amplitude: Amplitude) {
-        self.amplitude = amplitude
+        super.setup(amplitude: amplitude)
         pipeline = EventPipeline(amplitude: amplitude)
         identifyInterceptor = IdentifyInterceptor(
             configuration: amplitude.configuration,
@@ -57,9 +53,5 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
         pipeline?.start()
 
         add(plugin: IdentityEventSender())
-    }
-
-    public override func execute(event: BaseEvent?) -> BaseEvent? {
-        return event
     }
 }

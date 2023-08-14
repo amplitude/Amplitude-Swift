@@ -20,10 +20,7 @@
         public func applicationDidEnterBackground(watchExtension: WKExtension) {}
     }
 
-    class WatchOSLifecycleMonitor: Plugin {
-        weak var amplitude: Amplitude?
-
-        let type = PluginType.utility
+    class WatchOSLifecycleMonitor: UtilityPlugin {
         var wasBackgrounded: Bool = false
 
         private var watchExtension = WKExtension.shared()
@@ -32,8 +29,9 @@
             WKExtension.applicationDidEnterBackgroundNotification,
         ]
 
-        required init() {
+        override init() {
             watchExtension = WKExtension.shared()
+            super.init()
             setupListeners()
         }
 

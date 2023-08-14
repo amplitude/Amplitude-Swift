@@ -24,17 +24,17 @@ internal class Mediator {
         plugins.forEach { plugin in
             if let r = result {
                 if let p = plugin as? DestinationPlugin {
-                    _ = p.process(event: r)
+                    _ = p.execute(event: r)
                 } else if let p = plugin as? EventPlugin {
                     if let rr = result {
                         if let identifyEvent = rr as? IdentifyEvent {
-                            result = p.identify(event: identifyEvent)
+                            p.identify(event: identifyEvent)
                         } else if let groupIdentifyEvent = rr as? GroupIdentifyEvent {
-                            result = p.groupIdentify(event: groupIdentifyEvent)
+                            p.groupIdentify(event: groupIdentifyEvent)
                         } else if let revenueEvent = rr as? RevenueEvent {
-                            result = p.revenue(event: revenueEvent)
+                            p.revenue(event: revenueEvent)
                         } else {
-                            result = p.track(event: rr)
+                            p.track(event: rr)
                         }
                     }
                 } else {

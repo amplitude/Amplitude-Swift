@@ -3,21 +3,14 @@ import XCTest
 
 @testable import AmplitudeSwift
 
-class TestEnrichmentPlugin: Plugin {
-    let type: PluginType
-    var amplitude: Amplitude?
+class TestEnrichmentPlugin: EnrichmentPlugin {
     let trackCompletion: (() -> Bool)?
 
     init(trackCompletion: (() -> Bool)? = nil) {
-        self.type = PluginType.enrichment
         self.trackCompletion = trackCompletion
     }
 
-    func setup(amplitude: Amplitude) {
-        self.amplitude = amplitude
-    }
-
-    func execute(event: BaseEvent?) -> BaseEvent? {
+    override func execute(event: BaseEvent?) -> BaseEvent? {
         var returnEvent: BaseEvent? = event
         if let completion = trackCompletion {
             if !completion() {
@@ -28,40 +21,19 @@ class TestEnrichmentPlugin: Plugin {
     }
 }
 
-class OutputReaderPlugin: Plugin {
-    var type: PluginType
-    var amplitude: Amplitude?
-
+class OutputReaderPlugin: DestinationPlugin {
     var lastEvent: BaseEvent?
 
-    init() {
-        self.type = .destination
-    }
-
-    func setup(amplitude: Amplitude) {
-        self.amplitude = amplitude
-    }
-
-    func execute(event: BaseEvent?) -> BaseEvent? {
+    override func execute(event: BaseEvent?) -> BaseEvent? {
         lastEvent = event
         return event
     }
 }
 
-class EventCollectorPlugin: Plugin {
-    var type: PluginType
-    var amplitude: Amplitude?
+class EventCollectorPlugin: DestinationPlugin {
     var events: [BaseEvent] = Array()
 
-    init() {
-        self.type = .destination
-    }
-
-    func setup(amplitude: Amplitude) {
-        self.amplitude = amplitude
-    }
-
-    func execute(event: BaseEvent?) -> BaseEvent? {
+    override func execute(event: BaseEvent?) -> BaseEvent? {
         events.append(event!)
         return event
     }
