@@ -12,7 +12,7 @@
 // and for your convenience should you find it useful.
 
 import AdSupport
-import Amplitude_Swift
+import AmplitudeSwift
 import AppTrackingTransparency
 import Foundation
 import SwiftUI

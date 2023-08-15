@@ -13,7 +13,7 @@
 		19C9CC1D2937F5A600C1E660 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 19C9CC1C2937F5A600C1E660 /* Preview Assets.xcassets */; };
 		19C9CC1F2937F5A600C1E660 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19C9CC1E2937F5A600C1E660 /* Persistence.swift */; };
 		19C9CC222937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 19C9CC202937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodeld */; };
-		19C9CC2D2937F5D000C1E660 /* Amplitude-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 19C9CC2C2937F5D000C1E660 /* Amplitude-Swift */; };
+		19C9CC2D2937F5D000C1E660 /* AmplitudeSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 19C9CC2C2937F5D000C1E660 /* AmplitudeSwift */; };
 		3A3036482A4B45780004CF0B /* TroubleShootingPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3036472A4B45780004CF0B /* TroubleShootingPlugin.swift */; };
 		3A4E19BD2941D885002EA8BC /* IDFACollectionPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4E19BC2941D86E002EA8BC /* IDFACollectionPlugin.swift */; };
 		58324F75294BF7CF00C71E2E /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 58324F74294BF7CF00C71E2E /* WidgetKit.framework */; };
@@ -30,7 +30,8 @@
 		58324F97294BFB4000C71E2E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 58324F96294BFB4000C71E2E /* Assets.xcassets */; };
 		58324F9A294BFB4000C71E2E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 58324F99294BFB4000C71E2E /* Preview Assets.xcassets */; };
 		58324F9F294BFB4000C71E2E /* iOSAppClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = 58324F90294BFB4000C71E2E /* iOSAppClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		58324FA5294BFF3700C71E2E /* Amplitude-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 58324FA4294BFF3700C71E2E /* Amplitude-Swift */; };
+		58324FA5294BFF3700C71E2E /* AmplitudeSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 58324FA4294BFF3700C71E2E /* AmplitudeSwift */; };
+		BA541E9B2A8B587E0088D841 /* LocationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA541E9A2A8B587E0088D841 /* LocationPlugin.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,7 +84,7 @@
 		19C9CC1C2937F5A600C1E660 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		19C9CC1E2937F5A600C1E660 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		19C9CC212937F5A600C1E660 /* AmplitudeSwiftUIExample.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = AmplitudeSwiftUIExample.xcdatamodel; sourceTree = "<group>"; };
-		19C9CC292937F5B200C1E660 /* Amplitude-Swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "Amplitude-Swift"; path = ../..; sourceTree = "<group>"; };
+		19C9CC292937F5B200C1E660 /* AmplitudeSwift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = AmplitudeSwift; path = ../..; sourceTree = "<group>"; };
 		19C9CC2A2937F5C900C1E660 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3A3036472A4B45780004CF0B /* TroubleShootingPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TroubleShootingPlugin.swift; sourceTree = "<group>"; };
 		3A4E19BC2941D86E002EA8BC /* IDFACollectionPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDFACollectionPlugin.swift; sourceTree = "<group>"; };
@@ -103,6 +104,7 @@
 		58324F99294BFB4000C71E2E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		58324F9B294BFB4000C71E2E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		58324F9C294BFB4000C71E2E /* iOSAppClip.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOSAppClip.entitlements; sourceTree = "<group>"; };
+		BA541E9A2A8B587E0088D841 /* LocationPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationPlugin.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,7 +112,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				19C9CC2D2937F5D000C1E660 /* Amplitude-Swift in Frameworks */,
+				19C9CC2D2937F5D000C1E660 /* AmplitudeSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,7 +129,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				58324FA5294BFF3700C71E2E /* Amplitude-Swift in Frameworks */,
+				58324FA5294BFF3700C71E2E /* AmplitudeSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -182,7 +184,7 @@
 		19C9CC282937F5B200C1E660 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				19C9CC292937F5B200C1E660 /* Amplitude-Swift */,
+				19C9CC292937F5B200C1E660 /* AmplitudeSwift */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -199,6 +201,7 @@
 		3A4E19BB2941D86E002EA8BC /* ExamplePlugins */ = {
 			isa = PBXGroup;
 			children = (
+				BA541E9A2A8B587E0088D841 /* LocationPlugin.swift */,
 				3A4E19BC2941D86E002EA8BC /* IDFACollectionPlugin.swift */,
 				3A3036472A4B45780004CF0B /* TroubleShootingPlugin.swift */,
 			);
@@ -260,7 +263,7 @@
 			);
 			name = AmplitudeSwiftUIExample;
 			packageProductDependencies = (
-				19C9CC2C2937F5D000C1E660 /* Amplitude-Swift */,
+				19C9CC2C2937F5D000C1E660 /* AmplitudeSwift */,
 			);
 			productName = AmplitudeSwiftUIExample;
 			productReference = 19C9CC122937F5A400C1E660 /* AmplitudeSwiftUIExample.app */;
@@ -297,7 +300,7 @@
 			);
 			name = iOSAppClip;
 			packageProductDependencies = (
-				58324FA4294BFF3700C71E2E /* Amplitude-Swift */,
+				58324FA4294BFF3700C71E2E /* AmplitudeSwift */,
 			);
 			productName = iOSAppClip;
 			productReference = 58324F90294BFB4000C71E2E /* iOSAppClip.app */;
@@ -385,6 +388,7 @@
 				3A4E19BD2941D885002EA8BC /* IDFACollectionPlugin.swift in Sources */,
 				58324F84294BF7CF00C71E2E /* iOSWidgetExample.intentdefinition in Sources */,
 				3A3036482A4B45780004CF0B /* TroubleShootingPlugin.swift in Sources */,
+				BA541E9B2A8B587E0088D841 /* LocationPlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -762,13 +766,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		19C9CC2C2937F5D000C1E660 /* Amplitude-Swift */ = {
+		19C9CC2C2937F5D000C1E660 /* AmplitudeSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = "Amplitude-Swift";
+			productName = AmplitudeSwift;
 		};
-		58324FA4294BFF3700C71E2E /* Amplitude-Swift */ = {
+		58324FA4294BFF3700C71E2E /* AmplitudeSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = "Amplitude-Swift";
+			productName = AmplitudeSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 

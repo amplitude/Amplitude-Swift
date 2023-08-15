@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Amplitude_Swift
+import AmplitudeSwift
 
 class TroubleShootingPlugin: DestinationPlugin {
     open override func setup(amplitude: Amplitude) {
