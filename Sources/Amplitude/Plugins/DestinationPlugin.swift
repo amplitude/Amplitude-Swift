@@ -24,7 +24,7 @@ open class DestinationPlugin: BasePlugin, EventPlugin {
     open func flush() {
     }
 
-    public override func execute(event: BaseEvent?) -> BaseEvent? {
+    public override func execute(event: BaseEvent) -> BaseEvent? {
         // Skip this destination if it is disabled via settings
         if !enabled {
             return nil
@@ -38,10 +38,8 @@ open class DestinationPlugin: BasePlugin, EventPlugin {
             track(event: e)
         case let e as RevenueEvent:
             revenue(event: e)
-        case let e?:
-            track(event: e)
         default:
-            break
+            track(event: event)
         }
         return nil
     }

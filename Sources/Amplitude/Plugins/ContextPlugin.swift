@@ -18,15 +18,13 @@ class ContextPlugin: BeforePlugin {
         initializeDeviceId()
     }
 
-    override func execute(event: BaseEvent?) -> BaseEvent? {
-        guard let workingEvent = event else { return event }
-
+    override func execute(event: BaseEvent) -> BaseEvent? {
         let context = staticContext
 
         // merge context data
-        mergeContext(event: workingEvent, context: context)
+        mergeContext(event: event, context: context)
 
-        return workingEvent
+        return event
     }
 
     internal var staticContext = staticContextData()

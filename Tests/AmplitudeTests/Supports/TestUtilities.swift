@@ -10,7 +10,7 @@ class TestEnrichmentPlugin: EnrichmentPlugin {
         self.trackCompletion = trackCompletion
     }
 
-    override func execute(event: BaseEvent?) -> BaseEvent? {
+    override func execute(event: BaseEvent) -> BaseEvent? {
         var returnEvent: BaseEvent? = event
         if let completion = trackCompletion {
             if !completion() {
@@ -24,7 +24,7 @@ class TestEnrichmentPlugin: EnrichmentPlugin {
 class OutputReaderPlugin: DestinationPlugin {
     var lastEvent: BaseEvent?
 
-    override func execute(event: BaseEvent?) -> BaseEvent? {
+    override func execute(event: BaseEvent) -> BaseEvent? {
         lastEvent = event
         return event
     }
@@ -33,8 +33,8 @@ class OutputReaderPlugin: DestinationPlugin {
 class EventCollectorPlugin: DestinationPlugin {
     var events: [BaseEvent] = Array()
 
-    override func execute(event: BaseEvent?) -> BaseEvent? {
-        events.append(event!)
+    override func execute(event: BaseEvent) -> BaseEvent? {
+        events.append(event)
         return event
     }
 }

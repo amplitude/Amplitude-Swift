@@ -7,7 +7,7 @@ open class BasePlugin {
         self.amplitude = amplitude
     }
 
-    open func execute(event: BaseEvent?) -> BaseEvent? {
+    open func execute(event: BaseEvent) -> BaseEvent? {
         return event
     }
 }

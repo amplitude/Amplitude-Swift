@@ -22,7 +22,7 @@ import SwiftUI
 ///
 /// Don't forget to add "NSUserTrackingUsageDescription" with a description to your Info.plist.
 class IDFACollectionPlugin: EnrichmentPlugin {
-    func execute(event: BaseEvent?) -> BaseEvent? {
+    func execute(event: BaseEvent) -> BaseEvent? {
         let status = ATTrackingManager.trackingAuthorizationStatus
         var idfa = fallbackValue
         if status == .authorized {
