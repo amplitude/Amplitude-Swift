@@ -5,7 +5,7 @@
 //  Created by Hao Yu on 11/30/22.
 //
 
-import Amplitude_Swift
+import AmplitudeSwift
 import AppTrackingTransparency
 import SwiftUI
 
@@ -16,6 +16,7 @@ struct AmplitudeSwiftUIExampleApp: App {
     // Overriding the initializer in the App in order to config amplitude
     init() {
         Amplitude.testInstance.add(plugin: IDFACollectionPlugin())
+        Amplitude.testInstance.add(plugin: LocationPlugin())
         // add the trouble shooting plugin for debugging
         Amplitude.testInstance.add(plugin: TroubleShootingPlugin())
     }

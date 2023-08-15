@@ -16,7 +16,6 @@ public class TrackingOptions {
         Constants.AMP_TRACKING_OPTION_IDFV,
         Constants.AMP_TRACKING_OPTION_CITY,
         Constants.AMP_TRACKING_OPTION_IP_ADDRESS,
-        Constants.AMP_TRACKING_OPTION_LAT_LNG,
     ]
 
     var disabledFields: Set<String> = []
@@ -144,15 +143,6 @@ public class TrackingOptions {
 
     public func disableTrackPlatform() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_PLATFORM)
-        return self
-    }
-
-    public func shouldTrackLatLng() -> Bool {
-        return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_LAT_LNG)
-    }
-
-    public func disableTrackLatLng() -> TrackingOptions {
-        disabledFields.insert(Constants.AMP_TRACKING_OPTION_LAT_LNG)
         return self
     }
 

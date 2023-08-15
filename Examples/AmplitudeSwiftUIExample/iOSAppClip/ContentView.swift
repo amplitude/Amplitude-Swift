@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Amplitude_Swift
+import AmplitudeSwift
 
 struct ContentView: View {
     var body: some View {

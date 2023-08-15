@@ -5,7 +5,7 @@
 //  Created by Hao Yu on 11/30/22.
 //
 
-import Amplitude_Swift
+import AmplitudeSwift
 import AppTrackingTransparency
 import CoreData
 import SwiftUI

@@ -44,7 +44,6 @@ public struct Constants {
     static let AMP_TRACKING_OPTION_IDFV = "idfv"
     static let AMP_TRACKING_OPTION_IP_ADDRESS = "ip_address"
     static let AMP_TRACKING_OPTION_LANGUAGE = "language"
-    static let AMP_TRACKING_OPTION_LAT_LNG = "lat_lng"
     static let AMP_TRACKING_OPTION_OS_NAME = "os_name"
     static let AMP_TRACKING_OPTION_OS_VERSION = "os_version"
     static let AMP_TRACKING_OPTION_PLATFORM = "platform"
