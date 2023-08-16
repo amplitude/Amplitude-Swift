@@ -19,10 +19,10 @@ class LocationPlugin: NSObject, Plugin, CLLocationManagerDelegate {
         startUpdatingLocation()
     }
 
-    func execute(event: BaseEvent?) -> BaseEvent? {
+    func execute(event: BaseEvent) -> BaseEvent? {
         if let location {
-            event?.locationLat = location.coordinate.latitude
-            event?.locationLng = location.coordinate.longitude
+            event.locationLat = location.coordinate.latitude
+            event.locationLng = location.coordinate.longitude
         }
         return event
     }

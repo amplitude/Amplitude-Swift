@@ -3,6 +3,9 @@ import Foundation
 open class BasePlugin {
     weak public private(set) var amplitude: Amplitude?
 
+    public init() {
+    }
+
     open func setup(amplitude: Amplitude) {
         self.amplitude = amplitude
     }

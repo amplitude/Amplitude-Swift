@@ -22,19 +22,18 @@ import SwiftUI
 ///
 /// Don't forget to add "NSUserTrackingUsageDescription" with a description to your Info.plist.
 class IDFACollectionPlugin: EnrichmentPlugin {
-    func execute(event: BaseEvent) -> BaseEvent? {
+    public override func execute(event: BaseEvent) -> BaseEvent? {
         let status = ATTrackingManager.trackingAuthorizationStatus
         var idfa = fallbackValue
         if status == .authorized {
             idfa = ASIdentifierManager.shared().advertisingIdentifier.uuidString
         }
 
-        let workingEvent = event
         // The idfa on simulator is always 00000000-0000-0000-0000-000000000000
-        event?.idfa = idfa
+        event.idfa = idfa
         // If you want to use idfa for the device_id
-        event?.deviceId = idfa
-        return workingEvent
+        event.deviceId = idfa
+        return event
     }
 }
 
