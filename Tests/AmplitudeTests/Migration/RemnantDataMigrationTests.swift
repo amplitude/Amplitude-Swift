@@ -24,8 +24,7 @@ final class RemnantDataMigrationTests: XCTestCase {
     private func checkLegacyDataMigration(_ legacyDbName: String, _ dbVersion: Int, _ migrateLegacyData: Bool = true) throws {
         let instanceName = "legacy_v\(dbVersion)_\(migrateLegacyData)_\(UUID().uuidString)".lowercased()
 
-        let bundle = Bundle(for: type(of: self))
-        let legacyDbUrl = bundle.url(forResource: legacyDbName, withExtension: "sqlite")
+        let legacyDbUrl = Bundle.module.url(forResource: legacyDbName, withExtension: "sqlite")
         let dbUrl = LegacyDatabaseStorage.getDatabasePath(instanceName)
         let fileManager = FileManager.default
         let legacyDbExists = legacyDbUrl != nil ? fileManager.fileExists(atPath: legacyDbUrl!.path) : false

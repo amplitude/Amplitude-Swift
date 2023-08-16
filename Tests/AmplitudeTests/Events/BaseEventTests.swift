@@ -11,7 +11,7 @@ import XCTest
 
 // swiftlint:disable force_cast
 final class BaseEventTests: XCTestCase {
-    func testToString() {
+    func testToString() throws {
         let baseEvent = BaseEvent(
             plan: Plan(
                 branch: "test-branch",
@@ -33,50 +33,55 @@ final class BaseEventTests: XCTestCase {
 
         let baseEventData = baseEvent.toString().data(using: .utf8)!
         let baseEventDict =
-            try? JSONSerialization.jsonObject(with: baseEventData, options: .mutableContainers) as? [String: AnyObject]
+            try XCTUnwrap(
+                JSONSerialization.jsonObject(with: baseEventData, options: .mutableContainers) as? [String: AnyObject]
+            )
+        let baseEventProperties = try XCTUnwrap(baseEventDict["event_properties"] as? [String: AnyObject])
+        let baseEventPlan = try XCTUnwrap(baseEventDict["plan"] as? [String: String])
+        let baseEventIngestionMetadata = try XCTUnwrap(baseEventDict["ingestion_metadata"] as? [String: String])
         XCTAssertEqual(
-            baseEventDict!["event_type"] as! String,
+            baseEventDict["event_type"] as! String,
             "test"
         )
         XCTAssertEqual(
-            baseEventDict!["event_properties"]!["integer" as NSString] as! Int,
+            baseEventProperties["integer"] as! Int,
             1
         )
         XCTAssertEqual(
-            baseEventDict!["event_properties"]!["string" as NSString] as! String,
+            baseEventProperties["string"] as! String,
             "stringValue"
         )
         XCTAssertEqual(
-            baseEventDict!["event_properties"]!["array" as NSString] as! Array,
+            baseEventProperties["array"] as! Array,
             [1, 2, 3]
         )
         XCTAssertEqual(
-            baseEventDict!["plan"]!["branch" as NSString] as! String,
+            baseEventPlan["branch"],
             "test-branch"
         )
         XCTAssertEqual(
-            baseEventDict!["plan"]!["source" as NSString] as! String,
+            baseEventPlan["source"],
             "test-source"
         )
         XCTAssertEqual(
-            baseEventDict!["plan"]!["version" as NSString] as! String,
+            baseEventPlan["version"],
             "test-version"
         )
         XCTAssertEqual(
-            baseEventDict!["plan"]!["versionId" as NSString] as! String,
+            baseEventPlan["versionId"],
             "test-version-id"
         )
         XCTAssertEqual(
-            baseEventDict!["ingestion_metadata"]!["source_name" as NSString] as! String,
+            baseEventIngestionMetadata["source_name"],
             "test-source-name"
         )
         XCTAssertEqual(
-            baseEventDict!["ingestion_metadata"]!["source_version" as NSString] as! String,
+            baseEventIngestionMetadata["source_version"],
             "test-source-version"
         )
     }
 
-    func testToString_withNilValues() {
+    func testToString_withNilValues() throws {
         let baseEvent = BaseEvent(
             platform: nil,
             eventType: "test",
@@ -89,25 +94,28 @@ final class BaseEventTests: XCTestCase {
 
         let baseEventData = baseEvent.toString().data(using: .utf8)!
         let baseEventDict =
-            try? JSONSerialization.jsonObject(with: baseEventData, options: .mutableContainers) as? [String: AnyObject]
+            try XCTUnwrap(
+                JSONSerialization.jsonObject(with: baseEventData, options: .mutableContainers) as? [String: AnyObject]
+            )
+        let baseEventProperties = try XCTUnwrap(baseEventDict["event_properties"] as? [String: AnyObject])
         XCTAssertEqual(
-            baseEventDict!["event_type"] as! String,
+            baseEventDict["event_type"] as! String,
             "test"
         )
         XCTAssertEqual(
-            baseEventDict!["platform"] as? String?,
+            baseEventDict["platform"] as? String?,
             nil
         )
         XCTAssertEqual(
-            baseEventDict!["event_properties"]!["integer" as NSString] as! Int,
+            baseEventProperties["integer"] as! Int,
             1
         )
         XCTAssertEqual(
-            baseEventDict!["event_properties"]!["string" as NSString] as? String,
+            baseEventProperties["string"] as? String,
             nil
         )
         XCTAssertEqual(
-            baseEventDict!["event_properties"]!["array" as NSString] as? [Double],
+            baseEventProperties["array"] as? [Double],
             nil
         )
     }

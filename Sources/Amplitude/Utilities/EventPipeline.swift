@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 public class EventPipeline {
     let amplitude: Amplitude
@@ -27,7 +30,10 @@ public class EventPipeline {
     init(amplitude: Amplitude) {
         self.amplitude = amplitude
         self.httpClient = HttpClient(configuration: amplitude.configuration)
-        self.flushTimer = QueueTimer(interval: getFlushInterval()) { [weak self] in
+        self.flushTimer = QueueTimer(
+            interval: getFlushInterval(),
+            queue: QueueTimer.queue(runningOnServer: amplitude.configuration.runningOnServer)
+        ) { [weak self] in
             self?.flush()
         }
     }

@@ -220,6 +220,21 @@ import Foundation
     }
 #endif
 
+#if os(Linux)
+internal class LinuxVendorSystem: VendorSystem {
+    private let processInfo: ProcessInfo = .processInfo
+
+    override var os_name: String {
+        processInfo.operatingSystemVersionString
+    }
+
+    override var os_version: String {
+        let version = processInfo.operatingSystemVersion
+        return "\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
+    }
+}
+#endif
+
 private func getDeviceModel(platform: String) -> String {
     // use server device mapping except for the following exceptions
 

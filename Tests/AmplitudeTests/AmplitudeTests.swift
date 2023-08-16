@@ -72,13 +72,20 @@ final class AmplitudeTests: XCTestCase {
 
         let lastEvent = outputReader.lastEvent
         XCTAssertEqual(lastEvent?.library, "\(Constants.SDK_LIBRARY)/\(Constants.SDK_VERSION)")
-        XCTAssertEqual(lastEvent?.deviceManufacturer, "Apple")
         XCTAssertEqual(lastEvent?.deviceModel!.isEmpty, false)
         XCTAssertEqual(lastEvent?.ip, "$remote")
-        XCTAssertEqual(lastEvent?.idfv!.isEmpty, false)
         XCTAssertNil(lastEvent?.country)
+        #if os(Linux)
+        XCTAssertEqual(lastEvent?.deviceManufacturer, "unknown")
+        XCTAssertNil(lastEvent?.idfv)
+        XCTAssertEqual(lastEvent?.platform, "unknown")
+        XCTAssertNil(lastEvent?.language)
+        #else
+        XCTAssertEqual(lastEvent?.deviceManufacturer, "Apple")
+        XCTAssertEqual(lastEvent?.idfv!.isEmpty, false)
         XCTAssertEqual(lastEvent?.platform!.isEmpty, false)
         XCTAssertEqual(lastEvent?.language!.isEmpty, false)
+        #endif
     }
 
     func testContextWithDisableTrackingOptions() {

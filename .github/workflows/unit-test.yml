@@ -47,3 +47,15 @@ jobs:
             -sdk watchsimulator \
             -destination 'platform=watchOS Simulator,name=Apple Watch Series 8 (41mm)' \
             test
+
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Ubuntu Tests
+        run: |
+          swift test
+      - name: Vapor Example Tests
+        run: |
+          swift test --package-path Examples/ServerSideSwiftExample

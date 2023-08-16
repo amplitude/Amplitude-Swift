@@ -6,12 +6,11 @@ final class LegacyDatabaseStorageTests: XCTestCase {
     var storage: LegacyDatabaseStorage?
 
     override func setUpWithError() throws {
-        let bundle = Bundle(for: type(of: self))
-        let legacyDbUrl = bundle.url(forResource: "legacy_v4", withExtension: "sqlite")
+        let legacyDbUrl = try XCTUnwrap(Bundle.module.url(forResource: "legacy_v4", withExtension: "sqlite"))
         let tempDirectory = NSTemporaryDirectory()
         let tempDbName = UUID().uuidString
         let tempDbUrl = URL(fileURLWithPath: tempDirectory).appendingPathComponent(tempDbName)
-        try FileManager.default.copyItem(at: legacyDbUrl!, to: tempDbUrl)
+        try FileManager.default.copyItem(at: legacyDbUrl, to: tempDbUrl)
 
         addTeardownBlock {
             let fileManager = FileManager.default

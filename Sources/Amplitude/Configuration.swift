@@ -33,6 +33,8 @@ public class Configuration {
     public var trackingSessionEvents: Bool?
     public var identifyBatchIntervalMillis: Int
     public let migrateLegacyData: Bool
+    /// Indicates if this instance is running in a server/headless environment
+    public var runningOnServer: Bool
 
     public init(
         apiKey: String,
@@ -59,7 +61,8 @@ public class Configuration {
         minTimeBetweenSessionsMillis: Int = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS,
         trackingSessionEvents: Bool = true,
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
-        migrateLegacyData: Bool = true
+        migrateLegacyData: Bool = true,
+        runningOnServer: Bool = false
     ) {
         let normalizedInstanceName = instanceName == "" ? Constants.Configuration.DEFAULT_INSTANCE : instanceName
 
@@ -92,6 +95,7 @@ public class Configuration {
         self.migrateLegacyData = migrateLegacyData
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
+        self.runningOnServer = runningOnServer
     }
 
     func isValid() -> Bool {

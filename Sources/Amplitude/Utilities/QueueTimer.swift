@@ -27,6 +27,15 @@ internal class QueueTimer {
         Self.timers.append(timer)
     }
 
+    /// `DispatchQueue` appropriate for the environment being executed.
+    ///
+    /// When running on a server (in a headless/windowless state), the `.main` `DispatchQueue`
+    /// may not execute tasks that are enqueued to it. Essentially we can't count on the CGD event loop
+    /// like we typically do in iOS/tvOS/watchOS/macOS applications.
+    static func queue(runningOnServer: Bool) -> DispatchQueue {
+        runningOnServer ? .global(qos: .utility) : .main
+    }
+
     init(interval: TimeInterval, once: Bool = false, queue: DispatchQueue = .main, handler: @escaping () -> Void) {
         self.interval = interval
         self.queue = queue

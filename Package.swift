@@ -25,16 +25,28 @@ let package = Package(
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
+        .systemLibrary(
+            name: "CSQLite",
+            pkgConfig: "sqlite3",
+            providers: [
+                .apt(["sqlite3", "libsqlite3-dev"])
+            ]
+        ),
         .target(
             name: "AmplitudeSwift",
-            dependencies: [],
+            dependencies: [
+                .target(name: "CSQLite", condition: .when(platforms: [.linux]))
+            ],
             path: "Sources/Amplitude",
             exclude: ["../../Examples/", "../../Tests/"]
         ),
         .testTarget(
-            name: "Amplitude-SwiftTests",
+            name: "AmplitudeSwiftTests",
             dependencies: ["AmplitudeSwift"],
-            path: "Tests/AmplitudeTests"
+            path: "Tests/AmplitudeTests",
+            resources: [
+                .process("Resources")
+            ]
         ),
     ]
 )

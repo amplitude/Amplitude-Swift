@@ -6,6 +6,7 @@
 //
 
 import Foundation
+#if canImport(os.log)
 import os.log
 
 public class ConsoleLogger: Logger {
@@ -43,3 +44,38 @@ public class ConsoleLogger: Logger {
         }
     }
 }
+#else
+public class ConsoleLogger: Logger {
+    public typealias LogLevel = LogLevelEnum
+
+    public var logLevel: Int
+
+    public init(logLevel: Int = LogLevelEnum.OFF.rawValue) {
+        self.logLevel = logLevel
+    }
+
+    public func error(message: String) {
+        if logLevel >= LogLevel.ERROR.rawValue {
+            print("Amplitude - Error: %@", message)
+        }
+    }
+
+    public func warn(message: String) {
+        if logLevel >= LogLevel.WARN.rawValue {
+            print("Amplitude - Warn: %@", message)
+        }
+    }
+
+    public func log(message: String) {
+        if logLevel >= LogLevel.LOG.rawValue {
+            print("Amplitude - Info: %@", message)
+        }
+    }
+
+    public func debug(message: String) {
+        if logLevel >= LogLevel.DEBUG.rawValue {
+            print("Amplitude - Debug: %@", message)
+        }
+    }
+}
+#endif

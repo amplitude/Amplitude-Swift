@@ -1,5 +1,10 @@
 import Foundation
+#if os(Linux)
+import CSQLite
+import SwiftGlibc
+#else
 import SQLite3
+#endif
 
 class LegacyDatabaseStorage {
     private static let DATABASE_NAME = "com.amplitude.database"

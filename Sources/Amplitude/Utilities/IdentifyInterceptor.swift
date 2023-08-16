@@ -165,7 +165,11 @@ public class IdentifyInterceptor {
             return
         }
 
-        identifyTransferTimer = QueueTimer(interval: getIdentifyBatchInterval(), once: true) { [weak self] in
+        identifyTransferTimer = QueueTimer(
+            interval: getIdentifyBatchInterval(),
+            once: true,
+            queue: QueueTimer.queue(runningOnServer: configuration.runningOnServer)
+        ) { [weak self] in
             let transferInterceptedIdentifyEvent = self?.transferInterceptedIdentifyEvent
             self?.identifyTransferTimer = nil
             transferInterceptedIdentifyEvent?()
