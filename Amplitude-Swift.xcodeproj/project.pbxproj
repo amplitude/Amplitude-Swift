@@ -24,9 +24,10 @@
 		8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */; };
 		8EDEC2E0CC80DF79F5463ACC /* RemnantDataMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */; };
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
-		8EDEC972AEB33E4528F7FEEB /* StoragePrefixMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */; };
-		8EDECD602E181B3E2E85D4DF /* StoragePrefixMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */; };
 		8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */; };
+		8EDEC972AEB33E4528F7FEEB /* StoragePrefixMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */; };
+		8EDEC977C03AA2676724F436 /* BasePlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC448C42C8C0A464FAA15 /* BasePlugins.swift */; };
+		8EDECD602E181B3E2E85D4DF /* StoragePrefixMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */; };
 		8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
 		BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA0359C92A51585D007C383B /* legacy_v3.sqlite */; };
 		BA0639F62A4DD491000F1CEE /* LegacyDatabaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */; };
@@ -112,10 +113,11 @@
 		8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeSessionTests.swift; sourceTree = "<group>"; };
 		8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigration.swift; sourceTree = "<group>"; };
 		8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sessions.swift; sourceTree = "<group>"; };
+		8EDEC448C42C8C0A464FAA15 /* BasePlugins.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasePlugins.swift; sourceTree = "<group>"; };
 		8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueueTimeTests.swift; sourceTree = "<group>"; };
+		8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigrationTests.swift; sourceTree = "<group>"; };
 		8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigrationTests.swift; sourceTree = "<group>"; };
 		8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigration.swift; sourceTree = "<group>"; };
-		8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigrationTests.swift; sourceTree = "<group>"; };
 		BA0359C92A51585D007C383B /* legacy_v3.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v3.sqlite; sourceTree = "<group>"; };
 		BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorage.swift; sourceTree = "<group>"; };
 		BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorageTests.swift; sourceTree = "<group>"; };
@@ -251,6 +253,7 @@
 				OBJ_29 /* Vendors */,
 				OBJ_32 /* iOS */,
 				OBJ_34 /* watchOS */,
+				8EDEC448C42C8C0A464FAA15 /* BasePlugins.swift */,
 			);
 			path = Plugins;
 			sourceTree = "<group>";
@@ -599,6 +602,7 @@
 				8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */,
 				8EDECD602E181B3E2E85D4DF /* StoragePrefixMigration.swift in Sources */,
 				8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */,
+				8EDEC977C03AA2676724F436 /* BasePlugins.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -783,7 +787,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3,4";
-				TARGET_NAME = "AmplitudeSwift";
+				TARGET_NAME = AmplitudeSwift;
 				TVOS_DEPLOYMENT_TARGET = 13.0;
 				WATCHOS_DEPLOYMENT_TARGET = 7.0;
 			};
@@ -817,7 +821,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3,4";
-				TARGET_NAME = "AmplitudeSwift";
+				TARGET_NAME = AmplitudeSwift;
 				TVOS_DEPLOYMENT_TARGET = 13.0;
 				WATCHOS_DEPLOYMENT_TARGET = 7.0;
 			};

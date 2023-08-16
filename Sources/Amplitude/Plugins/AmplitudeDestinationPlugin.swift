@@ -48,7 +48,7 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
     }
 
     public override func setup(amplitude: Amplitude) {
-        self.amplitude = amplitude
+        super.setup(amplitude: amplitude)
         pipeline = EventPipeline(amplitude: amplitude)
         identifyInterceptor = IdentifyInterceptor(
             configuration: amplitude.configuration,
@@ -57,9 +57,5 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
         pipeline?.start()
 
         add(plugin: IdentityEventSender())
-    }
-
-    public override func execute(event: BaseEvent?) -> BaseEvent? {
-        return event
     }
 }

@@ -5,13 +5,9 @@
 //  Created by Hao Yu on 11/15/22.
 //
 
-open class DestinationPlugin: EventPlugin {
+open class DestinationPlugin: BasePlugin, EventPlugin {
     public let type: PluginType = .destination
-    public var amplitude: Amplitude?
-    private var timeline = Timeline()
-
-    public init() {
-    }
+    private let timeline = Timeline()
 
     open func track(event: BaseEvent) -> BaseEvent? {
         return event
@@ -32,36 +28,7 @@ open class DestinationPlugin: EventPlugin {
     open func flush() {
     }
 
-    open func execute(event: BaseEvent?) -> BaseEvent? {
-        return event
-    }
-
-    open func setup(amplitude: Amplitude) {
-        self.amplitude = amplitude
-    }
-}
-
-extension DestinationPlugin {
-    var enabled: Bool {
-        return true
-    }
-
-    var logger: (any Logger)? {
-        return self.amplitude?.logger
-    }
-
-    @discardableResult
-    func add(plugin: Plugin) -> Plugin {
-        plugin.amplitude = self.amplitude
-        timeline.add(plugin: plugin)
-        return plugin
-    }
-
-    func remove(plugin: Plugin) {
-        timeline.remove(plugin: plugin)
-    }
-
-    func process(event: BaseEvent?) -> BaseEvent? {
+    public override func execute(event: BaseEvent) -> BaseEvent? {
         // Skip this destination if it is disabled via settings
         if !enabled {
             return nil
@@ -76,12 +43,31 @@ extension DestinationPlugin {
             destinationResult = track(event: e)
         case let e as RevenueEvent:
             destinationResult = revenue(event: e)
-        case let e?:
-            destinationResult = track(event: e)
         default:
-            break
+            destinationResult = track(event: event)
         }
         return destinationResult
+    }
+}
+
+extension DestinationPlugin {
+    var enabled: Bool {
+        return true
+    }
+
+    var logger: (any Logger)? {
+        return self.amplitude?.logger
+    }
+
+    @discardableResult
+    func add(plugin: Plugin) -> Plugin {
+        plugin.setup(amplitude: amplitude!)
+        timeline.add(plugin: plugin)
+        return plugin
+    }
+
+    func remove(plugin: Plugin) {
+        timeline.remove(plugin: plugin)
     }
 
     public func apply(closure: (Plugin) -> Void) {

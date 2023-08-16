@@ -10,7 +10,7 @@ import AmplitudeSwift
 
 class TroubleShootingPlugin: DestinationPlugin {
     open override func setup(amplitude: Amplitude) {
-        self.amplitude = amplitude
+        super.setup(amplitude: amplitude)
         let apiKey = amplitude.configuration.apiKey;
         let serverZone = amplitude.configuration.serverZone.rawValue;
         let serverUrl = amplitude.configuration.serverUrl ?? "null";
@@ -18,7 +18,7 @@ class TroubleShootingPlugin: DestinationPlugin {
         self.amplitude?.logger?.debug(message: "Current Configuration : {\"apiKey\": "+apiKey+", \"serverZone\": "+serverZone+", \"serverUrl\": "+serverUrl+"}")
     }
 
-    open override func track(event: BaseEvent?) -> BaseEvent? {
+    open override func track(event: BaseEvent) -> BaseEvent? {
         let jsonEncoder = JSONEncoder()
         let eventJsonData = try! jsonEncoder.encode(event)
         let eventJson = String(data: eventJsonData, encoding: String.Encoding.utf8)
