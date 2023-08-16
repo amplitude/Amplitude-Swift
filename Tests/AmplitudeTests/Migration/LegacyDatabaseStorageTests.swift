@@ -6,7 +6,7 @@ final class LegacyDatabaseStorageTests: XCTestCase {
     var storage: LegacyDatabaseStorage?
 
     override func setUpWithError() throws {
-        let legacyDbUrl = try XCTUnwrap(Bundle.module.url(forResource: "legacy_v4", withExtension: "sqlite"))
+        let legacyDbUrl = try XCTUnwrap(Bundle.testBundle.url(forResource: "legacy_v4", withExtension: "sqlite"))
         let tempDirectory = NSTemporaryDirectory()
         let tempDbName = UUID().uuidString
         let tempDbUrl = URL(fileURLWithPath: tempDirectory).appendingPathComponent(tempDbName)

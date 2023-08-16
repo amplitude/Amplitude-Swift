@@ -55,7 +55,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Ubuntu Tests
         run: |
-          swift test
+          swift test -Xswiftc -DSWIFT_CLI
       - name: Vapor Example Tests
         run: |
           swift test --package-path Examples/ServerSideSwiftExample
