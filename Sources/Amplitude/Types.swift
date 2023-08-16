@@ -44,17 +44,6 @@ public struct IngestionMetadata: Codable {
 
 public typealias EventCallback = (BaseEvent, Int, String) -> Void
 
-public struct LocationInfo {
-    public var lat: Double
-    public var lng: Double
-    public init(lat: Double, lng: Double) {
-        self.lat = lat
-        self.lng = lng
-    }
-}
-
-public typealias LocationInfoBlock = () -> LocationInfo
-
 // Swift 5.7 supports any existential type.
 // The type of EventBlock has to be determined pre-runtime.
 // It cannot be dynamically associated with this protocol.

@@ -137,11 +137,6 @@ class ContextPlugin: BeforePlugin {
         if trackingOptions?.shouldTrackIDFV() ?? false {
             event.idfv = context["idfv"] as? String
         }
-        if (trackingOptions?.shouldTrackLatLng() ?? false) && (self.amplitude?.locationInfoBlock != nil) {
-            let location = self.amplitude?.locationInfoBlock!()
-            event.locationLat = location?.lat
-            event.locationLng = location?.lng
-        }
         if trackingOptions?.shouldTrackLanguage() ?? false {
             event.language = context["language"] as? String
         }

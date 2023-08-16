@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Amplitude_Swift
+import AmplitudeSwift
 
 @main
 struct iOSAppClipApp: App {

@@ -1,3 +1,10 @@
+## [0.4.12](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.11...v0.4.12) (2023-08-15)
+
+
+### Bug Fixes
+
+* remove location-related code from SDK, add an example plugin to collect location data ([#75](https://github.com/amplitude/Amplitude-Swift/issues/75)) ([34ff8e5](https://github.com/amplitude/Amplitude-Swift/commit/34ff8e54e98cfa5d3d3cd2b4585af03656063c89))
+
 ## [0.4.11](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.10...v0.4.11) (2023-08-11)
 
 

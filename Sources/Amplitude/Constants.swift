@@ -22,7 +22,7 @@ public enum ServerZone: String {
 
 public struct Constants {
     static let SDK_LIBRARY = "amplitude-swift"
-    static let SDK_VERSION = "0.4.11"
+    static let SDK_VERSION = "0.4.12"
     public static let DEFAULT_API_HOST = "https://api2.amplitude.com/2/httpapi"
     public static let EU_DEFAULT_API_HOST = "https://api.eu.amplitude.com/2/httpapi"
     static let BATCH_API_HOST = "https://api2.amplitude.com/batch"
@@ -44,7 +44,6 @@ public struct Constants {
     static let AMP_TRACKING_OPTION_IDFV = "idfv"
     static let AMP_TRACKING_OPTION_IP_ADDRESS = "ip_address"
     static let AMP_TRACKING_OPTION_LANGUAGE = "language"
-    static let AMP_TRACKING_OPTION_LAT_LNG = "lat_lng"
     static let AMP_TRACKING_OPTION_OS_NAME = "os_name"
     static let AMP_TRACKING_OPTION_OS_VERSION = "os_version"
     static let AMP_TRACKING_OPTION_PLATFORM = "platform"
