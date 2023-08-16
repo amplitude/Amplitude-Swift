@@ -28,17 +28,17 @@ internal class Mediator {
                 } else if let p = plugin as? EventPlugin {
                     if let rr = result {
                         if let identifyEvent = rr as? IdentifyEvent {
-                            p.identify(event: identifyEvent)
+                            result = p.identify(event: identifyEvent)
                         } else if let groupIdentifyEvent = rr as? GroupIdentifyEvent {
-                            p.groupIdentify(event: groupIdentifyEvent)
+                            result = p.groupIdentify(event: groupIdentifyEvent)
                         } else if let revenueEvent = rr as? RevenueEvent {
-                            p.revenue(event: revenueEvent)
+                            result = p.revenue(event: revenueEvent)
                         } else {
-                            p.track(event: rr)
+                            result = p.track(event: rr)
                         }
                     }
                 } else {
-                    result = plugin.execute(event: event)
+                    result = plugin.execute(event: r)
                 }
             }
         }

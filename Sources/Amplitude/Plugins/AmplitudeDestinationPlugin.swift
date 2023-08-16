@@ -22,20 +22,24 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
         }
     }
 
-    public override func track(event: BaseEvent) {
+    public override func track(event: BaseEvent) -> BaseEvent? {
         enqueue(event: event)
+        return event
     }
 
-    public override func identify(event: IdentifyEvent) {
+    public override func identify(event: IdentifyEvent) -> IdentifyEvent? {
         enqueue(event: event)
+        return event
     }
 
-    public override func groupIdentify(event: GroupIdentifyEvent) {
+    public override func groupIdentify(event: GroupIdentifyEvent) -> GroupIdentifyEvent? {
         enqueue(event: event)
+        return event
     }
 
-    public override func revenue(event: RevenueEvent) {
+    public override func revenue(event: RevenueEvent) -> RevenueEvent? {
         enqueue(event: event)
+        return event
     }
 
     public override func flush() {

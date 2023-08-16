@@ -109,10 +109,10 @@ public protocol Plugin: AnyObject {
 }
 
 public protocol EventPlugin: Plugin {
-    func track(event: BaseEvent)
-    func identify(event: IdentifyEvent)
-    func groupIdentify(event: GroupIdentifyEvent)
-    func revenue(event: RevenueEvent)
+    func track(event: BaseEvent) -> BaseEvent?
+    func identify(event: IdentifyEvent) -> IdentifyEvent?
+    func groupIdentify(event: GroupIdentifyEvent) -> GroupIdentifyEvent?
+    func revenue(event: RevenueEvent) -> RevenueEvent?
     func flush()
 }
 

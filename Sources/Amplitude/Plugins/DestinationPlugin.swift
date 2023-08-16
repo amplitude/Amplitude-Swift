@@ -9,16 +9,20 @@ open class DestinationPlugin: BasePlugin, EventPlugin {
     public let type: PluginType = .destination
     private let timeline = Timeline()
 
-    open func track(event: BaseEvent) {
+    open func track(event: BaseEvent) -> BaseEvent? {
+        return event
     }
 
-    open func identify(event: IdentifyEvent) {
+    open func identify(event: IdentifyEvent) -> IdentifyEvent? {
+        return event
     }
 
-    open func groupIdentify(event: GroupIdentifyEvent) {
+    open func groupIdentify(event: GroupIdentifyEvent) -> GroupIdentifyEvent? {
+        return event
     }
 
-    open func revenue(event: RevenueEvent) {
+    open func revenue(event: RevenueEvent) -> RevenueEvent? {
+        return event
     }
 
     open func flush() {
@@ -31,17 +35,18 @@ open class DestinationPlugin: BasePlugin, EventPlugin {
         }
         let beforeResult = timeline.applyPlugin(pluginType: .before, event: event)
         let enrichmentResult = timeline.applyPlugin(pluginType: .enrichment, event: beforeResult)
+        var destinationResult: BaseEvent?
         switch enrichmentResult {
         case let e as IdentifyEvent:
-            identify(event: e)
+            destinationResult = identify(event: e)
         case let e as GroupIdentifyEvent:
-            track(event: e)
+            destinationResult = track(event: e)
         case let e as RevenueEvent:
-            revenue(event: e)
+            destinationResult = revenue(event: e)
         default:
-            track(event: event)
+            destinationResult = track(event: event)
         }
-        return nil
+        return destinationResult
     }
 }
 
