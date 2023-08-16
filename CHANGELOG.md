@@ -1,3 +1,10 @@
+## [0.4.13](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.12...v0.4.13) (2023-08-16)
+
+
+### Bug Fixes
+
+* refactor base plugin types ([#73](https://github.com/amplitude/Amplitude-Swift/issues/73)) ([4c8a662](https://github.com/amplitude/Amplitude-Swift/commit/4c8a662b3adda3a4dd91518e365296f710839a6c))
+
 ## [0.4.12](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.11...v0.4.12) (2023-08-15)
 
 
