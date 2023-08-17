@@ -28,7 +28,7 @@ open class DestinationPlugin: BasePlugin, EventPlugin {
     open func flush() {
     }
 
-    public override func execute(event: BaseEvent) -> BaseEvent? {
+    open override func execute(event: BaseEvent) -> BaseEvent? {
         // Skip this destination if it is disabled via settings
         if !enabled {
             return nil
