@@ -1,3 +1,10 @@
+## [0.4.14](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.13...v0.4.14) (2023-08-17)
+
+
+### Bug Fixes
+
+* open 'DestinationPlugin.execute()' method ([#76](https://github.com/amplitude/Amplitude-Swift/issues/76)) ([e6bd825](https://github.com/amplitude/Amplitude-Swift/commit/e6bd8253e912268cebbf6de4068a13b7ad2285b3))
+
 ## [0.4.13](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.12...v0.4.13) (2023-08-16)
 
 
