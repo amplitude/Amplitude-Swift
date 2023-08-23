@@ -5,6 +5,8 @@
 //  Created by Hao Yu on 11/11/22.
 //
 
+internal typealias BackgroundTaskCompletionCallback = () -> Void
+
 internal class VendorSystem {
     var manufacturer: String {
         return "unknown"
@@ -43,6 +45,10 @@ internal class VendorSystem {
     }()
 
     var requiredPlugin: Plugin? {
+        return nil
+    }
+
+    func beginBackgroundTask() -> BackgroundTaskCompletionCallback? {
         return nil
     }
 }
