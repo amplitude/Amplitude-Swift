@@ -13,9 +13,10 @@ class HttpClient {
 
     init(configuration: Configuration) {
         self.configuration = configuration
-        // shared instance has limitations but think we are not affected
-        // https://developer.apple.com/documentation/foundation/urlsession/1409000-shared
-        self.session = URLSession.shared
+
+        let sessionConfiguration = URLSessionConfiguration.ephemeral
+        sessionConfiguration.httpMaximumConnectionsPerHost = 2
+        self.session = URLSession(configuration: sessionConfiguration)
     }
 
     func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
