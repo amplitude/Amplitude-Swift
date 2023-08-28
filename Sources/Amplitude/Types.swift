@@ -72,6 +72,8 @@ public enum StorageKey: String, CaseIterable {
     case EVENTS = "events"
     case USER_ID = "user_id"
     case DEVICE_ID = "device_id"
+    case APP_BUILD = "app_build"
+    case APP_VERSION = "app_version"
 }
 
 public protocol Logger {

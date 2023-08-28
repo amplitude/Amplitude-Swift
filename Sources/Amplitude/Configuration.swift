@@ -30,9 +30,9 @@ public class Configuration {
     public var enableCoppaControl: Bool?
     public var flushEventsOnClose: Bool?
     public var minTimeBetweenSessionsMillis: Int
-    public var trackingSessionEvents: Bool?
     public var identifyBatchIntervalMillis: Int
     public let migrateLegacyData: Bool
+    public var defaultTrackingOptions: DefaultTrackingOptions
 
     public init(
         apiKey: String,
@@ -59,7 +59,8 @@ public class Configuration {
         minTimeBetweenSessionsMillis: Int = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS,
         trackingSessionEvents: Bool = true,
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
-        migrateLegacyData: Bool = true
+        migrateLegacyData: Bool = true,
+        defaultTrackingOptions: DefaultTrackingOptions = DefaultTrackingOptions()
     ) {
         let normalizedInstanceName = instanceName == "" ? Constants.Configuration.DEFAULT_INSTANCE : instanceName
 
@@ -87,11 +88,15 @@ public class Configuration {
         self.enableCoppaControl = enableCoppaControl
         self.flushEventsOnClose = flushEventsOnClose
         self.minTimeBetweenSessionsMillis = minTimeBetweenSessionsMillis
-        self.trackingSessionEvents = trackingSessionEvents
         self.identifyBatchIntervalMillis = identifyBatchIntervalMillis
         self.migrateLegacyData = migrateLegacyData
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
+
+        self.defaultTrackingOptions = defaultTrackingOptions
+        if !trackingSessionEvents {
+            self.defaultTrackingOptions.sessions = false
+        }
     }
 
     func isValid() -> Bool {

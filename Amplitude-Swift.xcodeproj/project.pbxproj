@@ -23,6 +23,8 @@
 /* Begin PBXBuildFile section */
 		8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */; };
 		8EDEC2E0CC80DF79F5463ACC /* RemnantDataMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */; };
+		8EDEC30C0075E9D92B1B5210 /* UIKitScreenViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC650EF79B104DC3C9F4C /* UIKitScreenViews.swift */; };
+		8EDEC4D0C0CE07BF211804CC /* DefaultTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC17A6A0F8112A5DC8CEB /* DefaultTrackingOptions.swift */; };
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
 		8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */; };
 		8EDEC972AEB33E4528F7FEEB /* StoragePrefixMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */; };
@@ -31,6 +33,8 @@
 		8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
 		BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA0359C92A51585D007C383B /* legacy_v3.sqlite */; };
 		BA0639F62A4DD491000F1CEE /* LegacyDatabaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */; };
+		BA1EC0F42A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1EC0F32A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift */; };
+		BA1EC0F62A9F63FD00C2D547 /* AmplitudeIOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1EC0F52A9F63FD00C2D547 /* AmplitudeIOSTests.swift */; };
 		BA994B9A2A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */; };
 		BA994B9D2A4F4FCB00D0913F /* legacy_v4.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */; };
 		BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */; };
@@ -97,29 +101,33 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = amplitude-swift::Amplitude-Swift;
+			remoteGlobalIDString = "amplitude-swift::Amplitude-Swift";
 			remoteInfo = "Amplitude-Swift";
 		};
 		580FD1F1294A56F60036777B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = amplitude-swift::Amplitude-SwiftTests;
+			remoteGlobalIDString = "amplitude-swift::Amplitude-SwiftTests";
 			remoteInfo = "Amplitude-SwiftTests";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeSessionTests.swift; sourceTree = "<group>"; };
+		8EDEC17A6A0F8112A5DC8CEB /* DefaultTrackingOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultTrackingOptions.swift; sourceTree = "<group>"; };
 		8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigration.swift; sourceTree = "<group>"; };
 		8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sessions.swift; sourceTree = "<group>"; };
 		8EDEC448C42C8C0A464FAA15 /* BasePlugins.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasePlugins.swift; sourceTree = "<group>"; };
 		8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueueTimeTests.swift; sourceTree = "<group>"; };
+		8EDEC650EF79B104DC3C9F4C /* UIKitScreenViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitScreenViews.swift; sourceTree = "<group>"; };
 		8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigrationTests.swift; sourceTree = "<group>"; };
 		8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigrationTests.swift; sourceTree = "<group>"; };
 		8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigration.swift; sourceTree = "<group>"; };
 		BA0359C92A51585D007C383B /* legacy_v3.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v3.sqlite; sourceTree = "<group>"; };
 		BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorage.swift; sourceTree = "<group>"; };
+		BA1EC0F32A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultTrackingOptionsTests.swift; sourceTree = "<group>"; };
+		BA1EC0F52A9F63FD00C2D547 /* AmplitudeIOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmplitudeIOSTests.swift; sourceTree = "<group>"; };
 		BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorageTests.swift; sourceTree = "<group>"; };
 		BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v4.sqlite; sourceTree = "<group>"; };
 		BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptor.swift; sourceTree = "<group>"; };
@@ -183,7 +191,7 @@
 		OBJ_81 /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
 		OBJ_82 /* AmplitudeSwift.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = AmplitudeSwift.podspec; sourceTree = "<group>"; };
 		OBJ_9 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
-		"amplitude-swift::Amplitude-Swift::Product" /* Amplitude_Swift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Amplitude_Swift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		"amplitude-swift::Amplitude-Swift::Product" /* Amplitude_Swift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = Amplitude_Swift.framework; path = AmplitudeSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"amplitude-swift::Amplitude-SwiftTests::Product" /* Amplitude_SwiftTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; name = Amplitude_SwiftTests.xctest; path = "Amplitude-SwiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -279,6 +287,7 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_33 /* IOSLifecycleMonitor.swift */,
+				8EDEC650EF79B104DC3C9F4C /* UIKitScreenViews.swift */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -316,7 +325,7 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -329,7 +338,6 @@
 				OBJ_81 /* CONTRIBUTING.md */,
 				OBJ_82 /* AmplitudeSwift.podspec */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_53 /* Tests */ = {
@@ -346,6 +354,8 @@
 				OBJ_70 /* Utilities */,
 				8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */,
 				8EDECBC5925DC68913C7CB89 /* Migration */,
+				BA1EC0F32A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift */,
+				BA1EC0F52A9F63FD00C2D547 /* AmplitudeIOSTests.swift */,
 			);
 			name = Tests;
 			path = Tests/AmplitudeTests;
@@ -399,6 +409,7 @@
 				OBJ_43 /* Utilities */,
 				8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */,
 				8EDEC33A32439724A363C433 /* Migration */,
+				8EDEC17A6A0F8112A5DC8CEB /* DefaultTrackingOptions.swift */,
 			);
 			name = Sources;
 			path = Sources/Amplitude;
@@ -493,7 +504,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_75 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -532,6 +543,7 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_142 /* AmplitudeTests.swift in Sources */,
+				BA1EC0F42A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift in Sources */,
 				OBJ_143 /* ConfigurationTests.swift in Sources */,
 				OBJ_144 /* ConsoleLoggerTests.swift in Sources */,
 				OBJ_145 /* BaseEventTests.swift in Sources */,
@@ -550,6 +562,7 @@
 				OBJ_157 /* PersistentStorageResponseHandlerTests.swift in Sources */,
 				OBJ_158 /* UrlExtensionTests.swift in Sources */,
 				8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */,
+				BA1EC0F62A9F63FD00C2D547 /* AmplitudeIOSTests.swift in Sources */,
 				8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */,
 				8EDEC972AEB33E4528F7FEEB /* StoragePrefixMigrationTests.swift in Sources */,
 				BA994B9A2A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift in Sources */,
@@ -603,6 +616,8 @@
 				8EDECD602E181B3E2E85D4DF /* StoragePrefixMigration.swift in Sources */,
 				8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */,
 				8EDEC977C03AA2676724F436 /* BasePlugins.swift in Sources */,
+				8EDEC4D0C0CE07BF211804CC /* DefaultTrackingOptions.swift in Sources */,
+				8EDEC30C0075E9D92B1B5210 /* UIKitScreenViews.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

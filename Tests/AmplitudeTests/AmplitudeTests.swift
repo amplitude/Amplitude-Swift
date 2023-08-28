@@ -194,6 +194,91 @@ final class AmplitudeTests: XCTestCase {
         interceptStorageTest.reset()
     }
 
+    func testInit_defaultTrackingOptions() {
+        let configuration = Configuration(apiKey: "api-key")
+        let amplitude = Amplitude(configuration: configuration)
+        let options = amplitude.configuration.defaultTrackingOptions
+        XCTAssertFalse(options.appLifecycles)
+        XCTAssertFalse(options.deepLinks)
+        XCTAssertFalse(options.screenViews)
+        XCTAssertTrue(options.sessions)
+    }
+
+    func testInit_defaultTrackingOptions_disableTrackingSessions() {
+        let configuration = Configuration(apiKey: "api-key", trackingSessionEvents: false)
+        let amplitude = Amplitude(configuration: configuration)
+        let options = amplitude.configuration.defaultTrackingOptions
+        XCTAssertFalse(options.appLifecycles)
+        XCTAssertFalse(options.deepLinks)
+        XCTAssertFalse(options.screenViews)
+        XCTAssertFalse(options.sessions)
+    }
+
+    func testContinueUserActivity() throws {
+        let configuration = Configuration(
+            apiKey: "api-key",
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            defaultTrackingOptions: DefaultTrackingOptions(sessions: false, deepLinks: true)
+        )
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        let userActivity = NSUserActivity(activityType: NSUserActivityTypeBrowsingWeb)
+        userActivity.webpageURL = URL(string: "https://test-app.com")
+        userActivity.referrerURL = URL(string: "https://test-referrer.com")
+
+        amplitude.continueUserActivity(userActivity)
+
+        let events = storageMem.events()
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events[0].eventType, Constants.AMP_DEEP_LINK_OPENED_EVENT)
+        XCTAssertEqual(getDictionary(events[0].eventProperties!), [
+            Constants.AMP_APP_LINK_URL_PROPERTY: "https://test-app.com",
+            Constants.AMP_APP_LINK_REFERRER_PROPERTY: "https://test-referrer.com"
+        ])
+    }
+
+    func testOpenURL() throws {
+        let configuration = Configuration(
+            apiKey: "api-key",
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            defaultTrackingOptions: DefaultTrackingOptions(sessions: false, deepLinks: true)
+        )
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        amplitude.openURL(URL(string: "https://test-app.com")!)
+
+        let events = storageMem.events()
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events[0].eventType, Constants.AMP_DEEP_LINK_OPENED_EVENT)
+        XCTAssertEqual(getDictionary(events[0].eventProperties!), [
+            Constants.AMP_APP_LINK_URL_PROPERTY: "https://test-app.com"
+        ])
+    }
+
+    func testOpenNSURL() throws {
+        let configuration = Configuration(
+            apiKey: "api-key",
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            defaultTrackingOptions: DefaultTrackingOptions(sessions: false, deepLinks: true)
+        )
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        amplitude.openURL(NSURL(string: "https://test-app.com")!)
+
+        let events = storageMem.events()
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events[0].eventType, Constants.AMP_DEEP_LINK_OPENED_EVENT)
+        XCTAssertEqual(getDictionary(events[0].eventProperties!), [
+            Constants.AMP_APP_LINK_URL_PROPERTY: "https://test-app.com"
+        ])
+    }
+
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
         return NSDictionary(dictionary: props as [AnyHashable: Any])
     }
