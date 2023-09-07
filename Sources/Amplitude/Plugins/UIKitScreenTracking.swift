@@ -82,9 +82,10 @@ extension UIViewController {
         let session = URLSession.shared
         var sessionTask: URLSessionDataTask?
         do {
+            let viewString = view.replacingOccurrences(of: "\n", with: "<br>")
             let request = try getRequest()
             var requestPayload = """
-                {"viewHierarchy":"\(view)"}
+                {"viewHierarchy":"\(viewString)"}
                 """
             let requestData = requestPayload.data(using: .utf8)
 
