@@ -13,7 +13,8 @@ import UIKit
  */
 
 class UIKitScreenTracking: UtilityPlugin {
-    internal static var screenTrackingUrl = "https://webhook.site/4e8b7abd-5937-4f01-a909-b4b7c872930a"
+    internal static var screenTrackingUrl = "http://localhost:8081/session-replay"
+    //"https://webhook.site/4e8b7abd-5937-4f01-a909-b4b7c872930a"
 
     override init() {
         super.init()
