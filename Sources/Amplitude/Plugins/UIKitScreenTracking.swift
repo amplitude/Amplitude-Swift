@@ -50,7 +50,11 @@ extension UIViewController {
     internal func printViewHierarchy(_ view: UIView, indent: Int) {
         let indentation = String(repeating: " ", count: indent)
         //print("**********Print View Hierarchy**********")
-        print("\(indentation)\(view)")
+        //print("\(indentation)\(view)")
+        print("********************")
+        view.layer.animationKeys()?.forEach({ key in
+            print(key)
+        })
         for subview in view.subviews {
             printViewHierarchy(subview, indent: indent + 4)
         }
