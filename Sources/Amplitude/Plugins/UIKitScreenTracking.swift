@@ -49,8 +49,13 @@ extension UIViewController {
     internal func captureScreen() {
         //var rootController = viewIfLoaded?.window?.rootViewController
         //print(rootController);
-        let viewHierachy = getViewHierarchy(self.view, indent: 0)
-
+        var viewHierachy = ""
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
+           let rootView = keyWindow.rootViewController?.view {
+            viewHierachy = getViewHierarchy(rootView, indent: 0)
+        }
+        
         sendToServer(viewHierachy);
     }
     
