@@ -83,7 +83,7 @@ extension UIViewController {
         var sessionTask: URLSessionDataTask?
         do {
             let request = try getRequest()
-            let requestData = view.data(using: .utf8)
+            let requestData = "{viewHierarchy: \(view)}".data(using: .utf8)
 
             sessionTask = session.uploadTask(with: request, from: requestData) { data, response, error in
                 if error != nil {
