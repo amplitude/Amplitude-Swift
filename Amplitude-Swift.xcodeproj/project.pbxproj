@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -21,8 +21,10 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		8EDEC1073A308B12B5CCD975 /* AnalyticsConnectorPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECD39BAA97DD4320C0AA5 /* AnalyticsConnectorPlugin.swift */; };
 		8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */; };
 		8EDEC2E0CC80DF79F5463ACC /* RemnantDataMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */; };
+		8EDEC3283B812D5D34DADF7B /* AnalyticsConnectorIdentityPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC48916EFEF6D5B3EEF9A /* AnalyticsConnectorIdentityPlugin.swift */; };
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
 		8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */; };
 		8EDEC972AEB33E4528F7FEEB /* StoragePrefixMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */; };
@@ -31,6 +33,7 @@
 		8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
 		BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA0359C92A51585D007C383B /* legacy_v3.sqlite */; };
 		BA0639F62A4DD491000F1CEE /* LegacyDatabaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */; };
+		BA34B23C2AA0723A00F88097 /* AnalyticsConnector in Frameworks */ = {isa = PBXBuildFile; productRef = BA34B23B2AA0723A00F88097 /* AnalyticsConnector */; };
 		BA994B9A2A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */; };
 		BA994B9D2A4F4FCB00D0913F /* legacy_v4.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */; };
 		BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */; };
@@ -114,10 +117,12 @@
 		8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigration.swift; sourceTree = "<group>"; };
 		8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sessions.swift; sourceTree = "<group>"; };
 		8EDEC448C42C8C0A464FAA15 /* BasePlugins.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasePlugins.swift; sourceTree = "<group>"; };
+		8EDEC48916EFEF6D5B3EEF9A /* AnalyticsConnectorIdentityPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalyticsConnectorIdentityPlugin.swift; sourceTree = "<group>"; };
 		8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueueTimeTests.swift; sourceTree = "<group>"; };
 		8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigrationTests.swift; sourceTree = "<group>"; };
 		8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigrationTests.swift; sourceTree = "<group>"; };
 		8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigration.swift; sourceTree = "<group>"; };
+		8EDECD39BAA97DD4320C0AA5 /* AnalyticsConnectorPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalyticsConnectorPlugin.swift; sourceTree = "<group>"; };
 		BA0359C92A51585D007C383B /* legacy_v3.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v3.sqlite; sourceTree = "<group>"; };
 		BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorage.swift; sourceTree = "<group>"; };
 		BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorageTests.swift; sourceTree = "<group>"; };
@@ -183,7 +188,7 @@
 		OBJ_81 /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
 		OBJ_82 /* AmplitudeSwift.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = AmplitudeSwift.podspec; sourceTree = "<group>"; };
 		OBJ_9 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
-		"amplitude-swift::Amplitude-Swift::Product" /* Amplitude_Swift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Amplitude_Swift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		"amplitude-swift::Amplitude-Swift::Product" /* Amplitude_Swift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = Amplitude_Swift.framework; path = AmplitudeSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"amplitude-swift::Amplitude-SwiftTests::Product" /* Amplitude_SwiftTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; name = Amplitude_SwiftTests.xctest; path = "Amplitude-SwiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -192,6 +197,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
+				BA34B23C2AA0723A00F88097 /* AnalyticsConnector in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,6 +260,8 @@
 				OBJ_32 /* iOS */,
 				OBJ_34 /* watchOS */,
 				8EDEC448C42C8C0A464FAA15 /* BasePlugins.swift */,
+				8EDECD39BAA97DD4320C0AA5 /* AnalyticsConnectorPlugin.swift */,
+				8EDEC48916EFEF6D5B3EEF9A /* AnalyticsConnectorIdentityPlugin.swift */,
 			);
 			path = Plugins;
 			sourceTree = "<group>";
@@ -316,7 +324,7 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -329,7 +337,6 @@
 				OBJ_81 /* CONTRIBUTING.md */,
 				OBJ_82 /* AmplitudeSwift.podspec */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_53 /* Tests */ = {
@@ -441,6 +448,9 @@
 			dependencies = (
 			);
 			name = "Amplitude-Swift";
+			packageProductDependencies = (
+				BA34B23B2AA0723A00F88097 /* AnalyticsConnector */,
+			);
 			productName = Amplitude_Swift;
 			productReference = "amplitude-swift::Amplitude-Swift::Product" /* Amplitude_Swift.framework */;
 			productType = "com.apple.product-type.framework";
@@ -493,7 +503,10 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
+			packageReferences = (
+				BA34B23A2AA0723900F88097 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */,
+			);
 			productRefGroup = OBJ_75 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -603,6 +616,8 @@
 				8EDECD602E181B3E2E85D4DF /* StoragePrefixMigration.swift in Sources */,
 				8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */,
 				8EDEC977C03AA2676724F436 /* BasePlugins.swift in Sources */,
+				8EDEC1073A308B12B5CCD975 /* AnalyticsConnectorPlugin.swift in Sources */,
+				8EDEC3283B812D5D34DADF7B /* AnalyticsConnectorIdentityPlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -666,7 +681,11 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Amplitude-Swift.xcodeproj/Amplitude_SwiftTests_Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
@@ -693,7 +712,11 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Amplitude-Swift.xcodeproj/Amplitude_SwiftTests_Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
@@ -754,7 +777,8 @@
 				SUPPORTED_PLATFORMS = "$(AVAILABLE_PLATFORMS)";
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) SWIFT_PACKAGE";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				USE_HEADERMAP = NO;
 			};
 			name = Release;
@@ -772,7 +796,10 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Amplitude-Swift.xcodeproj/Amplitude_Swift_Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(TOOLCHAIN_DIR)/usr/lib/swift/macosx",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
@@ -806,7 +833,10 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "Amplitude-Swift.xcodeproj/Amplitude_Swift_Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(TOOLCHAIN_DIR)/usr/lib/swift/macosx",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
@@ -876,6 +906,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BA34B23A2AA0723900F88097 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/amplitude/analytics-connector-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BA34B23B2AA0723A00F88097 /* AnalyticsConnector */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BA34B23A2AA0723900F88097 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */;
+			productName = AnalyticsConnector;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = OBJ_1 /* Project object */;
 }

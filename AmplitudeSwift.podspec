@@ -25,5 +25,7 @@ Pod::Spec.new do |s|
   # s.watchos.deployment_target  = '7.0'
   # s.watchos.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
 
+  s.dependency 'AnalyticsConnector', '~> 1.0.1'
+
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
 end

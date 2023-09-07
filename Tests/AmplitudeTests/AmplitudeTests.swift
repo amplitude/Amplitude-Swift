@@ -1,4 +1,5 @@
 import XCTest
+import AnalyticsConnector
 
 @testable import AmplitudeSwift
 
@@ -192,6 +193,41 @@ final class AmplitudeTests: XCTestCase {
         // clear storages
         storageTest.reset()
         interceptStorageTest.reset()
+    }
+
+    func testAnalyticsConnector() {
+        let apiKey = "test-api-key"
+        let instanceName = "test-instance"
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: apiKey,
+            instanceName: instanceName,
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem
+        ))
+
+        let userId = "some-user"
+        let deviceId = "some-device"
+        let expectation = XCTestExpectation()
+        var identitySet = false
+
+        let connector = AnalyticsConnector.getInstance(instanceName)
+        connector.identityStore.addIdentityListener(key: "test-analytics-connector", { identity in
+            if identitySet {
+                XCTAssertEqual(identity.userId, userId)
+                XCTAssertEqual(identity.deviceId, deviceId)
+                XCTAssertEqual(identity.userProperties, ["prop-A": 123])
+                expectation.fulfill()
+            }
+        })
+
+        amplitude.setUserId(userId: userId)
+        amplitude.setDeviceId(deviceId: deviceId)
+        identitySet = true
+        let identify = Identify()
+        identify.set(property: "prop-A", value: 123)
+        amplitude.identify(identify: identify)
+
+        wait(for: [expectation], timeout: 1.0)
     }
 
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
