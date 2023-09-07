@@ -84,7 +84,7 @@ extension UIViewController {
         do {
             let request = try getRequest()
             var requestPayload = """
-                {"viewHierarchy":"<test123 attr>"}
+                {"viewHierarchy":"\(view)"}
                 """
             let requestData = requestPayload.data(using: .utf8)
 
