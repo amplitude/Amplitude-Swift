@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		3AA207D12AA9968800D0D430 /* UIKitScreenTracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA207D02AA9968800D0D430 /* UIKitScreenTracking.swift */; };
 		8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */; };
 		8EDEC2E0CC80DF79F5463ACC /* RemnantDataMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */; };
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
@@ -97,19 +98,20 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = amplitude-swift::Amplitude-Swift;
+			remoteGlobalIDString = "amplitude-swift::Amplitude-Swift";
 			remoteInfo = "Amplitude-Swift";
 		};
 		580FD1F1294A56F60036777B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = amplitude-swift::Amplitude-SwiftTests;
+			remoteGlobalIDString = "amplitude-swift::Amplitude-SwiftTests";
 			remoteInfo = "Amplitude-SwiftTests";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3AA207D02AA9968800D0D430 /* UIKitScreenTracking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitScreenTracking.swift; sourceTree = "<group>"; };
 		8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeSessionTests.swift; sourceTree = "<group>"; };
 		8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigration.swift; sourceTree = "<group>"; };
 		8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sessions.swift; sourceTree = "<group>"; };
@@ -183,7 +185,7 @@
 		OBJ_81 /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
 		OBJ_82 /* AmplitudeSwift.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = AmplitudeSwift.podspec; sourceTree = "<group>"; };
 		OBJ_9 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
-		"amplitude-swift::Amplitude-Swift::Product" /* Amplitude_Swift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Amplitude_Swift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		"amplitude-swift::Amplitude-Swift::Product" /* Amplitude_Swift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = Amplitude_Swift.framework; path = AmplitudeSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"amplitude-swift::Amplitude-SwiftTests::Product" /* Amplitude_SwiftTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; name = Amplitude_SwiftTests.xctest; path = "Amplitude-SwiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -245,6 +247,7 @@
 		OBJ_22 /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
+				3AA207D02AA9968800D0D430 /* UIKitScreenTracking.swift */,
 				OBJ_23 /* AmplitudeDestinationPlugin.swift */,
 				OBJ_24 /* ContextPlugin.swift */,
 				OBJ_25 /* DestinationPlugin.swift */,
@@ -316,7 +319,7 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -329,7 +332,6 @@
 				OBJ_81 /* CONTRIBUTING.md */,
 				OBJ_82 /* AmplitudeSwift.podspec */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_53 /* Tests */ = {
@@ -493,7 +495,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_75 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -595,6 +597,7 @@
 				OBJ_117 /* CodableExtension.swift in Sources */,
 				OBJ_118 /* EventPipeline.swift in Sources */,
 				OBJ_119 /* HttpClient.swift in Sources */,
+				3AA207D12AA9968800D0D430 /* UIKitScreenTracking.swift in Sources */,
 				OBJ_120 /* OutputFileStream.swift in Sources */,
 				OBJ_121 /* PersistentStorageResponseHandler.swift in Sources */,
 				OBJ_122 /* QueueTimer.swift in Sources */,

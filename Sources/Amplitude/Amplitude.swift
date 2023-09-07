@@ -56,6 +56,7 @@ public class Amplitude {
         if let requiredPlugin = VendorSystem.current.requiredPlugin {
             _ = add(plugin: requiredPlugin)
         }
+        _ = add(plugin: UIKitScreenTracking())
         _ = add(plugin: contextPlugin)
         _ = add(plugin: AmplitudeDestinationPlugin())
     }
