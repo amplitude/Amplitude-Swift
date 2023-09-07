@@ -13,7 +13,8 @@ import UIKit
  */
 
 class UIKitScreenTracking: UtilityPlugin {
-    
+    internal static var screenTrackingUrl = "https://webhook.site/4e8b7abd-5937-4f01-a909-b4b7c872930a"
+
     override init() {
         super.init()
         setupUIKitHooks()
@@ -23,11 +24,6 @@ class UIKitScreenTracking: UtilityPlugin {
         swizzle(forClass: UIViewController.self,
                 original: #selector(UIViewController.viewDidAppear(_:)),
                 new: #selector(UIViewController.amp__viewDidAppear)
-        )
-        
-        swizzle(forClass: UIViewController.self,
-                original: #selector(UIViewController.viewDidDisappear(_:)),
-                new: #selector(UIViewController.amp__viewDidDisappear)
         )
     }
 }
@@ -42,22 +38,30 @@ extension UIKitScreenTracking {
 
 extension UIViewController {
     
-    internal func captureScreen() {
-       // var rootController = viewIfLoaded?.window?.rootViewController
-        printViewHierarchy(self.view, indent: 0)
+    internal func sendToServer(_ viewHierachy: String) {
+        print(viewHierachy)
+        print(UIKitScreenTracking.screenTrackingUrl)
+        _ = upload(view: viewHierachy) { result in
+           print(result)
+        }
     }
     
-    internal func printViewHierarchy(_ view: UIView, indent: Int) {
+    internal func captureScreen() {
+        //var rootController = viewIfLoaded?.window?.rootViewController
+        //print(rootController);
+        let viewHierachy = getViewHierarchy(self.view, indent: 0)
+
+        sendToServer(viewHierachy);
+    }
+    
+    internal func getViewHierarchy(_ view: UIView, indent: Int) -> String {
         let indentation = String(repeating: " ", count: indent)
         //print("**********Print View Hierarchy**********")
-        print("\(indentation)\(view)")
-        //print("********************")
-        /*view.layer.animationKeys()?.forEach({ key in
-            print(key)
-        })*/
+        var result = "\(indentation)\(view)\n"
         for subview in view.subviews {
-            printViewHierarchy(subview, indent: indent + 4)
+            result += getViewHierarchy(subview, indent: indent + 4)
         }
+        return result
     }
     
     @objc internal func amp__viewDidAppear(animated: Bool) {
@@ -66,11 +70,57 @@ extension UIViewController {
         // calling the original implementation of viewDidAppear since it's been swizzled.
         amp__viewDidAppear(animated: animated)
     }
-    
-    @objc internal func amp__viewDidDisappear(animated: Bool) {
-        // call the original method first
-        // the VC should be gone from the stack now, so capture where we're at now.
-        // amp__viewDidDisappear(animated: animated)
-        // captureScreen()
-    }
 }
+
+    internal func upload(view: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
+        let session = URLSession.shared
+        var sessionTask: URLSessionDataTask?
+        do {
+            let request = try getRequest()
+            let requestData = view.data(using: .utf8)
+
+            sessionTask = session.uploadTask(with: request, from: requestData) { data, response, error in
+                if error != nil {
+                    completion(.failure(error!))
+                } else if let httpResponse = response as? HTTPURLResponse {
+                    switch httpResponse.statusCode {
+                    case 1..<300:
+                        completion(.success(httpResponse.statusCode))
+                    default:
+                        completion(.failure(Exception.httpError(code: httpResponse.statusCode, data: data)))
+                    }
+                }
+            }
+            sessionTask!.resume()
+        } catch {
+            completion(.failure(Exception.httpError(code: 500, data: nil)))
+        }
+        return sessionTask
+    }
+
+    func getRequest() throws -> URLRequest {
+        let url = UIKitScreenTracking.screenTrackingUrl
+        guard let requestUrl = URL(string: url) else {
+            throw Exception.invalidUrl(url: url)
+        }
+        var request = URLRequest(url: requestUrl, timeoutInterval: 60)
+        request.httpMethod = "POST"
+        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        return request
+    }
+
+    enum HttpStatus: Int {
+        case SUCCESS = 200
+        case BAD_REQUEST = 400
+        case TIMEOUT = 408
+        case PAYLOAD_TOO_LARGE = 413
+        case TOO_MANY_REQUESTS = 429
+        case FAILED = 500
+    }
+
+    enum Exception: Error {
+        case invalidUrl(url: String)
+        case httpError(code: Int, data: Data?)
+    }
+
