@@ -50,11 +50,11 @@ extension UIViewController {
     internal func printViewHierarchy(_ view: UIView, indent: Int) {
         let indentation = String(repeating: " ", count: indent)
         //print("**********Print View Hierarchy**********")
-        //print("\(indentation)\(view)")
-        print("********************")
-        view.layer.animationKeys()?.forEach({ key in
+        print("\(indentation)\(view)")
+        //print("********************")
+        /*view.layer.animationKeys()?.forEach({ key in
             print(key)
-        })
+        })*/
         for subview in view.subviews {
             printViewHierarchy(subview, indent: indent + 4)
         }
@@ -69,8 +69,8 @@ extension UIViewController {
     
     @objc internal func amp__viewDidDisappear(animated: Bool) {
         // call the original method first
-        amp__viewDidDisappear(animated: animated)
         // the VC should be gone from the stack now, so capture where we're at now.
-        captureScreen()
+        // amp__viewDidDisappear(animated: animated)
+        // captureScreen()
     }
 }
