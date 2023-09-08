@@ -40,6 +40,7 @@ public class Amplitude {
         self.contextPlugin = contextPlugin
 
         migrateApiKeyStorages()
+        migrateDefaultInstanceStorages()
 
         if configuration.migrateLegacyData {
             RemnantDataMigration(self).execute()
@@ -325,6 +326,23 @@ public class Amplitude {
         if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
             let apiKeyIdentifyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(configuration.apiKey)")
             StoragePrefixMigration(source: apiKeyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
+        }
+    }
+
+    private func migrateDefaultInstanceStorages() {
+        if configuration.instanceName != Constants.Configuration.DEFAULT_INSTANCE {
+            return
+        }
+
+        let legacyDefaultInstanceName = "default_instance"
+        if let persistentStorage = configuration.storageProvider as? PersistentStorage {
+            let legacyStorage = PersistentStorage(storagePrefix: "storage-\(legacyDefaultInstanceName)")
+            StoragePrefixMigration(source: legacyStorage, destination: persistentStorage, logger: logger).execute()
+        }
+
+        if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
+            let legacyIdentifyStorage = PersistentStorage(storagePrefix: "identify-\(legacyDefaultInstanceName)")
+            StoragePrefixMigration(source: legacyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
     }
 }
