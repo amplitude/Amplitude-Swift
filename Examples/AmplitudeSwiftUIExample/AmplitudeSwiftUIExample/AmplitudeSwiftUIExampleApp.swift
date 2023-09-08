@@ -7,6 +7,7 @@
 
 import AmplitudeSwift
 import AppTrackingTransparency
+import Experiment
 import SwiftUI
 
 @main
@@ -19,6 +20,8 @@ struct AmplitudeSwiftUIExampleApp: App {
         Amplitude.testInstance.add(plugin: LocationPlugin())
         // add the trouble shooting plugin for debugging
         Amplitude.testInstance.add(plugin: TroubleShootingPlugin())
+
+        Amplitude.experimentClient.fetch(user: nil, completion: nil)
     }
 
     var body: some Scene {
@@ -77,5 +80,12 @@ extension Amplitude {
             flushEventsOnClose: true,
             minTimeBetweenSessionsMillis: 15000
         )
+    )
+
+    static var experimentClient = Experiment.initializeWithAmplitudeAnalytics(
+        apiKey: "TEST-EXPERIMENT-KEY",
+        config: ExperimentConfigBuilder()
+            .instanceName(testInstance.configuration.instanceName)
+            .build()
     )
 }

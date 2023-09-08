@@ -40,6 +40,7 @@ public class Amplitude {
         self.contextPlugin = contextPlugin
 
         migrateApiKeyStorages()
+        migrateDefaultInstanceStorages()
 
         if configuration.migrateLegacyData {
             RemnantDataMigration(self).execute()
@@ -57,6 +58,8 @@ public class Amplitude {
             _ = add(plugin: requiredPlugin)
         }
         _ = add(plugin: contextPlugin)
+        _ = add(plugin: AnalyticsConnectorPlugin())
+        _ = add(plugin: AnalyticsConnectorIdentityPlugin())
         _ = add(plugin: AmplitudeDestinationPlugin())
     }
 
@@ -221,13 +224,21 @@ public class Amplitude {
     @discardableResult
     public func add(plugin: Plugin) -> Amplitude {
         plugin.setup(amplitude: self)
-        timeline.add(plugin: plugin)
+        if let _plugin = plugin as? ObservePlugin {
+            state.add(plugin: _plugin)
+        } else {
+            timeline.add(plugin: plugin)
+        }
         return self
     }
 
     @discardableResult
     public func remove(plugin: Plugin) -> Amplitude {
-        timeline.remove(plugin: plugin)
+        if let _plugin = plugin as? ObservePlugin {
+            state.remove(plugin: _plugin)
+        } else {
+            timeline.remove(plugin: plugin)
+        }
         return self
     }
 
@@ -315,6 +326,23 @@ public class Amplitude {
         if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
             let apiKeyIdentifyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(configuration.apiKey)")
             StoragePrefixMigration(source: apiKeyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
+        }
+    }
+
+    private func migrateDefaultInstanceStorages() {
+        if configuration.instanceName != Constants.Configuration.DEFAULT_INSTANCE {
+            return
+        }
+
+        let legacyDefaultInstanceName = "default_instance"
+        if let persistentStorage = configuration.storageProvider as? PersistentStorage {
+            let legacyStorage = PersistentStorage(storagePrefix: "storage-\(legacyDefaultInstanceName)")
+            StoragePrefixMigration(source: legacyStorage, destination: persistentStorage, logger: logger).execute()
+        }
+
+        if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
+            let legacyIdentifyStorage = PersistentStorage(storagePrefix: "identify-\(legacyDefaultInstanceName)")
+            StoragePrefixMigration(source: legacyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
     }
 }

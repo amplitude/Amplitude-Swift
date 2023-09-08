@@ -8,6 +8,29 @@
 import Foundation
 
 class State {
-    var userId: String?
-    var deviceId: String?
+    var userId: String? {
+        didSet {
+            for plugin in plugins {
+                plugin.onUserIdChanged(userId)
+            }
+        }
+    }
+
+    var deviceId: String? {
+        didSet {
+            for plugin in plugins {
+                plugin.onDeviceIdChanged(deviceId)
+            }
+        }
+    }
+
+    private var plugins: [ObservePlugin] = []
+
+    func add(plugin: ObservePlugin) {
+        plugins.append(plugin)
+    }
+
+    func remove(plugin: ObservePlugin) {
+        plugins.removeAll(where: { $0 === plugin })
+    }
 }

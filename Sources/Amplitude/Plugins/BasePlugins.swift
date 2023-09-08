@@ -29,4 +29,7 @@ open class UtilityPlugin: BasePlugin, Plugin {
 
 open class ObservePlugin: BasePlugin, Plugin {
     public let type: PluginType = .observe
+
+    open func onUserIdChanged(_ userId: String?) {}
+    open func onDeviceIdChanged(_ deviceId: String?) {}
 }
