@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.14...v0.5.0) (2023-09-08)
+
+
+### Features
+
+* support integration with experiment ios ([#80](https://github.com/amplitude/Amplitude-Swift/issues/80)) ([ff3a8ec](https://github.com/amplitude/Amplitude-Swift/commit/ff3a8ec7fec75a3f80cbbcd7004ccabecdc2377f))
+
 ## [0.4.14](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.13...v0.4.14) (2023-08-17)
 
 
