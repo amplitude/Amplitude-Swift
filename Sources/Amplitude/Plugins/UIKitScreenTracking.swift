@@ -26,6 +26,12 @@ class UIKitScreenTracking: UtilityPlugin {
                 original: #selector(UIViewController.viewDidAppear(_:)),
                 new: #selector(UIViewController.amp__viewDidAppear)
         )
+        swizzle(forClass: UIWindow.self,
+                original: #selector(UIWindow.sendEvent(_:)),
+                new: #selector(UIWindow.amp__sendEvent)
+        )
+
+        /*
         swizzle(forClass: UIGestureRecognizer.self,
                 original: #selector(UIGestureRecognizer.touchesBegan(_:with:)),
                 new: #selector(UIGestureRecognizer.amp__touchesBegan)
@@ -33,7 +39,7 @@ class UIKitScreenTracking: UtilityPlugin {
         swizzle(forClass: UIGestureRecognizer.self,
                 original: #selector(UIGestureRecognizer.touchesMoved(_:with:)),
                 new: #selector(UIGestureRecognizer.amp__touchesMoved)
-        )
+        )*/
     }
 }
 
@@ -55,6 +61,7 @@ extension UIViewController {
         }
     }
     
+
     internal func captureScreen() {
         //var rootController = viewIfLoaded?.window?.rootViewController
         //print(rootController);
@@ -84,16 +91,36 @@ extension UIViewController {
         // calling the original implementation of viewDidAppear since it's been swizzled.
         amp__viewDidAppear(animated: animated)
         
-        // Add an action to every UIButton within the view's hierarchy
+        /*
+         // Add an action to every UIButton within the view's hierarchy
         self.view.traverseHierarchy { view in
             if let button = view as? UIButton {
                 button.addTarget(self, action: #selector(self.buttonTouchUpInside), for: .touchUpInside)
             }
         }
+        
+        // Monitor UIBarButtonItems in the UINavigationBar
+        if let items = self.navigationItem.rightBarButtonItems {
+            for item in items {
+                item.target = self
+                item.action = #selector(self.barButtonItemPressed(_:))
+            }
+        }
+        if let leftItems = self.navigationItem.leftBarButtonItems {
+            for item in leftItems {
+                item.target = self
+                item.action = #selector(self.barButtonItemPressed(_:))
+            }
+        }*/
     }
     
     @objc func buttonTouchUpInside(_ sender: UIButton) {
         print("Button with title \(String(describing: sender.currentTitle)) was tapped!")
+        print(sender)
+    }
+    
+    @objc func barButtonItemPressed(_ sender: UIBarButtonItem) {
+        print("BarButtonItem with title \(String(describing: sender.title)) was pressed!")
         print(sender)
     }
 }
@@ -108,12 +135,6 @@ extension UIView {
 }
 
 extension UIGestureRecognizer {
-
-    private func swizzle(forClass: AnyClass, original: Selector, new: Selector) {
-        guard let originalMethod = class_getInstanceMethod(forClass, original) else { return }
-        guard let swizzledMethod = class_getInstanceMethod(forClass, new) else { return }
-        method_exchangeImplementations(originalMethod, swizzledMethod)
-    }
     
     @objc dynamic func amp__touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
         self.amp__touchesBegan(touches, with: event) // Call the original method
@@ -126,6 +147,22 @@ extension UIGestureRecognizer {
     }
 }
     
+extension UIWindow {
+    @objc func amp__sendEvent(_ event: UIEvent) {
+        // Call the original method
+        self.amp__sendEvent(event)
+        
+        // Add your monitoring logic here
+        if let touches = event.allTouches {
+            for touch in touches {
+                if touch.phase == .began {
+                    print("Touch began: \(touch)")
+                }
+            }
+        }
+    }
+}
+
 internal func upload(view: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
     let session = URLSession.shared
     var sessionTask: URLSessionDataTask?
@@ -155,6 +192,7 @@ internal func upload(view: String, completion: @escaping (_ result: Result<Int, 
         }
     return sessionTask
 }
+
 
 func getRequest() throws -> URLRequest {
     let url = UIKitScreenTracking.screenTrackingUrl
