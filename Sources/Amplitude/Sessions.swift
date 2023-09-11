@@ -112,7 +112,7 @@ public class Sessions {
 
     public func startNewSession(timestamp: Int64) -> [BaseEvent] {
         var sessionEvents: [BaseEvent] = Array()
-        let trackingSessionEvents = amplitude.configuration.defaultTrackingOptions.sessions
+        let trackingSessionEvents = amplitude.configuration.defaultTracking.sessions
 
         // end previous session
         if trackingSessionEvents == true && self.sessionId >= 0 {

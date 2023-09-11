@@ -340,7 +340,7 @@ public class Amplitude {
     }
 
     private func openURL(url: String?, referrer: String? = nil) {
-        if !configuration.defaultTrackingOptions.deepLinks {
+        if !configuration.defaultTracking.deepLinks {
             return
         }
 

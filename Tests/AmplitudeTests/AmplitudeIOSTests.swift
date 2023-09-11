@@ -24,7 +24,7 @@ final class AmplitudeIOSTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTrackingOptions: DefaultTrackingOptions(sessions: false, appLifecycles: true)
+            defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
         )
         _ = Amplitude(configuration: configuration)
         NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
@@ -53,7 +53,7 @@ final class AmplitudeIOSTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTrackingOptions: DefaultTrackingOptions(sessions: false, appLifecycles: true)
+            defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
         )
         try storageMem.write(key: StorageKey.LAST_EVENT_TIME, value: 123 as Int64)
         try storageMem.write(key: StorageKey.APP_BUILD, value: "abc")
@@ -87,7 +87,7 @@ final class AmplitudeIOSTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTrackingOptions: DefaultTrackingOptions(sessions: false, appLifecycles: true)
+            defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
         )
 
         let info = Bundle.main.infoDictionary
@@ -115,7 +115,7 @@ final class AmplitudeIOSTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTrackingOptions: DefaultTrackingOptions(sessions: false, appLifecycles: true)
+            defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
         )
 
         let info = Bundle.main.infoDictionary
@@ -140,7 +140,7 @@ final class AmplitudeIOSTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTrackingOptions: DefaultTrackingOptions(sessions: false, appLifecycles: true)
+            defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
         )
 
         _ = Amplitude(configuration: configuration)

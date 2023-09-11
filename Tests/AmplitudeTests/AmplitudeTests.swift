@@ -194,24 +194,24 @@ final class AmplitudeTests: XCTestCase {
         interceptStorageTest.reset()
     }
 
-    func testInit_defaultTrackingOptions() {
+    func testInit_defaultTracking() {
         let configuration = Configuration(apiKey: "api-key")
         let amplitude = Amplitude(configuration: configuration)
-        let options = amplitude.configuration.defaultTrackingOptions
-        XCTAssertFalse(options.appLifecycles)
-        XCTAssertFalse(options.deepLinks)
-        XCTAssertFalse(options.screenViews)
-        XCTAssertTrue(options.sessions)
+        let defaultTracking = amplitude.configuration.defaultTracking
+        XCTAssertFalse(defaultTracking.appLifecycles)
+        XCTAssertFalse(defaultTracking.deepLinks)
+        XCTAssertFalse(defaultTracking.screenViews)
+        XCTAssertTrue(defaultTracking.sessions)
     }
 
-    func testInit_defaultTrackingOptions_disableTrackingSessions() {
+    func testInit_defaultTracking_disableTrackingSessions() {
         let configuration = Configuration(apiKey: "api-key", trackingSessionEvents: false)
         let amplitude = Amplitude(configuration: configuration)
-        let options = amplitude.configuration.defaultTrackingOptions
-        XCTAssertFalse(options.appLifecycles)
-        XCTAssertFalse(options.deepLinks)
-        XCTAssertFalse(options.screenViews)
-        XCTAssertFalse(options.sessions)
+        let defaultTracking = amplitude.configuration.defaultTracking
+        XCTAssertFalse(defaultTracking.appLifecycles)
+        XCTAssertFalse(defaultTracking.deepLinks)
+        XCTAssertFalse(defaultTracking.screenViews)
+        XCTAssertFalse(defaultTracking.sessions)
     }
 
     func testContinueUserActivity() throws {
@@ -219,7 +219,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTrackingOptions: DefaultTrackingOptions(sessions: false, deepLinks: true)
+            defaultTracking: DefaultTrackingOptions(sessions: false, deepLinks: true)
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -244,7 +244,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTrackingOptions: DefaultTrackingOptions(sessions: false, deepLinks: true)
+            defaultTracking: DefaultTrackingOptions(sessions: false, deepLinks: true)
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -264,7 +264,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTrackingOptions: DefaultTrackingOptions(sessions: false, deepLinks: true)
+            defaultTracking: DefaultTrackingOptions(sessions: false, deepLinks: true)
         )
 
         let amplitude = Amplitude(configuration: configuration)

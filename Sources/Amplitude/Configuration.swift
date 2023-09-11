@@ -32,7 +32,7 @@ public class Configuration {
     public var minTimeBetweenSessionsMillis: Int
     public var identifyBatchIntervalMillis: Int
     public let migrateLegacyData: Bool
-    public var defaultTrackingOptions: DefaultTrackingOptions
+    public var defaultTracking: DefaultTrackingOptions
 
     public init(
         apiKey: String,
@@ -60,7 +60,7 @@ public class Configuration {
         trackingSessionEvents: Bool = true,
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
         migrateLegacyData: Bool = true,
-        defaultTrackingOptions: DefaultTrackingOptions = DefaultTrackingOptions()
+        defaultTracking: DefaultTrackingOptions = DefaultTrackingOptions()
     ) {
         let normalizedInstanceName = instanceName == "" ? Constants.Configuration.DEFAULT_INSTANCE : instanceName
 
@@ -93,9 +93,9 @@ public class Configuration {
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
 
-        self.defaultTrackingOptions = defaultTrackingOptions
+        self.defaultTracking = defaultTracking
         if !trackingSessionEvents {
-            self.defaultTrackingOptions.sessions = false
+            self.defaultTracking.sessions = false
         }
     }
 

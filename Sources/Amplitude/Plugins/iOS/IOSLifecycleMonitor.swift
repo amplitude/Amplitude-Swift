@@ -41,7 +41,7 @@
 
         public override func setup(amplitude: Amplitude) {
             super.setup(amplitude: amplitude)
-            if amplitude.configuration.defaultTrackingOptions.screenViews {
+            if amplitude.configuration.defaultTracking.screenViews {
                 UIKitScreenViews.register(amplitude)
             }
         }
@@ -103,7 +103,7 @@
         public func applicationWillEnterForeground(application: UIApplication?) {
             let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
             self.amplitude?.onEnterForeground(timestamp: timestamp)
-            if self.amplitude?.configuration.defaultTrackingOptions.appLifecycles == true {
+            if self.amplitude?.configuration.defaultTracking.appLifecycles == true {
                 let info = Bundle.main.infoDictionary
                 let currentBuild = info?["CFBundleVersion"] as? String
                 let currentVersion = info?["CFBundleShortVersionString"] as? String
@@ -118,7 +118,7 @@
         public func applicationDidEnterBackground(application: UIApplication?) {
             let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
             self.amplitude?.onExitForeground(timestamp: timestamp)
-            if self.amplitude?.configuration.defaultTrackingOptions.appLifecycles == true {
+            if self.amplitude?.configuration.defaultTracking.appLifecycles == true {
                 self.amplitude?.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
             }
         }
@@ -130,7 +130,7 @@
             let previousBuild: String? = amplitude?.storage.read(key: StorageKey.APP_BUILD)
             let previousVersion: String? = amplitude?.storage.read(key: StorageKey.APP_VERSION)
 
-            if self.amplitude?.configuration.defaultTrackingOptions.appLifecycles == true {
+            if self.amplitude?.configuration.defaultTracking.appLifecycles == true {
                 let lastEventTime: Int64? = amplitude?.storage.read(key: StorageKey.LAST_EVENT_TIME)
                 if lastEventTime == nil {
                     self.amplitude?.track(eventType: Constants.AMP_APPLICATION_INSTALLED_EVENT, eventProperties: [
