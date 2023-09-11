@@ -26,6 +26,10 @@ class UIKitScreenTracking: UtilityPlugin {
                 original: #selector(UIViewController.viewDidAppear(_:)),
                 new: #selector(UIViewController.amp__viewDidAppear)
         )
+        swizzle(forClass: UIGestureRecognizer.self,
+                original: #selector(UIGestureRecognizer.touchesBegan(_:with:)),
+                new: #selector(UIGestureRecognizer.amp__touchesBegan)
+        )
     }
 }
 
@@ -50,14 +54,14 @@ extension UIViewController {
     internal func captureScreen() {
         //var rootController = viewIfLoaded?.window?.rootViewController
         //print(rootController);
-        var viewHierachy = ""
+        /*var viewHierachy = ""
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
            let rootView = keyWindow.rootViewController?.view {
             viewHierachy = getViewHierarchy(rootView, indent: 0)
         }
         
-        sendToServer(viewHierachy);
+        sendToServer(viewHierachy);*/
     }
     
     internal func getViewHierarchy(_ view: UIView, indent: Int) -> String {
@@ -78,10 +82,24 @@ extension UIViewController {
     }
 }
 
-    internal func upload(view: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
-        let session = URLSession.shared
-        var sessionTask: URLSessionDataTask?
-        do {
+extension UIGestureRecognizer {
+
+    private func swizzle(forClass: AnyClass, original: Selector, new: Selector) {
+        guard let originalMethod = class_getInstanceMethod(forClass, original) else { return }
+        guard let swizzledMethod = class_getInstanceMethod(forClass, new) else { return }
+        method_exchangeImplementations(originalMethod, swizzledMethod)
+    }
+    
+    @objc dynamic func amp__touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        self.amp__touchesBegan(touches, with: event) // Call the original method
+        print("amp__touchesBegan: \(touches)")
+    }
+}
+    
+internal func upload(view: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
+    let session = URLSession.shared
+    var sessionTask: URLSessionDataTask?
+    do {
             let viewString = view.replacingOccurrences(of: "\'", with: "'").replacingOccurrences(of: "\n", with: "<br>")
             let request = try getRequest()
             var requestPayload = """
@@ -105,32 +123,32 @@ extension UIViewController {
         } catch {
             completion(.failure(Exception.httpError(code: 500, data: nil)))
         }
-        return sessionTask
-    }
+    return sessionTask
+}
 
-    func getRequest() throws -> URLRequest {
-        let url = UIKitScreenTracking.screenTrackingUrl
-        guard let requestUrl = URL(string: url) else {
+func getRequest() throws -> URLRequest {
+    let url = UIKitScreenTracking.screenTrackingUrl
+    guard let requestUrl = URL(string: url) else {
             throw Exception.invalidUrl(url: url)
-        }
-        var request = URLRequest(url: requestUrl, timeoutInterval: 60)
-        request.httpMethod = "POST"
-        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        request.addValue("application/json", forHTTPHeaderField: "Accept")
-        return request
     }
+    var request = URLRequest(url: requestUrl, timeoutInterval: 60)
+    request.httpMethod = "POST"
+    request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+    request.addValue("application/json", forHTTPHeaderField: "Accept")
+    return request
+}
 
-    enum HttpStatus: Int {
-        case SUCCESS = 200
-        case BAD_REQUEST = 400
-        case TIMEOUT = 408
-        case PAYLOAD_TOO_LARGE = 413
-        case TOO_MANY_REQUESTS = 429
-        case FAILED = 500
-    }
+enum HttpStatus: Int {
+    case SUCCESS = 200
+    case BAD_REQUEST = 400
+    case TIMEOUT = 408
+    case PAYLOAD_TOO_LARGE = 413
+    case TOO_MANY_REQUESTS = 429
+    case FAILED = 500
+}
 
-    enum Exception: Error {
-        case invalidUrl(url: String)
-        case httpError(code: Int, data: Data?)
-    }
+enum Exception: Error {
+    case invalidUrl(url: String)
+    case httpError(code: Int, data: Data?)
+}
 
