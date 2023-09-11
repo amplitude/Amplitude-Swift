@@ -14,9 +14,10 @@ class HttpClient {
     init(configuration: Configuration) {
         self.configuration = configuration
 
-        let sessionConfiguration = URLSessionConfiguration.ephemeral
+        let sessionConfiguration = URLSessionConfiguration.default
         sessionConfiguration.httpMaximumConnectionsPerHost = 2
-        self.session = URLSession(configuration: sessionConfiguration)
+        sessionConfiguration.urlCache = nil
+        self.session = URLSession(configuration: sessionConfiguration, delegate: nil, delegateQueue: nil)
     }
 
     func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
