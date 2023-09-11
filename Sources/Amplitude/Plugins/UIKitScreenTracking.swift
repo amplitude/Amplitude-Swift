@@ -30,6 +30,10 @@ class UIKitScreenTracking: UtilityPlugin {
                 original: #selector(UIGestureRecognizer.touchesBegan(_:with:)),
                 new: #selector(UIGestureRecognizer.amp__touchesBegan)
         )
+        swizzle(forClass: UIGestureRecognizer.self,
+                original: #selector(UIGestureRecognizer.touchesMoved(_:with:)),
+                new: #selector(UIGestureRecognizer.amp__touchesMoved)
+        )
     }
 }
 
@@ -44,24 +48,24 @@ extension UIKitScreenTracking {
 extension UIViewController {
     
     internal func sendToServer(_ viewHierachy: String) {
-        print(viewHierachy)
-        print(UIKitScreenTracking.screenTrackingUrl)
+        //print(viewHierachy)
+        //print(UIKitScreenTracking.screenTrackingUrl)
         _ = upload(view: viewHierachy) { result in
-           print(result)
+        //   print(result)
         }
     }
     
     internal func captureScreen() {
         //var rootController = viewIfLoaded?.window?.rootViewController
         //print(rootController);
-        /*var viewHierachy = ""
+        var viewHierachy = ""
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
            let rootView = keyWindow.rootViewController?.view {
             viewHierachy = getViewHierarchy(rootView, indent: 0)
         }
         
-        sendToServer(viewHierachy);*/
+        sendToServer(viewHierachy);
     }
     
     internal func getViewHierarchy(_ view: UIView, indent: Int) -> String {
@@ -79,6 +83,27 @@ extension UIViewController {
         // it looks like we're calling ourselves, but we're actually
         // calling the original implementation of viewDidAppear since it's been swizzled.
         amp__viewDidAppear(animated: animated)
+        
+        // Add an action to every UIButton within the view's hierarchy
+        self.view.traverseHierarchy { view in
+            if let button = view as? UIButton {
+                button.addTarget(self, action: #selector(self.buttonTouchUpInside), for: .touchUpInside)
+            }
+        }
+    }
+    
+    @objc func buttonTouchUpInside(_ sender: UIButton) {
+        print("Button with title \(String(describing: sender.currentTitle)) was tapped!")
+        print(sender)
+    }
+}
+
+extension UIView {
+    func traverseHierarchy(_ closure: (UIView) -> Void) {
+        closure(self)
+        for subview in subviews {
+            subview.traverseHierarchy(closure)
+        }
     }
 }
 
@@ -93,6 +118,11 @@ extension UIGestureRecognizer {
     @objc dynamic func amp__touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
         self.amp__touchesBegan(touches, with: event) // Call the original method
         print("amp__touchesBegan: \(touches)")
+    }
+    
+    @objc dynamic func amp__touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
+        self.amp__touchesMoved(touches, with: event) // Call the original method
+        print("amp__touchesMoved: \(touches)")
     }
 }
     
