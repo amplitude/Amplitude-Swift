@@ -30,7 +30,10 @@ class UIKitScreenTracking: UtilityPlugin {
                 original: #selector(UIWindow.sendEvent(_:)),
                 new: #selector(UIWindow.amp__sendEvent)
         )
-
+        swizzle(forClass: UIResponder.self,
+                original: #selector(UIResponder.pressesBegan(_:with:)),
+                new: #selector(UIResponder.amp__pressesBegan)
+        )
         /*
         swizzle(forClass: UIGestureRecognizer.self,
                 original: #selector(UIGestureRecognizer.touchesBegan(_:with:)),
@@ -114,7 +117,7 @@ extension UIViewController {
         }*/
     }
     
-    @objc func buttonTouchUpInside(_ sender: UIButton) {
+    /*@objc func buttonTouchUpInside(_ sender: UIButton) {
         print("Button with title \(String(describing: sender.currentTitle)) was tapped!")
         print(sender)
     }
@@ -122,10 +125,10 @@ extension UIViewController {
     @objc func barButtonItemPressed(_ sender: UIBarButtonItem) {
         print("BarButtonItem with title \(String(describing: sender.title)) was pressed!")
         print(sender)
-    }
+    }*/
 }
 
-extension UIView {
+/*extension UIView {
     func traverseHierarchy(_ closure: (UIView) -> Void) {
         closure(self)
         for subview in subviews {
@@ -146,7 +149,8 @@ extension UIGestureRecognizer {
         print("amp__touchesMoved: \(touches)")
     }
 }
-    
+*/
+
 extension UIWindow {
     @objc func amp__sendEvent(_ event: UIEvent) {
         // Call the original method
@@ -157,6 +161,37 @@ extension UIWindow {
             for touch in touches {
                 if touch.phase == .began {
                     print("Touch began: \(touch)")
+                }
+            }
+        }
+    }
+}
+
+extension UIResponder {
+    @objc func amp__pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        // Call the original method
+        self.amp__pressesBegan(presses, with: event)
+
+        // Your monitoring or additional code for key presses
+        for press in presses {
+            if let key = press.key {
+                print("Key pressed: \(key.characters)")
+            }
+        }
+    }
+}
+
+extension UIWindow {
+
+    @objc func swizzled_sendEvent(_ event: UIEvent) {
+        // Call the original method
+        self.swizzled_sendEvent(event)
+
+        // Your monitoring or additional code for touch events
+        if let touches = event.allTouches {
+            for touch in touches {
+                if touch.phase == .began {
+                    print("Touch began at \(touch.location(in: self))")
                 }
             }
         }
