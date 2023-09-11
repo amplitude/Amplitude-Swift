@@ -135,7 +135,7 @@ final class AmplitudeIOSTests: XCTestCase {
         ])
     }
 
-    func testDidEnterForeground() throws {
+    func testDidEnterBackground() throws {
         let configuration = Configuration(
             apiKey: "api-key",
             storageProvider: storageMem,
