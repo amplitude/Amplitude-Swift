@@ -31,6 +31,7 @@
 		58324F9A294BFB4000C71E2E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 58324F99294BFB4000C71E2E /* Preview Assets.xcassets */; };
 		58324F9F294BFB4000C71E2E /* iOSAppClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = 58324F90294BFB4000C71E2E /* iOSAppClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		58324FA5294BFF3700C71E2E /* AmplitudeSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 58324FA4294BFF3700C71E2E /* AmplitudeSwift */; };
+		BA34B23F2AA100F900F88097 /* Experiment in Frameworks */ = {isa = PBXBuildFile; productRef = BA34B23E2AA100F900F88097 /* Experiment */; };
 		BA541E9B2A8B587E0088D841 /* LocationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA541E9A2A8B587E0088D841 /* LocationPlugin.swift */; };
 /* End PBXBuildFile section */
 
@@ -113,6 +114,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				19C9CC2D2937F5D000C1E660 /* AmplitudeSwift in Frameworks */,
+				BA34B23F2AA100F900F88097 /* Experiment in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,6 +266,7 @@
 			name = AmplitudeSwiftUIExample;
 			packageProductDependencies = (
 				19C9CC2C2937F5D000C1E660 /* AmplitudeSwift */,
+				BA34B23E2AA100F900F88097 /* Experiment */,
 			);
 			productName = AmplitudeSwiftUIExample;
 			productReference = 19C9CC122937F5A400C1E660 /* AmplitudeSwiftUIExample.app */;
@@ -336,6 +339,9 @@
 				Base,
 			);
 			mainGroup = 19C9CC092937F5A400C1E660;
+			packageReferences = (
+				BA34B23D2AA100F900F88097 /* XCRemoteSwiftPackageReference "experiment-ios-client" */,
+			);
 			productRefGroup = 19C9CC132937F5A400C1E660 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -765,6 +771,17 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		BA34B23D2AA100F900F88097 /* XCRemoteSwiftPackageReference "experiment-ios-client" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/amplitude/experiment-ios-client";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		19C9CC2C2937F5D000C1E660 /* AmplitudeSwift */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -773,6 +790,11 @@
 		58324FA4294BFF3700C71E2E /* AmplitudeSwift */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AmplitudeSwift;
+		};
+		BA34B23E2AA100F900F88097 /* Experiment */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BA34B23D2AA100F900F88097 /* XCRemoteSwiftPackageReference "experiment-ios-client" */;
+			productName = Experiment;
 		};
 /* End XCSwiftPackageProductDependency section */
 

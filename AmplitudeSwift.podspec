@@ -1,4 +1,4 @@
-amplitude_version = "0.4.14" # Version is managed automatically by semantic-release, please don't change it manually
+amplitude_version = "0.5.0" # Version is managed automatically by semantic-release, please don't change it manually
 
 Pod::Spec.new do |s|
   s.name                   = "AmplitudeSwift"
@@ -24,6 +24,8 @@ Pod::Spec.new do |s|
   # unpaired watchos will cause failure, the fix of the above issue is merged but not released
   # s.watchos.deployment_target  = '7.0'
   # s.watchos.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
+
+  s.dependency 'AnalyticsConnector', '~> 1.0.1'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
 end
