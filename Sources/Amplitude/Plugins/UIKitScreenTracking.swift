@@ -90,8 +90,11 @@ extension UIViewController {
      }
     
     internal func getViewHierarchy(_ view: UIView, indent: Int) -> String {
-        let bgColor : UIColor = view.backgroundColor!
-        let bgHexColor = hexStringFromColor(color: bgColor);
+        if (view.backgroundColor !== nil) {
+            let bgColor : UIColor = view.backgroundColor!
+            let bgHexColor = hexStringFromColor(color: bgColor)
+            print(bgHexColor)
+        }
         
         let indentation = String(repeating: " ", count: indent)
         //print("**********Print View Hierarchy**********")
