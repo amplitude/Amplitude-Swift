@@ -1,3 +1,10 @@
+## [0.5.1](https://github.com/amplitude/Amplitude-Swift/compare/v0.5.0...v0.5.1) (2023-09-12)
+
+
+### Bug Fixes
+
+* mark uploads as background tasks to let them continue if the app enters the background ([#78](https://github.com/amplitude/Amplitude-Swift/issues/78)) ([80b465e](https://github.com/amplitude/Amplitude-Swift/commit/80b465e4b2e31fd3d01f732d6d59ffb73b3942fd))
+
 # [0.5.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.4.14...v0.5.0) (2023-09-08)
 
 
