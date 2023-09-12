@@ -78,7 +78,21 @@ extension UIViewController {
         sendToServer(viewHierachy);
     }
     
+    func hexStringFromColor(color: UIColor) -> String {
+        let components = color.cgColor.components
+        let r: CGFloat = components?[0] ?? 0.0
+        let g: CGFloat = components?[1] ?? 0.0
+        let b: CGFloat = components?[2] ?? 0.0
+
+        let hexString = String.init(format: "#%02lX%02lX%02lX", lroundf(Float(r * 255)), lroundf(Float(g * 255)), lroundf(Float(b * 255)))
+        print(hexString)
+        return hexString
+     }
+    
     internal func getViewHierarchy(_ view: UIView, indent: Int) -> String {
+        let bgColor : UIColor = view.backgroundColor!
+        let bgHexColor = hexStringFromColor(color: bgColor);
+        
         let indentation = String(repeating: " ", count: indent)
         //print("**********Print View Hierarchy**********")
         var result = "\(indentation)\(view)\n"
@@ -176,23 +190,6 @@ extension UIResponder {
         for press in presses {
             if let key = press.key {
                 print("Key pressed: \(key.characters)")
-            }
-        }
-    }
-}
-
-extension UIWindow {
-
-    @objc func swizzled_sendEvent(_ event: UIEvent) {
-        // Call the original method
-        self.swizzled_sendEvent(event)
-
-        // Your monitoring or additional code for touch events
-        if let touches = event.allTouches {
-            for touch in touches {
-                if touch.phase == .began {
-                    print("Touch began at \(touch.location(in: self))")
-                }
             }
         }
     }
