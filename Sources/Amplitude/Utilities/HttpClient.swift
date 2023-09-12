@@ -9,17 +9,20 @@ import Foundation
 
 class HttpClient {
     let configuration: Configuration
-    internal var session: URLSession
+    internal let session: URLSession
 
     init(configuration: Configuration) {
         self.configuration = configuration
-        // shared instance has limitations but think we are not affected
-        // https://developer.apple.com/documentation/foundation/urlsession/1409000-shared
-        self.session = URLSession.shared
+
+        let sessionConfiguration = URLSessionConfiguration.default
+        sessionConfiguration.httpMaximumConnectionsPerHost = 2
+        sessionConfiguration.urlCache = nil
+        self.session = URLSession(configuration: sessionConfiguration, delegate: nil, delegateQueue: nil)
     }
 
     func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
         var sessionTask: URLSessionDataTask?
+        let backgroundTaskCompletion = VendorSystem.current.beginBackgroundTask()
         do {
             let request = try getRequest()
             let requestData = getRequestData(events: events)
@@ -35,10 +38,12 @@ class HttpClient {
                         completion(.failure(Exception.httpError(code: httpResponse.statusCode, data: data)))
                     }
                 }
+                backgroundTaskCompletion?()
             }
             sessionTask!.resume()
         } catch {
             completion(.failure(Exception.httpError(code: 500, data: nil)))
+            backgroundTaskCompletion?()
         }
         return sessionTask
     }

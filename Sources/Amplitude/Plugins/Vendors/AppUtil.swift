@@ -63,6 +63,16 @@ import Foundation
         override var requiredPlugin: Plugin {
             return IOSLifecycleMonitor()
         }
+
+        override func beginBackgroundTask() -> BackgroundTaskCompletionCallback? {
+            var id: UIBackgroundTaskIdentifier = .invalid
+            let callback = { () in
+                UIApplication.shared.endBackgroundTask(id)
+                id = .invalid
+            }
+            id = UIApplication.shared.beginBackgroundTask(withName: "amplitude", expirationHandler: callback)
+            return callback
+        }
     }
 #endif
 
