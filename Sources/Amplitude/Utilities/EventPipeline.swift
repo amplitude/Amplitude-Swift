@@ -18,9 +18,6 @@ public class EventPipeline {
     internal struct UploadTaskInfo {
         let events: String
         let task: URLSessionDataTask
-        // set/used via an extension in iOSLifecycleMonitor.swift
-        typealias CleanupClosure = () -> Void
-        var cleanup: CleanupClosure?
     }
     private var uploads = [UploadTaskInfo]()
 
@@ -105,9 +102,6 @@ extension EventPipeline {
             var newPending = uploads
             newPending.removeAll { uploadInfo in
                 let shouldRemove = uploadInfo.task.state != .running
-                if shouldRemove, let cleanup = uploadInfo.cleanup {
-                    cleanup()
-                }
                 return shouldRemove
             }
             uploads = newPending

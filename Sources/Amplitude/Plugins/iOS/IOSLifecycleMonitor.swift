@@ -10,18 +10,6 @@
     import Foundation
     import SwiftUI
 
-    public protocol IOSLifecycle {
-        func applicationDidEnterBackground(application: UIApplication?)
-        func applicationWillEnterForeground(application: UIApplication?)
-        func applicationDidFinishLaunchingNotification(application: UIApplication?)
-    }
-
-    extension IOSLifecycle {
-        public func applicationDidEnterBackground(application: UIApplication?) {}
-        public func applicationWillEnterForeground(application: UIApplication?) {}
-        public func applicationDidFinishLaunchingNotification(application: UIApplication?) {}
-    }
-
     class IOSLifecycleMonitor: UtilityPlugin {
         private var application: UIApplication?
         private var appNotifications: [NSNotification.Name] = [
@@ -29,6 +17,7 @@
             UIApplication.willEnterForegroundNotification,
             UIApplication.didFinishLaunchingNotification,
         ]
+        private var trackAppOpenedEventOnEnterForeground: Bool = true
 
         override init() {
             // TODO: Check if lifecycle plugin works for app extension
@@ -75,35 +64,9 @@
         }
 
         func applicationWillEnterForeground(notification: NSNotification) {
-            amplitude?.apply { (ext) in
-                if let validExt = ext as? IOSLifecycle {
-                    validExt.applicationWillEnterForeground(application: application)
-                }
-            }
-        }
-
-        func didEnterBackground(notification: NSNotification) {
-            amplitude?.apply { (ext) in
-                if let validExt = ext as? IOSLifecycle {
-                    validExt.applicationDidEnterBackground(application: application)
-                }
-            }
-        }
-
-        func applicationDidFinishLaunchingNotification(notification: NSNotification) {
-            amplitude?.apply { (ext) in
-                if let validExt = ext as? IOSLifecycle {
-                    validExt.applicationDidFinishLaunchingNotification(application: application)
-                }
-            }
-        }
-    }
-
-    extension AmplitudeDestinationPlugin: IOSLifecycle {
-        public func applicationWillEnterForeground(application: UIApplication?) {
             let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
             self.amplitude?.onEnterForeground(timestamp: timestamp)
-            if self.amplitude?.configuration.defaultTracking.appLifecycles == true {
+            if self.amplitude?.configuration.defaultTracking.appLifecycles == true && self.trackAppOpenedEventOnEnterForeground {
                 let info = Bundle.main.infoDictionary
                 let currentBuild = info?["CFBundleVersion"] as? String
                 let currentVersion = info?["CFBundleShortVersionString"] as? String
@@ -115,7 +78,9 @@
             }
         }
 
-        public func applicationDidEnterBackground(application: UIApplication?) {
+        func didEnterBackground(notification: NSNotification) {
+            self.trackAppOpenedEventOnEnterForeground = true
+
             let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
             self.amplitude?.onExitForeground(timestamp: timestamp)
             if self.amplitude?.configuration.defaultTracking.appLifecycles == true {
@@ -123,7 +88,9 @@
             }
         }
 
-        public func applicationDidFinishLaunchingNotification(application: UIApplication?) {
+        func applicationDidFinishLaunchingNotification(notification: NSNotification) {
+            self.trackAppOpenedEventOnEnterForeground = false
+
             let info = Bundle.main.infoDictionary
             let currentBuild = info?["CFBundleVersion"] as? String
             let currentVersion = info?["CFBundleShortVersionString"] as? String
