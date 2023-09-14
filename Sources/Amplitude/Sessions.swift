@@ -115,7 +115,7 @@ public class Sessions {
         let trackingSessionEvents = amplitude.configuration.defaultTracking.sessions
 
         // end previous session
-        if trackingSessionEvents == true && self.sessionId >= 0 {
+        if trackingSessionEvents && self.sessionId >= 0 {
             let sessionEndEvent = BaseEvent(
                 timestamp: self.lastEventTime > 0 ? self.lastEventTime : nil,
                 sessionId: self.sessionId,
@@ -127,7 +127,7 @@ public class Sessions {
         // start new session
         self.sessionId = timestamp
         self.lastEventTime = timestamp
-        if trackingSessionEvents == true {
+        if trackingSessionEvents {
             let sessionStartEvent = BaseEvent(
                 timestamp: timestamp,
                 sessionId: timestamp,

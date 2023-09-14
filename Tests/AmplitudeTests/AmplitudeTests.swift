@@ -37,7 +37,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: apiKey,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            trackingSessionEvents: false
+            defaultTracking: DefaultTrackingOptions.NONE
         )
     }
 
@@ -153,7 +153,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: apiKey,
             storageProvider: storageTest,
             identifyStorageProvider: interceptStorageTest,
-            trackingSessionEvents: false
+            defaultTracking: DefaultTrackingOptions.NONE
         ))
 
         amplitude.setUserId(userId: "test-user")
@@ -238,16 +238,6 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertFalse(defaultTracking.deepLinks)
         XCTAssertFalse(defaultTracking.screenViews)
         XCTAssertTrue(defaultTracking.sessions)
-    }
-
-    func testInit_defaultTracking_disableTrackingSessions() {
-        let configuration = Configuration(apiKey: "api-key", trackingSessionEvents: false)
-        let amplitude = Amplitude(configuration: configuration)
-        let defaultTracking = amplitude.configuration.defaultTracking
-        XCTAssertFalse(defaultTracking.appLifecycles)
-        XCTAssertFalse(defaultTracking.deepLinks)
-        XCTAssertFalse(defaultTracking.screenViews)
-        XCTAssertFalse(defaultTracking.sessions)
     }
 
     func testContinueUserActivity() throws {
