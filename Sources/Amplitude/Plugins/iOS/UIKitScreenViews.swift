@@ -25,29 +25,24 @@ class UIKitScreenViews {
         let originalSelector = #selector(UIViewController.viewDidAppear(_:))
         let swizzledSelector = #selector(UIViewController.amp_viewDidAppear(_:))
 
-        let originalViewDidAppear = class_getInstanceMethod(controllerClass, originalSelector)
-        let swizzledViewDidAppear = class_getInstanceMethod(controllerClass, swizzledSelector)
+        guard let originalViewDidAppear = class_getInstanceMethod(controllerClass, originalSelector) else { return }
+        guard let swizzledViewDidAppear = class_getInstanceMethod(controllerClass, swizzledSelector) else { return }
 
-        var methodAdded = false
-        if let swizzledViewDidAppear = swizzledViewDidAppear {
-            methodAdded = class_addMethod(
-                controllerClass,
-                originalSelector,
-                method_getImplementation(swizzledViewDidAppear),
-                method_getTypeEncoding(swizzledViewDidAppear)
-            )
-        }
+        let methodAdded = class_addMethod(
+            controllerClass,
+            originalSelector,
+            method_getImplementation(swizzledViewDidAppear),
+            method_getTypeEncoding(swizzledViewDidAppear)
+        )
 
         if methodAdded {
-            if let originalViewDidAppear = originalViewDidAppear {
-                class_addMethod(
-                    controllerClass,
-                    swizzledSelector,
-                    method_getImplementation(originalViewDidAppear),
-                    method_getTypeEncoding(originalViewDidAppear)
-                )
-            }
-        } else if let swizzledViewDidAppear = swizzledViewDidAppear, let originalViewDidAppear = originalViewDidAppear {
+            class_replaceMethod(
+                controllerClass,
+                swizzledSelector,
+                method_getImplementation(originalViewDidAppear),
+                method_getTypeEncoding(originalViewDidAppear)
+            )
+        } else {
             method_exchangeImplementations(originalViewDidAppear, swizzledViewDidAppear)
         }
     }
@@ -55,8 +50,6 @@ class UIKitScreenViews {
 
 extension UIViewController {
     @objc func amp_viewDidAppear(_ animated: Bool) {
-        amp_viewDidAppear(animated)
-
         guard let top = UIViewController.amp_rootViewControllerFromView(view) else {
             return
         }
@@ -64,7 +57,7 @@ extension UIViewController {
         var name = top.title
         if name == nil || name!.isEmpty {
             // if no class title, try view controller's description
-            name = top.description.replacingOccurrences(of: "ViewController", with: "")
+            name = String(describing: top.self.description).replacingOccurrences(of: "ViewController", with: "")
             if name == nil || name!.isEmpty {
                 name = "Unknown"
             }
@@ -76,6 +69,8 @@ extension UIViewController {
         for amplitude in UIKitScreenViews.amplitudes {
             amplitude.value?.track(eventType: Constants.AMP_SCREEN_VIEWED_EVENT, eventProperties: eventProperties)
         }
+
+        amp_viewDidAppear(animated)
     }
 
     static func amp_rootViewControllerFromView(_ view: UIView) -> UIViewController? {
