@@ -4,14 +4,14 @@ import UIKit
 
 class UIKitScreenViews {
     internal static let lock = NSLock()
-    internal static var amplitudes: [Amplitude] = []
+    internal static var amplitudes: [Weak<Amplitude>] = []
     private static var viewDidAppearSwizzled = false
 
     static func register(_ amplitude: Amplitude) {
         lock.lock()
         defer { lock.unlock() }
 
-        amplitudes.append(amplitude)
+        amplitudes.append(Weak(amplitude))
         if viewDidAppearSwizzled {
             return
         }
@@ -74,7 +74,7 @@ extension UIViewController {
             Constants.AMP_APP_SCREEN_NAME_PROPERTY: name ?? ""
         ]
         for amplitude in UIKitScreenViews.amplitudes {
-            amplitude.track(eventType: Constants.AMP_SCREEN_VIEWED_EVENT, eventProperties: eventProperties)
+            amplitude.value?.track(eventType: Constants.AMP_SCREEN_VIEWED_EVENT, eventProperties: eventProperties)
         }
     }
 
