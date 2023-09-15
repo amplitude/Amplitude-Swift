@@ -28,6 +28,8 @@ final class BaseEventTests: XCTestCase {
                 "integer": 1,
                 "string": "stringValue",
                 "array": [1, 2, 3],
+                "int64": 1 as Int64,
+                "int32": 1 as Int32
             ]
         )
 
@@ -40,6 +42,14 @@ final class BaseEventTests: XCTestCase {
         )
         XCTAssertEqual(
             baseEventDict!["event_properties"]!["integer" as NSString] as! Int,
+            1
+        )
+        XCTAssertEqual(
+            baseEventDict!["event_properties"]!["int32" as NSString] as! Int32,
+            1
+        )
+        XCTAssertEqual(
+            baseEventDict!["event_properties"]!["int64" as NSString] as! Int64,
             1
         )
         XCTAssertEqual(
