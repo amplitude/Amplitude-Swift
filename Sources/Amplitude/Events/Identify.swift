@@ -158,6 +158,12 @@ public class Identify {
     }
 
     @discardableResult
+    public func setOnce(property: String, value: Any?) -> Identify {
+        setUserProperty(operation: .SET_ONCE, property: property, value: value)
+        return self
+    }
+
+    @discardableResult
     public func setOnce(property: String, value: [String: Any]) -> Identify {
         setUserProperty(operation: .SET_ONCE, property: property, value: value)
         return self
@@ -238,6 +244,12 @@ public class Identify {
 
     @discardableResult
     public func prepend(property: String, value: String) -> Identify {
+        setUserProperty(operation: .PREPEND, property: property, value: value)
+        return self
+    }
+
+    @discardableResult
+    public func prepend(property: String, value: Any?) -> Identify {
         setUserProperty(operation: .PREPEND, property: property, value: value)
         return self
     }
@@ -328,6 +340,12 @@ public class Identify {
     }
 
     @discardableResult
+    public func append(property: String, value: Any?) -> Identify {
+        setUserProperty(operation: .APPEND, property: property, value: value)
+        return self
+    }
+
+    @discardableResult
     public func append(property: String, value: [String: Any]) -> Identify {
         setUserProperty(operation: .APPEND, property: property, value: value)
         return self
@@ -408,6 +426,12 @@ public class Identify {
 
     @discardableResult
     public func postInsert(property: String, value: String) -> Identify {
+        setUserProperty(operation: .POST_INSERT, property: property, value: value)
+        return self
+    }
+
+    @discardableResult
+    public func postInsert(property: String, value: Any?) -> Identify {
         setUserProperty(operation: .POST_INSERT, property: property, value: value)
         return self
     }
@@ -498,6 +522,12 @@ public class Identify {
     }
 
     @discardableResult
+    public func preInsert(property: String, value: Any?) -> Identify {
+        setUserProperty(operation: .PRE_INSERT, property: property, value: value)
+        return self
+    }
+
+    @discardableResult
     public func preInsert(property: String, value: [String: Any]) -> Identify {
         setUserProperty(operation: .PRE_INSERT, property: property, value: value)
         return self
@@ -583,6 +613,12 @@ public class Identify {
     }
 
     @discardableResult
+    public func remove(property: String, value: Any?) -> Identify {
+        setUserProperty(operation: .REMOVE, property: property, value: value)
+        return self
+    }
+
+    @discardableResult
     public func remove(property: String, value: [String: Any]) -> Identify {
         setUserProperty(operation: .REMOVE, property: property, value: value)
         return self
@@ -657,8 +693,8 @@ public class Identify {
 
     // $unset operation
     @discardableResult
-    public func unset(proprety: String) -> Identify {
-        setUserProperty(operation: .UNSET, property: proprety, value: Identify.UNSET_VALUE)
+    public func unset(property: String) -> Identify {
+        setUserProperty(operation: .UNSET, property: property, value: Identify.UNSET_VALUE)
         return self
     }
 

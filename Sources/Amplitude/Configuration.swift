@@ -11,7 +11,7 @@ public class Configuration {
     public internal(set) var apiKey: String
     public var flushQueueSize: Int
     public var flushIntervalMillis: Int
-    public let instanceName: String
+    public internal(set) var instanceName: String
     public var optOut: Bool
     public let storageProvider: any Storage
     public let identifyStorageProvider: any Storage
@@ -26,12 +26,12 @@ public class Configuration {
     public var serverUrl: String?
     public var plan: Plan?
     public var ingestionMetadata: IngestionMetadata?
-    public var trackingOptions: TrackingOptions?
-    public var enableCoppaControl: Bool?
-    public var flushEventsOnClose: Bool?
+    public var trackingOptions: TrackingOptions
+    public var enableCoppaControl: Bool
+    public var flushEventsOnClose: Bool
     public var minTimeBetweenSessionsMillis: Int
     public var identifyBatchIntervalMillis: Int
-    public let migrateLegacyData: Bool
+    public internal(set) var migrateLegacyData: Bool
     public var defaultTracking: DefaultTrackingOptions
 
     public init(

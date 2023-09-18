@@ -86,7 +86,7 @@ final class AmplitudeTests: XCTestCase {
         let apiKey = "testApiKeyForDisableTrackingOptions"
         let trackingOptions = TrackingOptions()
         _ = trackingOptions.disableTrackIpAddress()
-            .disableCarrier()
+            .disableTrackCarrier()
             .disableTrackIDFV()
             .disableTrackCountry()
         let configuration = Configuration(apiKey: apiKey, trackingOptions: trackingOptions)

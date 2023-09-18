@@ -24,6 +24,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_VERSION_NAME)
     }
 
+    @discardableResult
     public func disableTrackVersionName() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_VERSION_NAME)
         return self
@@ -33,6 +34,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_OS_NAME)
     }
 
+    @discardableResult
     public func disableTrackOsName() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_OS_NAME)
         return self
@@ -42,6 +44,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_OS_VERSION)
     }
 
+    @discardableResult
     public func disableTrackOsVersion() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_OS_VERSION)
         return self
@@ -51,6 +54,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_DEVICE_MANUFACTURER)
     }
 
+    @discardableResult
     public func disableTrackDeviceManufacturer() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_DEVICE_MANUFACTURER)
         return self
@@ -60,6 +64,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_DEVICE_MODEL)
     }
 
+    @discardableResult
     public func disableTrackDeviceModel() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_DEVICE_MODEL)
         return self
@@ -69,7 +74,8 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_CARRIER)
     }
 
-    public func disableCarrier() -> TrackingOptions {
+    @discardableResult
+    public func disableTrackCarrier() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_CARRIER)
         return self
     }
@@ -78,6 +84,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_IP_ADDRESS)
     }
 
+    @discardableResult
     public func disableTrackIpAddress() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_IP_ADDRESS)
         return self
@@ -87,6 +94,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_COUNTRY)
     }
 
+    @discardableResult
     public func disableTrackCountry() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_COUNTRY)
         return self
@@ -96,6 +104,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_CITY)
     }
 
+    @discardableResult
     public func disableTrackCity() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_CITY)
         return self
@@ -105,6 +114,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_DMA)
     }
 
+    @discardableResult
     public func disableTrackDMA() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_DMA)
         return self
@@ -114,6 +124,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_IDFV)
     }
 
+    @discardableResult
     public func disableTrackIDFV() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_IDFV)
         return self
@@ -123,6 +134,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_LANGUAGE)
     }
 
+    @discardableResult
     public func disableTrackLanguage() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_LANGUAGE)
         return self
@@ -132,6 +144,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_REGION)
     }
 
+    @discardableResult
     public func disableTrackRegion() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_REGION)
         return self
@@ -141,6 +154,7 @@ public class TrackingOptions {
         return shouldTrackField(field: Constants.AMP_TRACKING_OPTION_PLATFORM)
     }
 
+    @discardableResult
     public func disableTrackPlatform() -> TrackingOptions {
         disabledFields.insert(Constants.AMP_TRACKING_OPTION_PLATFORM)
         return self
