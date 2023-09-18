@@ -63,11 +63,8 @@ extension UIViewController {
             }
         }
 
-        let eventProperties = [
-            Constants.AMP_APP_SCREEN_NAME_PROPERTY: name ?? ""
-        ]
         for amplitude in UIKitScreenViews.amplitudes {
-            amplitude.value?.track(eventType: Constants.AMP_SCREEN_VIEWED_EVENT, eventProperties: eventProperties)
+            amplitude.value?.track(event: ScreenViewEvent(screenName: name!))
         }
 
         amp_viewDidAppear(animated)

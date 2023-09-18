@@ -235,17 +235,16 @@ final class AmplitudeTests: XCTestCase {
         let amplitude = Amplitude(configuration: configuration)
         let defaultTracking = amplitude.configuration.defaultTracking
         XCTAssertFalse(defaultTracking.appLifecycles)
-        XCTAssertFalse(defaultTracking.deepLinks)
         XCTAssertFalse(defaultTracking.screenViews)
         XCTAssertTrue(defaultTracking.sessions)
     }
 
-    func testContinueUserActivity() throws {
+    func testTrackNSUserActivity() throws {
         let configuration = Configuration(
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTracking: DefaultTrackingOptions(sessions: false, deepLinks: true)
+            defaultTracking: DefaultTrackingOptions(sessions: false)
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -254,7 +253,7 @@ final class AmplitudeTests: XCTestCase {
         userActivity.webpageURL = URL(string: "https://test-app.com")
         userActivity.referrerURL = URL(string: "https://test-referrer.com")
 
-        amplitude.continueUserActivity(userActivity)
+        amplitude.track(event: DeepLinkOpenedEvent(activity: userActivity))
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
@@ -265,17 +264,17 @@ final class AmplitudeTests: XCTestCase {
         ])
     }
 
-    func testOpenURL() throws {
+    func testTrackURLOpened() throws {
         let configuration = Configuration(
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTracking: DefaultTrackingOptions(sessions: false, deepLinks: true)
+            defaultTracking: DefaultTrackingOptions(sessions: false)
         )
 
         let amplitude = Amplitude(configuration: configuration)
 
-        amplitude.openURL(URL(string: "https://test-app.com")!)
+        amplitude.track(event: DeepLinkOpenedEvent(url: URL(string: "https://test-app.com")!))
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
@@ -285,23 +284,43 @@ final class AmplitudeTests: XCTestCase {
         ])
     }
 
-    func testOpenNSURL() throws {
+    func testTrackNSURLOpened() throws {
         let configuration = Configuration(
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTracking: DefaultTrackingOptions(sessions: false, deepLinks: true)
+            defaultTracking: DefaultTrackingOptions(sessions: false)
         )
 
         let amplitude = Amplitude(configuration: configuration)
 
-        amplitude.openURL(NSURL(string: "https://test-app.com")!)
+        amplitude.track(event: DeepLinkOpenedEvent(url: NSURL(string: "https://test-app.com")!))
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
         XCTAssertEqual(events[0].eventType, Constants.AMP_DEEP_LINK_OPENED_EVENT)
         XCTAssertEqual(getDictionary(events[0].eventProperties!), [
             Constants.AMP_APP_LINK_URL_PROPERTY: "https://test-app.com"
+        ])
+    }
+
+    func testTrackScreenView() throws {
+        let configuration = Configuration(
+            apiKey: "api-key",
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            defaultTracking: DefaultTrackingOptions(sessions: false)
+        )
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        amplitude.track(event: ScreenViewEvent(screenName: "main view"))
+
+        let events = storageMem.events()
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events[0].eventType, Constants.AMP_SCREEN_VIEWED_EVENT)
+        XCTAssertEqual(getDictionary(events[0].eventProperties!), [
+            Constants.AMP_APP_SCREEN_NAME_PROPERTY: "main view"
         ])
     }
 

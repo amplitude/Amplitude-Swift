@@ -290,27 +290,6 @@ public class Amplitude {
         timeline.apply(closure)
     }
 
-    public func openURL(_ url: NSURL) {
-        openURL(url: url.absoluteString)
-    }
-
-    public func openURL(_ url: URL) {
-        openURL(url: url.absoluteString)
-    }
-
-    public func continueUserActivity(_ activity: NSUserActivity) {
-        if activity.activityType != NSUserActivityTypeBrowsingWeb {
-            return
-        }
-
-        let url = activity.webpageURL?.absoluteString
-        var referrer: String?
-        if #available(iOS 11, tvOS 11.0, macOS 10.13, watchOS 4.0, *) {
-            referrer = activity.referrerURL?.absoluteString
-        }
-        openURL(url: url, referrer: referrer)
-    }
-
     private func process(event: BaseEvent) {
         if configuration.optOut {
             logger?.log(message: "Skip event based on opt out configuration")
@@ -365,19 +344,5 @@ public class Amplitude {
             let legacyIdentifyStorage = PersistentStorage(storagePrefix: "identify-\(legacyDefaultInstanceName)")
             StoragePrefixMigration(source: legacyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
-    }
-
-    private func openURL(url: String?, referrer: String? = nil) {
-        if !configuration.defaultTracking.deepLinks {
-            return
-        }
-
-        var eventProperties = [
-            Constants.AMP_APP_LINK_URL_PROPERTY: url ?? "",
-        ]
-        if let referrer = referrer {
-            eventProperties[Constants.AMP_APP_LINK_REFERRER_PROPERTY] = referrer
-        }
-        self.track(eventType: Constants.AMP_DEEP_LINK_OPENED_EVENT, eventProperties: eventProperties)
     }
 }
