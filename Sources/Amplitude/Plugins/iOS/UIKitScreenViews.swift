@@ -75,7 +75,7 @@ extension UIViewController {
         }
 
         for amplitude in UIKitScreenViews.amplitudes {
-            amplitude.value?.track(event: ScreenViewEvent(screenName: name!))
+            amplitude.value?.track(event: ScreenViewedEvent(screenName: name!))
         }
     }
 

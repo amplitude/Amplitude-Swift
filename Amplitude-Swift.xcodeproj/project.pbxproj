@@ -26,7 +26,7 @@
 		8EDEC2E0CC80DF79F5463ACC /* RemnantDataMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */; };
 		8EDEC30C0075E9D92B1B5210 /* UIKitScreenViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC650EF79B104DC3C9F4C /* UIKitScreenViews.swift */; };
 		8EDEC3283B812D5D34DADF7B /* AnalyticsConnectorIdentityPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC48916EFEF6D5B3EEF9A /* AnalyticsConnectorIdentityPlugin.swift */; };
-		8EDEC43FB30802F70112E577 /* ScreenViewEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECB455E34133AB256D720 /* ScreenViewEvent.swift */; };
+		8EDEC43FB30802F70112E577 /* ScreenViewedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECB455E34133AB256D720 /* ScreenViewedEvent.swift */; };
 		8EDEC4D0C0CE07BF211804CC /* DefaultTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC17A6A0F8112A5DC8CEB /* DefaultTrackingOptions.swift */; };
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
 		8EDEC51F746CC25D27E32F6A /* DeepLinkOpenedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECC405793463C10F52EF2 /* DeepLinkOpenedEvent.swift */; };
@@ -131,7 +131,7 @@
 		8EDEC650EF79B104DC3C9F4C /* UIKitScreenViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitScreenViews.swift; sourceTree = "<group>"; };
 		8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigrationTests.swift; sourceTree = "<group>"; };
 		8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigrationTests.swift; sourceTree = "<group>"; };
-		8EDECB455E34133AB256D720 /* ScreenViewEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScreenViewEvent.swift; sourceTree = "<group>"; };
+		8EDECB455E34133AB256D720 /* ScreenViewedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScreenViewedEvent.swift; sourceTree = "<group>"; };
 		8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigration.swift; sourceTree = "<group>"; };
 		8EDECC405793463C10F52EF2 /* DeepLinkOpenedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeepLinkOpenedEvent.swift; sourceTree = "<group>"; };
 		8EDECD39BAA97DD4320C0AA5 /* AnalyticsConnectorPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalyticsConnectorPlugin.swift; sourceTree = "<group>"; };
@@ -258,7 +258,7 @@
 				OBJ_18 /* IdentifyEvent.swift */,
 				OBJ_19 /* Revenue.swift */,
 				OBJ_20 /* RevenueEvent.swift */,
-				8EDECB455E34133AB256D720 /* ScreenViewEvent.swift */,
+				8EDECB455E34133AB256D720 /* ScreenViewedEvent.swift */,
 				8EDECC405793463C10F52EF2 /* DeepLinkOpenedEvent.swift */,
 			);
 			path = Events;
@@ -644,7 +644,7 @@
 				8EDEC4D0C0CE07BF211804CC /* DefaultTrackingOptions.swift in Sources */,
 				8EDEC30C0075E9D92B1B5210 /* UIKitScreenViews.swift in Sources */,
 				8EDEC94F3562C2FACAA58A3D /* Weak.swift in Sources */,
-				8EDEC43FB30802F70112E577 /* ScreenViewEvent.swift in Sources */,
+				8EDEC43FB30802F70112E577 /* ScreenViewedEvent.swift in Sources */,
 				8EDEC51F746CC25D27E32F6A /* DeepLinkOpenedEvent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -314,7 +314,7 @@ final class AmplitudeTests: XCTestCase {
 
         let amplitude = Amplitude(configuration: configuration)
 
-        amplitude.track(event: ScreenViewEvent(screenName: "main view"))
+        amplitude.track(event: ScreenViewedEvent(screenName: "main view"))
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)

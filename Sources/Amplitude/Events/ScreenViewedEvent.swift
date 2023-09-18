@@ -1,6 +1,6 @@
 import Foundation
 
-public class ScreenViewEvent: BaseEvent {
+public class ScreenViewedEvent: BaseEvent {
     override public var eventType: String {
         get {
             Constants.AMP_SCREEN_VIEWED_EVENT
