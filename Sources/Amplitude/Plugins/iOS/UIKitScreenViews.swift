@@ -50,7 +50,18 @@ class UIKitScreenViews {
 
 extension UIViewController {
     @objc func amp_viewDidAppear(_ animated: Bool) {
-        guard let top = UIViewController.amp_rootViewControllerFromView(view) else {
+        amp_viewDidAppear(animated)
+
+        let bundle = Bundle(for: self.classForCoder)
+        if !bundle.bundlePath.hasPrefix(Bundle.main.bundlePath) {
+            return
+        }
+
+        guard let rootViewController = viewIfLoaded?.window?.rootViewController else {
+            return
+        }
+
+        guard let top = Self.amp_topViewController(rootViewController) else {
             return
         }
 
@@ -66,15 +77,6 @@ extension UIViewController {
         for amplitude in UIKitScreenViews.amplitudes {
             amplitude.value?.track(event: ScreenViewEvent(screenName: name!))
         }
-
-        amp_viewDidAppear(animated)
-    }
-
-    static func amp_rootViewControllerFromView(_ view: UIView) -> UIViewController? {
-        guard let root = view.window?.rootViewController else {
-            return nil
-        }
-        return amp_topViewController(root)
     }
 
     static func amp_topViewController(_ rootViewController: UIViewController) -> UIViewController? {
@@ -90,7 +92,9 @@ extension UIViewController {
         }
 
         if let navigationController = rootViewController as? UINavigationController {
-            return navigationController.viewControllers.last
+            if let visibleViewController = navigationController.visibleViewController {
+                return visibleViewController
+            }
         }
 
         if let tabBarController = rootViewController as? UITabBarController {
