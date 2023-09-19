@@ -26,17 +26,17 @@ class UIKitScreenTracking: UtilityPlugin {
                 original: #selector(UIViewController.viewDidAppear(_:)),
                 new: #selector(UIViewController.amp__viewDidAppear)
         )
-        swizzle(forClass: UIWindow.self,
+    
+        /*
+         swizzle(forClass: UIWindow.self,
                 original: #selector(UIWindow.sendEvent(_:)),
                 new: #selector(UIWindow.amp__sendEvent)
         )
 
-        /*swizzle(forClass: UIScrollView.self,
+        swizzle(forClass: UIScrollView.self,
                 original: #selector(UIScrollView.setContentOffset(_:animated:)),
                 new:  #selector(UIScrollView.amp__setContentOffset)
-        )*/
-        
-        /*
+        )
 
         swizzle(forClass: UIScrollView.self,
                 original: #selector(UIScrollView.setContentOffset(_:animated:)),
