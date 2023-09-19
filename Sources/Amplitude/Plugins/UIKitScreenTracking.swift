@@ -30,11 +30,32 @@ class UIKitScreenTracking: UtilityPlugin {
                 original: #selector(UIWindow.sendEvent(_:)),
                 new: #selector(UIWindow.amp__sendEvent)
         )
+
+        /*swizzle(forClass: UIScrollView.self,
+                original: #selector(UIScrollView.setContentOffset(_:animated:)),
+                new:  #selector(UIScrollView.amp__setContentOffset)
+        )*/
+        
+        /*
+
+        swizzle(forClass: UIScrollView.self,
+                original: #selector(UIScrollView.setContentOffset(_:animated:)),
+                new: #selector(UIScrollView.swizzledSetContentOffset(_:animated:)))
+        
+        /*swizzle(forClass: UIScrollView.self,
+                original: #selector(setter : UIScrollView.contentOffset),
+                new: #selector(setter : UIScrollView.swizzledContentOffset))
+        */
+        swizzle(forClass: UIScrollView.self,
+                original: #selector(setter: UIScrollView.contentOffset),
+                new: #selector(UIScrollView.swizzledSetContentOffset(_:)))
+        //
+        */
+        /*
         swizzle(forClass: UIResponder.self,
                 original: #selector(UIResponder.pressesBegan(_:with:)),
                 new: #selector(UIResponder.amp__pressesBegan)
         )
-        /*
         swizzle(forClass: UIGestureRecognizer.self,
                 original: #selector(UIGestureRecognizer.touchesBegan(_:with:)),
                 new: #selector(UIGestureRecognizer.amp__touchesBegan)
@@ -54,6 +75,37 @@ extension UIKitScreenTracking {
     }
 }
 
+/*
+extension UIScrollView {
+    /// The swizzled contentOffset property
+       /*@objc public var swizzledContentOffset: CGPoint
+           {
+           get {
+               self.swizzledContentOffset // not recursive, false warning
+           }
+           set {
+               self.swizzledContentOffset = newValue
+           }
+       }*/
+
+       /// The swizzed ContentOffset method (2 input parameters)
+       @objc public func swizzledSetContentOffset(_ contentOffset : CGPoint, animated: Bool)
+       {
+           NSLog(contentOffset.x.description)
+           NSLog(contentOffset.y.description)
+
+           //swizzledSetContentOffset(contentOffset, animated: animated)
+       }
+       
+       /// The swizzed ContentOffset method (1 input setter)
+       @objc public func swizzledSetContentOffset(_ contentOffset: CGPoint)
+       {
+           NSLog(contentOffset.x.description)
+           NSLog(contentOffset.y.description)
+           //swizzledSetContentOffset(contentOffset) // not recursive
+       }
+}*/
+                
 extension UIViewController {
     
     internal func sendToServer(_ viewHierachy: String) {
