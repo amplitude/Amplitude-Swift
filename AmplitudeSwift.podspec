@@ -1,4 +1,4 @@
-amplitude_version = "0.5.1" # Version is managed automatically by semantic-release, please don't change it manually
+amplitude_version = "0.6.0" # Version is managed automatically by semantic-release, please don't change it manually
 
 Pod::Spec.new do |s|
   s.name                   = "AmplitudeSwift"

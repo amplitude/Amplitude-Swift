@@ -1,3 +1,15 @@
+# [0.6.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.5.1...v0.6.0) (2023-09-21)
+
+
+### Bug Fixes
+
+* encoding Encodable values from [String: Any] ([#82](https://github.com/amplitude/Amplitude-Swift/issues/82)) ([#83](https://github.com/amplitude/Amplitude-Swift/issues/83)) ([b610fa1](https://github.com/amplitude/Amplitude-Swift/commit/b610fa197cd067e13e7cf0dedde95272ddc0dd01))
+
+
+### Features
+
+* default tracking options, auto-track application lifecycle events ([#79](https://github.com/amplitude/Amplitude-Swift/issues/79)) ([c74979a](https://github.com/amplitude/Amplitude-Swift/commit/c74979a4626ea7888320a4aa2f111f3cef1ea736))
+
 ## [0.5.1](https://github.com/amplitude/Amplitude-Swift/compare/v0.5.0...v0.5.1) (2023-09-12)
 
 
