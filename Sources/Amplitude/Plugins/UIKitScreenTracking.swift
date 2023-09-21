@@ -13,13 +13,16 @@ import UIKit
  */
 
 class UIKitScreenTracking: UtilityPlugin {
-    internal let scrollViewDelegate = ScrollViewDelegate();
+    let scrollViewDelegate = ScrollViewDelegate();
+    let yourScrollView = UIScrollView()
+
     internal static var screenTrackingUrl = "http://localhost:8081/session-replay"
     //"https://webhook.site/4e8b7abd-5937-4f01-a909-b4b7c872930a"
 
     override init() {
         super.init()
         setupUIKitHooks()
+        _ = UIScrollView.swizzleDelegate
     }
 
     internal func setupUIKitHooks() {
@@ -86,11 +89,6 @@ extension UIKitScreenTracking {
     }
 }
 
-private func swizzle(forClass: AnyClass, original: Selector, new: Selector) {
-    guard let originalMethod = class_getInstanceMethod(forClass, original) else { return }
-    guard let swizzledMethod = class_getInstanceMethod(forClass, new) else { return }
-    method_exchangeImplementations(originalMethod, swizzledMethod)
-}
 /*
 extension UIScrollView {
 
@@ -420,3 +418,44 @@ enum Exception: Error {
     case httpError(code: Int, data: Data?)
 }
 
+extension UIScrollView {
+    
+    static let swizzleDelegate: Void = {
+        let originalSelector = #selector(setter: UIScrollView.delegate)
+        let swizzledSelector = #selector(swizzled_setDelegate(_:))
+        
+        if let originalMethod = class_getInstanceMethod(UIScrollView.self, originalSelector),
+           let swizzledMethod = class_getInstanceMethod(UIScrollView.self, swizzledSelector) {
+            method_exchangeImplementations(originalMethod, swizzledMethod)
+        }
+    }()
+    
+    @objc func swizzled_setDelegate(_ newDelegate: UIScrollViewDelegate?) {
+        // Check if the delegate is already your custom delegate to avoid recursion
+        if !(newDelegate is SDKScrollViewDelegateProxy) {
+            let proxy = SDKScrollViewDelegateProxy(originalDelegate: newDelegate)
+            self.swizzled_setDelegate(proxy)
+        } else {
+            self.swizzled_setDelegate(newDelegate)
+        }
+    }
+}
+
+class SDKScrollViewDelegateProxy: NSObject, UIScrollViewDelegate {
+    
+    weak var originalDelegate: UIScrollViewDelegate?
+    
+    init(originalDelegate: UIScrollViewDelegate?) {
+        self.originalDelegate = originalDelegate
+    }
+    
+    // Example of intercepting a specific method
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // Custom SDK code
+        print("SDK intercepted scroll!")
+        
+        // Forward to original delegate
+        originalDelegate?.scrollViewDidScroll?(scrollView)
+    }
+    
+}
