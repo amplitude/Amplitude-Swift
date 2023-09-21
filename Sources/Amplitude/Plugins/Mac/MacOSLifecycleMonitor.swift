@@ -8,18 +8,6 @@
 #if os(macOS)
     import Cocoa
 
-    public protocol MacOSLifecycle {
-        func application(didFinishLaunchingWithOptions launchOptions: [String: Any]?)
-        func applicationDidBecomeActive()
-        func applicationWillResignActive()
-    }
-
-    extension MacOSLifecycle {
-        public func application(didFinishLaunchingWithOptions launchOptions: [String: Any]?) {}
-        public func applicationDidBecomeActive() {}
-        public func applicationWillResignActive() {}
-    }
-
     class MacOSLifecycleMonitor: UtilityPlugin {
         private var application: NSApplication
         private var appNotifications: [NSNotification.Name] =
@@ -60,29 +48,11 @@
         }
 
         func applicationDidBecomeActive(notification: NSNotification) {
-            amplitude?.apply { (ext) in
-                if let validExt = ext as? MacOSLifecycle {
-                    validExt.applicationDidBecomeActive()
-                }
-            }
-        }
-
-        func applicationWillResignActive(notification: NSNotification) {
-            amplitude?.apply { (ext) in
-                if let validExt = ext as? MacOSLifecycle {
-                    validExt.applicationWillResignActive()
-                }
-            }
-        }
-    }
-
-    extension AmplitudeDestinationPlugin: MacOSLifecycle {
-        public func applicationDidBecomeActive() {
             let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
             self.amplitude?.onEnterForeground(timestamp: timestamp)
         }
 
-        public func applicationWillResignActive() {
+        func applicationWillResignActive(notification: NSNotification) {
             let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
             self.amplitude?.onExitForeground(timestamp: timestamp)
         }

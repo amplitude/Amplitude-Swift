@@ -18,8 +18,7 @@ final class AmplitudeSessionTests: XCTestCase {
             apiKey: apiKey,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            minTimeBetweenSessionsMillis: 100,
-            trackingSessionEvents: true
+            minTimeBetweenSessionsMillis: 100
         )
     }
 

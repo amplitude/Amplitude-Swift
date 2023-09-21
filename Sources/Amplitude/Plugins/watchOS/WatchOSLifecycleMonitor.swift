@@ -10,16 +10,6 @@
     import Foundation
     import WatchKit
 
-    public protocol WatchOSLifecycle {
-        func applicationWillEnterForeground(watchExtension: WKExtension)
-        func applicationDidEnterBackground(watchExtension: WKExtension)
-    }
-
-    extension WatchOSLifecycle {
-        public func applicationWillEnterForeground(watchExtension: WKExtension) {}
-        public func applicationDidEnterBackground(watchExtension: WKExtension) {}
-    }
-
     class WatchOSLifecycleMonitor: UtilityPlugin {
         var wasBackgrounded: Bool = false
 
@@ -65,32 +55,14 @@
             // from iOS, so ignore until we've been backgrounded at least once.
             if wasBackgrounded == false { return }
 
-            amplitude?.apply { (ext) in
-                if let validExt = ext as? WatchOSLifecycle {
-                    validExt.applicationWillEnterForeground(watchExtension: watchExtension)
-                }
-            }
+            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+            self.amplitude?.onEnterForeground(timestamp: timestamp)
         }
 
         func applicationDidEnterBackground(notification: NSNotification) {
             // make sure to denote that we were backgrounded.
             wasBackgrounded = true
 
-            amplitude?.apply { (ext) in
-                if let validExt = ext as? WatchOSLifecycle {
-                    validExt.applicationDidEnterBackground(watchExtension: watchExtension)
-                }
-            }
-        }
-    }
-
-    extension AmplitudeDestinationPlugin: WatchOSLifecycle {
-        public func applicationWillEnterForeground(watchExtension: WKExtension) {
-            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
-            self.amplitude?.onEnterForeground(timestamp: timestamp)
-        }
-
-        public func applicationDidEnterBackground(watchExtension: WKExtension) {
             let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
             self.amplitude?.onExitForeground(timestamp: timestamp)
         }

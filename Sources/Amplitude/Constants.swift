@@ -29,7 +29,6 @@ public struct Constants {
     static let EU_BATCH_API_HOST = "https://api.eu.amplitude.com/batch"
     static let IDENTIFY_EVENT = "$identify"
     static let GROUP_IDENTIFY_EVENT = "$groupidentify"
-    static let AMP_REVENUE_EVENT = "revenue_amount"
     static let MAX_PROPERTY_KEYS = 1024
     static let MAX_STRING_LENGTH = 1024
     public static let MIN_IDENTIFY_BATCH_INTERVAL_MILLIS = 30 * 1000  // 30s
@@ -49,8 +48,27 @@ public struct Constants {
     static let AMP_TRACKING_OPTION_PLATFORM = "platform"
     static let AMP_TRACKING_OPTION_REGION = "region"
     static let AMP_TRACKING_OPTION_VERSION_NAME = "version_name"
+
+    static let AMP_AMPLITUDE_PREFIX = "[Amplitude] "
+
     static let AMP_SESSION_END_EVENT = "session_end"
     static let AMP_SESSION_START_EVENT = "session_start"
+    static let AMP_APPLICATION_INSTALLED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Application Installed"
+    static let AMP_APPLICATION_UPDATED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Application Updated"
+    static let AMP_APPLICATION_OPENED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Application Opened"
+    static let AMP_APPLICATION_BACKGROUNDED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Application Backgrounded"
+    static let AMP_DEEP_LINK_OPENED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Deep Link Opened"
+    static let AMP_SCREEN_VIEWED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Screen Viewed"
+    static let AMP_REVENUE_EVENT = "revenue_amount"
+
+    static let AMP_APP_VERSION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Version"
+    static let AMP_APP_BUILD_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Build"
+    static let AMP_APP_PREVIOUS_VERSION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Previous Version"
+    static let AMP_APP_PREVIOUS_BUILD_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Previous Build"
+    static let AMP_APP_FROM_BACKGROUND_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)From Background"
+    static let AMP_APP_LINK_URL_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Link URL"
+    static let AMP_APP_LINK_REFERRER_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Link Referrer"
+    static let AMP_APP_SCREEN_NAME_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Screen Name"
 
     public struct Configuration {
         public static let FLUSH_QUEUE_SIZE = 30
