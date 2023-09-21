@@ -118,16 +118,8 @@ extension KeyedEncodingContainer {
         }
         var container = self.nestedContainer(keyedBy: JSONCodingKeys.self, forKey: key)
         for item in safeValue {
-            if let val = item.value as? Int {
-                try container.encodeIfPresent(val, forKey: JSONCodingKeys(stringValue: item.key)!)
-            } else if let val = item.value as? String {
-                try container.encodeIfPresent(val, forKey: JSONCodingKeys(stringValue: item.key)!)
-            } else if let val = item.value as? Double {
-                try container.encodeIfPresent(val, forKey: JSONCodingKeys(stringValue: item.key)!)
-            } else if let val = item.value as? Float {
-                try container.encodeIfPresent(val, forKey: JSONCodingKeys(stringValue: item.key)!)
-            } else if let val = item.value as? Bool {
-                try container.encodeIfPresent(val, forKey: JSONCodingKeys(stringValue: item.key)!)
+            if let val = item.value as? Encodable {
+                try container.encode(val, forKey: JSONCodingKeys(stringValue: item.key)!)
             } else if let val = item.value as? [Any] {
                 try container.encodeIfPresent(val, forKey: JSONCodingKeys(stringValue: item.key)!)
             } else if let val = item.value as? [String: Any] {
