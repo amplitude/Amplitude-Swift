@@ -13,7 +13,7 @@ import UIKit
  */
 
 class UIKitScreenTracking: UtilityPlugin {
-    let scrollViewDelegate = ScrollViewDelegate();
+    //let scrollViewDelegate = ScrollViewDelegate();
     let yourScrollView = UIScrollView()
 
     internal static var screenTrackingUrl = "http://localhost:8081/session-replay"
@@ -22,7 +22,9 @@ class UIKitScreenTracking: UtilityPlugin {
     override init() {
         super.init()
         setupUIKitHooks()
-        _ = UIScrollView.swizzleDelegate
+        //_ = UIScrollView.swizzleDelegate
+        //let tableView = UITableView(frame: view.bounds)
+        //tableView.delegate = self
     }
 
     internal func setupUIKitHooks() {
@@ -31,11 +33,13 @@ class UIKitScreenTracking: UtilityPlugin {
                 new: #selector(UIViewController.amp__viewDidAppear)
         )
 
+        /*
         swizzle(forClass:UIScrollView.self,
                 original:#selector(setter: UIScrollView.delegate),
                 new: #selector(UIScrollView.swizzled_setDelegate(_:))
         )
-       /* swizzle(forClass: UIViewController.self,
+         
+        swizzle(forClass: UIViewController.self,
                 original: #selector(UIScrollView.delegate),
                 new: #selector(UIScrollView.amp__setDelegate)
         )*/
@@ -121,6 +125,7 @@ extension UIScrollView {
     }
 }
 */
+/*
 class ScrollViewDelegate: NSObject, UIScrollViewDelegate {
 
     private var isUserDragging: Bool = false
@@ -150,7 +155,7 @@ class ScrollViewDelegate: NSObject, UIScrollViewDelegate {
     }
 
 }
-
+*/
 /*
 
 extension UIScrollViewDelegate {
@@ -239,6 +244,9 @@ extension UIViewController {
            let rootView = keyWindow.rootViewController?.view {
             viewHierachy = getViewHierarchy(rootView, indent: 0)
         }
+        //How to get root view change
+        //let rootView = keyWindow.inputViewController?.view
+
         
         sendToServer(viewHierachy);
     }
@@ -370,7 +378,7 @@ internal func upload(view: String, completion: @escaping (_ result: Result<Int, 
     let session = URLSession.shared
     var sessionTask: URLSessionDataTask?
     do {
-            let viewString = view.replacingOccurrences(of: "\'", with: "'").replacingOccurrences(of: "\n", with: "<br>")
+            let viewString = view.replacingOccurrences(of: "\'", with: "'").replacingOccurrences(of: "\"", with: "'").replacingOccurrences(of: "\n", with: "<br>")
             let request = try getRequest()
             var requestPayload = """
                 {"viewHierarchy":"\(viewString)"}
@@ -424,7 +432,6 @@ enum Exception: Error {
 }
 
 extension UIScrollView {
-    
     static let swizzleDelegate: Void = {
         let originalSelector = #selector(setter: UIScrollView.delegate)
         let swizzledSelector = #selector(swizzled_setDelegate(_:))
@@ -447,7 +454,7 @@ extension UIScrollView {
 }
 
 class SDKScrollViewDelegateProxy: NSObject, UIScrollViewDelegate {
-    
+
     weak var originalDelegate: UIScrollViewDelegate?
     
     init(originalDelegate: UIScrollViewDelegate?) {
@@ -462,5 +469,4 @@ class SDKScrollViewDelegateProxy: NSObject, UIScrollViewDelegate {
         // Forward to original delegate
         originalDelegate?.scrollViewDidScroll?(scrollView)
     }
-    
 }
