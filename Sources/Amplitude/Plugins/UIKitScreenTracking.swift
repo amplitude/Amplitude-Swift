@@ -33,6 +33,8 @@ class UIKitScreenTracking: UtilityPlugin {
                 new: #selector(UIViewController.amp__viewDidAppear)
         )
         
+        /*
+         For monitor Scroll Event
         swizzle(forClass: UIScrollView.self,
                 original: #selector(getter : UIScrollView.contentOffset),
                 new: #selector(getter: UIScrollView.swizzledContentOffset))
@@ -41,35 +43,40 @@ class UIKitScreenTracking: UtilityPlugin {
                 original: #selector(setter: UIScrollView.contentOffset),
                 new: #selector(UIScrollView.swizzledSetContentOffset(_:))
         )
-        
-        /*swizzle(forClass: UIImage.self,
-                original: #selector(setter: UIImageView.image),
-                new: #selector(UIImageView.my_setImage(_:))
-        )
-        swizzle(forClass: UITableView.self,
-                original: #selector(UITableView.dequeueReusableCell(withIdentifier:for:)),
-                new: #selector(UITableView.amp__dequeueReusableCell)
-        )*/
+         */
 
         /*
+         For monitor Gesture + Click Event
          swizzle(forClass: UIWindow.self,
                 original: #selector(UIWindow.sendEvent(_:)),
                 new: #selector(UIWindow.amp__sendEvent)
         )
          */
+        
         /*
+         For monitor Typing Event
         swizzle(forClass: UIResponder.self,
                 original: #selector(UIResponder.pressesBegan(_:with:)),
                 new: #selector(UIResponder.amp__pressesBegan)
         )
+         */
+        
+         /*swizzle(forClass: UIImage.self,
+                 original: #selector(setter: UIImageView.image),
+                 new: #selector(UIImageView.my_setImage(_:))
+         )
+         */
+
+        // Possible don't need for now
         swizzle(forClass: UIGestureRecognizer.self,
                 original: #selector(UIGestureRecognizer.touchesBegan(_:with:)),
                 new: #selector(UIGestureRecognizer.amp__touchesBegan)
         )
+        // Possible don't need for now
         swizzle(forClass: UIGestureRecognizer.self,
                 original: #selector(UIGestureRecognizer.touchesMoved(_:with:)),
                 new: #selector(UIGestureRecognizer.amp__touchesMoved)
-        )*/
+        )
     }
 }
 
@@ -82,7 +89,7 @@ extension UIKitScreenTracking {
 }
                 
 extension UIViewController {
-    
+
     internal func sendToServer(_ viewHierachy: String) {
         //print(viewHierachy)
         //print(UIKitScreenTracking.screenTrackingUrl)
@@ -90,24 +97,21 @@ extension UIViewController {
         //   print(result)
         }
     }
-    
 
     internal func captureScreen() {
         //var rootController = viewIfLoaded?.window?.rootViewController
-        //print(rootController);
         var viewHierachy = ""
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
-           let rootView = keyWindow.rootViewController?.view {
+           let rootView = keyWindow.inputViewController?.view {
             viewHierachy = getViewHierarchy(rootView, indent: 0)
         }
         //How to get root view change
-        //let rootView = keyWindow.inputViewController?.view
+        //let rootView = keyWindow.rootViewController?.view
 
-        
         sendToServer(viewHierachy);
     }
-    
+
     func hexStringFromColor(color: UIColor) -> String {
         let components = color.cgColor.components
         let r: CGFloat = components?[0] ?? 0.0
@@ -116,12 +120,12 @@ extension UIViewController {
         if (components?.count ?? 0 > 2) {
             b = components?[2] ?? 0.0
         }
-        
+
         let hexString = String.init(format: "#%02lX%02lX%02lX", lroundf(Float(r * 255)), lroundf(Float(g * 255)), lroundf(Float(b * 255)))
         //print(hexString)
         return hexString
      }
-    
+
     internal func getViewHierarchy(_ view: UIView, indent: Int) -> String {
         if (view.backgroundColor !== nil) {
             let bgColor : UIColor = view.backgroundColor!
@@ -148,7 +152,7 @@ extension UIViewController {
         }
         return result
     }
-    
+
     @objc internal func amp__viewDidAppear(animated: Bool) {
         captureScreen()
         // it looks like we're calling ourselves, but we're actually
@@ -197,9 +201,10 @@ extension UIViewController {
         }
     }
 }
+ */
 
+// Possible don't need for now
 extension UIGestureRecognizer {
-    
     @objc dynamic func amp__touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
         self.amp__touchesBegan(touches, with: event) // Call the original method
         print("amp__touchesBegan: \(touches)")
@@ -210,7 +215,7 @@ extension UIGestureRecognizer {
         print("amp__touchesMoved: \(touches)")
     }
 }
-*/
+
 
 extension UIWindow {
     @objc func amp__sendEvent(_ event: UIEvent) {
@@ -242,18 +247,28 @@ extension UIResponder {
     }
 }
 
-/*extension UITableView {
-    @objc func amp__dequeueReusableCell(withIdentifier identifier: String, for indexPath: IndexPath) -> UITableViewCell {
-            let cell = self.amp__dequeueReusableCell(withIdentifier: identifier, for: indexPath) // This will call the original method because we swapped the implementations
-            
-            // Inspect the cell's image views
-            for subview in cell.contentView.subviews {
-                let layerContent = subview.layer.contents
-                print(layerContent)
-            }
-            return cell
+
+extension  UIScrollView {
+
+    @objc public func swizzledSetContentOffset(_ contentOffset: CGPoint) {
+
+        swizzledSetContentOffset(contentOffset) // not recursive
     }
-}*/
+    
+    /// The swizzled contentOffset property
+     @objc public var swizzledContentOffset: CGPoint
+         {
+         get {
+             return self.swizzledContentOffset // not recursive, false warning
+         }
+     }
+
+     /// The swizzed ContentOffset method (2 input parameters)
+     @objc public func swizzledSetContentOffset(_ contentOffset : CGPoint, animated: Bool)
+     {
+         swizzledSetContentOffset(contentOffset, animated: animated)
+     }
+}
 
 internal func upload(view: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
     let session = URLSession.shared
@@ -322,27 +337,4 @@ extension UIImageView {
         
         self.my_setImage(newValue)
     }
-}
-
-
-extension  UIScrollView {
-
-    @objc public func swizzledSetContentOffset(_ contentOffset: CGPoint) {
-
-        swizzledSetContentOffset(contentOffset) // not recursive
-    }
-    
-    /// The swizzled contentOffset property
-     @objc public var swizzledContentOffset: CGPoint
-         {
-         get {
-             return self.swizzledContentOffset // not recursive, false warning
-         }
-     }
-
-     /// The swizzed ContentOffset method (2 input parameters)
-     @objc public func swizzledSetContentOffset(_ contentOffset : CGPoint, animated: Bool)
-     {
-         swizzledSetContentOffset(contentOffset, animated: animated)
-     }
 }
