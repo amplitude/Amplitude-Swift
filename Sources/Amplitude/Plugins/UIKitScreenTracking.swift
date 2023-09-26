@@ -395,8 +395,15 @@ extension UITableView {
     @objc func amp__dequeueReusableCell(withIdentifier identifier: String, for indexPath: IndexPath) -> UITableViewCell {
             let cell = self.amp__dequeueReusableCell(withIdentifier: identifier, for: indexPath) // This will call the original method because we swapped the implementations
             
-            // TODO: Inspect the cell here. Check if it has an image and get the URL if possible.
-            
+            // Inspect the cell's image views
+            for subview in cell.contentView.subviews {
+                if let imageView = subview as? UIImageView, let image = imageView.image {
+                    // You've found an image
+                    print("Found an image in the cell at \(indexPath)")
+                
+                    // TODO: Handle or inspect the image as needed
+                }
+            }
             return cell
     }
 }
