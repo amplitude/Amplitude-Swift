@@ -397,6 +397,7 @@ extension UITableView {
             
             // Inspect the cell's image views
             for subview in cell.contentView.subviews {
+                let type = type(of: subview)
                 if let imageView = subview as? UIImageView, let image = imageView.image {
                     // You've found an image
                     print("Found an image in the cell at \(indexPath)")
