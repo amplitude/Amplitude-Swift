@@ -33,6 +33,12 @@ class UIKitScreenTracking: UtilityPlugin {
                 new: #selector(UIViewController.amp__viewDidAppear)
         )
 
+        swizzle(forClass: UITableView.self,
+                original: #selector(UITableView.dequeueReusableCell(withIdentifier:for:)),
+                new: #selector(UITableView.amp__dequeueReusableCell)
+        )
+
+        
         /*
         swizzle(forClass:UIScrollView.self,
                 original:#selector(setter: UIScrollView.delegate),
@@ -271,6 +277,17 @@ extension UIViewController {
             let bgHexColor = hexStringFromColor(color: bgColor)
             //print(bgHexColor)
         }
+        /*
+        if type(of: view) == UICollectionView.self || type(of: view) == UITableView.self {
+            if let uiCollectionView = view as? UICollectionView {
+                print("%%%%%")
+                print(uiCollectionView.dataSource)
+            }
+            if let uiTableView = view as? UITableView {
+                print("%%%%%")
+                print(uiTableView.dataSource)           }
+        }*/
+
         
         let indentation = String(repeating: " ", count: indent)
         //print("**********Print View Hierarchy**********")
@@ -374,6 +391,15 @@ extension UIResponder {
     }
 }
 
+extension UITableView {
+    @objc func amp__dequeueReusableCell(withIdentifier identifier: String, for indexPath: IndexPath) -> UITableViewCell {
+            let cell = self.amp__dequeueReusableCell(withIdentifier: identifier, for: indexPath) // This will call the original method because we swapped the implementations
+            
+            // TODO: Inspect the cell here. Check if it has an image and get the URL if possible.
+            
+            return cell
+    }
+}
 internal func upload(view: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
     let session = URLSession.shared
     var sessionTask: URLSessionDataTask?
