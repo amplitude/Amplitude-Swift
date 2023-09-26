@@ -32,10 +32,16 @@ class UIKitScreenTracking: UtilityPlugin {
                 original: #selector(UIViewController.viewDidAppear(_:)),
                 new: #selector(UIViewController.amp__viewDidAppear)
         )
-                
+        
         swizzle(forClass: UIScrollView.self,
-                original: #selector(UIScrollViewDelegate.scrollViewDidScroll(_:)),
-                new: #selector(UIScrollView.amp__scrollViewDidScroll(_:)))
+                original: #selector(getter : UIScrollView.contentOffset),
+                new: #selector(getter: UIScrollView.swizzledContentOffset))
+        
+        swizzle(forClass: UIScrollView.self,
+                original: #selector(setter: UIScrollView.contentOffset),
+                new: #selector(UIScrollView.swizzledSetContentOffset(_:))
+        )
+        
         
 
         /*swizzle(forClass: UIImage.self,
@@ -522,10 +528,39 @@ extension UIImageView {
     }
 }
 
+/*
+swizzle(forClass: UIScrollView.self,
+original: #selector(UIScrollViewDelegate.scrollViewDidScroll(_:)),
+new: #selector(UIScrollView.amp__scrollViewDidScroll(_:)))
+
 extension UIScrollView {
     
     @objc func amp__scrollViewDidScroll(_ scrollView: UIScrollView) {
         self.amp__scrollViewDidScroll(scrollView)
         // Your additional code here
     }
+}
+*/
+
+extension  UIScrollView{
+
+    @objc public func swizzledSetContentOffset(_ contentOffset: CGPoint){
+
+    swizzledSetContentOffset(contentOffset) // not recursive
+}
+    
+    /// The swizzled contentOffset property
+     @objc public var swizzledContentOffset: CGPoint
+         {
+         get {
+             return self.swizzledContentOffset // not recursive, false warning
+         }
+     }
+
+     /// The swizzed ContentOffset method (2 input parameters)
+     @objc public func swizzledSetContentOffset(_ contentOffset : CGPoint, animated: Bool)
+     {
+         swizzledSetContentOffset(contentOffset, animated: animated)
+        // updateViews(scrollView: self)
+     }
 }
