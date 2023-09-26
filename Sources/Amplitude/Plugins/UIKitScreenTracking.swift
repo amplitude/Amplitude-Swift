@@ -113,11 +113,6 @@ extension UIKitScreenTracking {
     }
 }
 
-extension UIScrollViewDelegate {
-    @objc func amp__scrollViewDidEndDragging() {
-        
-    }
-}
 /*
 extension UIScrollView {
 
