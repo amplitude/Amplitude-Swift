@@ -33,10 +33,14 @@ class UIKitScreenTracking: UtilityPlugin {
                 new: #selector(UIViewController.amp__viewDidAppear)
         )
 
-        swizzle(forClass: UITableView.self,
+        swizzle(forClass: UIImage.self,
+                original: #selector(setter: UIImageView.image),
+                new: #selector(UIImageView.my_setImage(_:))
+        )
+        /*swizzle(forClass: UITableView.self,
                 original: #selector(UITableView.dequeueReusableCell(withIdentifier:for:)),
                 new: #selector(UITableView.amp__dequeueReusableCell)
-        )
+        )*/
 
         
         /*
@@ -391,7 +395,7 @@ extension UIResponder {
     }
 }
 
-extension UITableView {
+/*extension UITableView {
     @objc func amp__dequeueReusableCell(withIdentifier identifier: String, for indexPath: IndexPath) -> UITableViewCell {
             let cell = self.amp__dequeueReusableCell(withIdentifier: identifier, for: indexPath) // This will call the original method because we swapped the implementations
             
@@ -402,7 +406,8 @@ extension UITableView {
             }
             return cell
     }
-}
+}*/
+
 internal func upload(view: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
     let session = URLSession.shared
     var sessionTask: URLSessionDataTask?
@@ -497,5 +502,17 @@ class SDKScrollViewDelegateProxy: NSObject, UIScrollViewDelegate {
         
         // Forward to original delegate
         originalDelegate?.scrollViewDidScroll?(scrollView)
+    }
+}
+
+extension UIImageView {
+
+    @objc func my_setImage(_ newValue: UIImage?) {
+        print("Image being set!")
+        
+        // Here, you could potentially inspect the UIImage or its properties,
+        // but note that you won't have direct access to any URL that might have been used to load it.
+        
+        self.my_setImage(newValue)
     }
 }
