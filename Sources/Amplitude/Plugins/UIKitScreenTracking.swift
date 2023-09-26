@@ -32,12 +32,17 @@ class UIKitScreenTracking: UtilityPlugin {
                 original: #selector(UIViewController.viewDidAppear(_:)),
                 new: #selector(UIViewController.amp__viewDidAppear)
         )
+                
+        swizzle(forClass: UIScrollView.self,
+                original: #selector(UIScrollViewDelegate.scrollViewDidScroll(_:)),
+                new: #selector(UIScrollView.amp__scrollViewDidScroll(_:)))
+        
 
-        swizzle(forClass: UIImage.self,
+        /*swizzle(forClass: UIImage.self,
                 original: #selector(setter: UIImageView.image),
                 new: #selector(UIImageView.my_setImage(_:))
         )
-        /*swizzle(forClass: UITableView.self,
+        swizzle(forClass: UITableView.self,
                 original: #selector(UITableView.dequeueReusableCell(withIdentifier:for:)),
                 new: #selector(UITableView.amp__dequeueReusableCell)
         )*/
@@ -108,6 +113,11 @@ extension UIKitScreenTracking {
     }
 }
 
+extension UIScrollViewDelegate {
+    @objc func amp__scrollViewDidEndDragging() {
+        
+    }
+}
 /*
 extension UIScrollView {
 
@@ -514,5 +524,13 @@ extension UIImageView {
         // but note that you won't have direct access to any URL that might have been used to load it.
         
         self.my_setImage(newValue)
+    }
+}
+
+extension UIScrollView {
+    
+    @objc func amp__scrollViewDidScroll(_ scrollView: UIScrollView) {
+        self.amp__scrollViewDidScroll(scrollView)
+        // Your additional code here
     }
 }
