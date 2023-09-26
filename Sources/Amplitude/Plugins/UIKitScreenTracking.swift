@@ -33,8 +33,8 @@ class UIKitScreenTracking: UtilityPlugin {
                 new: #selector(UIViewController.amp__viewDidAppear)
         )
         
-        /*
-         For monitor Scroll Event
+        
+        // For monitor Scroll Event
         swizzle(forClass: UIScrollView.self,
                 original: #selector(getter : UIScrollView.contentOffset),
                 new: #selector(getter: UIScrollView.swizzledContentOffset))
@@ -43,7 +43,6 @@ class UIKitScreenTracking: UtilityPlugin {
                 original: #selector(setter: UIScrollView.contentOffset),
                 new: #selector(UIScrollView.swizzledSetContentOffset(_:))
         )
-         */
 
         /*
          For monitor Gesture + Click Event
