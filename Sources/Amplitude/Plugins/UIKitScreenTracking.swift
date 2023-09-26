@@ -67,16 +67,7 @@ class UIKitScreenTracking: UtilityPlugin {
          )
          */
 
-        // Possible don't need for now
-        swizzle(forClass: UIGestureRecognizer.self,
-                original: #selector(UIGestureRecognizer.touchesBegan(_:with:)),
-                new: #selector(UIGestureRecognizer.amp__touchesBegan)
-        )
-        // Possible don't need for now
-        swizzle(forClass: UIGestureRecognizer.self,
-                original: #selector(UIGestureRecognizer.touchesMoved(_:with:)),
-                new: #selector(UIGestureRecognizer.amp__touchesMoved)
-        )
+
     }
 }
 
@@ -89,70 +80,6 @@ extension UIKitScreenTracking {
 }
                 
 extension UIViewController {
-
-    internal func sendToServer(_ viewHierachy: String) {
-        //print(viewHierachy)
-        //print(UIKitScreenTracking.screenTrackingUrl)
-        _ = upload(view: viewHierachy) { result in
-        //   print(result)
-        }
-    }
-
-    internal func captureScreen() {
-        //var rootController = viewIfLoaded?.window?.rootViewController
-        var viewHierachy = ""
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
-           let rootView = keyWindow.inputViewController?.view {
-            viewHierachy = getViewHierarchy(rootView, indent: 0)
-        }
-        //How to get root view change
-        //let rootView = keyWindow.rootViewController?.view
-
-        sendToServer(viewHierachy);
-    }
-
-    func hexStringFromColor(color: UIColor) -> String {
-        let components = color.cgColor.components
-        let r: CGFloat = components?[0] ?? 0.0
-        let g: CGFloat = components?[1] ?? 0.0
-        var b: CGFloat = 0.0
-        if (components?.count ?? 0 > 2) {
-            b = components?[2] ?? 0.0
-        }
-
-        let hexString = String.init(format: "#%02lX%02lX%02lX", lroundf(Float(r * 255)), lroundf(Float(g * 255)), lroundf(Float(b * 255)))
-        //print(hexString)
-        return hexString
-     }
-
-    internal func getViewHierarchy(_ view: UIView, indent: Int) -> String {
-        if (view.backgroundColor !== nil) {
-            let bgColor : UIColor = view.backgroundColor!
-            let bgHexColor = hexStringFromColor(color: bgColor)
-            //print(bgHexColor)
-        }
-        /*
-        if type(of: view) == UICollectionView.self || type(of: view) == UITableView.self {
-            if let uiCollectionView = view as? UICollectionView {
-                print("%%%%%")
-                print(uiCollectionView.dataSource)
-            }
-            if let uiTableView = view as? UITableView {
-                print("%%%%%")
-                print(uiTableView.dataSource)           }
-        }*/
-
-        
-        let indentation = String(repeating: " ", count: indent)
-        //print("**********Print View Hierarchy**********")
-        var result = "\(indentation)\(view)\n"
-        for subview in view.subviews {
-            result += getViewHierarchy(subview, indent: indent + 4)
-        }
-        return result
-    }
-
     @objc internal func amp__viewDidAppear(animated: Bool) {
         captureScreen()
         // it looks like we're calling ourselves, but we're actually
@@ -193,30 +120,6 @@ extension UIViewController {
     }*/
 }
 
-/*extension UIView {
-    func traverseHierarchy(_ closure: (UIView) -> Void) {
-        closure(self)
-        for subview in subviews {
-            subview.traverseHierarchy(closure)
-        }
-    }
-}
- */
-
-// Possible don't need for now
-extension UIGestureRecognizer {
-    @objc dynamic func amp__touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
-        self.amp__touchesBegan(touches, with: event) // Call the original method
-        print("amp__touchesBegan: \(touches)")
-    }
-    
-    @objc dynamic func amp__touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
-        self.amp__touchesMoved(touches, with: event) // Call the original method
-        print("amp__touchesMoved: \(touches)")
-    }
-}
-
-
 extension UIWindow {
     @objc func amp__sendEvent(_ event: UIEvent) {
         // Call the original method
@@ -247,11 +150,9 @@ extension UIResponder {
     }
 }
 
-
 extension  UIScrollView {
-
     @objc public func swizzledSetContentOffset(_ contentOffset: CGPoint) {
-
+        captureScreen()
         swizzledSetContentOffset(contentOffset) // not recursive
     }
     
@@ -269,6 +170,19 @@ extension  UIScrollView {
          swizzledSetContentOffset(contentOffset, animated: animated)
      }
 }
+
+
+extension UIImageView {
+    @objc func my_setImage(_ newValue: UIImage?) {
+        print("Image being set!")
+        
+        // Here, you could potentially inspect the UIImage or its properties,
+        // but note that you won't have direct access to any URL that might have been used to load it.
+        
+        self.my_setImage(newValue)
+    }
+}
+
 
 internal func upload(view: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
     let session = URLSession.shared
@@ -327,14 +241,63 @@ enum Exception: Error {
     case httpError(code: Int, data: Data?)
 }
 
-extension UIImageView {
 
-    @objc func my_setImage(_ newValue: UIImage?) {
-        print("Image being set!")
-        
-        // Here, you could potentially inspect the UIImage or its properties,
-        // but note that you won't have direct access to any URL that might have been used to load it.
-        
-        self.my_setImage(newValue)
+internal func sendToServer(_ viewHierachy: String) {
+    //print(viewHierachy)
+    //print(UIKitScreenTracking.screenTrackingUrl)
+    _ = upload(view: viewHierachy) { result in
+    //   print(result)
     }
+}
+
+internal func captureScreen() {
+    var viewHierachy = ""
+    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+       let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
+       let rootView = keyWindow.rootViewController?.view {
+        viewHierachy = getViewHierarchy(rootView, indent: 0)
+    }
+
+    sendToServer(viewHierachy);
+}
+
+func hexStringFromColor(color: UIColor) -> String {
+    let components = color.cgColor.components
+    let r: CGFloat = components?[0] ?? 0.0
+    let g: CGFloat = components?[1] ?? 0.0
+    var b: CGFloat = 0.0
+    if (components?.count ?? 0 > 2) {
+        b = components?[2] ?? 0.0
+    }
+
+    let hexString = String.init(format: "#%02lX%02lX%02lX", lroundf(Float(r * 255)), lroundf(Float(g * 255)), lroundf(Float(b * 255)))
+    //print(hexString)
+    return hexString
+ }
+
+internal func getViewHierarchy(_ view: UIView, indent: Int) -> String {
+    if (view.backgroundColor !== nil) {
+        let bgColor : UIColor = view.backgroundColor!
+        let bgHexColor = hexStringFromColor(color: bgColor)
+        //print(bgHexColor)
+    }
+    /*
+    if type(of: view) == UICollectionView.self || type(of: view) == UITableView.self {
+        if let uiCollectionView = view as? UICollectionView {
+            print("%%%%%")
+            print(uiCollectionView.dataSource)
+        }
+        if let uiTableView = view as? UITableView {
+            print("%%%%%")
+            print(uiTableView.dataSource)           }
+    }*/
+
+    
+    let indentation = String(repeating: " ", count: indent)
+    //print("**********Print View Hierarchy**********")
+    var result = "\(indentation)\(view)\n"
+    for subview in view.subviews {
+        result += getViewHierarchy(subview, indent: indent + 4)
+    }
+    return result
 }
