@@ -34,6 +34,7 @@
 		8EDEC4D0C0CE07BF211804CC /* DefaultTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC17A6A0F8112A5DC8CEB /* DefaultTrackingOptions.swift */; };
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
 		8EDEC51F746CC25D27E32F6A /* DeepLinkOpenedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECC405793463C10F52EF2 /* DeepLinkOpenedEvent.swift */; };
+		8EDEC5F7208B1C327C8703D7 /* ObjCStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECF8CF745F7339B65D6DB /* ObjCStorage.swift */; };
 		8EDEC74C71FEC9056DC7358F /* ObjCLoggerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECD4B7ED7CBCD6955D097 /* ObjCLoggerProvider.swift */; };
 		8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */; };
 		8EDEC94F3562C2FACAA58A3D /* Weak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC54AB4DF9E1074C3D6A4 /* Weak.swift */; };
@@ -165,6 +166,7 @@
 		8EDECD6CF59CA94D5D0256CD /* ObjCDeepLinkOpenedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCDeepLinkOpenedEvent.swift; sourceTree = "<group>"; };
 		8EDECE07F682FAAE47F77B24 /* ObjCEventOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCEventOptions.swift; sourceTree = "<group>"; };
 		8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCConfiguration.swift; sourceTree = "<group>"; };
+		8EDECF8CF745F7339B65D6DB /* ObjCStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCStorage.swift; sourceTree = "<group>"; };
 		BA0359C92A51585D007C383B /* legacy_v3.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v3.sqlite; sourceTree = "<group>"; };
 		BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorage.swift; sourceTree = "<group>"; };
 		BA1EC0F32A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultTrackingOptionsTests.swift; sourceTree = "<group>"; };
@@ -284,6 +286,7 @@
 				8EDEC44D23EBD92D7892628E /* ObjCDefaultTrackingOptions.swift */,
 				8EDEC7D924907683D0A14CA6 /* ObjCScreenViewedEvent.swift */,
 				8EDECD6CF59CA94D5D0256CD /* ObjCDeepLinkOpenedEvent.swift */,
+				8EDECF8CF745F7339B65D6DB /* ObjCStorage.swift */,
 			);
 			path = ObjC;
 			sourceTree = "<group>";
@@ -714,6 +717,7 @@
 				8EDECA4DAFA67CD4785D0161 /* ObjCDefaultTrackingOptions.swift in Sources */,
 				8EDEC43520B2DCF584F1035D /* ObjCScreenViewedEvent.swift in Sources */,
 				8EDECC1FC97DDF0BEFAA96E7 /* ObjCDeepLinkOpenedEvent.swift in Sources */,
+				8EDEC5F7208B1C327C8703D7 /* ObjCStorage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

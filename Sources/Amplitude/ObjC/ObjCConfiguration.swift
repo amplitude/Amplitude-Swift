@@ -9,6 +9,11 @@ public class ObjCConfiguration: NSObject {
         self.init(configuration: Configuration(apiKey: apiKey))
     }
 
+    @objc(init:instanceName:)
+    public convenience init(apiKey: String, instanceName: String) {
+        self.init(configuration: Configuration(apiKey: apiKey, instanceName: instanceName))
+    }
+
     internal init(configuration: Configuration) {
         self.configuration = configuration
     }
@@ -40,12 +45,7 @@ public class ObjCConfiguration: NSObject {
 
     @objc
     public var instanceName: String {
-        get {
-            configuration.instanceName
-        }
-        set(value) {
-            configuration.instanceName = value
-        }
+        configuration.instanceName
     }
 
     @objc

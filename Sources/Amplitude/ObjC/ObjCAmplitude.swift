@@ -17,6 +17,11 @@ public class ObjCAmplitude: NSObject {
         ObjCConfiguration(configuration: amplitude.configuration)
     }
 
+    @objc
+    public var storage: ObjCStorage {
+        ObjCStorage(amplitude: amplitude)
+    }
+
     @objc(track:)
     @discardableResult
     public func track(event: ObjCBaseEvent) -> ObjCAmplitude {
@@ -93,15 +98,29 @@ public class ObjCAmplitude: NSObject {
 
     @objc(setGroup:groupName:)
     @discardableResult
-    public func setGroup(groupType: String, groupName: [String]) -> ObjCAmplitude {
+    public func setGroup(groupType: String, groupName: String) -> ObjCAmplitude {
         amplitude.setGroup(groupType: groupType, groupName: groupName)
         return self
     }
 
     @objc(setGroup:groupName:options:)
     @discardableResult
-    public func setGroup(groupType: String, groupName: [String], options: ObjCEventOptions?) -> ObjCAmplitude {
+    public func setGroup(groupType: String, groupName: String, options: ObjCEventOptions?) -> ObjCAmplitude {
         amplitude.setGroup(groupType: groupType, groupName: groupName, options: options?.options)
+        return self
+    }
+
+    @objc(setGroup:groupNames:)
+    @discardableResult
+    public func setGroup(groupType: String, groupNames: [String]) -> ObjCAmplitude {
+        amplitude.setGroup(groupType: groupType, groupName: groupNames)
+        return self
+    }
+
+    @objc(setGroup:groupNames:options:)
+    @discardableResult
+    public func setGroup(groupType: String, groupNames: [String], options: ObjCEventOptions?) -> ObjCAmplitude {
+        amplitude.setGroup(groupType: groupType, groupName: groupNames, options: options?.options)
         return self
     }
 

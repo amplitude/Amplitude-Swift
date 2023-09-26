@@ -57,6 +57,13 @@ jobs:
             -sdk watchsimulator \
             -destination 'platform=watchOS Simulator,name=Apple Watch Series 8 (41mm)' \
             test
+      - name: Objective-C Example Tests (iOS)
+        working-directory: Examples/AmplitudeObjCExample
+        run: |
+          xcodebuild test \
+            -scheme AmplitudeObjCExample \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 14'
 
       - name: Validate Podfile
         run: pod lib lint --allow-warnings
