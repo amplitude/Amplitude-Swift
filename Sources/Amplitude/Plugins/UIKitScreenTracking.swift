@@ -53,12 +53,13 @@ class UIKitScreenTracking: UtilityPlugin {
          */
         
         //For monitor Typing Event
-        swizzle(forClass: UIResponder.self,
+        /*swizzle(forClass: UIResponder.self,
                 original: #selector(UIResponder.pressesBegan(_:with:)),
                 new: #selector(UIResponder.amp__pressesBegan)
         )
+        */
         
-         /*swizzle(forClass: UIImage.self,
+        /*swizzle(forClass: UIImage.self,
                  original: #selector(setter: UIImageView.image),
                  new: #selector(UIImageView.my_setImage(_:))
          )
