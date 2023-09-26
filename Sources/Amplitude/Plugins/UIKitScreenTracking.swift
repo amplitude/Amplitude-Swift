@@ -52,13 +52,11 @@ class UIKitScreenTracking: UtilityPlugin {
         )
          */
         
-        /*
-         For monitor Typing Event
+        //For monitor Typing Event
         swizzle(forClass: UIResponder.self,
                 original: #selector(UIResponder.pressesBegan(_:with:)),
                 new: #selector(UIResponder.amp__pressesBegan)
         )
-         */
         
          /*swizzle(forClass: UIImage.self,
                  original: #selector(setter: UIImageView.image),
@@ -138,6 +136,7 @@ extension UIWindow {
 extension UIResponder {
     @objc func amp__pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         // Call the original method
+        captureScreen()
         self.amp__pressesBegan(presses, with: event)
 
         // Your monitoring or additional code for key presses
@@ -166,6 +165,7 @@ extension  UIScrollView {
      /// The swizzed ContentOffset method (2 input parameters)
      @objc public func swizzledSetContentOffset(_ contentOffset : CGPoint, animated: Bool)
      {
+         captureScreen()
          swizzledSetContentOffset(contentOffset, animated: animated)
      }
 }
