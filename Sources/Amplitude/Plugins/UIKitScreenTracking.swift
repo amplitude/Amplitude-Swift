@@ -137,14 +137,14 @@ extension UIResponder {
     @objc func amp__pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         // Call the original method
         captureScreen()
-        self.amp__pressesBegan(presses, with: event)
+        amp__pressesBegan(presses, with: event)
 
-        // Your monitoring or additional code for key presses
+        /*// Your monitoring or additional code for key presses
         for press in presses {
             if let key = press.key {
                 print("Key pressed: \(key.characters)")
             }
-        }
+        }*/
     }
 }
 
