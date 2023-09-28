@@ -85,12 +85,13 @@ public protocol Logger {
     func debug(message: String)
 }
 
-public enum PluginType: String, CaseIterable {
-    case before = "Before"
-    case enrichment = "Enrichment"
-    case destination = "Destination"
-    case utility = "Utility"
-    case observe = "Observe"
+@objc(AMPPluginType)
+public enum PluginType: Int, CaseIterable {
+    case before
+    case enrichment
+    case destination
+    case utility
+    case observe
 }
 
 public protocol Plugin: AnyObject {

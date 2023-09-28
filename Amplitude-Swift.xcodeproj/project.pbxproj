@@ -21,20 +21,36 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		8EDEC02B99EE2092B567A61D /* ObjCIngestionMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC500EBDA8B813056E2DB /* ObjCIngestionMetadata.swift */; };
 		8EDEC1073A308B12B5CCD975 /* AnalyticsConnectorPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECD39BAA97DD4320C0AA5 /* AnalyticsConnectorPlugin.swift */; };
+		8EDEC10C56FA7F7DEEB48B6F /* ObjCBaseEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECCFD935A0C5A6FE85E87 /* ObjCBaseEvent.swift */; };
 		8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */; };
+		8EDEC2155081F99515DF9C82 /* ObjCProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC18449A3E12FCADAD756 /* ObjCProperties.swift */; };
 		8EDEC2E0CC80DF79F5463ACC /* RemnantDataMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */; };
 		8EDEC30C0075E9D92B1B5210 /* UIKitScreenViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC650EF79B104DC3C9F4C /* UIKitScreenViews.swift */; };
 		8EDEC3283B812D5D34DADF7B /* AnalyticsConnectorIdentityPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC48916EFEF6D5B3EEF9A /* AnalyticsConnectorIdentityPlugin.swift */; };
+		8EDEC43520B2DCF584F1035D /* ObjCScreenViewedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC7D924907683D0A14CA6 /* ObjCScreenViewedEvent.swift */; };
 		8EDEC43FB30802F70112E577 /* ScreenViewedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECB455E34133AB256D720 /* ScreenViewedEvent.swift */; };
 		8EDEC4D0C0CE07BF211804CC /* DefaultTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC17A6A0F8112A5DC8CEB /* DefaultTrackingOptions.swift */; };
 		8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */; };
 		8EDEC51F746CC25D27E32F6A /* DeepLinkOpenedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECC405793463C10F52EF2 /* DeepLinkOpenedEvent.swift */; };
+		8EDEC5F7208B1C327C8703D7 /* ObjCStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECF8CF745F7339B65D6DB /* ObjCStorage.swift */; };
+		8EDEC74C71FEC9056DC7358F /* ObjCLoggerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECD4B7ED7CBCD6955D097 /* ObjCLoggerProvider.swift */; };
 		8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */; };
 		8EDEC94F3562C2FACAA58A3D /* Weak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC54AB4DF9E1074C3D6A4 /* Weak.swift */; };
 		8EDEC972AEB33E4528F7FEEB /* StoragePrefixMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */; };
 		8EDEC977C03AA2676724F436 /* BasePlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC448C42C8C0A464FAA15 /* BasePlugins.swift */; };
+		8EDEC98799DCB6610B8DBA19 /* ObjCAmplitude.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC1576C95A2EB2FEF00A8 /* ObjCAmplitude.swift */; };
+		8EDECA4DAFA67CD4785D0161 /* ObjCDefaultTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC44D23EBD92D7892628E /* ObjCDefaultTrackingOptions.swift */; };
+		8EDECB800546E37719391E65 /* ObjCPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECB1FA2AFF022A19104EE /* ObjCPlan.swift */; };
+		8EDECBA91C61037025B85EFA /* ObjCRevenue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECB730131FFFBE11EF9FF /* ObjCRevenue.swift */; };
+		8EDECC1FC97DDF0BEFAA96E7 /* ObjCDeepLinkOpenedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECD6CF59CA94D5D0256CD /* ObjCDeepLinkOpenedEvent.swift */; };
+		8EDECD1E851511887BE000F9 /* ObjCEventOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECE07F682FAAE47F77B24 /* ObjCEventOptions.swift */; };
 		8EDECD602E181B3E2E85D4DF /* StoragePrefixMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */; };
+		8EDECDF8E188CD7F24EEB475 /* ObjCTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC48D9C242C1A39AABCC4 /* ObjCTrackingOptions.swift */; };
+		8EDECE3AA54253BA167E89CB /* ObjCPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC1160D95DC3F0E48DDF7 /* ObjCPlugin.swift */; };
+		8EDECEC5F98F9974DF3E576F /* ObjCIdentify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC5A50E197C9C5067C19E /* ObjCIdentify.swift */; };
+		8EDECF81C2B1B38D472FD7EF /* ObjCConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */; };
 		8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
 		BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA0359C92A51585D007C383B /* legacy_v3.sqlite */; };
 		BA0639F62A4DD491000F1CEE /* LegacyDatabaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */; };
@@ -107,34 +123,50 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = "amplitude-swift::Amplitude-Swift";
+			remoteGlobalIDString = amplitude-swift::Amplitude-Swift;
 			remoteInfo = "Amplitude-Swift";
 		};
 		580FD1F1294A56F60036777B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = "amplitude-swift::Amplitude-SwiftTests";
+			remoteGlobalIDString = amplitude-swift::Amplitude-SwiftTests;
 			remoteInfo = "Amplitude-SwiftTests";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeSessionTests.swift; sourceTree = "<group>"; };
+		8EDEC1160D95DC3F0E48DDF7 /* ObjCPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCPlugin.swift; sourceTree = "<group>"; };
+		8EDEC1576C95A2EB2FEF00A8 /* ObjCAmplitude.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCAmplitude.swift; sourceTree = "<group>"; };
 		8EDEC17A6A0F8112A5DC8CEB /* DefaultTrackingOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultTrackingOptions.swift; sourceTree = "<group>"; };
+		8EDEC18449A3E12FCADAD756 /* ObjCProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCProperties.swift; sourceTree = "<group>"; };
 		8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigration.swift; sourceTree = "<group>"; };
 		8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sessions.swift; sourceTree = "<group>"; };
 		8EDEC448C42C8C0A464FAA15 /* BasePlugins.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasePlugins.swift; sourceTree = "<group>"; };
+		8EDEC44D23EBD92D7892628E /* ObjCDefaultTrackingOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCDefaultTrackingOptions.swift; sourceTree = "<group>"; };
 		8EDEC48916EFEF6D5B3EEF9A /* AnalyticsConnectorIdentityPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalyticsConnectorIdentityPlugin.swift; sourceTree = "<group>"; };
+		8EDEC48D9C242C1A39AABCC4 /* ObjCTrackingOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCTrackingOptions.swift; sourceTree = "<group>"; };
 		8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueueTimeTests.swift; sourceTree = "<group>"; };
+		8EDEC500EBDA8B813056E2DB /* ObjCIngestionMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCIngestionMetadata.swift; sourceTree = "<group>"; };
 		8EDEC54AB4DF9E1074C3D6A4 /* Weak.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Weak.swift; sourceTree = "<group>"; };
+		8EDEC5A50E197C9C5067C19E /* ObjCIdentify.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCIdentify.swift; sourceTree = "<group>"; };
 		8EDEC650EF79B104DC3C9F4C /* UIKitScreenViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitScreenViews.swift; sourceTree = "<group>"; };
 		8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigrationTests.swift; sourceTree = "<group>"; };
+		8EDEC7D924907683D0A14CA6 /* ObjCScreenViewedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCScreenViewedEvent.swift; sourceTree = "<group>"; };
 		8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigrationTests.swift; sourceTree = "<group>"; };
+		8EDECB1FA2AFF022A19104EE /* ObjCPlan.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCPlan.swift; sourceTree = "<group>"; };
 		8EDECB455E34133AB256D720 /* ScreenViewedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScreenViewedEvent.swift; sourceTree = "<group>"; };
+		8EDECB730131FFFBE11EF9FF /* ObjCRevenue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCRevenue.swift; sourceTree = "<group>"; };
 		8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoragePrefixMigration.swift; sourceTree = "<group>"; };
 		8EDECC405793463C10F52EF2 /* DeepLinkOpenedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeepLinkOpenedEvent.swift; sourceTree = "<group>"; };
+		8EDECCFD935A0C5A6FE85E87 /* ObjCBaseEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCBaseEvent.swift; sourceTree = "<group>"; };
 		8EDECD39BAA97DD4320C0AA5 /* AnalyticsConnectorPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalyticsConnectorPlugin.swift; sourceTree = "<group>"; };
+		8EDECD4B7ED7CBCD6955D097 /* ObjCLoggerProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCLoggerProvider.swift; sourceTree = "<group>"; };
+		8EDECD6CF59CA94D5D0256CD /* ObjCDeepLinkOpenedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCDeepLinkOpenedEvent.swift; sourceTree = "<group>"; };
+		8EDECE07F682FAAE47F77B24 /* ObjCEventOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCEventOptions.swift; sourceTree = "<group>"; };
+		8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCConfiguration.swift; sourceTree = "<group>"; };
+		8EDECF8CF745F7339B65D6DB /* ObjCStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCStorage.swift; sourceTree = "<group>"; };
 		BA0359C92A51585D007C383B /* legacy_v3.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v3.sqlite; sourceTree = "<group>"; };
 		BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorage.swift; sourceTree = "<group>"; };
 		BA1EC0F32A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultTrackingOptionsTests.swift; sourceTree = "<group>"; };
@@ -234,6 +266,29 @@
 				8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */,
 			);
 			path = Migration;
+			sourceTree = "<group>";
+		};
+		8EDECAFD8271434E8DC7BA78 /* ObjC */ = {
+			isa = PBXGroup;
+			children = (
+				8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */,
+				8EDECB1FA2AFF022A19104EE /* ObjCPlan.swift */,
+				8EDEC500EBDA8B813056E2DB /* ObjCIngestionMetadata.swift */,
+				8EDEC1576C95A2EB2FEF00A8 /* ObjCAmplitude.swift */,
+				8EDECE07F682FAAE47F77B24 /* ObjCEventOptions.swift */,
+				8EDECCFD935A0C5A6FE85E87 /* ObjCBaseEvent.swift */,
+				8EDEC48D9C242C1A39AABCC4 /* ObjCTrackingOptions.swift */,
+				8EDEC5A50E197C9C5067C19E /* ObjCIdentify.swift */,
+				8EDECB730131FFFBE11EF9FF /* ObjCRevenue.swift */,
+				8EDEC1160D95DC3F0E48DDF7 /* ObjCPlugin.swift */,
+				8EDEC18449A3E12FCADAD756 /* ObjCProperties.swift */,
+				8EDECD4B7ED7CBCD6955D097 /* ObjCLoggerProvider.swift */,
+				8EDEC44D23EBD92D7892628E /* ObjCDefaultTrackingOptions.swift */,
+				8EDEC7D924907683D0A14CA6 /* ObjCScreenViewedEvent.swift */,
+				8EDECD6CF59CA94D5D0256CD /* ObjCDeepLinkOpenedEvent.swift */,
+				8EDECF8CF745F7339B65D6DB /* ObjCStorage.swift */,
+			);
+			path = ObjC;
 			sourceTree = "<group>";
 		};
 		8EDECBC5925DC68913C7CB89 /* Migration */ = {
@@ -427,6 +482,7 @@
 				8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */,
 				8EDEC33A32439724A363C433 /* Migration */,
 				8EDEC17A6A0F8112A5DC8CEB /* DefaultTrackingOptions.swift */,
+				8EDECAFD8271434E8DC7BA78 /* ObjC */,
 			);
 			name = Sources;
 			path = Sources/Amplitude;
@@ -646,6 +702,22 @@
 				8EDEC94F3562C2FACAA58A3D /* Weak.swift in Sources */,
 				8EDEC43FB30802F70112E577 /* ScreenViewedEvent.swift in Sources */,
 				8EDEC51F746CC25D27E32F6A /* DeepLinkOpenedEvent.swift in Sources */,
+				8EDECF81C2B1B38D472FD7EF /* ObjCConfiguration.swift in Sources */,
+				8EDECB800546E37719391E65 /* ObjCPlan.swift in Sources */,
+				8EDEC02B99EE2092B567A61D /* ObjCIngestionMetadata.swift in Sources */,
+				8EDEC98799DCB6610B8DBA19 /* ObjCAmplitude.swift in Sources */,
+				8EDECD1E851511887BE000F9 /* ObjCEventOptions.swift in Sources */,
+				8EDEC10C56FA7F7DEEB48B6F /* ObjCBaseEvent.swift in Sources */,
+				8EDECDF8E188CD7F24EEB475 /* ObjCTrackingOptions.swift in Sources */,
+				8EDECEC5F98F9974DF3E576F /* ObjCIdentify.swift in Sources */,
+				8EDECBA91C61037025B85EFA /* ObjCRevenue.swift in Sources */,
+				8EDECE3AA54253BA167E89CB /* ObjCPlugin.swift in Sources */,
+				8EDEC2155081F99515DF9C82 /* ObjCProperties.swift in Sources */,
+				8EDEC74C71FEC9056DC7358F /* ObjCLoggerProvider.swift in Sources */,
+				8EDECA4DAFA67CD4785D0161 /* ObjCDefaultTrackingOptions.swift in Sources */,
+				8EDEC43520B2DCF584F1035D /* ObjCScreenViewedEvent.swift in Sources */,
+				8EDECC1FC97DDF0BEFAA96E7 /* ObjCDeepLinkOpenedEvent.swift in Sources */,
+				8EDEC5F7208B1C327C8703D7 /* ObjCStorage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

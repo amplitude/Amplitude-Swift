@@ -74,7 +74,7 @@ final class IdentifyTests: XCTestCase {
 
     func testUnsetOperation_withValidValue() {
         let identify = Identify()
-        identify.unset(proprety: "test-property")
+        identify.unset(property: "test-property")
         XCTAssertEqual(
             identify.propertySet,
             Set(["test-property"])

@@ -7,6 +7,7 @@
 
 import Foundation
 
+@objc(AMPLogLevel)
 public enum LogLevelEnum: Int {
     case OFF
     case ERROR
@@ -15,9 +16,32 @@ public enum LogLevelEnum: Int {
     case DEBUG
 }
 
-public enum ServerZone: String {
+@objc(AMPServerZone)
+public enum ServerZone: Int {
     case US
     case EU
+
+    public typealias RawValue = String
+
+    public var rawValue: RawValue {
+        switch self {
+        case .US:
+            return "US"
+        case .EU:
+            return "EU"
+        }
+    }
+
+    public init?(rawValue: RawValue) {
+        switch rawValue {
+        case "US":
+            self = .US
+        case "EU":
+            self = .EU
+        default:
+            return nil
+        }
+    }
 }
 
 public struct Constants {
