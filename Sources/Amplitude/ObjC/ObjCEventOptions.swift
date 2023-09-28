@@ -390,4 +390,9 @@ public class ObjCEventOptions: NSObject {
             options.partnerId = value
         }
     }
+
+    @objc(mergeEventOptions:)
+    public func mergeEventOptions(other: ObjCEventOptions) {
+        options.mergeEventOptions(eventOptions: other.options)
+    }
 }
