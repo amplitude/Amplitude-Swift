@@ -33,7 +33,7 @@
 - (void)testTrack_Options {
     Amplitude* amplitude = [self getAmplitude:@"track_options"];
     
-    AMPEventOptions* eventOptions = [[AMPEventOptions alloc] init];
+    AMPEventOptions* eventOptions = [AMPEventOptions new];
     eventOptions.locationLat = 12;
     eventOptions.locationLng = 34;
     NSDictionary* eventProperties = @{
@@ -54,7 +54,7 @@
 - (void)testIdentify {
     Amplitude* amplitude = [self getAmplitude:@"identify"];
     
-    AMPIdentify* identify = [[AMPIdentify alloc] init];
+    AMPIdentify* identify = [AMPIdentify new];
     [identify set:@"user-string-prop" value:@"string-value"];
     [identify setOnce:@"user-int-prop" value:@111];
     [identify append:@"user-number-prop" value:@123.4];
@@ -84,7 +84,7 @@
 - (void)testIdentify_ClearAll {
     Amplitude* amplitude = [self getAmplitude:@"identify-clearAll"];
     
-    AMPIdentify* identify = [[AMPIdentify alloc] init];
+    AMPIdentify* identify = [AMPIdentify new];
     [identify clearAll];
     [amplitude identify:identify];
     
@@ -102,11 +102,11 @@
 - (void)testIdentify_InterceptedIdentifies {
     Amplitude* amplitude = [self getAmplitude:@"identify-interceptedIdentifies"];
     
-    AMPIdentify* identify1 = [[AMPIdentify alloc] init];
+    AMPIdentify* identify1 = [AMPIdentify new];
     [identify1 set:@"user-string-prop" value:@"string-value"];
     [amplitude identify:identify1];
     
-    AMPIdentify* identify2 = [[AMPIdentify alloc] init];
+    AMPIdentify* identify2 = [AMPIdentify new];
     [identify2 set:@"user-int-prop" value:@111];
     [amplitude identify:identify2];
 
@@ -130,7 +130,7 @@
 - (void)testGroupIdentify {
     Amplitude* amplitude = [self getAmplitude:@"groupIdentify"];
     
-    AMPIdentify* identify = [[AMPIdentify alloc] init];
+    AMPIdentify* identify = [AMPIdentify new];
     [identify set:@"user-string-prop" value:@"string-value"];
     [identify setOnce:@"user-int-prop" value:@111];
     [identify append:@"user-number-prop" value:@123.4];
@@ -188,7 +188,7 @@
 
 - (void)testPlugin {
     Amplitude* amplitude = [self getAmplitude:@"plugin"];
-    [amplitude add:[[AMPPlugin alloc] init:AMPPluginTypeBefore execute:^AMPBaseEvent* _Nullable(AMPBaseEvent* _Nonnull event) {
+    [amplitude add:[AMPPlugin initWithType:AMPPluginTypeBefore execute:^AMPBaseEvent* _Nullable(AMPBaseEvent* _Nonnull event) {
         [event.eventProperties set:@"plugin-prop" value:@"plugin-value"];
         event.locationLat = 12;
         event.locationLng = 34;
@@ -217,9 +217,9 @@
 
 - (Amplitude *)getAmplitude:(NSString *)instancePrefix {
     NSString* instanceName = [NSString stringWithFormat:@"%@-%f", instancePrefix, [[NSDate date] timeIntervalSince1970]];
-    AMPConfiguration* configuration = [[AMPConfiguration alloc] init:@"API-KEY" instanceName:instanceName];
+    AMPConfiguration* configuration = [AMPConfiguration initWithApiKey:@"API-KEY" instanceName:instanceName];
     configuration.defaultTracking = AMPDefaultTrackingOptions.NONE;
-    Amplitude* amplitude = [[Amplitude alloc] init:configuration];
+    Amplitude* amplitude = [Amplitude initWithConfiguration:configuration];
     return amplitude;
 }
 

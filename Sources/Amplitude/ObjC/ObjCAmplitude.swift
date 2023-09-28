@@ -5,7 +5,14 @@ public class ObjCAmplitude: NSObject {
     private let amplitude: Amplitude
     private var plugins: [ObjCPluginWrapper] = []
 
-    @objc(init:)
+    @objc(initWithConfiguration:)
+    public static func initWithConfiguration(
+        configuration: ObjCConfiguration
+    ) -> ObjCAmplitude {
+        ObjCAmplitude(configuration: configuration)
+    }
+
+    @objc(initWithConfiguration:)
     public init(
         configuration: ObjCConfiguration
     ) {

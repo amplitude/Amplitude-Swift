@@ -4,12 +4,22 @@ import Foundation
 public class ObjCConfiguration: NSObject {
     internal let configuration: Configuration
 
-    @objc(init:)
+    @objc(initWithApiKey:)
+    public static func initWithApiKey(apiKey: String) -> ObjCConfiguration {
+        ObjCConfiguration(apiKey: apiKey)
+    }
+
+    @objc(initWithApiKey:instanceName:)
+    public static func initWithApiKey(apiKey: String, instanceName: String) -> ObjCConfiguration {
+        ObjCConfiguration(apiKey: apiKey, instanceName: instanceName)
+    }
+
+    @objc(initWithApiKey:)
     public convenience init(apiKey: String) {
         self.init(configuration: Configuration(apiKey: apiKey))
     }
 
-    @objc(init:instanceName:)
+    @objc(initWithApiKey:instanceName:)
     public convenience init(apiKey: String, instanceName: String) {
         self.init(configuration: Configuration(apiKey: apiKey, instanceName: instanceName))
     }

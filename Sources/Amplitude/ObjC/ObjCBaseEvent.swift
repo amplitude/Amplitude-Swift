@@ -8,7 +8,22 @@ public class ObjCBaseEvent: ObjCEventOptions {
         event
     }
 
-    @objc(init:eventProperties:)
+    @objc(initWithEventType:)
+    public static func initWithEventType(eventType: String) -> ObjCBaseEvent {
+        ObjCBaseEvent(eventType: eventType)
+    }
+
+    @objc(initWithEventType:eventProperties:)
+    public static func initWithEventType(eventType: String, eventProperties: [String: Any]?) -> ObjCBaseEvent {
+        ObjCBaseEvent(eventType: eventType, eventProperties: eventProperties)
+    }
+
+    @objc(initWithEventType:)
+    public convenience init(eventType: String) {
+        self.init(event: BaseEvent(eventType: eventType))
+    }
+
+    @objc(initWithEventType:eventProperties:)
     public convenience init(eventType: String, eventProperties: [String: Any]?) {
         self.init(event: BaseEvent(eventType: eventType, eventProperties: eventProperties))
     }

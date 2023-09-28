@@ -2,7 +2,12 @@ import Foundation
 
 @objc(AMPScreenViewEvent)
 public class ObjCScreenViewedEvent: ObjCBaseEvent {
-    @objc(init:)
+    @objc(initWithScreenName:)
+    public static func initWithScreenName(screenName: String) -> ObjCScreenViewedEvent {
+        ObjCScreenViewedEvent(screenName: screenName)
+    }
+
+    @objc(initWithScreenName:)
     public convenience init(screenName: String) {
         self.init(event: ScreenViewedEvent(screenName: screenName))
     }

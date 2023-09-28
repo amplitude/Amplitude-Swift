@@ -6,7 +6,24 @@ public class ObjCPlugin: NSObject {
     internal let setup: ((ObjCAmplitude) -> Void)?
     internal let execute: (ObjCBaseEvent) -> ObjCBaseEvent?
 
-    @objc(init:setup:execute:)
+    @objc(initWithType:setup:execute:)
+    public static func initWithType(
+        type: PluginType,
+        setup: @escaping (ObjCAmplitude) -> Void,
+        execute: @escaping (ObjCBaseEvent) -> ObjCBaseEvent?
+    ) -> ObjCPlugin {
+        ObjCPlugin(type: type, setup: setup, execute: execute)
+    }
+
+    @objc(initWithType:execute:)
+    public static func initWithType(
+        type: PluginType,
+        execute: @escaping (ObjCBaseEvent) -> ObjCBaseEvent?
+    ) -> ObjCPlugin {
+        ObjCPlugin(type: type, execute: execute)
+    }
+
+    @objc(initWithType:setup:execute:)
     public init(
         type: PluginType,
         setup: @escaping (ObjCAmplitude) -> Void,
@@ -17,7 +34,7 @@ public class ObjCPlugin: NSObject {
         self.execute = execute
     }
 
-    @objc(init:execute:)
+    @objc(initWithType:execute:)
     public init(type: PluginType, execute: @escaping (ObjCBaseEvent) -> ObjCBaseEvent?) {
         self.type = type
         self.setup = nil

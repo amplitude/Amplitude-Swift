@@ -10,16 +10,16 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     NSString* apiKey = @"API-KEY";
-    AMPConfiguration* configuration = [[AMPConfiguration alloc] init:apiKey];
+    AMPConfiguration* configuration = [AMPConfiguration initWithApiKey:apiKey];
     configuration.logLevel = AMPLogLevelLOG;
     configuration.serverZone = AMPServerZoneUS;
     configuration.defaultTracking = AMPDefaultTrackingOptions.ALL;
     configuration.loggerProvider = ^(NSInteger logLevel, NSString* _Nonnull message) {
         NSLog(@"%@", message);
     };
-    Amplitude* amplitude = [[Amplitude alloc] init:configuration];
+    Amplitude* amplitude = [Amplitude initWithConfiguration:configuration];
     
-    [amplitude add:[[AMPPlugin alloc] init:AMPPluginTypeBefore execute:^AMPBaseEvent* _Nullable(AMPBaseEvent* _Nonnull event) {
+    [amplitude add:[AMPPlugin initWithType:AMPPluginTypeBefore execute:^AMPBaseEvent* _Nullable(AMPBaseEvent* _Nonnull event) {
         [event.eventProperties set:@"plugin-prop" value:@234];
         event.locationLat = 34;
         event.locationLng = 78;
@@ -28,7 +28,7 @@
     
     [amplitude setUserId:@"User-ObjC"];
     
-    AMPIdentify* identify = [[AMPIdentify alloc] init];
+    AMPIdentify* identify = [AMPIdentify new];
     [identify set:@"user-prop-1" value:@"value-1"];
     [identify set:@"user-prop-2" value:@123];
     [amplitude identify:identify];
@@ -39,14 +39,14 @@
         @"prop-string-array": @[@"item-1", @"item-2"]
     }];
     
-    AMPBaseEvent* event = [[AMPBaseEvent alloc] init:@"Event-B" eventProperties:nil];
+    AMPBaseEvent* event = [AMPBaseEvent initWithEventType:@"Event-B"];
     event.appVersion = @"1.2.3";
     
     [amplitude track:event callback:^(AMPBaseEvent* _Nonnull event, NSInteger code, NSString* _Nonnull message) {
         NSLog(@"%@ - %@", event.eventType, message);
     }];
     
-    AMPBaseEvent* deepLinkOpenedEvent = [[AMPDeepLinkOpenedEvent alloc] init:@"http://example.com" referrer:@"https://referrer.com"];
+    AMPBaseEvent* deepLinkOpenedEvent = [AMPDeepLinkOpenedEvent initWithUrl:@"http://example.com" referrer:@"https://referrer.com"];
     [amplitude track:deepLinkOpenedEvent];
     
     [amplitude flush];
