@@ -1,3 +1,10 @@
+# [0.7.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.6.0...v0.7.0) (2023-09-28)
+
+
+### Features
+
+* Objective-C support ([#84](https://github.com/amplitude/Amplitude-Swift/issues/84)) ([eeced3e](https://github.com/amplitude/Amplitude-Swift/commit/eeced3eb1706019dc49823fd11149b89141a4e16))
+
 # [0.6.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.5.1...v0.6.0) (2023-09-21)
 
 
