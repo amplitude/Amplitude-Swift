@@ -23,7 +23,7 @@ public class ObjCProperties: NSObject {
     @objc(remove:)
     @discardableResult
     public func remove(key: String) -> ObjCProperties {
-        remove(key: key)
+        remover(key)
         return self
     }
 }
