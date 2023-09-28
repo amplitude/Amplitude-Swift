@@ -33,6 +33,13 @@
     [identify set:@"user-prop-2" value:@123];
     [amplitude identify:identify];
     
+    [amplitude setGroup:@"orgName" groupName:@"Test Org"];
+    
+    AMPIdentify* groupIdentify = [AMPIdentify new];
+    [groupIdentify set:@"group-prop-1" value:@"value-A"];
+    [groupIdentify set:@"group-prop-2" value:@true];
+    [amplitude groupIdentify:@"orgName" groupName:@"Test Org" identify:groupIdentify];
+
     [amplitude track:@"Event-A" eventProperties:@{
         @"prop-string": @"value-A",
         @"prop-int": @111,
@@ -48,6 +55,9 @@
     
     AMPBaseEvent* deepLinkOpenedEvent = [AMPDeepLinkOpenedEvent initWithUrl:@"http://example.com" referrer:@"https://referrer.com"];
     [amplitude track:deepLinkOpenedEvent];
+    
+    AMPBaseEvent* screenViewedEvent = [AMPScreenViewedEvent initWithScreenName:@"Settings"];
+    [amplitude track:screenViewedEvent];
     
     [amplitude flush];
     
