@@ -1,3 +1,10 @@
+## [0.7.1](https://github.com/amplitude/Amplitude-Swift/compare/v0.7.0...v0.7.1) (2023-09-29)
+
+
+### Bug Fixes
+
+* Objective-C support for plugin flush() ([#87](https://github.com/amplitude/Amplitude-Swift/issues/87)) ([726e3e8](https://github.com/amplitude/Amplitude-Swift/commit/726e3e84b3c3be75b65010d68d3ac2e565188df3))
+
 # [0.7.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.6.0...v0.7.0) (2023-09-28)
 
 
