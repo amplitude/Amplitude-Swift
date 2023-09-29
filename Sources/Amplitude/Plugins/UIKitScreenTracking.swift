@@ -255,7 +255,7 @@ internal func captureScreen() {
     if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
        let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
        let rootView = keyWindow.rootViewController?.view {
-        viewHierachy = getViewHierarchy(rootView, indent: 0)
+        viewHierachy = getViewHierarchy(rootView, indent: 0, fontSize: "")
     }
 
     sendToServer(viewHierachy);
@@ -275,7 +275,7 @@ func hexStringFromColor(color: UIColor) -> String {
     return hexString
  }
 
-internal func getViewHierarchy(_ view: UIView, indent: Int) -> String {
+internal func getViewHierarchy(_ view: UIView, indent: Int, fontSize: String) -> String {
     if (view.backgroundColor !== nil) {
         let bgColor : UIColor = view.backgroundColor!
         let bgHexColor = hexStringFromColor(color: bgColor)
@@ -295,9 +295,21 @@ internal func getViewHierarchy(_ view: UIView, indent: Int) -> String {
     
     let indentation = String(repeating: " ", count: indent)
     //print("**********Print View Hierarchy**********")
-    var result = "\(indentation)\(view)\n"
+
+    var result = ""
+    if (fontSize != "") {
+        result = "\(indentation)\(view) fontSize='\(fontSize)';\n"
+    } else {
+        result = "\(indentation)\(view)\n"
+    }
     for subview in view.subviews {
-        result += getViewHierarchy(subview, indent: indent + 4)
+        var fontSize = "";
+        if let labelView = subview as? UILabel {
+            fontSize = "\(labelView.font.pointSize) px"
+            //print(fontSize)
+            //print(labelView.text)
+        }
+        result += getViewHierarchy(subview, indent: indent + 4, fontSize: fontSize)
     }
     return result
 }
