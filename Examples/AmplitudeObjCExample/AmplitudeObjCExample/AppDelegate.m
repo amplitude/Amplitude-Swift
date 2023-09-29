@@ -26,6 +26,15 @@
         return event;
     }]];
     
+    NSMutableArray<AMPBaseEvent*>* collectedEvents = [NSMutableArray array];
+    [amplitude add:[AMPPlugin initWithType:AMPPluginTypeDestination execute:^AMPBaseEvent* _Nullable(AMPBaseEvent* _Nonnull event) {
+        [collectedEvents addObject:event];
+        return nil;
+    } flush:^() {
+        NSLog(@"Plugin Flush: %lu events", (unsigned long)collectedEvents.count);
+        [collectedEvents removeAllObjects];
+    }]];
+    
     [amplitude setUserId:@"User-ObjC"];
     
     AMPIdentify* identify = [AMPIdentify new];

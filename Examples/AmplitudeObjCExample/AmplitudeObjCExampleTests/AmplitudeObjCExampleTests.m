@@ -215,6 +215,36 @@
     XCTAssertEqualObjects(@34, [events[0] objectForKey:@"location_lng"]);
 }
 
+- (void)testDestinationPlugin {
+    XCTestExpectation* expectation = [self expectationWithDescription:@"flush"];
+    NSMutableArray<AMPBaseEvent*>* collectedEvents = [NSMutableArray array];
+    
+    Amplitude* amplitude = [self getAmplitude:@"plugin"];
+    [amplitude add:[AMPPlugin initWithType:AMPPluginTypeDestination execute:^AMPBaseEvent* _Nullable(AMPBaseEvent* _Nonnull event) {
+        [collectedEvents addObject:event];
+        return nil;
+    } flush:^() {
+        [expectation fulfill];
+    }]];
+   
+    [amplitude track:@"Event-A" eventProperties:nil];
+    [amplitude track:@"Event-B" eventProperties:nil];
+    [amplitude track:@"Event-C" eventProperties:nil];
+    
+    [amplitude flush];
+    
+    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError* error) {
+        if (error) {
+            XCTFail("Expectation failed with error: %@", error);
+        }
+    }];
+    
+    XCTAssertEqual(collectedEvents.count, 3);
+    XCTAssertEqualObjects(@"Event-A", [collectedEvents objectAtIndex:0].eventType);
+    XCTAssertEqualObjects(@"Event-B", [collectedEvents objectAtIndex:1].eventType);
+    XCTAssertEqualObjects(@"Event-C", [collectedEvents objectAtIndex:2].eventType);
+}
+
 - (Amplitude *)getAmplitude:(NSString *)instancePrefix {
     NSString* instanceName = [NSString stringWithFormat:@"%@-%f", instancePrefix, [[NSDate date] timeIntervalSince1970]];
     AMPConfiguration* configuration = [AMPConfiguration initWithApiKey:@"API-KEY" instanceName:instanceName];
