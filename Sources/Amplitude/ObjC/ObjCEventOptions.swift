@@ -354,7 +354,10 @@ public class ObjCEventOptions: NSObject {
 
     @objc
     public var extra: ObjCProperties {
-        ObjCProperties(setter: { (key, value) in
+        ObjCProperties(getter: { key in
+            guard let extra = self.options.extra else { return nil }
+            return extra[key]
+        }, setter: { (key, value) in
             if self.options.extra == nil {
                 self.options.extra = [:]
             }

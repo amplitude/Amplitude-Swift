@@ -76,7 +76,10 @@ public class ObjCRevenue: NSObject {
 
     @objc
     public var properties: ObjCProperties {
-        ObjCProperties(setter: { (key, value) in
+        ObjCProperties(getter: { key in
+            guard let properties = self.instance.properties else { return nil }
+            return properties[key] ?? nil
+        }, setter: { (key, value) in
             if self.instance.properties == nil {
                 self.instance.properties = [:]
             }
