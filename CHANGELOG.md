@@ -1,3 +1,10 @@
+## [0.7.2](https://github.com/amplitude/Amplitude-Swift/compare/v0.7.1...v0.7.2) (2023-10-04)
+
+
+### Bug Fixes
+
+* add Objective-C support to get property values ([#88](https://github.com/amplitude/Amplitude-Swift/issues/88)) ([a0d5aa6](https://github.com/amplitude/Amplitude-Swift/commit/a0d5aa6d88d8624d980bf3bc15bfea4a1c327839))
+
 ## [0.7.1](https://github.com/amplitude/Amplitude-Swift/compare/v0.7.0...v0.7.1) (2023-09-29)
 
 
