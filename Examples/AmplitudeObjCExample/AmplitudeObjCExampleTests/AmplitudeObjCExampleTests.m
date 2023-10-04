@@ -245,6 +245,16 @@
     XCTAssertEqualObjects(@"Event-C", [collectedEvents objectAtIndex:2].eventType);
 }
 
+- (void)testEventProperties {
+    AMPBaseEvent* event = [AMPBaseEvent initWithEventType:@"Event-A" eventProperties:@{@"prop-1": @"123"}];
+    [event.eventProperties set:@"prop-2" value:@111];
+    XCTAssertEqualObjects(@"123", [event.eventProperties get:@"prop-1"]);
+    XCTAssertEqualObjects(@111, [event.eventProperties get:@"prop-2"]);
+    [event.eventProperties remove:@"prop-1"];
+    XCTAssertEqualObjects(nil, [event.eventProperties get:@"prop-1"]);
+    XCTAssertEqualObjects(@111, [event.eventProperties get:@"prop-2"]);
+}
+
 - (Amplitude *)getAmplitude:(NSString *)instancePrefix {
     NSString* instanceName = [NSString stringWithFormat:@"%@-%f", instancePrefix, [[NSDate date] timeIntervalSince1970]];
     AMPConfiguration* configuration = [AMPConfiguration initWithApiKey:@"API-KEY" instanceName:instanceName];

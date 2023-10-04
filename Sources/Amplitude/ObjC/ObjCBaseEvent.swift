@@ -39,7 +39,10 @@ public class ObjCBaseEvent: ObjCEventOptions {
 
     @objc
     public var eventProperties: ObjCProperties {
-        ObjCProperties(setter: { (key, value) in
+        ObjCProperties(getter: { key in
+            guard let eventProperties = self.event.eventProperties else { return nil }
+            return eventProperties[key] ?? nil
+        }, setter: { (key, value) in
             if self.event.eventProperties == nil {
                 self.event.eventProperties = [:]
             }
@@ -51,7 +54,10 @@ public class ObjCBaseEvent: ObjCEventOptions {
 
     @objc
     public var userProperties: ObjCProperties {
-        ObjCProperties(setter: { (key, value) in
+        ObjCProperties(getter: { key in
+            guard let userProperties = self.event.userProperties else { return nil }
+            return userProperties[key] ?? nil
+        }, setter: { (key, value) in
             if self.event.userProperties == nil {
                 self.event.userProperties = [:]
             }
@@ -63,7 +69,10 @@ public class ObjCBaseEvent: ObjCEventOptions {
 
     @objc
     public var groups: ObjCProperties {
-        ObjCProperties(setter: { (key, value) in
+        ObjCProperties(getter: { key in
+            guard let groups = self.event.groups else { return nil }
+            return groups[key] ?? nil
+        }, setter: { (key, value) in
             if self.event.groups == nil {
                 self.event.groups = [:]
             }
@@ -75,7 +84,10 @@ public class ObjCBaseEvent: ObjCEventOptions {
 
     @objc
     public var groupProperties: ObjCProperties {
-        ObjCProperties(setter: { (key, value) in
+        ObjCProperties(getter: { key in
+            guard let groupProperties = self.event.groupProperties else { return nil }
+            return groupProperties[key] ?? nil
+        }, setter: { (key, value) in
             if self.event.groupProperties == nil {
                 self.event.groupProperties = [:]
             }

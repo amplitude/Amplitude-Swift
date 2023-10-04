@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class Identify {
+open class Identify {
     static let UNSET_VALUE = "-"
 
     enum Operation: String {
