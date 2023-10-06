@@ -1,5 +1,7 @@
 #import "AppDelegate.h"
 @import AmplitudeSwift;
+#import <AppTrackingTransparency/AppTrackingTransparency.h>
+#import <AdSupport/ASIdentifierManager.h>
 
 @interface AppDelegate ()
 
@@ -7,6 +9,93 @@
 
 @implementation AppDelegate
 
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions3:(NSDictionary *)launchOptions {
+    AMPConfiguration* configuration = [AMPConfiguration initWithApiKey:@"YOUR-API-KEY"];
+    configuration.defaultTracking.sessions = true;
+    Amplitude* amplitude = [Amplitude initWithConfiguration:configuration];
+    
+    NSString* eventType = @"Button Clicked";
+    NSDictionary* eventProperties = @{@"key": @"value"};
+    //AMPBaseEvent* event = [AMPBaseEvent initWithEventType:eventType eventProperties:eventProperties];
+    //[amplitude track:event];
+    
+    NSNumber* timestamp = [NSNumber numberWithLongLong:[[NSDate date] timeIntervalSince1970] * 1000];
+    //AMPBaseEvent* event = [AMPBaseEvent initWithEventType:eventType];
+    //event.timestamp = [timestamp longLongValue];
+    //[amplitude track:event];
+    
+    AMPBaseEvent* event = [AMPBaseEvent initWithEventType:eventType eventProperties:eventProperties];
+    [event.groups set:@"orgId" value:@"10"];
+    [amplitude track:event];
+ 
+    [amplitude flush];
+    
+    NSString* userId = @"TEST-USER-ID";
+    [amplitude setUserId:userId];
+    
+    NSString* deviceId = @"TEST-DEVICE-ID";
+    [amplitude setDeviceId:deviceId];
+ 
+    //[amplitude setSessionId:[timestamp longLongValue]];
+    
+    AMPIdentify* identify = [AMPIdentify new];
+    [identify clearAll];
+    [amplitude identify:identify];
+    
+    // AMPIdentify* identify = [AMPIdentify new];
+    [identify set:@"membership" value:@"paid"];
+    [identify set:@"payment" value:@"bank"];
+    [amplitude identify:identify];
+    
+    [identify set:@"membership" value:@"paid"];
+    [amplitude identify:identify];
+    
+    [amplitude groupIdentify:@"TEST-GROUP-TYPE" groupName:@"TEST-GROUP-NAME" identify:identify];
+    
+    AMPRevenue* revenue = [AMPRevenue new];
+    revenue.productId = @"productidentifier";
+    revenue.quantity = 3;
+    revenue.price = 3.99;
+    [amplitude revenue:revenue];
+    
+    configuration.callback = ^(AMPBaseEvent* _Nonnull event, NSInteger code, NSString* _Nonnull message) {
+        NSLog(@"eventCallback: %@, code: %@, message: %@", event.eventType, @(code), message);
+    };
+   
+    event.callback = ^(AMPBaseEvent* _Nonnull event, NSInteger code, NSString* _Nonnull message) {
+        NSLog(@"eventCallback: %@, code: %@, message: %@", event.eventType, @(code), message);
+    };
+    
+    [amplitude track:event callback:^(AMPBaseEvent* _Nonnull event, NSInteger code, NSString* _Nonnull message) {
+        NSLog(@"eventCallback: %@, code: %@, message: %@", event.eventType, @(code), message);
+    }];
+    
+    configuration.migrateLegacyData = false;
+   
+    
+    [amplitude add:[AMPPlugin initWithType:AMPPluginTypeEnrichment execute:^AMPBaseEvent* _Nullable(AMPBaseEvent* _Nonnull event) {
+        ATTrackingManagerAuthorizationStatus status = ATTrackingManager.trackingAuthorizationStatus;
+ 
+        // fallback to the IDFV value.
+        // this is also sent in event.context.device.id,
+        // feel free to use a value that is more useful to you.
+        NSUUID* idfaUUID = [UIDevice currentDevice].identifierForVendor;
+        
+        if (status == ATTrackingManagerAuthorizationStatusAuthorized) {
+            idfaUUID = [ASIdentifierManager sharedManager].advertisingIdentifier;
+        }
+        
+        NSString* idfa = (idfaUUID != nil) ? idfaUUID.UUIDString : nil;
+
+        // The idfa on simulator is always 00000000-0000-0000-0000-000000000000
+        event.idfa = idfa;
+        // If you want to use idfa for the device_id
+        event.deviceId = idfa;
+        return event;
+    }]];
+    
+    return true;
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     NSString* apiKey = @"API-KEY";
