@@ -29,7 +29,9 @@ final class BaseEventTests: XCTestCase {
                 "string": "stringValue",
                 "array": [1, 2, 3],
                 "int64": 1 as Int64,
-                "int32": 1 as Int32
+                "int32": 1 as Int32,
+                "cgfloat": 3.14 as CGFloat,
+                "double": 3.14 as Double
             ]
         )
 
@@ -51,6 +53,14 @@ final class BaseEventTests: XCTestCase {
         XCTAssertEqual(
             baseEventDict!["event_properties"]!["int64" as NSString] as! Int64,
             1
+        )
+        XCTAssertEqual(
+            baseEventDict!["event_properties"]!["cgfloat" as NSString] as! CGFloat,
+            3.14
+        )
+        XCTAssertEqual(
+            baseEventDict!["event_properties"]!["double" as NSString] as! Double,
+            3.14
         )
         XCTAssertEqual(
             baseEventDict!["event_properties"]!["string" as NSString] as! String,
