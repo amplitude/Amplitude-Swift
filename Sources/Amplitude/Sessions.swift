@@ -11,7 +11,7 @@ public class Sessions {
             do {
                 try amplitude.storage.write(key: StorageKey.PREVIOUS_SESSION_ID, value: _sessionId)
             } catch {
-                amplitude.logger?.warn(message: "Can't write PREVIOUS_SESSION_ID to storage: \(error)")
+                amplitude.logger.warn(message: "Can't write PREVIOUS_SESSION_ID to storage: \(error)")
             }
         }
     }
@@ -24,7 +24,7 @@ public class Sessions {
             do {
                 try amplitude.storage.write(key: StorageKey.LAST_EVENT_ID, value: _lastEventId)
             } catch {
-                amplitude.logger?.warn(message: "Can't write LAST_EVENT_ID to storage: \(error)")
+                amplitude.logger.warn(message: "Can't write LAST_EVENT_ID to storage: \(error)")
             }
         }
     }
@@ -37,7 +37,7 @@ public class Sessions {
             do {
                 try amplitude.storage.write(key: StorageKey.LAST_EVENT_TIME, value: _lastEventTime)
             } catch {
-                amplitude.logger?.warn(message: "Can't write LAST_EVENT_TIME to storage: \(error)")
+                amplitude.logger.warn(message: "Can't write LAST_EVENT_TIME to storage: \(error)")
             }
         }
     }

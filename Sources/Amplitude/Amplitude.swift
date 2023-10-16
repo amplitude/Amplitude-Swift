@@ -1,15 +1,19 @@
 import Foundation
 
 public class Amplitude {
+    private static var instanceNames: Set<String> = []
+    private static let instanceNamesLock = NSLock()
+
     public private(set) var configuration: Configuration
     private var inForeground = false
+    private let instanceNameDuplicated: Bool
 
     var sessionId: Int64 {
         sessions.sessionId
     }
 
     var state: State = State()
-    var contextPlugin: ContextPlugin
+    var contextPlugin: ContextPlugin?
 
     lazy var storage: any Storage = {
         return self.configuration.storageProvider
@@ -27,7 +31,7 @@ public class Amplitude {
         return Sessions(amplitude: self)
     }()
 
-    public lazy var logger: (any Logger)? = {
+    public lazy var logger: any Logger = {
         return self.configuration.loggerProvider
     }()
 
@@ -35,6 +39,12 @@ public class Amplitude {
         configuration: Configuration
     ) {
         self.configuration = configuration
+        let instanceName = configuration.instanceName
+        self.instanceNameDuplicated = !Self.registerInstanceName(instanceName)
+        if self.instanceNameDuplicated {
+            logger.error(message: "Instance name '\(instanceName)' is duplicated")
+            return
+        }
 
         let contextPlugin = ContextPlugin()
         self.contextPlugin = contextPlugin
@@ -203,7 +213,7 @@ public class Amplitude {
         options: EventOptions? = nil
     ) -> Amplitude {
         guard revenue.isValid() else {
-            logger?.warn(message: "Invalid revenue object, missing required fields")
+            logger.warn(message: "Invalid revenue object, missing required fields")
             return self
         }
 
@@ -223,6 +233,11 @@ public class Amplitude {
 
     @discardableResult
     public func add(plugin: Plugin) -> Amplitude {
+        if instanceNameDuplicated {
+            logger.error(message: "Skip plugin adding. Instance name '\(configuration.instanceName)' is duplicated")
+            return self
+        }
+
         plugin.setup(amplitude: self)
         if let _plugin = plugin as? ObservePlugin {
             state.add(plugin: _plugin)
@@ -254,6 +269,10 @@ public class Amplitude {
 
     @discardableResult
     public func setUserId(userId: String?) -> Amplitude {
+        if instanceNameDuplicated {
+            logger.error(message: "Skip setUserId. Instance name '\(configuration.instanceName)' is duplicated")
+            return self
+        }
         try? storage.write(key: .USER_ID, value: userId)
         state.userId = userId
         return self
@@ -261,6 +280,10 @@ public class Amplitude {
 
     @discardableResult
     public func setDeviceId(deviceId: String?) -> Amplitude {
+        if instanceNameDuplicated {
+            logger.error(message: "Skip setDeviceId. Instance name '\(configuration.instanceName)' is duplicated")
+            return self
+        }
         try? storage.write(key: .DEVICE_ID, value: deviceId)
         state.deviceId = deviceId
         return self
@@ -280,9 +303,13 @@ public class Amplitude {
 
     @discardableResult
     public func reset() -> Amplitude {
+        if instanceNameDuplicated {
+            logger.error(message: "Skip reset. Instance name '\(configuration.instanceName)' is duplicated")
+            return self
+        }
         _ = setUserId(userId: nil)
         _ = setDeviceId(deviceId: nil)
-        contextPlugin.initializeDeviceId()
+        contextPlugin?.initializeDeviceId()
         return self
     }
 
@@ -292,7 +319,11 @@ public class Amplitude {
 
     private func process(event: BaseEvent) {
         if configuration.optOut {
-            logger?.log(message: "Skip event based on opt out configuration")
+            logger.log(message: "Skip event based on opt out configuration")
+            return
+        }
+        if instanceNameDuplicated {
+            logger.error(message: "Skip event. Instance name '\(configuration.instanceName)' is duplicated")
             return
         }
         let events = sessions.processEvent(event: event, inForeground: inForeground)
@@ -301,6 +332,10 @@ public class Amplitude {
 
     func onEnterForeground(timestamp: Int64) {
         inForeground = true
+        if configuration.optOut || instanceNameDuplicated {
+            return
+        }
+
         let dummySessionStartEvent = BaseEvent(
             timestamp: timestamp,
             eventType: Constants.AMP_SESSION_START_EVENT
@@ -311,6 +346,10 @@ public class Amplitude {
 
     func onExitForeground(timestamp: Int64) {
         inForeground = false
+        if configuration.optOut || instanceNameDuplicated {
+            return
+        }
+
         sessions.lastEventTime = timestamp
         if configuration.flushEventsOnClose == true {
             _ = self.flush()
@@ -344,5 +383,16 @@ public class Amplitude {
             let legacyIdentifyStorage = PersistentStorage(storagePrefix: "identify-\(legacyDefaultInstanceName)")
             StoragePrefixMigration(source: legacyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
+    }
+
+    private static func registerInstanceName(_ instanceName: String) -> Bool {
+        instanceNamesLock.lock()
+        defer { instanceNamesLock.unlock() }
+
+        if instanceNames.contains(instanceName) {
+            return false
+        }
+        instanceNames.insert(instanceName)
+        return true
     }
 }

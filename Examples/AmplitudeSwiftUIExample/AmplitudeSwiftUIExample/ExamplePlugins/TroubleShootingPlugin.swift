@@ -15,7 +15,7 @@ class TroubleShootingPlugin: DestinationPlugin {
         let serverZone = amplitude.configuration.serverZone.rawValue;
         let serverUrl = amplitude.configuration.serverUrl ?? "null";
 
-        self.amplitude?.logger?.debug(message: "Current Configuration : {\"apiKey\": "+apiKey+", \"serverZone\": "+serverZone+", \"serverUrl\": "+serverUrl+"}")
+        self.amplitude?.logger.debug(message: "Current Configuration : {\"apiKey\": "+apiKey+", \"serverZone\": "+serverZone+", \"serverUrl\": "+serverUrl+"}")
     }
 
     open override func track(event: BaseEvent) -> BaseEvent? {
@@ -23,7 +23,7 @@ class TroubleShootingPlugin: DestinationPlugin {
         let eventJsonData = try! jsonEncoder.encode(event)
         let eventJson = String(data: eventJsonData, encoding: String.Encoding.utf8)
 
-        self.amplitude?.logger?.debug(message: "Processed event: \(String(describing: eventJson))")
+        self.amplitude?.logger.debug(message: "Processed event: \(String(describing: eventJson))")
         return event
     }
 }

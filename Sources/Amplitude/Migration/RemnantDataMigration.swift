@@ -113,7 +113,7 @@ class RemnantDataMigration {
             removeFromSource(rowId!)
             return rowId!
         } catch {
-            amplitude.logger?.error(message: "event migration failed: \(error)")
+            amplitude.logger.error(message: "event migration failed: \(error)")
             return -1
         }
     }

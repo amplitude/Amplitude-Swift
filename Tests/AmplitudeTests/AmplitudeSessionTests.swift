@@ -16,6 +16,7 @@ final class AmplitudeSessionTests: XCTestCase {
 
         configuration = Configuration(
             apiKey: apiKey,
+            instanceName: NSUUID().uuidString,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             minTimeBetweenSessionsMillis: 100

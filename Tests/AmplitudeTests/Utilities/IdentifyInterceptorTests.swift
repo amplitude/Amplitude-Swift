@@ -19,6 +19,7 @@ final class IdentifyInterceptorTests: XCTestCase {
         let identifyBatchIntervalMillis = Int(Self.IDENTIFY_UPLOAD_INTERVAL_SECONDS * 1000)
         configuration = Configuration(
             apiKey: "testApiKey",
+            instanceName: NSUUID().uuidString,
             storageProvider: storage,
             identifyStorageProvider: identifyStorage,
             identifyBatchIntervalMillis: identifyBatchIntervalMillis
