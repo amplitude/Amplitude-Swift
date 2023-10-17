@@ -1,3 +1,10 @@
+## [0.7.3](https://github.com/amplitude/Amplitude-Swift/compare/v0.7.2...v0.7.3) (2023-10-17)
+
+
+### Bug Fixes
+
+* add support for CGFloat property values ([#91](https://github.com/amplitude/Amplitude-Swift/issues/91)) ([6de48f0](https://github.com/amplitude/Amplitude-Swift/commit/6de48f014c7ac80b83ad94e0cfa748ddc0d7908e))
+
 ## [0.7.2](https://github.com/amplitude/Amplitude-Swift/compare/v0.7.1...v0.7.2) (2023-10-04)
 
 
