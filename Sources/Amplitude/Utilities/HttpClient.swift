@@ -72,8 +72,9 @@ class HttpClient {
 
     func getRequestData(events: String) -> Data? {
         let apiKey = configuration.apiKey
+        let clientUploadTime: String = ISO8601DateFormatter().string(from: Date())
         var requestPayload = """
-            {"api_key":"\(apiKey)","events":\(events)
+            {"api_key":"\(apiKey)","client_upload_time":"\(clientUploadTime)","events":\(events)
             """
         if let minIdLength = configuration.minIdLength {
             requestPayload += """
