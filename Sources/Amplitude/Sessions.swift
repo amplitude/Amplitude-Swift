@@ -81,13 +81,9 @@ public class Sessions {
             result.append(event)
         }
 
-        return assignEventId(events: result)
-    }
-
-    func assignEventId(events: [BaseEvent]) -> [BaseEvent] {
         var newLastEventId = self.lastEventId
 
-        events.forEach({ event in
+        result.forEach({ event in
             if event.eventId == nil {
                 newLastEventId += 1
                 event.eventId = newLastEventId
@@ -96,7 +92,7 @@ public class Sessions {
 
         self.lastEventId = newLastEventId
 
-        return events
+        return result
     }
 
     private func isWithinMinTimeBetweenSessions(timestamp: Int64) -> Bool {

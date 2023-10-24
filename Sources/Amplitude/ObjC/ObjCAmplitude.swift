@@ -200,13 +200,6 @@ public class ObjCAmplitude: NSObject {
         amplitude.getSessionId()
     }
 
-    @objc(setSessionId:)
-    @discardableResult
-    public func setSessionId(timestamp: Int64) -> ObjCAmplitude {
-        amplitude.setSessionId(timestamp: timestamp)
-        return self
-    }
-
     @objc
     @discardableResult
     public func reset() -> ObjCAmplitude {
