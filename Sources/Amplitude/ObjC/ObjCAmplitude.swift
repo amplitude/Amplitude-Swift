@@ -207,6 +207,34 @@ public class ObjCAmplitude: NSObject {
         return self
     }
 
+    @objc(sessionStart)
+    @discardableResult
+    public func sessionStart() -> ObjCAmplitude {
+        amplitude.sessionStart()
+        return self
+    }
+
+    @objc(sessionStart:)
+    @discardableResult
+    public func sessionStart(at: Date) -> ObjCAmplitude {
+        amplitude.sessionStart(at: at)
+        return self
+    }
+
+    @objc(sessionEnd)
+    @discardableResult
+    public func sessionEnd() -> ObjCAmplitude {
+        amplitude.sessionEnd()
+        return self
+    }
+
+    @objc(sessionEnd:)
+    @discardableResult
+    public func sessionEnd(at: Date) -> ObjCAmplitude {
+        amplitude.sessionEnd(at: at)
+        return self
+    }
+
     @objc
     @discardableResult
     public func reset() -> ObjCAmplitude {

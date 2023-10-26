@@ -142,4 +142,25 @@ public class Sessions {
 
         return sessionEvents
     }
+
+    public func endCurrentSession(timestamp: Int64?) -> [BaseEvent] {
+        var sessionEvents: [BaseEvent] = Array()
+        let trackingSessionEvents = amplitude.configuration.defaultTracking.sessions
+
+        if trackingSessionEvents && self.sessionId >= 0 {
+            let sessionEndEvent = BaseEvent(
+                timestamp: timestamp ?? (self.lastEventTime > 0 ? self.lastEventTime : nil),
+                sessionId: self.sessionId,
+                eventType: Constants.AMP_SESSION_END_EVENT
+            )
+            sessionEvents.append(sessionEndEvent)
+
+            if let timestamp = timestamp, timestamp > (self.lastEventTime ?? 0) {
+                self.lastEventTime = timestamp
+            }
+        }
+
+        self.sessionId = -1
+        return sessionEvents
+    }
 }

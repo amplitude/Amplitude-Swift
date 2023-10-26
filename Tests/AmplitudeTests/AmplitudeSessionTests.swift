@@ -516,6 +516,131 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.eventId, lastEventId+5)
     }
 
+    func testSessionEndInBackgroundShouldEndCurrentSession() throws {
+        let lastEventId: Int64 = 123
+        try storageMem.write(key: StorageKey.LAST_EVENT_ID, value: lastEventId)
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        let eventCollector = EventCollectorPlugin()
+        amplitude.add(plugin: eventCollector)
+
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 100, eventType: "test event 1"))
+        XCTAssertEqual(amplitude.sessionId, 100)
+
+        amplitude.sessionEnd()
+        XCTAssertEqual(amplitude.sessionId, -1)
+
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 200, eventType: "test event 2"))
+        XCTAssertEqual(amplitude.sessionId, 200)
+
+        amplitude.sessionEnd(at: Date(timeIntervalSince1970: 1))
+        XCTAssertEqual(amplitude.sessionId, -1)
+
+        let collectedEvents = eventCollector.events
+
+        XCTAssertEqual(collectedEvents.count, 6)
+
+        var event = collectedEvents[0]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
+        XCTAssertEqual(event.sessionId, 100)
+        XCTAssertEqual(event.timestamp, 100)
+        XCTAssertEqual(event.eventId, lastEventId+1)
+
+        event = collectedEvents[1]
+        XCTAssertEqual(event.eventType, "test event 1")
+        XCTAssertEqual(event.sessionId, 100)
+        XCTAssertEqual(event.timestamp, 100)
+        XCTAssertEqual(event.eventId, lastEventId+2)
+
+        event = collectedEvents[2]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
+        XCTAssertEqual(event.sessionId, 100)
+        XCTAssertEqual(event.timestamp, 100)
+        XCTAssertEqual(event.eventId, lastEventId+3)
+
+        event = collectedEvents[3]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
+        XCTAssertEqual(event.sessionId, 200)
+        XCTAssertEqual(event.timestamp, 200)
+        XCTAssertEqual(event.eventId, lastEventId+4)
+
+        event = collectedEvents[4]
+        XCTAssertEqual(event.eventType, "test event 2")
+        XCTAssertEqual(event.sessionId, 200)
+        XCTAssertEqual(event.timestamp, 200)
+        XCTAssertEqual(event.eventId, lastEventId+5)
+
+        event = collectedEvents[5]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
+        XCTAssertEqual(event.sessionId, 200)
+        XCTAssertEqual(event.timestamp, 1000)
+        XCTAssertEqual(event.eventId, lastEventId+6)
+    }
+
+    func testSessionEndInForegroundShouldEndCurrentSession() throws {
+        let lastEventId: Int64 = 123
+        try storageMem.write(key: StorageKey.LAST_EVENT_ID, value: lastEventId)
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        let eventCollector = EventCollectorPlugin()
+        amplitude.add(plugin: eventCollector)
+
+        amplitude.onEnterForeground(timestamp: 100)
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 150, eventType: "test event 1"))
+        XCTAssertEqual(amplitude.sessionId, 100)
+
+        amplitude.sessionEnd()
+        XCTAssertEqual(amplitude.sessionId, -1)
+
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 200, eventType: "test event 2"))
+        XCTAssertEqual(amplitude.sessionId, 200)
+
+        amplitude.sessionEnd(at: Date(timeIntervalSince1970: 1))
+        XCTAssertEqual(amplitude.sessionId, -1)
+
+        let collectedEvents = eventCollector.events
+
+        XCTAssertEqual(collectedEvents.count, 6)
+
+        var event = collectedEvents[0]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
+        XCTAssertEqual(event.sessionId, 100)
+        XCTAssertEqual(event.timestamp, 100)
+        XCTAssertEqual(event.eventId, lastEventId+1)
+
+        event = collectedEvents[1]
+        XCTAssertEqual(event.eventType, "test event 1")
+        XCTAssertEqual(event.sessionId, 100)
+        XCTAssertEqual(event.timestamp, 150)
+        XCTAssertEqual(event.eventId, lastEventId+2)
+
+        event = collectedEvents[2]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
+        XCTAssertEqual(event.sessionId, 100)
+        XCTAssertEqual(event.timestamp, 150)
+        XCTAssertEqual(event.eventId, lastEventId+3)
+
+        event = collectedEvents[3]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
+        XCTAssertEqual(event.sessionId, 200)
+        XCTAssertEqual(event.timestamp, 200)
+        XCTAssertEqual(event.eventId, lastEventId+4)
+
+        event = collectedEvents[4]
+        XCTAssertEqual(event.eventType, "test event 2")
+        XCTAssertEqual(event.sessionId, 200)
+        XCTAssertEqual(event.timestamp, 200)
+        XCTAssertEqual(event.eventId, lastEventId+5)
+
+        event = collectedEvents[5]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
+        XCTAssertEqual(event.sessionId, 200)
+        XCTAssertEqual(event.timestamp, 1000)
+        XCTAssertEqual(event.eventId, lastEventId+6)
+    }
+
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
         return NSDictionary(dictionary: props as [AnyHashable: Any])
     }
