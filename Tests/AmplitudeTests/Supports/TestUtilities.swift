@@ -129,7 +129,6 @@ class FakeHttpClient: HttpClient {
         completion(Result.success(200))
         return nil
     }
-    
     override func getDate() -> Date {
         // timestamp of 2023-10-24T18:16:24.000 in UTC time zone
         return Date(timeIntervalSince1970: 1698171384)
