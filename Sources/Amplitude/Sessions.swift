@@ -81,9 +81,13 @@ public class Sessions {
             result.append(event)
         }
 
+        return assignEventId(events: result)
+    }
+
+    func assignEventId(events: [BaseEvent]) -> [BaseEvent] {
         var newLastEventId = self.lastEventId
 
-        result.forEach({ event in
+        events.forEach({ event in
             if event.eventId == nil {
                 newLastEventId += 1
                 event.eventId = newLastEventId
@@ -92,7 +96,7 @@ public class Sessions {
 
         self.lastEventId = newLastEventId
 
-        return result
+        return events
     }
 
     private func isWithinMinTimeBetweenSessions(timestamp: Int64) -> Bool {
@@ -136,6 +140,23 @@ public class Sessions {
             sessionEvents.append(sessionStartEvent)
         }
 
+        return sessionEvents
+    }
+
+    public func endCurrentSession() -> [BaseEvent] {
+        var sessionEvents: [BaseEvent] = Array()
+        let trackingSessionEvents = amplitude.configuration.defaultTracking.sessions
+
+        if trackingSessionEvents && self.sessionId >= 0 {
+            let sessionEndEvent = BaseEvent(
+                timestamp: self.lastEventTime > 0 ? self.lastEventTime : nil,
+                sessionId: self.sessionId,
+                eventType: Constants.AMP_SESSION_END_EVENT
+            )
+            sessionEvents.append(sessionEndEvent)
+        }
+
+        self.sessionId = -1
         return sessionEvents
     }
 }

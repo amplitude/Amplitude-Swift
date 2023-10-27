@@ -279,6 +279,22 @@ public class Amplitude {
     }
 
     @discardableResult
+    public func setSessionId(timestamp: Int64) -> Amplitude {
+        let sessionEvents = sessions.assignEventId(
+            events: timestamp >= 0 ? sessions.startNewSession(timestamp: timestamp) : sessions.endCurrentSession()
+        )
+        sessionEvents.forEach { e in timeline.processEvent(event: e) }
+        return self
+    }
+
+    @discardableResult
+    public func setSessionId(date: Date) -> Amplitude {
+        let timestamp = Int64(date.timeIntervalSince1970 * 1000)
+        setSessionId(timestamp: timestamp)
+        return self
+    }
+
+    @discardableResult
     public func reset() -> Amplitude {
         _ = setUserId(userId: nil)
         _ = setDeviceId(deviceId: nil)
