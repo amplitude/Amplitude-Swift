@@ -1,3 +1,8 @@
+## [1.0.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.7.3...v1.0.0) (2023-10-27)
+
+
+Version 1.0.0 is released!
+
 ## [0.7.3](https://github.com/amplitude/Amplitude-Swift/compare/v0.7.2...v0.7.3) (2023-10-17)
 
 
