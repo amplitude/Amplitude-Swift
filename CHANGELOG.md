@@ -1,3 +1,20 @@
+# [1.0.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.7.3...v1.0.0) (2023-10-27)
+
+
+### Bug Fixes
+
+* add setSessionId() method ([#95](https://github.com/amplitude/Amplitude-Swift/issues/95)) ([1fb9f01](https://github.com/amplitude/Amplitude-Swift/commit/1fb9f01592e5a230e1e27aba0816ccf22250e01d))
+
+
+### Features
+
+* Release 1.0.0 ([#98](https://github.com/amplitude/Amplitude-Swift/issues/98)) ([b047273](https://github.com/amplitude/Amplitude-Swift/commit/b0472736148a2364a4e8802518dabf78cf149ec1))
+
+
+### BREAKING CHANGES
+
+* New major version
+
 ## [0.7.3](https://github.com/amplitude/Amplitude-Swift/compare/v0.7.2...v0.7.3) (2023-10-17)
 
 
