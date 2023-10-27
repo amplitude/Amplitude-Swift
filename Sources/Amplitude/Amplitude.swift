@@ -280,23 +280,17 @@ public class Amplitude {
 
     @discardableResult
     public func setSessionId(timestamp: Int64) -> Amplitude {
-        let sessionEvents = sessions.assignEventId(events: sessions.startNewSession(timestamp: timestamp))
+        let sessionEvents = sessions.assignEventId(
+            events: timestamp >= 0 ? sessions.startNewSession(timestamp: timestamp) : sessions.endCurrentSession()
+        )
         sessionEvents.forEach { e in timeline.processEvent(event: e) }
         return self
     }
 
     @discardableResult
-    public func sessionStart(at: Date = Date()) -> Amplitude {
-        let timestamp = Int64(at.timeIntervalSince1970 * 1000)
+    public func setSessionId(date: Date) -> Amplitude {
+        let timestamp = Int64(date.timeIntervalSince1970 * 1000)
         setSessionId(timestamp: timestamp)
-        return self
-    }
-
-    @discardableResult
-    public func sessionEnd(at: Date? = nil) -> Amplitude {
-        let timestamp = at != nil ? Int64(at!.timeIntervalSince1970 * 1000) : nil
-        let sessionEvents = sessions.assignEventId(events: sessions.endCurrentSession(timestamp: timestamp))
-        sessionEvents.forEach { e in timeline.processEvent(event: e) }
         return self
     }
 

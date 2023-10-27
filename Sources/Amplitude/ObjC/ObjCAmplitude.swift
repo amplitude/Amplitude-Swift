@@ -200,38 +200,17 @@ public class ObjCAmplitude: NSObject {
         amplitude.getSessionId()
     }
 
-    @objc(setSessionId:)
+    @objc(setSessionIdWithTimestamp:)
     @discardableResult
     public func setSessionId(timestamp: Int64) -> ObjCAmplitude {
         amplitude.setSessionId(timestamp: timestamp)
         return self
     }
 
-    @objc(sessionStart)
+    @objc(setSessionIdWithDate:)
     @discardableResult
-    public func sessionStart() -> ObjCAmplitude {
-        amplitude.sessionStart()
-        return self
-    }
-
-    @objc(sessionStart:)
-    @discardableResult
-    public func sessionStart(at: Date) -> ObjCAmplitude {
-        amplitude.sessionStart(at: at)
-        return self
-    }
-
-    @objc(sessionEnd)
-    @discardableResult
-    public func sessionEnd() -> ObjCAmplitude {
-        amplitude.sessionEnd()
-        return self
-    }
-
-    @objc(sessionEnd:)
-    @discardableResult
-    public func sessionEnd(at: Date) -> ObjCAmplitude {
-        amplitude.sessionEnd(at: at)
+    public func setSessionId(date: Date) -> ObjCAmplitude {
+        amplitude.setSessionId(date: date)
         return self
     }
 
