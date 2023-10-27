@@ -70,11 +70,9 @@ class HttpClient {
         return request
     }
 
-    func getRequestData(events: String, currentTime: Date = Date()) -> Data? {
+    func getRequestData(events: String) -> Data? {
         let apiKey = configuration.apiKey
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions.insert(.withFractionalSeconds)
-        let clientUploadTime: String = formatter.string(from: currentTime)
+        let clientUploadTime: String = ISO8601DateFormatter().string(from: Date())
         var requestPayload = """
             {"api_key":"\(apiKey)","client_upload_time":"\(clientUploadTime)","events":\(events)
             """
