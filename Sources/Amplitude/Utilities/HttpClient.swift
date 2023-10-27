@@ -86,6 +86,7 @@ class HttpClient {
         requestPayload += "}"
         return requestPayload.data(using: .utf8)
     }
+
     func getDate() -> Date {
         return Date()
     }
