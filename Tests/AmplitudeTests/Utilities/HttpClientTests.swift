@@ -42,6 +42,19 @@ final class HttpClientTests: XCTestCase {
         }
     }
 
+    func testGetRequestData() {
+        let httpClient = FakeHttpClient(configuration: configuration)
+        let event = BaseEvent(userId: "unit-test user", eventType: "unit-test event")
+
+        let expectedRequestPayload = """
+            {"api_key":"testApiKey","client_upload_time":"2023-10-24T18:16:24.000Z","events":[\(event.toString())]}
+            """.data(using: .utf8)
+
+        let result = httpClient.getRequestData(events: "[\(event.toString())]")
+
+        XCTAssertEqual(result, expectedRequestPayload)
+    }
+
     func testUploadWithInvalidApiKey() {
         // TODO: currently this test is sending request to real Amplitude host, update to mock for better stability
         let httpClient = HttpClient(configuration: configuration)
