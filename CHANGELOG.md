@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.0.0...v1.1.0) (2023-10-30)
+
+
+### Features
+
+* add client upload time ([#94](https://github.com/amplitude/Amplitude-Swift/issues/94)) ([a0d59f1](https://github.com/amplitude/Amplitude-Swift/commit/a0d59f169f89794f33308781a96f0a2ad252d229))
+
 # [1.0.0](https://github.com/amplitude/Amplitude-Swift/compare/v0.7.3...v1.0.0) (2023-10-27)
 
 
