@@ -9,7 +9,7 @@ public class ScreenViewedEvent: BaseEvent {
         }
     }
 
-    public init(screenName: String) {
+    @objc public init(screenName: String) {
         super.init(eventType: Constants.AMP_SCREEN_VIEWED_EVENT, eventProperties: [
             Constants.AMP_APP_SCREEN_NAME_PROPERTY: screenName
         ])
