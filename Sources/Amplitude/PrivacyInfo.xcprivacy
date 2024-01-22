@@ -32,6 +32,9 @@
 	<key>NSPrivacyTrackingDomains</key>
 	<array>
 		<string>https://api2.amplitude.com/2/httpapi</string>
+		<string>https://api.eu.amplitude.com/2/httpapi</string>
+		<string>https://api2.amplitude.com/batch</string>
+		<string>https://api.eu.amplitude.com/batch</string>
 	</array>
 </dict>
 </plist>
