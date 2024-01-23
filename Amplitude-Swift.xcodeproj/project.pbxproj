@@ -167,6 +167,7 @@
 		8EDECE07F682FAAE47F77B24 /* ObjCEventOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCEventOptions.swift; sourceTree = "<group>"; };
 		8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCConfiguration.swift; sourceTree = "<group>"; };
 		8EDECF8CF745F7339B65D6DB /* ObjCStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCStorage.swift; sourceTree = "<group>"; };
+		B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BA0359C92A51585D007C383B /* legacy_v3.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v3.sqlite; sourceTree = "<group>"; };
 		BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorage.swift; sourceTree = "<group>"; };
 		BA1EC0F32A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultTrackingOptionsTests.swift; sourceTree = "<group>"; };
@@ -465,6 +466,7 @@
 		OBJ_7 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */,
 				OBJ_8 /* Amplitude.swift */,
 				OBJ_9 /* Configuration.swift */,
 				OBJ_10 /* ConsoleLogger.swift */,
