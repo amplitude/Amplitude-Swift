@@ -33,6 +33,7 @@ public class Configuration {
     public var identifyBatchIntervalMillis: Int
     public internal(set) var migrateLegacyData: Bool
     public var defaultTracking: DefaultTrackingOptions
+    public var offline: Bool?
 
     public init(
         apiKey: String,
@@ -60,7 +61,8 @@ public class Configuration {
         // `trackingSessionEvents` has been replaced by `defaultTracking.sessions`
         defaultTracking: DefaultTrackingOptions = DefaultTrackingOptions(),
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
-        migrateLegacyData: Bool = true
+        migrateLegacyData: Bool = true,
+        offline: Bool = false
     ) {
         let normalizedInstanceName = instanceName == "" ? Constants.Configuration.DEFAULT_INSTANCE : instanceName
 
@@ -93,6 +95,7 @@ public class Configuration {
         self.migrateLegacyData = migrateLegacyData
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
+        self.offline = offline
     }
 
     func isValid() -> Bool {

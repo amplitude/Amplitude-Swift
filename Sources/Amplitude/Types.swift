@@ -98,6 +98,7 @@ public protocol Plugin: AnyObject {
     var type: PluginType { get }
     func setup(amplitude: Amplitude)
     func execute(event: BaseEvent) -> BaseEvent?
+    func teardown()
 }
 
 public protocol EventPlugin: Plugin {
@@ -115,6 +116,10 @@ extension Plugin {
     }
 
     public func setup(amplitude: Amplitude) {
+    }
+
+    public func teardown(){
+        // Clean up any resources from setup if necessary
     }
 }
 
