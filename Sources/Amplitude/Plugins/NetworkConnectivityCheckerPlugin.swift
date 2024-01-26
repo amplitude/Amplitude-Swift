@@ -12,7 +12,6 @@ open class NetworkConnectivityCheckerPlugin: BeforePlugin {
     public static let Disabled: Bool? = nil
     let monitor = NWPathMonitor()
 
-
     open override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
         self.amplitude?.logger?.debug(message: "Installing AndroidNetworkConnectivityPlugin, offline feature should be supported.")
