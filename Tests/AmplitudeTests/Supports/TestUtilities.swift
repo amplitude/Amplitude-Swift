@@ -1,5 +1,7 @@
 import Foundation
 import XCTest
+import Network
+import Combine
 
 @testable import AmplitudeSwift
 
@@ -258,5 +260,20 @@ class FakeSandboxHelperWithAppSandboxContainer: SandboxHelper {
 class FakePersistentStorageAppSandboxEnabled: PersistentStorage {
     override internal func isStorageSandboxed() -> Bool {
         return true
+    }
+}
+
+final class MockPathCreation: PathCreationProtocol {
+    var networkPathPublisher: AnyPublisher<NetworkPath, Never>?
+    private let subject = PassthroughSubject<NetworkPath, Never>()
+
+    func start() {
+        networkPathPublisher = subject.eraseToAnyPublisher()
+    }
+
+    // Method to simulate network change in tests
+    func simulateNetworkChange(status: NWPath.Status) {
+        let networkPath = NetworkPath(status: status)
+        subject.send(networkPath)
     }
 }
