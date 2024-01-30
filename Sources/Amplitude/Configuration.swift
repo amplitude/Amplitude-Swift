@@ -62,7 +62,7 @@ public class Configuration {
         defaultTracking: DefaultTrackingOptions = DefaultTrackingOptions(),
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
         migrateLegacyData: Bool = true,
-        offline: Bool = false
+        offline: Bool? = false
     ) {
         let normalizedInstanceName = instanceName == "" ? Constants.Configuration.DEFAULT_INSTANCE : instanceName
 
