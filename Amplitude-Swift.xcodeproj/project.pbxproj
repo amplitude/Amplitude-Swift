@@ -52,6 +52,7 @@
 		8EDECEC5F98F9974DF3E576F /* ObjCIdentify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC5A50E197C9C5067C19E /* ObjCIdentify.swift */; };
 		8EDECF81C2B1B38D472FD7EF /* ObjCConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */; };
 		8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
+		B6CCC6CD2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CCC6CC2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift */; };
 		B6EDB4D02B643C8400454B90 /* NetworkConnectivityCheckerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6EDB4CF2B643C8400454B90 /* NetworkConnectivityCheckerPlugin.swift */; };
 		B6F338A32B685793006179E2 /* NetworkConnectivityCheckerPluginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F338A22B685793006179E2 /* NetworkConnectivityCheckerPluginTests.swift */; };
 		BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA0359C92A51585D007C383B /* legacy_v3.sqlite */; };
@@ -171,6 +172,7 @@
 		8EDECE07F682FAAE47F77B24 /* ObjCEventOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCEventOptions.swift; sourceTree = "<group>"; };
 		8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCConfiguration.swift; sourceTree = "<group>"; };
 		8EDECF8CF745F7339B65D6DB /* ObjCStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCStorage.swift; sourceTree = "<group>"; };
+		B6CCC6CC2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjCNetworkConnectivityCheckerPlugin.swift; sourceTree = "<group>"; };
 		B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B6EDB4CF2B643C8400454B90 /* NetworkConnectivityCheckerPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConnectivityCheckerPlugin.swift; sourceTree = "<group>"; };
 		B6F338A22B685793006179E2 /* NetworkConnectivityCheckerPluginTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConnectivityCheckerPluginTests.swift; sourceTree = "<group>"; };
@@ -280,6 +282,7 @@
 		8EDECAFD8271434E8DC7BA78 /* ObjC */ = {
 			isa = PBXGroup;
 			children = (
+				B6CCC6CC2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift */,
 				8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */,
 				8EDECB1FA2AFF022A19104EE /* ObjCPlan.swift */,
 				8EDEC500EBDA8B813056E2DB /* ObjCIngestionMetadata.swift */,
@@ -700,6 +703,7 @@
 				OBJ_108 /* IOSLifecycleMonitor.swift in Sources */,
 				OBJ_109 /* WatchOSLifecycleMonitor.swift in Sources */,
 				OBJ_110 /* State.swift in Sources */,
+				B6CCC6CD2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift in Sources */,
 				OBJ_111 /* InMemoryStorage.swift in Sources */,
 				OBJ_112 /* PersistentStorage.swift in Sources */,
 				BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */,

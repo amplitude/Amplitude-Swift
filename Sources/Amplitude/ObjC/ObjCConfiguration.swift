@@ -272,4 +272,14 @@ public class ObjCConfiguration: NSObject {
             configuration.migrateLegacyData = value
         }
     }
+
+    @objc
+    public var offline: NSNumber? {
+        get {
+            return configuration.offline as NSNumber?
+        }
+        set(value) {
+            configuration.offline = value?.boolValue
+        }
+    }
 }
