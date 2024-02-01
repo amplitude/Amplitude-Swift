@@ -49,4 +49,25 @@ final class PersistentStorageTests: XCTestCase {
         XCTAssertNotEqual(eventFiles?[0].pathExtension, PersistentStorage.TEMP_FILE_EXTENSION)
         persistentStorage.reset()
     }
+
+    func testStorageDirectorySandboxed() {
+        let persistentStorage = PersistentStorage(storagePrefix: "sandbox-instance")
+
+        // e.g. /Library/Developer/CoreSimulator/Devices/AA0CFF70-35A4-4D85-AB9A-C27A8DBF94D7/data/Library/Application%20Support/amplitude/amplitude-swift-sandbox-instance.events.inde
+        // /Library/Developer/CoreSimulator/Devices/AA0CFF70-35A4-4D85-AB9A-C27A8DBF94D7/data/Containers/Data/Application/06213CC5-0BE3-4822-BF6A-44C711467CB7/Library/Application%20Support/amplitude/amplitude-swift-identify-default_instance.events.index
+        let iOSSandboxPathRegex = "CoreSimulator/Devices/[A-Z0-9-]*/data/"
+        let bundleId = Bundle.main.bundleIdentifier!
+
+        let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: false)
+
+        // print("bundleId=\(bundleId)")
+        // print("storageUrl=\(storageUrl)")
+
+        #if os(iOS)
+            XCTAssertNotNil(storageUrl.absoluteString.range(of: iOSSandboxPathRegex, options: .regularExpression, range: nil, locale: nil))
+        #else
+            XCTAssertEqual(storageUrl.absoluteString.contains(bundleId), true)
+        #endif
+        persistentStorage.reset()
+    }
 }

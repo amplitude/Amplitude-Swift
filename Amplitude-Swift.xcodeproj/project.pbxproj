@@ -61,6 +61,8 @@
 		BA994B9D2A4F4FCB00D0913F /* legacy_v4.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */; };
 		BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */; };
 		BA9BEA4D299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */; };
+		D010435F2B6C59EE00F8173C /* SandboxHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D010435E2B6C59EE00F8173C /* SandboxHelper.swift */; };
+		D01043612B6C5A8500F8173C /* SandboxHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01043602B6C5A8500F8173C /* SandboxHelperTests.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
 		OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* AmplitudeDestinationPlugin.swift */; };
 		OBJ_102 /* ContextPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ContextPlugin.swift */; };
@@ -123,14 +125,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = amplitude-swift::Amplitude-Swift;
+			remoteGlobalIDString = "amplitude-swift::Amplitude-Swift";
 			remoteInfo = "Amplitude-Swift";
 		};
 		580FD1F1294A56F60036777B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = amplitude-swift::Amplitude-SwiftTests;
+			remoteGlobalIDString = "amplitude-swift::Amplitude-SwiftTests";
 			remoteInfo = "Amplitude-SwiftTests";
 		};
 /* End PBXContainerItemProxy section */
@@ -176,6 +178,8 @@
 		BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v4.sqlite; sourceTree = "<group>"; };
 		BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptor.swift; sourceTree = "<group>"; };
 		BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyInterceptorTests.swift; sourceTree = "<group>"; };
+		D010435E2B6C59EE00F8173C /* SandboxHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxHelper.swift; sourceTree = "<group>"; };
+		D01043602B6C5A8500F8173C /* SandboxHelperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxHelperTests.swift; sourceTree = "<group>"; };
 		OBJ_10 /* ConsoleLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleLogger.swift; sourceTree = "<group>"; };
 		OBJ_11 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		OBJ_12 /* EventBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventBridge.swift; sourceTree = "<group>"; };
@@ -394,6 +398,7 @@
 				OBJ_52 /* UrlExtension.swift */,
 				BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */,
 				8EDEC54AB4DF9E1074C3D6A4 /* Weak.swift */,
+				D010435E2B6C59EE00F8173C /* SandboxHelper.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -499,6 +504,7 @@
 				OBJ_74 /* UrlExtensionTests.swift */,
 				BA9BEA4C299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift */,
 				8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */,
+				D01043602B6C5A8500F8173C /* SandboxHelperTests.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -640,6 +646,7 @@
 				OBJ_154 /* TypesTests.swift in Sources */,
 				OBJ_155 /* EventPipelineTests.swift in Sources */,
 				OBJ_156 /* HttpClientTests.swift in Sources */,
+				D01043612B6C5A8500F8173C /* SandboxHelperTests.swift in Sources */,
 				OBJ_157 /* PersistentStorageResponseHandlerTests.swift in Sources */,
 				OBJ_158 /* UrlExtensionTests.swift in Sources */,
 				8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */,
@@ -698,6 +705,7 @@
 				8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */,
 				8EDEC977C03AA2676724F436 /* BasePlugins.swift in Sources */,
 				8EDEC1073A308B12B5CCD975 /* AnalyticsConnectorPlugin.swift in Sources */,
+				D010435F2B6C59EE00F8173C /* SandboxHelper.swift in Sources */,
 				8EDEC3283B812D5D34DADF7B /* AnalyticsConnectorIdentityPlugin.swift in Sources */,
 				8EDEC4D0C0CE07BF211804CC /* DefaultTrackingOptions.swift in Sources */,
 				8EDEC30C0075E9D92B1B5210 /* UIKitScreenViews.swift in Sources */,

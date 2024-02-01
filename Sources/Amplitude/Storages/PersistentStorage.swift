@@ -238,22 +238,10 @@ extension PersistentStorage {
         return result
     }
 
-    private func isSandboxEnabled() -> Bool {
-        let environment = ProcessInfo.processInfo.environment
-        return environment["APP_SANDBOX_CONTAINER_ID"] != nil
-    }
-
     internal func getEventsStorageDirectory(createDirectory: Bool = true) -> URL {
         let searchPathDirectory = FileManager.SearchPathDirectory.applicationSupportDirectory
-
         // Make sure Amplitude data is sandboxed per app
-        #if os(iOS)
-            // iOS is sandboxed by default
-            let appPath = ""
-        #else
-            // macOS/tvOS are not sandboxed automatically
-            let appPath = isSandboxEnabled() ? "" : "\(Bundle.main.bundleIdentifier!)/"
-        #endif
+        let appPath = SandboxHelper.isSandboxEnabled() ? "" : "\(Bundle.main.bundleIdentifier!)/"
 
         let urls = fileManager.urls(for: searchPathDirectory, in: .userDomainMask)
         let docUrl = urls[0]
@@ -267,7 +255,6 @@ extension PersistentStorage {
                 at: storageUrl, withIntermediateDirectories: true, attributes: nil)
             try? storageUrl.setResourceValues(values)
         }
-
         return storageUrl
     }
 
