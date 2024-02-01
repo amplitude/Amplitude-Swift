@@ -22,6 +22,7 @@ final class EventPipelineTests: XCTestCase {
         configuration = Configuration(
             apiKey: "testApiKey",
             flushIntervalMillis: Int(Self.FLUSH_INTERVAL_SECONDS * 1000),
+            instanceName: NSUUID().uuidString,
             storageProvider: storage
         )
         let amplitude = Amplitude(configuration: configuration)

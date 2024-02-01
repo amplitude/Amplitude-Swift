@@ -69,7 +69,7 @@ class PersistentStorage: Storage {
         do {
             content = try String(contentsOf: eventBlock, encoding: .utf8)
         } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
+            amplitude?.logger.error(message: error.localizedDescription)
         }
         return content
     }
@@ -79,7 +79,7 @@ class PersistentStorage: Storage {
             do {
                 try fileManager.removeItem(atPath: eventBlock.path)
             } catch {
-                amplitude?.logger?.error(message: error.localizedDescription)
+                amplitude?.logger.error(message: error.localizedDescription)
             }
         }
     }
@@ -95,7 +95,7 @@ class PersistentStorage: Storage {
             do {
                 try fileManager.removeItem(atPath: eventBlock.path)
             } catch {
-                amplitude?.logger?.error(message: error.localizedDescription)
+                amplitude?.logger.error(message: error.localizedDescription)
             }
         }
     }
@@ -285,7 +285,7 @@ extension PersistentStorage {
         let jsonString = event.toString()
         do {
             if outputStream == nil {
-                amplitude?.logger?.error(message: "OutputStream is nil with file: \(storeFile)")
+                amplitude?.logger.error(message: "OutputStream is nil with file: \(storeFile)")
             }
             if newFile == false {
                 // prepare for the next entry
@@ -293,7 +293,7 @@ extension PersistentStorage {
             }
             try outputStream?.write(jsonString)
         } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
+            amplitude?.logger.error(message: error.localizedDescription)
         }
     }
 
@@ -308,11 +308,11 @@ extension PersistentStorage {
         let jsonString = events.map { $0.toString() }.joined(separator: ", ")
         do {
             if outputStream == nil {
-                amplitude?.logger?.error(message: "OutputStream is nil with file: \(storeFile)")
+                amplitude?.logger.error(message: "OutputStream is nil with file: \(storeFile)")
             }
             try outputStream?.write(jsonString)
         } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
+            amplitude?.logger.error(message: error.localizedDescription)
         }
         finish(file: storeFile)
     }
@@ -324,7 +324,7 @@ extension PersistentStorage {
             try outputStream?.create()
             try outputStream?.write(contents)
         } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
+            amplitude?.logger.error(message: error.localizedDescription)
         }
     }
 
@@ -337,7 +337,7 @@ extension PersistentStorage {
                     try outputStream.open()
                 }
             } catch {
-                amplitude?.logger?.error(message: error.localizedDescription)
+                amplitude?.logger.error(message: error.localizedDescription)
             }
         }
     }
@@ -352,7 +352,7 @@ extension PersistentStorage {
             try outputStream.write(fileEnding)
             try outputStream.close()
         } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
+            amplitude?.logger.error(message: error.localizedDescription)
         }
         self.outputStream = nil
 
@@ -360,7 +360,7 @@ extension PersistentStorage {
         do {
             try fileManager.moveItem(at: file, to: fileWithoutTemp)
         } catch {
-            amplitude?.logger?.error(message: "Unable to rename file: \(file.path)")
+            amplitude?.logger.error(message: "Unable to rename file: \(file.path)")
         }
 
         let currentFileIndex: Int = (getCurrentEventFileIndex() ?? 0) + 1

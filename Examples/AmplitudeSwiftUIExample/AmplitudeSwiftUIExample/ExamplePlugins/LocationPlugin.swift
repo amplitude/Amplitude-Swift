@@ -42,7 +42,7 @@ class LocationPlugin: NSObject, Plugin, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        amplitude?.logger?.error(message: error.localizedDescription)
+        amplitude?.logger.error(message: error.localizedDescription)
         clearReferences()
     }
 

@@ -21,12 +21,16 @@ final class AmplitudeTests: XCTestCase {
         super.setUp()
         let apiKey = "testApiKey"
 
-        configuration = Configuration(apiKey: apiKey)
+        configuration = Configuration(
+            apiKey: apiKey,
+            instanceName: NSUUID().uuidString
+        )
 
         storage = FakePersistentStorage(storagePrefix: "storage")
         interceptStorage = FakePersistentStorage(storagePrefix: "intercept")
         configurationWithFakeStorage = Configuration(
             apiKey: apiKey,
+            instanceName: NSUUID().uuidString,
             storageProvider: storage,
             identifyStorageProvider: interceptStorage
         )
@@ -35,6 +39,7 @@ final class AmplitudeTests: XCTestCase {
         interceptStorageMem = FakeInMemoryStorage()
         configurationWithFakeMemoryStorage = Configuration(
             apiKey: apiKey,
+            instanceName: NSUUID().uuidString,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             defaultTracking: DefaultTrackingOptions.NONE
@@ -89,7 +94,11 @@ final class AmplitudeTests: XCTestCase {
             .disableTrackCarrier()
             .disableTrackIDFV()
             .disableTrackCountry()
-        let configuration = Configuration(apiKey: apiKey, trackingOptions: trackingOptions)
+        let configuration = Configuration(
+            apiKey: apiKey,
+            instanceName: NSUUID().uuidString,
+            trackingOptions: trackingOptions
+        )
 
         let amplitude = Amplitude(configuration: configuration)
 
@@ -151,6 +160,7 @@ final class AmplitudeTests: XCTestCase {
         interceptStorageTest = TestPersistentStorage(storagePrefix: "identify")
         let amplitude = Amplitude(configuration: Configuration(
             apiKey: apiKey,
+            instanceName: NSUUID().uuidString,
             storageProvider: storageTest,
             identifyStorageProvider: interceptStorageTest,
             defaultTracking: DefaultTrackingOptions.NONE
@@ -231,7 +241,10 @@ final class AmplitudeTests: XCTestCase {
     }
 
     func testInit_defaultTracking() {
-        let configuration = Configuration(apiKey: "api-key")
+        let configuration = Configuration(
+            apiKey: "api-key",
+            instanceName: NSUUID().uuidString
+        )
         let amplitude = Amplitude(configuration: configuration)
         let defaultTracking = amplitude.configuration.defaultTracking
         XCTAssertFalse(defaultTracking.appLifecycles)
@@ -242,6 +255,7 @@ final class AmplitudeTests: XCTestCase {
     func testTrackNSUserActivity() throws {
         let configuration = Configuration(
             apiKey: "api-key",
+            instanceName: NSUUID().uuidString,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             defaultTracking: DefaultTrackingOptions(sessions: false)
@@ -267,6 +281,7 @@ final class AmplitudeTests: XCTestCase {
     func testTrackURLOpened() throws {
         let configuration = Configuration(
             apiKey: "api-key",
+            instanceName: NSUUID().uuidString,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             defaultTracking: DefaultTrackingOptions(sessions: false)
@@ -287,6 +302,7 @@ final class AmplitudeTests: XCTestCase {
     func testTrackNSURLOpened() throws {
         let configuration = Configuration(
             apiKey: "api-key",
+            instanceName: NSUUID().uuidString,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             defaultTracking: DefaultTrackingOptions(sessions: false)
@@ -307,6 +323,7 @@ final class AmplitudeTests: XCTestCase {
     func testTrackScreenView() throws {
         let configuration = Configuration(
             apiKey: "api-key",
+            instanceName: NSUUID().uuidString,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             defaultTracking: DefaultTrackingOptions(sessions: false)
@@ -322,6 +339,98 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(getDictionary(events[0].eventProperties!), [
             Constants.AMP_APP_SCREEN_NAME_PROPERTY: "main view"
         ])
+    }
+
+    func testDuplicatedInstanceNames() throws {
+
+        class TestPlugin: BeforePlugin {
+            override func execute(event: BaseEvent) -> BaseEvent? {
+                event.eventProperties = event.eventProperties ?? [:]
+                event.eventProperties!["plugin-property"] = "plugin-value"
+                return event
+            }
+        }
+
+        class TestLogger: Logger {
+            public typealias LogLevel = LogLevelEnum
+
+            var messages: [String] = []
+            public var logLevel: Int
+
+            public init(logLevel: Int = LogLevelEnum.OFF.rawValue) {
+                self.logLevel = logLevel
+            }
+
+            public func error(message: String) {
+                messages.append("Error: \(message)")
+            }
+
+            public func warn(message: String) {
+                messages.append("Warn: \(message)")
+            }
+
+            public func log(message: String) {
+            }
+
+            public func debug(message: String) {
+            }
+        }
+
+        let instanceName = NSUUID().uuidString
+
+        let storage1 = FakeInMemoryStorage()
+        let interceptStorage1 = FakeInMemoryStorage()
+        let logger1 = TestLogger()
+        let configuration1 = Configuration(
+            apiKey: "api-key-1",
+            instanceName: instanceName,
+            storageProvider: storage1,
+            identifyStorageProvider: interceptStorage1,
+            loggerProvider: logger1,
+            defaultTracking: DefaultTrackingOptions.NONE
+        )
+
+        let storage2 = FakeInMemoryStorage()
+        let interceptStorage2 = FakeInMemoryStorage()
+        let logger2 = TestLogger()
+        let configuration2 = Configuration(
+            apiKey: "api-key-2",
+            instanceName: instanceName,
+            storageProvider: storage2,
+            identifyStorageProvider: interceptStorage2,
+            loggerProvider: logger2,
+            defaultTracking: DefaultTrackingOptions.NONE
+        )
+
+        let amplitude1 = Amplitude(configuration: configuration1)
+        amplitude1.add(plugin: TestPlugin())
+
+        let amplitude2 = Amplitude(configuration: configuration2)
+        amplitude2.add(plugin: TestPlugin())
+
+        amplitude1.track(eventType: "event-1")
+        amplitude2.track(eventType: "event-2")
+
+        amplitude1.reset()
+        amplitude2.reset()
+
+        let events1 = storage1.events()
+        XCTAssertEqual(events1.count, 1)
+        XCTAssertEqual(events1[0].eventType, "event-1")
+        XCTAssertEqual(getDictionary(events1[0].eventProperties!), [
+            "plugin-property": "plugin-value"
+        ])
+        let logMessages1 = logger1.messages
+        XCTAssertEqual(logMessages1.count, 0)
+
+        let events2 = storage2.events()
+        XCTAssertEqual(events2.count, 0)
+        let logMessages2 = logger2.messages
+        XCTAssertEqual(logMessages2.count, 4)
+        XCTAssertEqual(logMessages2[0], "Error: Instance name '\(instanceName)' is duplicated")
+        XCTAssertEqual(logMessages2[1], "Error: Skip plugin adding. Instance name '\(instanceName)' is duplicated")
+        XCTAssertEqual(logMessages2[2], "Error: Skip event. Instance name '\(instanceName)' is duplicated")
+        XCTAssertEqual(logMessages2[3], "Error: Skip reset. Instance name '\(instanceName)' is duplicated")
     }
 
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {

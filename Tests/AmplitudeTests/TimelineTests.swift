@@ -13,7 +13,10 @@ final class TimelineTests: XCTestCase {
             return true
         }
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "testApiKey"))
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: "testApiKey",
+            instanceName: NSUUID().uuidString
+        ))
         amplitude.add(plugin: testPlugin)
         amplitude.track(event: BaseEvent(eventType: "testEvent"))
 
@@ -33,7 +36,10 @@ final class TimelineTests: XCTestCase {
             return true
         }
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "testApiKey"))
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: "testApiKey",
+            instanceName: NSUUID().uuidString
+        ))
         amplitude.add(plugin: testPlugin)
         amplitude.add(plugin: testPlugin2)
         amplitude.track(event: BaseEvent(eventType: "testEvent"))

@@ -40,12 +40,12 @@ public class EventPipeline {
             }
             completion?()
         } catch {
-            amplitude.logger?.error(message: "Error when storing event: \(error.localizedDescription)")
+            amplitude.logger.error(message: "Error when storing event: \(error.localizedDescription)")
         }
     }
 
     func flush(completion: (() -> Void)? = nil) {
-        amplitude.logger?.log(message: "Start flushing \(eventCount) events")
+        amplitude.logger.log(message: "Start flushing \(eventCount) events")
         eventCount = 0
         guard let storage = self.storage else { return }
         storage.rollover()
@@ -106,7 +106,7 @@ extension EventPipeline {
             }
             uploads = newPending
             let after = uploads.count
-            amplitude.logger?.log(message: "Cleaned up \(before - after) non-running uploads.")
+            amplitude.logger.log(message: "Cleaned up \(before - after) non-running uploads.")
         }
     }
 

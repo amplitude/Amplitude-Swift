@@ -22,6 +22,7 @@ final class AmplitudeIOSTests: XCTestCase {
     func testDidFinishLaunching_ApplicationInstalled() {
         let configuration = Configuration(
             apiKey: "api-key",
+            instanceName: NSUUID().uuidString,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
@@ -51,6 +52,7 @@ final class AmplitudeIOSTests: XCTestCase {
     func testDidFinishLaunching_ApplicationUpdated() throws {
         let configuration = Configuration(
             apiKey: "api-key",
+            instanceName: NSUUID().uuidString,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
@@ -85,6 +87,7 @@ final class AmplitudeIOSTests: XCTestCase {
     func testDidFinishLaunching_ApplicationOpened() throws {
         let configuration = Configuration(
             apiKey: "api-key",
+            instanceName: NSUUID().uuidString,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
@@ -113,6 +116,7 @@ final class AmplitudeIOSTests: XCTestCase {
     func testWillEnterForeground() throws {
         let configuration = Configuration(
             apiKey: "api-key",
+            instanceName: NSUUID().uuidString,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
@@ -138,6 +142,7 @@ final class AmplitudeIOSTests: XCTestCase {
     func testDidEnterBackground() throws {
         let configuration = Configuration(
             apiKey: "api-key",
+            instanceName: NSUUID().uuidString,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
