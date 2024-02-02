@@ -8,10 +8,10 @@
 import Foundation
 
 public class SandboxHelper {
-    internal func getEnvironment() -> Dictionary<String, String> {
+    internal func getEnvironment() -> [String: String] {
         return ProcessInfo.processInfo.environment
     }
-    
+
     public func isSandboxEnabled() -> Bool {
         #if os(macOS)
             // Check if macOS app has "App Sandbox" enabled
