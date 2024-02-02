@@ -254,7 +254,7 @@ extension PersistentStorage {
 
         let urls = fileManager.urls(for: searchPathDirectory, in: .userDomainMask)
         let docUrl = urls[0]
-        var storageUrl = docUrl.appendingPathComponent("amplitude/\(appPath)\(eventsFileKey)/")
+        let storageUrl = docUrl.appendingPathComponent("amplitude/\(appPath)\(eventsFileKey)/")
         if createDirectory {
             // try to create it, will fail if already exists.
             // tvOS, watchOS regularly clear out data.
