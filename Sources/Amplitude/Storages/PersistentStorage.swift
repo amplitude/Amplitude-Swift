@@ -239,7 +239,16 @@ extension PersistentStorage {
     }
 
     internal func getEventsStorageDirectory(createDirectory: Bool = true) -> URL {
-        let searchPathDirectory = FileManager.SearchPathDirectory.applicationSupportDirectory
+        // TODO: Update to use applicationSupportDirectory for all platforms (this will require a migration)
+        // let searchPathDirectory = FileManager.SearchPathDirectory.applicationSupportDirectory
+        // tvOS doesn't have access to document
+        // macOS /Documents dir might be synced with iCloud
+        #if os(tvOS) || os(macOS)
+            let searchPathDirectory = FileManager.SearchPathDirectory.cachesDirectory
+        #else
+            let searchPathDirectory = FileManager.SearchPathDirectory.documentDirectory
+        #endif
+
         // Make sure Amplitude data is sandboxed per app
         let appPath = sandboxHelper.isSandboxEnabled() ? "" : "\(Bundle.main.bundleIdentifier!)/"
 
@@ -249,11 +258,7 @@ extension PersistentStorage {
         if createDirectory {
             // try to create it, will fail if already exists.
             // tvOS, watchOS regularly clear out data.
-            var values = URLResourceValues()
-            values.isExcludedFromBackup = true
-            try? FileManager.default.createDirectory(
-                at: storageUrl, withIntermediateDirectories: true, attributes: nil)
-            try? storageUrl.setResourceValues(values)
+            try? FileManager.default.createDirectory(at: storageUrl, withIntermediateDirectories: true, attributes: nil)
         }
         return storageUrl
     }
