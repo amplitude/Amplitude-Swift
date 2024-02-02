@@ -250,8 +250,7 @@ class TestIdentifyInterceptor: IdentifyInterceptor {
 }
 
 class FakeSandboxHelperWithAppSandboxContainer: SandboxHelper {
-    override func getEnvironment() -> Dictionary<String, String> {
+    override func getEnvironment() -> [String: String] {
         return ["APP_SANDBOX_CONTAINER_ID": "test-container-id"]
     }
 }
-
