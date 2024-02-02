@@ -248,3 +248,10 @@ class TestIdentifyInterceptor: IdentifyInterceptor {
         overridenIdentifyBatchIntervalMillis = identifyBatchIntervalMillis
     }
 }
+
+class FakeSandboxHelperWithAppSandboxContainer: SandboxHelper {
+    override func getEnvironment() -> Dictionary<String, String> {
+        return ["APP_SANDBOX_CONTAINER_ID": "test-container-id"]
+    }
+}
+

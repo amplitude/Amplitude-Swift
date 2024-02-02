@@ -9,17 +9,11 @@ import XCTest
 
 @testable import AmplitudeSwift
 
-class MockSandboxHelper: SandboxHelper {
-    override func getEnvironment() -> Dictionary<String, String> {
-        return ["APP_SANDBOX_CONTAINER_ID": "test-container-id"]
-    }
-}
-
 final class SandboxHelperTests: XCTestCase {
 
     func testIsSandboxEnabled() {
-        let sanboxHelper = SandboxHelper()
-        let isSandboxed = sanboxHelper.isSandboxEnabled()
+        let sandboxHelper = SandboxHelper()
+        let isSandboxed = sandboxHelper.isSandboxEnabled()
 
         #if os(macOS)
             XCTAssertEqual(isSandboxed, false)
@@ -30,9 +24,9 @@ final class SandboxHelperTests: XCTestCase {
 
     #if os(macOS)
     func testIsSandboxEnabledWithMacOSAppSandbox() {
-        let sanboxHelper = MockSandboxHelper()
-        
-        let isSandboxed = SandboxHelper.isSandboxEnabled()
+        let sandboxHelper = FakeSandboxHelperWithAppSandboxContainer()
+
+        let isSandboxed = sandboxHelper.isSandboxEnabled()
 
         XCTAssertEqual(isSandboxed, true)
     }

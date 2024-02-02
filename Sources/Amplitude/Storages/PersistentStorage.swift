@@ -15,7 +15,7 @@ class PersistentStorage: Storage {
     let fileManager: FileManager
     private var outputStream: OutputFileStream?
     internal weak var amplitude: Amplitude?
-
+    internal var sandboxHelper = SandboxHelper()
     // Store event.callback in memory as it cannot be ser/deser in files.
     private var eventCallbackMap: [String: EventCallback]
 
@@ -241,7 +241,7 @@ extension PersistentStorage {
     internal func getEventsStorageDirectory(createDirectory: Bool = true) -> URL {
         let searchPathDirectory = FileManager.SearchPathDirectory.applicationSupportDirectory
         // Make sure Amplitude data is sandboxed per app
-        let appPath = SandboxHelper.isSandboxEnabled() ? "" : "\(Bundle.main.bundleIdentifier!)/"
+        let appPath = sandboxHelper.isSandboxEnabled() ? "" : "\(Bundle.main.bundleIdentifier!)/"
 
         let urls = fileManager.urls(for: searchPathDirectory, in: .userDomainMask)
         let docUrl = urls[0]
