@@ -57,7 +57,7 @@ final class PersistentStorageTests: XCTestCase {
         let bundleId = Bundle.main.bundleIdentifier!
         let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: false)
 
-        XCTAssertEqual(persistentStorage.isStorageSandboxed(), false)
+        XCTAssertEqual(PersistentStorage.isStorageSandboxed(), false)
         XCTAssertEqual(storageUrl.absoluteString.contains(bundleId), true)
         persistentStorage.reset()
     }
@@ -68,7 +68,7 @@ final class PersistentStorageTests: XCTestCase {
         let bundleId = Bundle.main.bundleIdentifier!
         let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: false)
 
-        XCTAssertEqual(persistentStorage.isStorageSandboxed(), true)
+        XCTAssertEqual(FakePersistentStorageAppSandboxEnabled.isStorageSandboxed(), true)
         XCTAssertEqual(storageUrl.absoluteString.contains(bundleId), false)
         persistentStorage.reset()
     }
