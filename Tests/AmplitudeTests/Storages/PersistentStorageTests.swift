@@ -63,8 +63,7 @@ final class PersistentStorageTests: XCTestCase {
     }
 
     func testMacOsStorageDirectorySandboxedWhenAppSandboxEnabled() {
-        let persistentStorage = PersistentStorage(storagePrefix: "mac-app-sandbox-instance")
-        persistentStorage.sandboxHelper = FakeSandboxHelperWithAppSandboxContainer()
+        let persistentStorage = FakePersistentStorageWithAppSandboxEnabled(storagePrefix: "mac-app-sandbox-instance")
 
         let bundleId = Bundle.main.bundleIdentifier!
         let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: false)

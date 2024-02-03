@@ -254,3 +254,9 @@ class FakeSandboxHelperWithAppSandboxContainer: SandboxHelper {
         return ["APP_SANDBOX_CONTAINER_ID": "test-container-id"]
     }
 }
+
+class FakePersistentStorageWithAppSandboxEnabled: PersistentStorage {
+    override internal class func isStorageSandboxed() -> Bool {
+        return true
+    }
+}
