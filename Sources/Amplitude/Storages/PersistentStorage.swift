@@ -17,7 +17,7 @@ class PersistentStorage: Storage {
     internal weak var amplitude: Amplitude?
     // Store event.callback in memory as it cannot be ser/deser in files.
     private var eventCallbackMap: [String: EventCallback]
-    private var appPath: String
+    private var appPath: String!
     let syncQueue = DispatchQueue(label: "syncPersistentStorage.amplitude.com")
 
     init(storagePrefix: String) {
@@ -28,7 +28,7 @@ class PersistentStorage: Storage {
         self.fileManager = FileManager.default
         self.eventCallbackMap = [String: EventCallback]()
         // Make sure Amplitude data is sandboxed per app
-        self.appPath = PersistentStorage.isStorageSandboxed() ? "" : "\(Bundle.main.bundleIdentifier!)/"
+        self.appPath = isStorageSandboxed() ? "" : "\(Bundle.main.bundleIdentifier!)/"
     }
 
     func write(key: StorageKey, value: Any?) throws {
@@ -170,7 +170,7 @@ class PersistentStorage: Storage {
         return result
     }
 
-    internal class func isStorageSandboxed() -> Bool {
+    internal func isStorageSandboxed() -> Bool {
         return SandboxHelper().isSandboxEnabled()
     }
 }
