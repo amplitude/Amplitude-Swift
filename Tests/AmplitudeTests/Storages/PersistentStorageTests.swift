@@ -49,4 +49,28 @@ final class PersistentStorageTests: XCTestCase {
         XCTAssertNotEqual(eventFiles?[0].pathExtension, PersistentStorage.TEMP_FILE_EXTENSION)
         persistentStorage.reset()
     }
+
+    #if os(macOS)
+    func testMacOsStorageDirectorySandboxedWhenAppSandboxDisabled() {
+        let persistentStorage = PersistentStorage(storagePrefix: "mac-instance")
+
+        let bundleId = Bundle.main.bundleIdentifier!
+        let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: false)
+
+        XCTAssertEqual(persistentStorage.isStorageSandboxed(), false)
+        XCTAssertEqual(storageUrl.absoluteString.contains(bundleId), true)
+        persistentStorage.reset()
+    }
+
+    func testMacOsStorageDirectorySandboxedWhenAppSandboxEnabled() {
+        let persistentStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "mac-app-sandbox-instance")
+
+        let bundleId = Bundle.main.bundleIdentifier!
+        let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: false)
+
+        XCTAssertEqual(persistentStorage.isStorageSandboxed(), true)
+        XCTAssertEqual(storageUrl.absoluteString.contains(bundleId), false)
+        persistentStorage.reset()
+    }
+    #endif
 }

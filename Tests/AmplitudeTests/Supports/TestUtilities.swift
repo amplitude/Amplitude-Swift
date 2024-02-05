@@ -248,3 +248,15 @@ class TestIdentifyInterceptor: IdentifyInterceptor {
         overridenIdentifyBatchIntervalMillis = identifyBatchIntervalMillis
     }
 }
+
+class FakeSandboxHelperWithAppSandboxContainer: SandboxHelper {
+    override func getEnvironment() -> [String: String] {
+        return ["APP_SANDBOX_CONTAINER_ID": "test-container-id"]
+    }
+}
+
+class FakePersistentStorageAppSandboxEnabled: PersistentStorage {
+    override internal func isStorageSandboxed() -> Bool {
+        return true
+    }
+}

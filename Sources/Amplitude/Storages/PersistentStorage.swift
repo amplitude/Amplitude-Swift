@@ -15,10 +15,9 @@ class PersistentStorage: Storage {
     let fileManager: FileManager
     private var outputStream: OutputFileStream?
     internal weak var amplitude: Amplitude?
-
     // Store event.callback in memory as it cannot be ser/deser in files.
     private var eventCallbackMap: [String: EventCallback]
-
+    private var appPath: String!
     let syncQueue = DispatchQueue(label: "syncPersistentStorage.amplitude.com")
 
     init(storagePrefix: String) {
@@ -28,6 +27,8 @@ class PersistentStorage: Storage {
         self.userDefaults = UserDefaults(suiteName: "\(PersistentStorage.AMP_STORAGE_PREFIX).\(self.storagePrefix)")
         self.fileManager = FileManager.default
         self.eventCallbackMap = [String: EventCallback]()
+        // Make sure Amplitude data is sandboxed per app
+        self.appPath = isStorageSandboxed() ? "" : "\(Bundle.main.bundleIdentifier!)/"
     }
 
     func write(key: StorageKey, value: Any?) throws {
@@ -168,6 +169,10 @@ class PersistentStorage: Storage {
         }
         return result
     }
+
+    internal func isStorageSandboxed() -> Bool {
+        return SandboxHelper().isSandboxEnabled()
+    }
 }
 
 extension PersistentStorage {
@@ -239,6 +244,8 @@ extension PersistentStorage {
     }
 
     internal func getEventsStorageDirectory(createDirectory: Bool = true) -> URL {
+        // TODO: Update to use applicationSupportDirectory for all platforms (this will require a migration)
+        // let searchPathDirectory = FileManager.SearchPathDirectory.applicationSupportDirectory
         // tvOS doesn't have access to document
         // macOS /Documents dir might be synced with iCloud
         #if os(tvOS) || os(macOS)
@@ -249,7 +256,7 @@ extension PersistentStorage {
 
         let urls = fileManager.urls(for: searchPathDirectory, in: .userDomainMask)
         let docUrl = urls[0]
-        let storageUrl = docUrl.appendingPathComponent("amplitude/\(eventsFileKey)/")
+        let storageUrl = docUrl.appendingPathComponent("amplitude/\(appPath ?? "")\(eventsFileKey)/")
         if createDirectory {
             // try to create it, will fail if already exists.
             // tvOS, watchOS regularly clear out data.
