@@ -1,3 +1,16 @@
+# [1.2.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.1.0...v1.2.0) (2024-02-05)
+
+
+### Bug Fixes
+
+* ensure event data is sandboxed per app for all platforms ([#113](https://github.com/amplitude/Amplitude-Swift/issues/113)) ([72da9f8](https://github.com/amplitude/Amplitude-Swift/commit/72da9f879837d2a64c248559081b322cde994c50))
+* should track coarse location by default ([#110](https://github.com/amplitude/Amplitude-Swift/issues/110)) ([2aab265](https://github.com/amplitude/Amplitude-Swift/commit/2aab2657d0f9efde6e6ba977bbd488459b4a0c53))
+
+
+### Features
+
+* add privacy manifest for ios 17 ([#109](https://github.com/amplitude/Amplitude-Swift/issues/109)) ([cf0ca47](https://github.com/amplitude/Amplitude-Swift/commit/cf0ca474f50864fbaa5ea8ae7e70a58814456e61))
+
 # [1.1.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.0.0...v1.1.0) (2023-10-30)
 
 
