@@ -362,10 +362,14 @@ public class Amplitude {
             StoragePrefixMigration(source: legacyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
     }
-    
+
     private func migrateInstanceOnlyStorages() {
-        let instanceName = configuration.getNormalizeInstanceName()
+        // Only migrate sandboxed apps to avoid potential data polution
+        if (!SandboxHelper().isSandboxEnabled()) {
+            return;
+        }
         
+        let instanceName = configuration.getNormalizeInstanceName()
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
             let instanceOnlyEventPrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-storage-\(instanceName)"
             let instanceNameOnlyStorage = PersistentStorage(storagePrefix: instanceOnlyEventPrefix)
