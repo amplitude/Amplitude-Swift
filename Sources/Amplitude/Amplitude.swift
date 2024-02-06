@@ -364,11 +364,11 @@ public class Amplitude {
     }
 
     private func migrateInstanceOnlyStorages() {
-        // Only migrate sandboxed apps to avoid potential data polution
+        // Only migrate sandboxed apps to avoid potential data pollution
         if (!SandboxHelper().isSandboxEnabled()) {
             return;
         }
-        
+
         let instanceName = configuration.getNormalizeInstanceName()
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
             let instanceOnlyEventPrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-storage-\(instanceName)"
