@@ -41,6 +41,7 @@ public class Amplitude {
 
         migrateApiKeyStorages()
         migrateDefaultInstanceStorages()
+        migrateInstanceOnlyStorages()
 
         if configuration.migrateLegacyData {
             RemnantDataMigration(self).execute()
@@ -359,6 +360,22 @@ public class Amplitude {
         if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
             let legacyIdentifyStorage = PersistentStorage(storagePrefix: "identify-\(legacyDefaultInstanceName)")
             StoragePrefixMigration(source: legacyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
+        }
+    }
+    
+    private func migrateInstanceOnlyStorages() {
+        let instanceName = configuration.getNormalizeInstanceName()
+        
+        if let persistentStorage = configuration.storageProvider as? PersistentStorage {
+            let instanceOnlyEventPrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-storage-\(instanceName)"
+            let instanceNameOnlyStorage = PersistentStorage(storagePrefix: instanceOnlyEventPrefix)
+            StoragePrefixMigration(source: instanceNameOnlyStorage, destination: persistentStorage, logger: logger).execute()
+        }
+
+        if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
+            let instanceOnlyIdentifyPrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(instanceName)"
+            let instanceNameOnlyIdentifyStorage = PersistentStorage(storagePrefix: instanceOnlyIdentifyPrefix)
+            StoragePrefixMigration(source: instanceNameOnlyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
     }
 }
