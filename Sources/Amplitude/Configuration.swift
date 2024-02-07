@@ -62,7 +62,7 @@ public class Configuration {
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
         migrateLegacyData: Bool = true
     ) {
-        let normalizedInstanceName = getNormalizeInstanceName()
+        let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
         self.apiKey = apiKey
         self.flushQueueSize = flushQueueSize
@@ -100,8 +100,12 @@ public class Configuration {
             && minTimeBetweenSessionsMillis > 0
             && (minIdLength == nil || minIdLength! > 0)
     }
+
+    private class func getNormalizeInstanceName(_ instanceName: String) -> String {
+        return instanceName == "" ? Constants.Configuration.DEFAULT_INSTANCE : instanceName
+    }
     
     internal func getNormalizeInstanceName() -> String {
-        return self.instanceName == "" ? Constants.Configuration.DEFAULT_INSTANCE : self.instanceName
+        return Configuration.getNormalizeInstanceName(self.instanceName)
     }
 }

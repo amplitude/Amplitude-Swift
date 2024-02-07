@@ -13,11 +13,11 @@ class PersistentStorage: Storage {
     static internal func getEventStoragePrefix(_ apiKey: String, _ instanceName: String) -> String {
         return "storage-\(instanceName)-\(apiKey)"
     }
-    
+
     static internal func getIdentifyStoragePrefix(_ apiKey: String, _ instanceName: String) -> String {
         return "identify-\(instanceName)-\(apiKey)"
     }
-    
+
     let storagePrefix: String
     let userDefaults: UserDefaults?
     let fileManager: FileManager
