@@ -41,7 +41,7 @@ public class Amplitude {
 
         migrateApiKeyStorages()
         migrateDefaultInstanceStorages()
-        if (configuration.migrateLegacyData && getStorageVersion() < .INSTANCE_NAME_AND_API_KEY) {
+        if configuration.migrateLegacyData && getStorageVersion() < .INSTANCE_NAME_AND_API_KEY {
             RemnantDataMigration(self).execute()
         }
         migrateInstanceOnlyStorages()
@@ -340,8 +340,8 @@ public class Amplitude {
     }
 
     private func migrateApiKeyStorages() {
-        if (getStorageVersion() >= PersistentStorageVersion.API_KEY) {
-            return;
+        if getStorageVersion() >= PersistentStorageVersion.API_KEY {
+            return
         }
         configuration.loggerProvider.error(message: "Running migrateApiKeyStorages")
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
@@ -356,8 +356,8 @@ public class Amplitude {
     }
 
     private func migrateDefaultInstanceStorages() {
-        if (getStorageVersion() >= PersistentStorageVersion.INSTANCE_NAME ||
-            configuration.instanceName != Constants.Configuration.DEFAULT_INSTANCE) {
+        if getStorageVersion() >= PersistentStorageVersion.INSTANCE_NAME ||
+            configuration.instanceName != Constants.Configuration.DEFAULT_INSTANCE {
             return
         }
         configuration.loggerProvider.error(message: "Running migrateDefaultInstanceStorages")
@@ -374,13 +374,13 @@ public class Amplitude {
     }
 
     private func migrateInstanceOnlyStorages() {
-        if (getStorageVersion() >= .INSTANCE_NAME_AND_API_KEY) {
-            return;
+        if getStorageVersion() >= .INSTANCE_NAME_AND_API_KEY {
+            return
         }
         configuration.loggerProvider.error(message: "Running migrateInstanceOnlyStorages")
 
         // Only migrate sandboxed apps to avoid potential data pollution
-        if (SandboxHelper().isSandboxEnabled()) {
+        if SandboxHelper().isSandboxEnabled() {
             let instanceName = configuration.getNormalizeInstanceName()
             if let persistentStorage = configuration.storageProvider as? PersistentStorage {
                 let instanceOnlyEventPrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-storage-\(instanceName)"

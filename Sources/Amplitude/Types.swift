@@ -84,7 +84,7 @@ public enum PersistentStorageVersion: Int, Comparable {
     public static func < (lhs: PersistentStorageVersion, rhs: PersistentStorageVersion) -> Bool {
         return lhs.rawValue < rhs.rawValue
     }
-    
+
     case NO_VERSION = -1
     // Note that versioning was added after these storage changes (0, 1)
     case API_KEY = 0

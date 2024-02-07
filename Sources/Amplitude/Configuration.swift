@@ -104,7 +104,7 @@ public class Configuration {
     private class func getNormalizeInstanceName(_ instanceName: String) -> String {
         return instanceName == "" ? Constants.Configuration.DEFAULT_INSTANCE : instanceName
     }
-    
+
     internal func getNormalizeInstanceName() -> String {
         return Configuration.getNormalizeInstanceName(self.instanceName)
     }
