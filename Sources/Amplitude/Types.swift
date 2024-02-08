@@ -90,7 +90,7 @@ public enum PersistentStorageVersion: Int, Comparable {
     case API_KEY = 0
     case INSTANCE_NAME = 1
     // This is the first version (2) we set a value in storageProvider.read(.StorageVersion)
-    case INSTANCE_NAME_AND_API_KEY = 2
+    case API_KEY_AND_INSTANCE_NAME = 2
 }
 
 public protocol Logger {

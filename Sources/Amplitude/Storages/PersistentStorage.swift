@@ -11,11 +11,11 @@ class PersistentStorage: Storage {
     typealias EventBlock = URL
 
     static internal func getEventStoragePrefix(_ apiKey: String, _ instanceName: String) -> String {
-        return "storage-\(instanceName)-\(apiKey)"
+        return "storage-\(apiKey)-\(instanceName)"
     }
 
     static internal func getIdentifyStoragePrefix(_ apiKey: String, _ instanceName: String) -> String {
-        return "identify-\(instanceName)-\(apiKey)"
+        return "identify-\(apiKey)-\(instanceName)"
     }
 
     let storagePrefix: String

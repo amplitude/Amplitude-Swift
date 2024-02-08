@@ -47,4 +47,45 @@ final class ConfigurationTests: XCTestCase {
         configuration = Configuration(apiKey: apiKey, minIdLength: 0)
         XCTAssertFalse(configuration.isValid())
     }
+
+    func testStorageByApiKeyAndInstanceName() throws {
+        let configuration = Configuration(apiKey: "migration-api-key")
+
+        let expectedStoragePostfix = "\(configuration.apiKey)-\(configuration.getNormalizeInstanceName())"
+
+        let eventsStorage = configuration.storageProvider as? PersistentStorage
+        let eventStorageUrl = eventsStorage != nil
+            ? eventsStorage?.getEventsStorageDirectory(createDirectory: false).absoluteString
+            : ""
+
+        let identifyStorage = configuration.storageProvider as? PersistentStorage
+        let identifyStorageUrl = identifyStorage != nil
+        ? identifyStorage?.getEventsStorageDirectory(createDirectory: false).absoluteString
+            : ""
+
+        XCTAssertTrue(eventStorageUrl?.contains(expectedStoragePostfix) ?? false)
+        XCTAssertTrue(identifyStorageUrl?.contains(expectedStoragePostfix) ?? false)
+    }
+
+    func testStorageByApiKeyAndInstanceNameWithCustomInstanceName() throws {
+        let configuration = Configuration(
+            apiKey: "migration-api-key",
+            instanceName: "test-instance"
+        )
+
+        let expectedStoragePostfix = "\(configuration.apiKey)-\(configuration.getNormalizeInstanceName())"
+
+        let eventsStorage = configuration.storageProvider as? PersistentStorage
+        let eventStorageUrl = eventsStorage != nil
+            ? eventsStorage?.getEventsStorageDirectory(createDirectory: false).absoluteString
+            : ""
+
+        let identifyStorage = configuration.storageProvider as? PersistentStorage
+        let identifyStorageUrl = identifyStorage != nil
+        ? identifyStorage?.getEventsStorageDirectory(createDirectory: false).absoluteString
+            : ""
+
+        XCTAssertTrue(eventStorageUrl?.contains(expectedStoragePostfix) ?? false)
+        XCTAssertTrue(identifyStorageUrl?.contains(expectedStoragePostfix) ?? false)
+    }
 }

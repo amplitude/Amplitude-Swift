@@ -41,7 +41,7 @@ public class Amplitude {
 
         migrateApiKeyStorages()
         migrateDefaultInstanceStorages()
-        if configuration.migrateLegacyData && getStorageVersion() < .INSTANCE_NAME_AND_API_KEY {
+        if configuration.migrateLegacyData && getStorageVersion() < .API_KEY_AND_INSTANCE_NAME {
             RemnantDataMigration(self).execute()
         }
         migrateInstanceOnlyStorages()
@@ -374,7 +374,7 @@ public class Amplitude {
     }
 
     private func migrateInstanceOnlyStorages() {
-        if getStorageVersion() >= .INSTANCE_NAME_AND_API_KEY {
+        if getStorageVersion() >= .API_KEY_AND_INSTANCE_NAME {
             return
         }
         configuration.loggerProvider.error(message: "Running migrateInstanceOnlyStorages")
@@ -401,9 +401,9 @@ public class Amplitude {
             // Store the current storage version
             try configuration.storageProvider.write(
                 key: .STORAGE_VERSION,
-                value: PersistentStorageVersion.INSTANCE_NAME_AND_API_KEY.rawValue as Int
+                value: PersistentStorageVersion.API_KEY_AND_INSTANCE_NAME.rawValue as Int
             )
-            configuration.loggerProvider.debug(message: "Updated STORAGE_VERSION to .INSTANCE_NAME_AND_API_KEY")
+            configuration.loggerProvider.debug(message: "Updated STORAGE_VERSION to .API_KEY_AND_INSTANCE_NAME")
         } catch {
             configuration.loggerProvider.error(message: "Unable to set STORAGE_VERSION in storageProvider during migration")
         }
