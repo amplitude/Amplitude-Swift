@@ -56,10 +56,13 @@ open class NetworkConnectivityCheckerPlugin: BeforePlugin {
         pathCreation.start()
         pathUpdateCancellable = pathCreation.networkPathPublisher?
             .sink(receiveValue: { [weak self] networkPath in
-                let isOnline = networkPath.status == .satisfied
-                self?.amplitude?.logger?.debug(message: "Network connectivity changed to \(isOnline ? "online" : "offline").")
-                self?.amplitude?.configuration.offline = !isOnline
-                if isOnline {
+                let isOffline = !(networkPath.status == .satisfied)
+                if self?.amplitude?.configuration.offline == isOffline {
+                    return
+                }
+                self?.amplitude?.logger?.debug(message: "Network connectivity changed to \(isOffline ? "offline" : "online").")
+                self?.amplitude?.configuration.offline = isOffline
+                if !isOffline {
                     amplitude.flush()
                 }
             })

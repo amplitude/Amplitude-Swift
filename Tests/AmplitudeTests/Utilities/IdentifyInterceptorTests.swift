@@ -11,6 +11,7 @@ final class IdentifyInterceptorTests: XCTestCase {
     private var interceptor: TestIdentifyInterceptor!
     private var configuration: Configuration!
     private var pipeline: EventPipeline!
+    private var mockPathCreation: MockPathCreation!
 
     override func setUp() {
         super.setUp()
@@ -25,6 +26,8 @@ final class IdentifyInterceptorTests: XCTestCase {
             offline: NetworkConnectivityCheckerPlugin.Disabled
         )
         let amplitude = Amplitude(configuration: configuration)
+        mockPathCreation = MockPathCreation()
+        amplitude.add(plugin: NetworkConnectivityCheckerPlugin(pathCreation: mockPathCreation))
         httpClient = FakeHttpClient(configuration: configuration)
         pipeline = EventPipeline(amplitude: amplitude)
         pipeline.httpClient = httpClient
