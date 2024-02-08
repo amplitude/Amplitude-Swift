@@ -59,6 +59,9 @@ open class NetworkConnectivityCheckerPlugin: BeforePlugin {
                 let isOnline = networkPath.status == .satisfied
                 self?.amplitude?.logger?.debug(message: "Network connectivity changed to \(isOnline ? "online" : "offline").")
                 self?.amplitude?.configuration.offline = !isOnline
+                if isOnline {
+                    amplitude.flush()
+                }
             })
     }
 
