@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.2.0...v1.3.0) (2024-02-08)
+
+
+### Features
+
+* add offline mode ([#111](https://github.com/amplitude/Amplitude-Swift/issues/111)) ([37b337d](https://github.com/amplitude/Amplitude-Swift/commit/37b337daefced3fd50aa9fed7c1145e84b4e1eda))
+
 # [1.2.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.1.0...v1.2.0) (2024-02-05)
 
 
