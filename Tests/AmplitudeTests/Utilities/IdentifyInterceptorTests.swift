@@ -21,7 +21,8 @@ final class IdentifyInterceptorTests: XCTestCase {
             apiKey: "testApiKey",
             storageProvider: storage,
             identifyStorageProvider: identifyStorage,
-            identifyBatchIntervalMillis: identifyBatchIntervalMillis
+            identifyBatchIntervalMillis: identifyBatchIntervalMillis,
+            offline: NetworkConnectivityCheckerPlugin.Disabled
         )
         let amplitude = Amplitude(configuration: configuration)
         httpClient = FakeHttpClient(configuration: configuration)
