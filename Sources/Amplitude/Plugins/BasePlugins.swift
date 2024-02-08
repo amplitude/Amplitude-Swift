@@ -13,6 +13,10 @@ open class BasePlugin {
     open func execute(event: BaseEvent) -> BaseEvent? {
         return event
     }
+
+    public func teardown(){
+        // Clean up any resources from setup if necessary
+    }
 }
 
 open class BeforePlugin: BasePlugin, Plugin {

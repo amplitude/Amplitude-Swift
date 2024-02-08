@@ -53,6 +53,9 @@ public class Amplitude {
             state.userId = userId
         }
 
+        if self.configuration.offline != NetworkConnectivityCheckerPlugin.Disabled {
+            _ = add(plugin: NetworkConnectivityCheckerPlugin())
+        }
         // required plugin for specific platform, only has lifecyclePlugin now
         if let requiredPlugin = VendorSystem.current.requiredPlugin {
             _ = add(plugin: requiredPlugin)
