@@ -6,3 +6,6 @@ DerivedData/
 .swiftpm/config/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
+
+Amplitude-Swift.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+Examples/AmplitudeSwiftUIExample/AmplitudeSwiftUIExample.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
