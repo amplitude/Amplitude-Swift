@@ -16,10 +16,10 @@ class StoragePrefixMigration {
             return
         }
 
-        if (!skipEventFiles) {
+        if !skipEventFiles {
             moveSourceEventFilesToDestination()
         }
-        
+
         moveUserDefaults()
     }
 

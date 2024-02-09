@@ -325,7 +325,7 @@ final class AmplitudeTests: XCTestCase {
     }
 
     func testMigrationToApiKeyAndInstanceNameStorage() throws {
-        let legacyUserId = "legacy-user-id";
+        let legacyUserId = "legacy-user-id"
         let config = Configuration(
             apiKey: "amp-migration-api-key",
             // don't transfer any events
@@ -341,7 +341,7 @@ final class AmplitudeTests: XCTestCase {
 
         print("Creating legacy Amplitude instance")
         // Init Amplitude using legacy storage
-        let legacyStorageAmplitude = FakeAmplitudeWithNoApiAndInstanceNameMigration(configuration: Configuration(
+        let legacyStorageAmplitude = FakeAmplitudeWithNoInstNameOnlyMigration(configuration: Configuration(
             apiKey: config.apiKey,
             flushQueueSize: config.flushQueueSize,
             flushIntervalMillis: config.flushIntervalMillis,
@@ -410,7 +410,7 @@ final class AmplitudeTests: XCTestCase {
 
     #if os(macOS)
     func testMigrationToApiKeyAndInstanceNameStorageMacSandboxEnabled() throws {
-        let legacyUserId = "legacy-user-id";
+        let legacyUserId = "legacy-user-id"
         let config = Configuration(
             apiKey: "amp-mac-migration-api-key",
             // don't transfer any events
@@ -426,7 +426,7 @@ final class AmplitudeTests: XCTestCase {
 
         print("Creating legacy Amplitude instance")
         // Init Amplitude using legacy storage
-        let legacyStorageAmplitude = FakeAmplitudeWithNoApiAndInstanceNameMigration(configuration: Configuration(
+        let legacyStorageAmplitude = FakeAmplitudeWithNoInstNameOnlyMigration(configuration: Configuration(
             apiKey: config.apiKey,
             flushQueueSize: config.flushQueueSize,
             flushIntervalMillis: config.flushIntervalMillis,

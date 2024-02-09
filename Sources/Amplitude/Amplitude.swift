@@ -388,14 +388,14 @@ public class Amplitude {
         if skipEventMigration {
             configuration.loggerProvider.debug(message: "Skipping event migration in non-sandboxed app. Transfering UserDefaults only.")
         }
-        
+
         let instanceName = configuration.getNormalizeInstanceName()
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
             let instanceOnlyEventPrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-storage-\(instanceName)"
             let instanceNameOnlyStorage = PersistentStorage(storagePrefix: instanceOnlyEventPrefix)
             StoragePrefixMigration(
                 source: instanceNameOnlyStorage,
-                destination: persistentStorage, 
+                destination: persistentStorage,
                 logger: logger
             ).execute(skipEventFiles: skipEventMigration)
         }
@@ -421,8 +421,8 @@ public class Amplitude {
             configuration.loggerProvider.error(message: "Unable to set STORAGE_VERSION in storageProvider during migration")
         }
     }
-    
+
     internal func isSandboxEnabled() -> Bool {
-        return SandboxHelper().isSandboxEnabled();
+        return SandboxHelper().isSandboxEnabled()
     }
 }
