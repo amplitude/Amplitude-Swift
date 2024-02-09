@@ -76,7 +76,7 @@ public enum StorageKey: String, CaseIterable {
     case APP_VERSION = "app_version"
     // The version of PersistentStorage, used for data migrations
     // Value should be a PersistentStorageVersion value
-    // Note the first version is 2, which corresponds to instanceName-apiKey based storage
+    // Note the first version is 2, which corresponds to apiKey-instanceName based storage
     case STORAGE_VERSION = "storage_version"
 }
 

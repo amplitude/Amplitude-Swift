@@ -339,7 +339,6 @@ final class AmplitudeTests: XCTestCase {
         let legacyEventStorage = PersistentStorage(storagePrefix: "storage-\(config.getNormalizeInstanceName())")
         let legacyIdentityStorage = PersistentStorage(storagePrefix: "identify-\(config.getNormalizeInstanceName())")
 
-        print("Creating legacy Amplitude instance")
         // Init Amplitude using legacy storage
         let legacyStorageAmplitude = FakeAmplitudeWithNoInstNameOnlyMigration(configuration: Configuration(
             apiKey: config.apiKey,
@@ -366,7 +365,6 @@ final class AmplitudeTests: XCTestCase {
         var legacyEventsString = ""
         legacyEventFiles?.forEach { file in
             legacyEventsString = legacyEventStorage.getEventsString(eventBlock: file) ?? ""
-            print(legacyEventsString)
         }
 
         XCTAssertEqual(legacyEventFiles?.count ?? 0, 1)
@@ -380,7 +378,6 @@ final class AmplitudeTests: XCTestCase {
         var eventsString = ""
         eventFiles?.forEach { file in
             eventsString = legacyEventStorage.getEventsString(eventBlock: file) ?? ""
-            print(eventsString)
         }
 
         XCTAssertEqual(legacyDeviceId != nil, true)
@@ -424,7 +421,6 @@ final class AmplitudeTests: XCTestCase {
         let legacyEventStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "storage-\(config.getNormalizeInstanceName())")
         let legacyIdentityStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "identify-\(config.getNormalizeInstanceName())")
 
-        print("Creating legacy Amplitude instance")
         // Init Amplitude using legacy storage
         let legacyStorageAmplitude = FakeAmplitudeWithNoInstNameOnlyMigration(configuration: Configuration(
             apiKey: config.apiKey,
@@ -451,7 +447,6 @@ final class AmplitudeTests: XCTestCase {
         var legacyEventsString = ""
         legacyEventFiles?.forEach { file in
             legacyEventsString = legacyEventStorage.getEventsString(eventBlock: file) ?? ""
-            print(legacyEventsString)
         }
 
         XCTAssertEqual(legacyEventFiles?.count ?? 0, 1)
@@ -465,7 +460,6 @@ final class AmplitudeTests: XCTestCase {
         var eventsString = ""
         eventFiles?.forEach { file in
             eventsString = legacyEventStorage.getEventsString(eventBlock: file) ?? ""
-            print(eventsString)
         }
 
         XCTAssertEqual(legacyDeviceId != nil, true)
