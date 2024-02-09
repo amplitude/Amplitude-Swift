@@ -52,6 +52,9 @@
 		8EDECEC5F98F9974DF3E576F /* ObjCIdentify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC5A50E197C9C5067C19E /* ObjCIdentify.swift */; };
 		8EDECF81C2B1B38D472FD7EF /* ObjCConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */; };
 		8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
+		B6CCC6CD2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CCC6CC2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift */; };
+		B6EDB4D02B643C8400454B90 /* NetworkConnectivityCheckerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6EDB4CF2B643C8400454B90 /* NetworkConnectivityCheckerPlugin.swift */; };
+		B6F338A32B685793006179E2 /* NetworkConnectivityCheckerPluginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F338A22B685793006179E2 /* NetworkConnectivityCheckerPluginTests.swift */; };
 		BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA0359C92A51585D007C383B /* legacy_v3.sqlite */; };
 		BA0639F62A4DD491000F1CEE /* LegacyDatabaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */; };
 		BA1EC0F42A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1EC0F32A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift */; };
@@ -169,7 +172,10 @@
 		8EDECE07F682FAAE47F77B24 /* ObjCEventOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCEventOptions.swift; sourceTree = "<group>"; };
 		8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCConfiguration.swift; sourceTree = "<group>"; };
 		8EDECF8CF745F7339B65D6DB /* ObjCStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCStorage.swift; sourceTree = "<group>"; };
+		B6CCC6CC2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjCNetworkConnectivityCheckerPlugin.swift; sourceTree = "<group>"; };
 		B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		B6EDB4CF2B643C8400454B90 /* NetworkConnectivityCheckerPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConnectivityCheckerPlugin.swift; sourceTree = "<group>"; };
+		B6F338A22B685793006179E2 /* NetworkConnectivityCheckerPluginTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConnectivityCheckerPluginTests.swift; sourceTree = "<group>"; };
 		BA0359C92A51585D007C383B /* legacy_v3.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v3.sqlite; sourceTree = "<group>"; };
 		BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorage.swift; sourceTree = "<group>"; };
 		BA1EC0F32A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultTrackingOptionsTests.swift; sourceTree = "<group>"; };
@@ -276,6 +282,7 @@
 		8EDECAFD8271434E8DC7BA78 /* ObjC */ = {
 			isa = PBXGroup;
 			children = (
+				B6CCC6CC2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift */,
 				8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */,
 				8EDECB1FA2AFF022A19104EE /* ObjCPlan.swift */,
 				8EDEC500EBDA8B813056E2DB /* ObjCIngestionMetadata.swift */,
@@ -308,6 +315,14 @@
 			path = Migration;
 			sourceTree = "<group>";
 		};
+		B6F3389F2B6854A8006179E2 /* Plugins */ = {
+			isa = PBXGroup;
+			children = (
+				B6F338A22B685793006179E2 /* NetworkConnectivityCheckerPluginTests.swift */,
+			);
+			path = Plugins;
+			sourceTree = "<group>";
+		};
 		OBJ_13 /* Events */ = {
 			isa = PBXGroup;
 			children = (
@@ -338,6 +353,7 @@
 				8EDEC448C42C8C0A464FAA15 /* BasePlugins.swift */,
 				8EDECD39BAA97DD4320C0AA5 /* AnalyticsConnectorPlugin.swift */,
 				8EDEC48916EFEF6D5B3EEF9A /* AnalyticsConnectorIdentityPlugin.swift */,
+				B6EDB4CF2B643C8400454B90 /* NetworkConnectivityCheckerPlugin.swift */,
 			);
 			path = Plugins;
 			sourceTree = "<group>";
@@ -421,6 +437,7 @@
 		OBJ_53 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				B6F3389F2B6854A8006179E2 /* Plugins */,
 				OBJ_54 /* AmplitudeTests.swift */,
 				OBJ_55 /* ConfigurationTests.swift */,
 				OBJ_56 /* ConsoleLoggerTests.swift */,
@@ -645,6 +662,7 @@
 				OBJ_153 /* TimelineTests.swift in Sources */,
 				OBJ_154 /* TypesTests.swift in Sources */,
 				OBJ_155 /* EventPipelineTests.swift in Sources */,
+				B6F338A32B685793006179E2 /* NetworkConnectivityCheckerPluginTests.swift in Sources */,
 				OBJ_156 /* HttpClientTests.swift in Sources */,
 				D01043612B6C5A8500F8173C /* SandboxHelperTests.swift in Sources */,
 				OBJ_157 /* PersistentStorageResponseHandlerTests.swift in Sources */,
@@ -685,6 +703,7 @@
 				OBJ_108 /* IOSLifecycleMonitor.swift in Sources */,
 				OBJ_109 /* WatchOSLifecycleMonitor.swift in Sources */,
 				OBJ_110 /* State.swift in Sources */,
+				B6CCC6CD2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift in Sources */,
 				OBJ_111 /* InMemoryStorage.swift in Sources */,
 				OBJ_112 /* PersistentStorage.swift in Sources */,
 				BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */,
@@ -727,6 +746,7 @@
 				8EDECA4DAFA67CD4785D0161 /* ObjCDefaultTrackingOptions.swift in Sources */,
 				8EDEC43520B2DCF584F1035D /* ObjCScreenViewedEvent.swift in Sources */,
 				8EDECC1FC97DDF0BEFAA96E7 /* ObjCDeepLinkOpenedEvent.swift in Sources */,
+				B6EDB4D02B643C8400454B90 /* NetworkConnectivityCheckerPlugin.swift in Sources */,
 				8EDEC5F7208B1C327C8703D7 /* ObjCStorage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

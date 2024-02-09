@@ -489,7 +489,11 @@ final class AmplitudeTests: XCTestCase {
     }
     #endif
 
-    private func getDictionary(_ props: [String: Any?]) -> NSDictionary {
+    func testInit_Offline() {
+        XCTAssertEqual(Amplitude(configuration: configuration).configuration.offline, false)
+    }
+
+    func getDictionary(_ props: [String: Any?]) -> NSDictionary {
         return NSDictionary(dictionary: props as [AnyHashable: Any])
     }
 }
