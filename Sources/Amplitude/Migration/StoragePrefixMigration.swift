@@ -11,12 +11,15 @@ class StoragePrefixMigration {
         self.logger = logger
     }
 
-    func execute() {
+    func execute(skipEventFiles: Bool = false) {
         if source.storagePrefix == destination.storagePrefix {
             return
         }
 
-        moveSourceEventFilesToDestination()
+        if (!skipEventFiles) {
+            moveSourceEventFilesToDestination()
+        }
+        
         moveUserDefaults()
     }
 

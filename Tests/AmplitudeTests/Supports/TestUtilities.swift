@@ -260,3 +260,15 @@ class FakePersistentStorageAppSandboxEnabled: PersistentStorage {
         return true
     }
 }
+
+class FakeAmplitudeWithNoApiAndInstanceNameMigration: Amplitude {
+    override func migrateInstanceOnlyStorages() {
+        // do nothing
+    }
+}
+
+class FakeAmplitudeWithSandboxEnabled: Amplitude {
+    override internal func isSandboxEnabled() -> Bool {
+        return true
+    }
+}

@@ -324,7 +324,172 @@ final class AmplitudeTests: XCTestCase {
         ])
     }
 
-    func getDictionary(_ props: [String: Any?]) -> NSDictionary {
+    func testMigrationToApiKeyAndInstanceNameStorage() throws {
+        let legacyUserId = "legacy-user-id";
+        let config = Configuration(
+            apiKey: "amp-migration-api-key",
+            // don't transfer any events
+            flushQueueSize: 1000,
+            flushIntervalMillis: 99999,
+            logLevel: LogLevelEnum.DEBUG,
+            defaultTracking: DefaultTrackingOptions.NONE
+        )
+
+        // Create storages using instance name only
+        let legacyEventStorage = PersistentStorage(storagePrefix: "storage-\(config.getNormalizeInstanceName())")
+        let legacyIdentityStorage = PersistentStorage(storagePrefix: "identify-\(config.getNormalizeInstanceName())")
+
+        print("Creating legacy Amplitude instance")
+        // Init Amplitude using legacy storage
+        let legacyStorageAmplitude = FakeAmplitudeWithNoApiAndInstanceNameMigration(configuration: Configuration(
+            apiKey: config.apiKey,
+            flushQueueSize: config.flushQueueSize,
+            flushIntervalMillis: config.flushIntervalMillis,
+            storageProvider: legacyEventStorage,
+            identifyStorageProvider: legacyIdentityStorage,
+            logLevel: config.logLevel,
+            defaultTracking: config.defaultTracking
+        ))
+
+        let legacyDeviceId = legacyStorageAmplitude.getDeviceId()
+
+        // set userId
+        legacyStorageAmplitude.setUserId(userId: legacyUserId)
+        XCTAssertEqual(legacyUserId, legacyStorageAmplitude.getUserId())
+
+        // track events to legacy storage
+        legacyStorageAmplitude.identify(identify: Identify().set(property: "user-prop", value: true))
+        legacyStorageAmplitude.track(event: BaseEvent(eventType: "Legacy Storage Event"))
+
+        guard let legacyEventFiles: [URL]? = legacyEventStorage.read(key: StorageKey.EVENTS) else { return }
+
+        var legacyEventsString = ""
+        legacyEventFiles?.forEach { file in
+            legacyEventsString = legacyEventStorage.getEventsString(eventBlock: file) ?? ""
+            print(legacyEventsString)
+        }
+
+        XCTAssertEqual(legacyEventFiles?.count ?? 0, 1)
+
+        let amplitude = Amplitude(configuration: config)
+        let deviceId = amplitude.getDeviceId()
+        let userId = amplitude.getUserId()
+
+        guard let eventFiles: [URL]? = amplitude.storage.read(key: StorageKey.EVENTS) else { return }
+
+        var eventsString = ""
+        eventFiles?.forEach { file in
+            eventsString = legacyEventStorage.getEventsString(eventBlock: file) ?? ""
+            print(eventsString)
+        }
+
+        XCTAssertEqual(legacyDeviceId != nil, true)
+        XCTAssertEqual(deviceId != nil, true)
+        XCTAssertEqual(legacyDeviceId, deviceId)
+
+        XCTAssertEqual(legacyUserId, userId)
+
+        XCTAssertNotNil(legacyEventsString)
+
+        #if os(macOS)
+        // We don't want to transfer event data in non-sanboxed apps
+        XCTAssertFalse(amplitude.isSandboxEnabled())
+        XCTAssertEqual(eventFiles?.count ?? 0, 0)
+        #else
+        XCTAssertTrue(eventsString != "")
+        XCTAssertEqual(legacyEventsString, eventsString)
+        XCTAssertEqual(eventFiles?.count ?? 0, 1)
+        #endif
+
+        // clear storage
+        amplitude.storage.reset()
+        amplitude.identifyStorage.reset()
+        legacyStorageAmplitude.storage.reset()
+        legacyStorageAmplitude.identifyStorage.reset()
+    }
+
+    #if os(macOS)
+    func testMigrationToApiKeyAndInstanceNameStorageMacSandboxEnabled() throws {
+        let legacyUserId = "legacy-user-id";
+        let config = Configuration(
+            apiKey: "amp-mac-migration-api-key",
+            // don't transfer any events
+            flushQueueSize: 1000,
+            flushIntervalMillis: 99999,
+            logLevel: LogLevelEnum.DEBUG,
+            defaultTracking: DefaultTrackingOptions.NONE
+        )
+
+        // Create storages using instance name only
+        let legacyEventStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "storage-\(config.getNormalizeInstanceName())")
+        let legacyIdentityStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "identify-\(config.getNormalizeInstanceName())")
+
+        print("Creating legacy Amplitude instance")
+        // Init Amplitude using legacy storage
+        let legacyStorageAmplitude = FakeAmplitudeWithNoApiAndInstanceNameMigration(configuration: Configuration(
+            apiKey: config.apiKey,
+            flushQueueSize: config.flushQueueSize,
+            flushIntervalMillis: config.flushIntervalMillis,
+            storageProvider: legacyEventStorage,
+            identifyStorageProvider: legacyIdentityStorage,
+            logLevel: config.logLevel,
+            defaultTracking: config.defaultTracking
+        ))
+
+        let legacyDeviceId = legacyStorageAmplitude.getDeviceId()
+
+        // set userId
+        legacyStorageAmplitude.setUserId(userId: legacyUserId)
+        XCTAssertEqual(legacyUserId, legacyStorageAmplitude.getUserId())
+
+        // track events to legacy storage
+        legacyStorageAmplitude.identify(identify: Identify().set(property: "user-prop", value: true))
+        legacyStorageAmplitude.track(event: BaseEvent(eventType: "Legacy Storage Event"))
+
+        guard let legacyEventFiles: [URL]? = legacyEventStorage.read(key: StorageKey.EVENTS) else { return }
+
+        var legacyEventsString = ""
+        legacyEventFiles?.forEach { file in
+            legacyEventsString = legacyEventStorage.getEventsString(eventBlock: file) ?? ""
+            print(legacyEventsString)
+        }
+
+        XCTAssertEqual(legacyEventFiles?.count ?? 0, 1)
+
+        let amplitude = FakeAmplitudeWithSandboxEnabled(configuration: config)
+        let deviceId = amplitude.getDeviceId()
+        let userId = amplitude.getUserId()
+
+        guard let eventFiles: [URL]? = amplitude.storage.read(key: StorageKey.EVENTS) else { return }
+
+        var eventsString = ""
+        eventFiles?.forEach { file in
+            eventsString = legacyEventStorage.getEventsString(eventBlock: file) ?? ""
+            print(eventsString)
+        }
+
+        XCTAssertEqual(legacyDeviceId != nil, true)
+        XCTAssertEqual(deviceId != nil, true)
+        XCTAssertEqual(legacyDeviceId, deviceId)
+
+        XCTAssertEqual(legacyUserId, userId)
+
+        XCTAssertNotNil(legacyEventsString)
+
+        // Transfer event data in sandboxed apps
+        XCTAssertTrue(eventsString == "")
+        XCTAssertNotEqual(legacyEventsString, eventsString)
+        XCTAssertEqual(eventFiles?.count ?? 0, 0)
+
+        // clear storage
+        amplitude.storage.reset()
+        amplitude.identifyStorage.reset()
+        legacyStorageAmplitude.storage.reset()
+        legacyStorageAmplitude.identifyStorage.reset()
+    }
+    #endif
+
+    private func getDictionary(_ props: [String: Any?]) -> NSDictionary {
         return NSDictionary(dictionary: props as [AnyHashable: Any])
     }
 }
