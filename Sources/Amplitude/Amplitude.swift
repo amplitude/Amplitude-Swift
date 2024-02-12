@@ -41,10 +41,10 @@ public class Amplitude {
 
         migrateApiKeyStorages()
         migrateDefaultInstanceStorages()
-
-        if configuration.migrateLegacyData {
+        if configuration.migrateLegacyData && getStorageVersion() < .API_KEY_AND_INSTANCE_NAME {
             RemnantDataMigration(self).execute()
         }
+        migrateInstanceOnlyStorages()
 
         if let deviceId: String? = configuration.storageProvider.read(key: .DEVICE_ID) {
             state.deviceId = deviceId
@@ -336,7 +336,17 @@ public class Amplitude {
         }
     }
 
+    private func getStorageVersion() -> PersistentStorageVersion {
+        let storageVersionInt: Int? = configuration.storageProvider.read(key: .STORAGE_VERSION)
+        let storageVersion: PersistentStorageVersion = (storageVersionInt == nil) ? PersistentStorageVersion.NO_VERSION : PersistentStorageVersion(rawValue: storageVersionInt!)!
+        return storageVersion
+    }
+
     private func migrateApiKeyStorages() {
+        if getStorageVersion() >= PersistentStorageVersion.API_KEY {
+            return
+        }
+        configuration.loggerProvider.debug(message: "Running migrateApiKeyStorages")
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
             let apiKeyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(configuration.apiKey)")
             StoragePrefixMigration(source: apiKeyStorage, destination: persistentStorage, logger: logger).execute()
@@ -349,10 +359,11 @@ public class Amplitude {
     }
 
     private func migrateDefaultInstanceStorages() {
-        if configuration.instanceName != Constants.Configuration.DEFAULT_INSTANCE {
+        if getStorageVersion() >= PersistentStorageVersion.INSTANCE_NAME ||
+            configuration.instanceName != Constants.Configuration.DEFAULT_INSTANCE {
             return
         }
-
+        configuration.loggerProvider.debug(message: "Running migrateDefaultInstanceStorages")
         let legacyDefaultInstanceName = "default_instance"
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
             let legacyStorage = PersistentStorage(storagePrefix: "storage-\(legacyDefaultInstanceName)")
@@ -363,5 +374,55 @@ public class Amplitude {
             let legacyIdentifyStorage = PersistentStorage(storagePrefix: "identify-\(legacyDefaultInstanceName)")
             StoragePrefixMigration(source: legacyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
+    }
+
+    internal func migrateInstanceOnlyStorages() {
+        if getStorageVersion() >= .API_KEY_AND_INSTANCE_NAME {
+            configuration.loggerProvider.debug(message: "Skipping migrateInstanceOnlyStorages based on STORAGE_VERSION")
+            return
+        }
+        configuration.loggerProvider.debug(message: "Running migrateInstanceOnlyStorages")
+
+        let skipEventMigration = !isSandboxEnabled()
+        // Only migrate sandboxed apps to avoid potential data pollution
+        if skipEventMigration {
+            configuration.loggerProvider.debug(message: "Skipping event migration in non-sandboxed app. Transfering UserDefaults only.")
+        }
+
+        let instanceName = configuration.getNormalizeInstanceName()
+        if let persistentStorage = configuration.storageProvider as? PersistentStorage {
+            let instanceOnlyEventPrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-storage-\(instanceName)"
+            let instanceNameOnlyStorage = PersistentStorage(storagePrefix: instanceOnlyEventPrefix)
+            StoragePrefixMigration(
+                source: instanceNameOnlyStorage,
+                destination: persistentStorage,
+                logger: logger
+            ).execute(skipEventFiles: skipEventMigration)
+        }
+
+        if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
+            let instanceOnlyIdentifyPrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(instanceName)"
+            let instanceNameOnlyIdentifyStorage = PersistentStorage(storagePrefix: instanceOnlyIdentifyPrefix)
+            StoragePrefixMigration(
+                source: instanceNameOnlyIdentifyStorage,
+                destination: persistentIdentifyStorage,
+                logger: logger
+            ).execute(skipEventFiles: skipEventMigration)
+        }
+
+        do {
+            // Store the current storage version
+            try configuration.storageProvider.write(
+                key: .STORAGE_VERSION,
+                value: PersistentStorageVersion.API_KEY_AND_INSTANCE_NAME.rawValue as Int
+            )
+            configuration.loggerProvider.debug(message: "Updated STORAGE_VERSION to .API_KEY_AND_INSTANCE_NAME")
+        } catch {
+            configuration.loggerProvider.error(message: "Unable to set STORAGE_VERSION in storageProvider during migration")
+        }
+    }
+
+    internal func isSandboxEnabled() -> Bool {
+        return SandboxHelper().isSandboxEnabled()
     }
 }

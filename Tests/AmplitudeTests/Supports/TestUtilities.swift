@@ -263,6 +263,18 @@ class FakePersistentStorageAppSandboxEnabled: PersistentStorage {
     }
 }
 
+class FakeAmplitudeWithNoInstNameOnlyMigration: Amplitude {
+    override func migrateInstanceOnlyStorages() {
+        // do nothing
+    }
+}
+
+class FakeAmplitudeWithSandboxEnabled: Amplitude {
+    override internal func isSandboxEnabled() -> Bool {
+        return true
+    }
+}
+
 final class MockPathCreation: PathCreationProtocol {
     var networkPathPublisher: AnyPublisher<NetworkPath, Never>?
     private let subject = PassthroughSubject<NetworkPath, Never>()
