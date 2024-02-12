@@ -12,7 +12,7 @@ open class Identify {
 
     enum Operation: String {
         case SET = "$set"
-        case SET_ONCE = "$set_once"
+        case SET_ONCE = "$setOnce"
         case ADD = "$add"
         case APPEND = "$append"
         case CLEAR_ALL = "$clearAll"
