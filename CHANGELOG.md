@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.0...v1.3.1) (2024-02-12)
+
+
+### Bug Fixes
+
+* migrate storage to instanceName-apiKey to isolate by instance ([#114](https://github.com/amplitude/Amplitude-Swift/issues/114)) ([7128e62](https://github.com/amplitude/Amplitude-Swift/commit/7128e624b38e005ca6e68245e5c4f6443c62fa19))
+
 # [1.3.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.2.0...v1.3.0) (2024-02-08)
 
 
