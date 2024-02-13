@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.1...v1.3.2) (2024-02-13)
+
+
+### Bug Fixes
+
+* storage instance issue ([#118](https://github.com/amplitude/Amplitude-Swift/issues/118)) ([2655645](https://github.com/amplitude/Amplitude-Swift/commit/26556450b4f8b1f3df235bccf7ee10c8ca11ef0d))
+
 ## [1.3.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.0...v1.3.1) (2024-02-12)
 
 
