@@ -50,6 +50,13 @@ internal class OutputFileStream {
         if fileHandle != nil { return }
         do {
             fileHandle = try FileHandle(forWritingTo: fileURL)
+            if #available(macOS 10.15.4, iOS 13.4, macCatalyst 13.4, tvOS 13.4, watchOS 6.2, *) {
+                _ = try? fileHandle?.seekToEnd()
+            } else if #available(tvOS 13.0, *) {
+                try? fileHandle?.seek(toOffset: .max)
+            } else {
+                fileHandle?.seekToEndOfFile()
+            }
         } catch {
             throw OutputStreamError.unableToOpen(fileURL.path)
         }
@@ -57,7 +64,7 @@ internal class OutputFileStream {
 
     func write(_ data: Data) throws {
         guard data.isEmpty == false else { return }
-        if #available(macOS 10.15.4, iOS 13.4, macCatalyst 13.4, tvOS 13.4, watchOS 13.4, *) {
+        if #available(macOS 10.15.4, iOS 13.4, macCatalyst 13.4, tvOS 13.4, watchOS 6.2, *) {
             do {
                 try fileHandle?.write(contentsOf: data)
             } catch {
