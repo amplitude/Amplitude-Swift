@@ -66,7 +66,7 @@
     
     NSDictionary* expectedUserProperties = @{
         @"$set": @{@"user-string-prop": @"string-value"},
-        @"$set_once": @{@"user-int-prop": @111},
+        @"$setOnce": @{@"user-int-prop": @111},
         @"$append": @{@"user-number-prop": @123.4},
         @"$prepend": @{@"user-bool-prop": @true},
         @"$add": @{@"user-sum-prop": @7},
@@ -142,7 +142,7 @@
     
     NSDictionary* expectedGroupProperties = @{
         @"$set": @{@"user-string-prop": @"string-value"},
-        @"$set_once": @{@"user-int-prop": @111},
+        @"$setOnce": @{@"user-int-prop": @111},
         @"$append": @{@"user-number-prop": @123.4},
         @"$prepend": @{@"user-bool-prop": @true},
         @"$add": @{@"user-sum-prop": @7},
