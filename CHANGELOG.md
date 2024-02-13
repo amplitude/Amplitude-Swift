@@ -1,3 +1,11 @@
+## [1.3.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.2...v1.3.3) (2024-02-13)
+
+
+### Bug Fixes
+
+* fix setOnce identify operation ([#119](https://github.com/amplitude/Amplitude-Swift/issues/119)) ([6934c89](https://github.com/amplitude/Amplitude-Swift/commit/6934c8913d23765806f72046bc7976b316078959))
+* try fix crash ([#117](https://github.com/amplitude/Amplitude-Swift/issues/117)) ([0536666](https://github.com/amplitude/Amplitude-Swift/commit/0536666dd36e4dda86a0a5334de8588c59063f7c))
+
 ## [1.3.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.1...v1.3.2) (2024-02-13)
 
 
