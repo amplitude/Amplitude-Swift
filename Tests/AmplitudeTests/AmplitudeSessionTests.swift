@@ -105,6 +105,35 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.eventId, lastEventId+5)
     }
 
+    func testBackgroundOutOfSessionEvent() throws {
+        let lastEventId: Int64 = 123
+        try storageMem.write(key: StorageKey.LAST_EVENT_ID, value: lastEventId)
+        let customCongiguration = Configuration(
+            apiKey: "test-out-of-session",
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            minTimeBetweenSessionsMillis: 100,
+            defaultTracking: DefaultTrackingOptions(sessions: false)
+        )
+        let amplitude = Amplitude(configuration: customCongiguration)
+        amplitude.setSessionId(timestamp: 800)
+        let eventCollector = EventCollectorPlugin()
+        amplitude.add(plugin: eventCollector)
+        let eventOptions = EventOptions(timestamp: 1000, sessionId: -1)
+        let eventType = "out of session event"
+        amplitude.track(eventType: eventType, options: eventOptions)
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 1050, eventType: "test event"))
+        let collectedEvents = eventCollector.events
+        XCTAssertEqual(collectedEvents.count, 2)
+        var event = collectedEvents[0]
+        XCTAssertEqual(event.eventType, eventType)
+        XCTAssertEqual(event.sessionId, -1)
+        event = collectedEvents[1]
+        XCTAssertEqual(event.eventType, "test event")
+        XCTAssertEqual(event.sessionId, 1000)
+        XCTAssertEqual(amplitude.getSessionId(), 1000)
+    }
+
     func testForegroundEventsShouldNotStartNewSession() throws {
         let lastEventId: Int64 = 123
         try storageMem.write(key: StorageKey.LAST_EVENT_ID, value: lastEventId)

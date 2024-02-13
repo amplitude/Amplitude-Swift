@@ -9,6 +9,11 @@ public class IdentifyInterceptor {
             userId = event.userId
             deviceId = event.deviceId
         }
+
+        init(_ newUserId: String?, _ newDeviceId: String?) {
+            userId = newUserId
+            deviceId = newDeviceId
+        }
     }
 
     private let configuration: Configuration
@@ -34,6 +39,7 @@ public class IdentifyInterceptor {
             self.logger?.warn(message: "Minimum `identifyBatchIntervalMillis` is \(Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS).")
         }
         self.identifyBatchIntervalMillis = max(identifyBatchIntervalMillis, Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS)
+        self.lastIdentity = Identity(nil, nil)
     }
 
     public func intercept(event: BaseEvent) -> BaseEvent? {
@@ -49,7 +55,12 @@ public class IdentifyInterceptor {
     private func isIdentityUpdated(_ event: BaseEvent) -> Bool {
         let eventIdentity = Identity(event)
 
-        if eventIdentity != lastIdentity {
+        guard let currentIdenity = lastIdentity else {
+            lastIdentity = eventIdentity
+            return true
+        }
+
+        if eventIdentity != currentIdenity {
             lastIdentity = eventIdentity
             return true
         }
