@@ -49,4 +49,55 @@ final class PersistentStorageTests: XCTestCase {
         XCTAssertNotEqual(eventFiles?[0].pathExtension, PersistentStorage.TEMP_FILE_EXTENSION)
         persistentStorage.reset()
     }
+
+    func testWriteWithTwoInstances() {
+        let persistentStorage1 = PersistentStorage(storagePrefix: "xxx-instance")
+        try? persistentStorage1.write(
+            key: StorageKey.EVENTS,
+            value: BaseEvent(eventType: "test1")
+        )
+        let persistentStorage2 = PersistentStorage(storagePrefix: "xxx-instance")
+        try? persistentStorage2.write(
+            key: StorageKey.EVENTS,
+            value: BaseEvent(eventType: "test2")
+        )
+        // Only read from second instance, reading from first instance insert the "]" at the wrong cursor.
+        let eventFiles2: [URL]? = persistentStorage2.read(key: StorageKey.EVENTS)
+        XCTAssertEqual(eventFiles2?[0].absoluteString.contains("xxx-instance.events.index"), true)
+        XCTAssertNotEqual(eventFiles2?[0].pathExtension, PersistentStorage.TEMP_FILE_EXTENSION)
+
+        XCTAssertEqual(eventFiles2?.count, 1)
+
+        let eventString2 = persistentStorage2.getEventsString(eventBlock: (eventFiles2?[0])!)
+        let decodedEvents = BaseEvent.fromArrayString(jsonString: eventString2!)
+        XCTAssertEqual(decodedEvents!.count, 2)
+        XCTAssertEqual(decodedEvents![0].eventType, "test1")
+        XCTAssertEqual(decodedEvents![1].eventType, "test2")
+        persistentStorage1.reset()
+        persistentStorage2.reset()
+    }
+
+    #if os(macOS)
+    func testMacOsStorageDirectorySandboxedWhenAppSandboxDisabled() {
+        let persistentStorage = PersistentStorage(storagePrefix: "mac-instance")
+
+        let bundleId = Bundle.main.bundleIdentifier!
+        let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: false)
+
+        XCTAssertEqual(persistentStorage.isStorageSandboxed(), false)
+        XCTAssertEqual(storageUrl.absoluteString.contains(bundleId), true)
+        persistentStorage.reset()
+    }
+
+    func testMacOsStorageDirectorySandboxedWhenAppSandboxEnabled() {
+        let persistentStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "mac-app-sandbox-instance")
+
+        let bundleId = Bundle.main.bundleIdentifier!
+        let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: false)
+
+        XCTAssertEqual(persistentStorage.isStorageSandboxed(), true)
+        XCTAssertEqual(storageUrl.absoluteString.contains(bundleId), false)
+        persistentStorage.reset()
+    }
+    #endif
 }

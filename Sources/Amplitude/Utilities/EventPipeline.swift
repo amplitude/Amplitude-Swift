@@ -45,6 +45,11 @@ public class EventPipeline {
     }
 
     func flush(completion: (() -> Void)? = nil) {
+        if self.amplitude.configuration.offline == true {
+            self.amplitude.logger?.debug(message: "Skipping flush while offline.")
+            return
+        }
+
         amplitude.logger?.log(message: "Start flushing \(eventCount) events")
         eventCount = 0
         guard let storage = self.storage else { return }

@@ -1,3 +1,37 @@
+## [1.3.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.1...v1.3.2) (2024-02-13)
+
+
+### Bug Fixes
+
+* storage instance issue ([#118](https://github.com/amplitude/Amplitude-Swift/issues/118)) ([2655645](https://github.com/amplitude/Amplitude-Swift/commit/26556450b4f8b1f3df235bccf7ee10c8ca11ef0d))
+
+## [1.3.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.0...v1.3.1) (2024-02-12)
+
+
+### Bug Fixes
+
+* migrate storage to instanceName-apiKey to isolate by instance ([#114](https://github.com/amplitude/Amplitude-Swift/issues/114)) ([7128e62](https://github.com/amplitude/Amplitude-Swift/commit/7128e624b38e005ca6e68245e5c4f6443c62fa19))
+
+# [1.3.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.2.0...v1.3.0) (2024-02-08)
+
+
+### Features
+
+* add offline mode ([#111](https://github.com/amplitude/Amplitude-Swift/issues/111)) ([37b337d](https://github.com/amplitude/Amplitude-Swift/commit/37b337daefced3fd50aa9fed7c1145e84b4e1eda))
+
+# [1.2.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.1.0...v1.2.0) (2024-02-05)
+
+
+### Bug Fixes
+
+* ensure event data is sandboxed per app for all platforms ([#113](https://github.com/amplitude/Amplitude-Swift/issues/113)) ([72da9f8](https://github.com/amplitude/Amplitude-Swift/commit/72da9f879837d2a64c248559081b322cde994c50))
+* should track coarse location by default ([#110](https://github.com/amplitude/Amplitude-Swift/issues/110)) ([2aab265](https://github.com/amplitude/Amplitude-Swift/commit/2aab2657d0f9efde6e6ba977bbd488459b4a0c53))
+
+
+### Features
+
+* add privacy manifest for ios 17 ([#109](https://github.com/amplitude/Amplitude-Swift/issues/109)) ([cf0ca47](https://github.com/amplitude/Amplitude-Swift/commit/cf0ca474f50864fbaa5ea8ae7e70a58814456e61))
+
 # [1.1.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.0.0...v1.1.0) (2023-10-30)
 
 

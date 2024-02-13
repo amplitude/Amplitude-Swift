@@ -15,7 +15,11 @@ internal class Mediator {
 
     internal func remove(plugin: Plugin) {
         plugins.removeAll { (storedPlugin) -> Bool in
-            return storedPlugin === plugin
+            if storedPlugin === plugin {
+                storedPlugin.teardown()
+                return true
+            }
+            return false
         }
     }
 

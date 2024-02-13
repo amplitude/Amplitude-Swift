@@ -33,6 +33,7 @@ public class Configuration {
     public var identifyBatchIntervalMillis: Int
     public internal(set) var migrateLegacyData: Bool
     public var defaultTracking: DefaultTrackingOptions
+    public var offline: Bool?
 
     public init(
         apiKey: String,
@@ -60,9 +61,10 @@ public class Configuration {
         // `trackingSessionEvents` has been replaced by `defaultTracking.sessions`
         defaultTracking: DefaultTrackingOptions = DefaultTrackingOptions(),
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
-        migrateLegacyData: Bool = true
+        migrateLegacyData: Bool = true,
+        offline: Bool? = false
     ) {
-        let normalizedInstanceName = instanceName == "" ? Constants.Configuration.DEFAULT_INSTANCE : instanceName
+        let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
         self.apiKey = apiKey
         self.flushQueueSize = flushQueueSize
@@ -70,9 +72,9 @@ public class Configuration {
         self.instanceName = normalizedInstanceName
         self.optOut = optOut
         self.storageProvider = storageProvider
-            ?? PersistentStorage(storagePrefix: "storage-\(normalizedInstanceName)")
+            ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName))
         self.identifyStorageProvider = identifyStorageProvider
-            ?? PersistentStorage(storagePrefix: "identify-\(normalizedInstanceName)")
+            ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName))
         self.logLevel = logLevel
         self.loggerProvider = loggerProvider
         self.minIdLength = minIdLength
@@ -93,11 +95,20 @@ public class Configuration {
         self.migrateLegacyData = migrateLegacyData
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
+        self.offline = offline
     }
 
     func isValid() -> Bool {
         return !apiKey.isEmpty && flushQueueSize > 0 && flushIntervalMillis > 0
             && minTimeBetweenSessionsMillis > 0
             && (minIdLength == nil || minIdLength! > 0)
+    }
+
+    private class func getNormalizeInstanceName(_ instanceName: String) -> String {
+        return instanceName == "" ? Constants.Configuration.DEFAULT_INSTANCE : instanceName
+    }
+
+    internal func getNormalizeInstanceName() -> String {
+        return Configuration.getNormalizeInstanceName(self.instanceName)
     }
 }

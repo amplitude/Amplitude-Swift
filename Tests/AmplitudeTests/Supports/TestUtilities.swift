@@ -1,5 +1,7 @@
 import Foundation
 import XCTest
+import Network
+import Combine
 
 @testable import AmplitudeSwift
 
@@ -246,5 +248,44 @@ class TestIdentifyInterceptor: IdentifyInterceptor {
 
     public func setIdentifyBatchInterval(_ identifyBatchIntervalMillis: Int) {
         overridenIdentifyBatchIntervalMillis = identifyBatchIntervalMillis
+    }
+}
+
+class FakeSandboxHelperWithAppSandboxContainer: SandboxHelper {
+    override func getEnvironment() -> [String: String] {
+        return ["APP_SANDBOX_CONTAINER_ID": "test-container-id"]
+    }
+}
+
+class FakePersistentStorageAppSandboxEnabled: PersistentStorage {
+    override internal func isStorageSandboxed() -> Bool {
+        return true
+    }
+}
+
+class FakeAmplitudeWithNoInstNameOnlyMigration: Amplitude {
+    override func migrateInstanceOnlyStorages() {
+        // do nothing
+    }
+}
+
+class FakeAmplitudeWithSandboxEnabled: Amplitude {
+    override internal func isSandboxEnabled() -> Bool {
+        return true
+    }
+}
+
+final class MockPathCreation: PathCreationProtocol {
+    var networkPathPublisher: AnyPublisher<NetworkPath, Never>?
+    private let subject = PassthroughSubject<NetworkPath, Never>()
+
+    func start() {
+        networkPathPublisher = subject.eraseToAnyPublisher()
+    }
+
+    // Method to simulate network change in tests
+    func simulateNetworkChange(status: NWPath.Status) {
+        let networkPath = NetworkPath(status: status)
+        subject.send(networkPath)
     }
 }

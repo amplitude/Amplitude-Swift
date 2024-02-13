@@ -74,6 +74,23 @@ public enum StorageKey: String, CaseIterable {
     case DEVICE_ID = "device_id"
     case APP_BUILD = "app_build"
     case APP_VERSION = "app_version"
+    // The version of PersistentStorage, used for data migrations
+    // Value should be a PersistentStorageVersion value
+    // Note the first version is 2, which corresponds to apiKey-instanceName based storage
+    case STORAGE_VERSION = "storage_version"
+}
+
+public enum PersistentStorageVersion: Int, Comparable {
+    public static func < (lhs: PersistentStorageVersion, rhs: PersistentStorageVersion) -> Bool {
+        return lhs.rawValue < rhs.rawValue
+    }
+
+    case NO_VERSION = -1
+    // Note that versioning was added after these storage changes (0, 1)
+    case API_KEY = 0
+    case INSTANCE_NAME = 1
+    // This is the first version (2) we set a value in storageProvider.read(.StorageVersion)
+    case API_KEY_AND_INSTANCE_NAME = 2
 }
 
 public protocol Logger {
@@ -98,6 +115,7 @@ public protocol Plugin: AnyObject {
     var type: PluginType { get }
     func setup(amplitude: Amplitude)
     func execute(event: BaseEvent) -> BaseEvent?
+    func teardown()
 }
 
 public protocol EventPlugin: Plugin {
@@ -115,6 +133,10 @@ extension Plugin {
     }
 
     public func setup(amplitude: Amplitude) {
+    }
+
+    public func teardown(){
+        // Clean up any resources from setup if necessary
     }
 }
 
