@@ -340,7 +340,7 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(events[0].eventType, eventType)
         XCTAssertEqual(events[0].sessionId, -1)
     }
-    
+
     func testMigrationToApiKeyAndInstanceNameStorage() throws {
         let legacyUserId = "legacy-user-id"
         let config = Configuration(
