@@ -1,5 +1,5 @@
 module.exports = {
-  "branches": ["main"],
+  "branches": ["main", "1.1.x"],
   "plugins": [
     ["@semantic-release/commit-analyzer", {
       "preset": "angular",
