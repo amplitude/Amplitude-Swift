@@ -9,7 +9,7 @@ public class IdentifyInterceptor {
             userId = event.userId
             deviceId = event.deviceId
         }
-        
+
         init(_ newUserId: String?, _ newDeviceId: String?) {
             userId = newUserId
             deviceId = newDeviceId
@@ -54,7 +54,7 @@ public class IdentifyInterceptor {
 
     private func isIdentityUpdated(_ event: BaseEvent) -> Bool {
         let eventIdentity = Identity(event)
-        
+
         guard let currentIdenity = lastIdentity else {
             lastIdentity = eventIdentity
             return true
