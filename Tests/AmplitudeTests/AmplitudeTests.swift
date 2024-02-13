@@ -324,6 +324,23 @@ final class AmplitudeTests: XCTestCase {
         ])
     }
 
+    func testOutOfSessionEvent() {
+        let configuration = Configuration(
+            apiKey: "api-key",
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            defaultTracking: DefaultTrackingOptions(sessions: false)
+        )
+        let amplitude = Amplitude(configuration: configuration)
+        let eventOptions = EventOptions(sessionId: -1)
+        let eventType = "out of session event"
+        amplitude.track(eventType: eventType, options: eventOptions)
+        let events = storageMem.events()
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events[0].eventType, eventType)
+        XCTAssertEqual(events[0].sessionId, -1)
+    }
+
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
         return NSDictionary(dictionary: props as [AnyHashable: Any])
     }
