@@ -20,6 +20,7 @@ struct AmplitudeSwiftUIExampleApp: App {
         Amplitude.testInstance.add(plugin: LocationPlugin())
         // add the trouble shooting plugin for debugging
         Amplitude.testInstance.add(plugin: TroubleShootingPlugin())
+        Amplitude.testInstance.add(plugin: FilterPlugin())
 
         Amplitude.experimentClient.fetch(user: nil, completion: nil)
     }

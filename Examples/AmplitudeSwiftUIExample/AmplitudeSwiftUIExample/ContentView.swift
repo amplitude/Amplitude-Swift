@@ -88,6 +88,17 @@ struct ContentView: View {
                             Text("Send Revenue Event")
                         }.buttonStyle(AmplitudeButton())
                     }
+                    Section(header: Text("FILTERED EVENT")) {
+                        HStack {
+                            Button(action: {
+                                print("Send event")
+                                Amplitude.testInstance.track(eventType: "Filtered Event")
+                            }) {
+                                Text("Event Should Be Filtered")
+                            }.buttonStyle(AmplitudeButton())
+
+                        }
+                    }
                     Section(header: Text("IDENTIFY")) {
                         HStack {
                             TextField("User Property Key", text: $userPropertyKey)

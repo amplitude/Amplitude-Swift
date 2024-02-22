@@ -23,7 +23,7 @@ internal class Mediator {
         }
     }
 
-    internal func execute(event: BaseEvent) -> BaseEvent? {
+    internal func execute(event: BaseEvent?) -> BaseEvent? {
         var result: BaseEvent? = event
         plugins.forEach { plugin in
             if let r = result {
