@@ -82,6 +82,41 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(lastEvent?.language!.isEmpty, false)
     }
 
+    func testFilterAndEnrichmentPlugin() {
+        let apiKey = "testFilterAndEnrichmentPlugin"
+        let enrichedEventType = "Enriched Event"
+        storageTest = TestPersistentStorage(storagePrefix: "storage-\(apiKey)")
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: apiKey,
+            storageProvider: storageTest
+        ))
+
+        class TestFilterAndEnrichmentPlugin: EnrichmentPlugin {
+            override func execute(event: BaseEvent) -> BaseEvent? {
+                if event.eventType == "Enriched Event" {
+                    if event.eventProperties == nil {
+                        event.eventProperties = [:]
+                    }
+                    event.eventProperties!["testPropertyKey"] = "testPropertyValue"
+                    return event
+                }
+                return nil
+            }
+        }
+        let testPlugin = TestFilterAndEnrichmentPlugin()
+        amplitude.add(plugin: testPlugin)
+        amplitude.track(event: BaseEvent(eventType: enrichedEventType))
+        amplitude.track(event: BaseEvent(eventType: "Other Event"))
+
+        let events = storageTest.events()
+        XCTAssertEqual(events[0].eventType, enrichedEventType)
+        XCTAssertEqual(getDictionary(events[0].eventProperties!), [
+            "testPropertyKey": "testPropertyValue"
+        ])
+
+        XCTAssertEqual(events.count, 1)
+    }
+
     func testContextWithDisableTrackingOptions() {
         let apiKey = "testApiKeyForDisableTrackingOptions"
         let trackingOptions = TrackingOptions()

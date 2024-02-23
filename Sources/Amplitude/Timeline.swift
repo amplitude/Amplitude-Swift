@@ -28,7 +28,7 @@ public class Timeline {
     internal func applyPlugin(pluginType: PluginType, event: BaseEvent?) -> BaseEvent? {
         var result: BaseEvent? = event
         if let mediator = plugins[pluginType] {
-            result = mediator.execute(event: event!)
+            result = mediator.execute(event: event)
         }
         return result
     }
