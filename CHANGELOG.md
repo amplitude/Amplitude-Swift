@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.3...v1.3.4) (2024-02-23)
+
+
+### Bug Fixes
+
+* fix the enrichment plugin to enable filter event ([#123](https://github.com/amplitude/Amplitude-Swift/issues/123)) ([5d3aeb0](https://github.com/amplitude/Amplitude-Swift/commit/5d3aeb0494d6d2aa625d38019d04c46d82340aeb))
+
 ## [1.3.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.2...v1.3.3) (2024-02-13)
 
 
