@@ -41,7 +41,7 @@ public class Amplitude {
 
         migrateApiKeyStorages()
         migrateDefaultInstanceStorages()
-        if configuration.migrateLegacyData && getStorageVersion() < .API_KEY_AND_INSTANCE_NAME {
+        if configuration.migrateLegacyData && getStorageVersion() < .API_KEY_AND_INSTANCE_NAME && isSandboxEnabled() {
             RemnantDataMigration(self).execute()
         }
         migrateInstanceOnlyStorages()
