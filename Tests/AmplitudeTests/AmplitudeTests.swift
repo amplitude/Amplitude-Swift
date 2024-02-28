@@ -534,7 +534,7 @@ final class AmplitudeTests: XCTestCase {
         legacyStorageAmplitude.identifyStorage.reset()
     }
     #endif
-    
+
     func testRemnantDataNotMigratedInNonSandboxedApps() throws {
         let instanceName = "legacy_v3_\(UUID().uuidString)".lowercased()
         let bundle = Bundle(for: type(of: self))
@@ -552,7 +552,7 @@ final class AmplitudeTests: XCTestCase {
                 try fileManager.removeItem(at: dbUrl)
             }
         }
-        
+
         let apiKey = "test-api-key"
         let configuration = Configuration(
             apiKey: apiKey,
@@ -563,7 +563,7 @@ final class AmplitudeTests: XCTestCase {
 
         let deviceId = "9B574574-74A7-4EDF-969D-164CB151B6C3"
         let userId = "ios-sample-user-legacy"
-               
+
         #if os(macOS)
             // We don't want to transfer remnant data in non-sanboxed apps
             XCTAssertFalse(amplitude.isSandboxEnabled())
@@ -574,8 +574,8 @@ final class AmplitudeTests: XCTestCase {
             XCTAssertEqual(amplitude.getUserId(), userId)
         #endif
     }
-    
-#if os(macOS)
+
+    #if os(macOS)
     func testRemnantDataNotMigratedInSandboxedMacApps() throws {
         let instanceName = "legacy_v3_\(UUID().uuidString)".lowercased()
         let bundle = Bundle(for: type(of: self))
@@ -593,7 +593,7 @@ final class AmplitudeTests: XCTestCase {
                 try fileManager.removeItem(at: dbUrl)
             }
         }
-        
+
         let apiKey = "test-api-key"
         let configuration = Configuration(
             apiKey: apiKey,
@@ -604,12 +604,12 @@ final class AmplitudeTests: XCTestCase {
 
         let deviceId = "9B574574-74A7-4EDF-969D-164CB151B6C3"
         let userId = "ios-sample-user-legacy"
-               
+
         XCTAssertTrue(amplitude.isSandboxEnabled())
         XCTAssertEqual(amplitude.getDeviceId(), deviceId)
         XCTAssertEqual(amplitude.getUserId(), userId)
     }
-#endif
+    #endif
 
     func testInit_Offline() {
         XCTAssertEqual(Amplitude(configuration: configuration).configuration.offline, false)
