@@ -46,7 +46,7 @@ final class RemnantDataMigrationTests: XCTestCase {
             instanceName: instanceName,
             migrateLegacyData: migrateLegacyData
         )
-        let amplitude = Amplitude(configuration: configuration)
+        let amplitude = FakeAmplitudeWithSandboxEnabled(configuration: configuration)
 
         let deviceId = "9B574574-74A7-4EDF-969D-164CB151B6C3"
         let userId = "ios-sample-user-legacy"
