@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.4...v1.3.5) (2024-02-28)
+
+
+### Bug Fixes
+
+* Do not migrate remnant data from legacy SDK when sandboxing is not enabled ([#127](https://github.com/amplitude/Amplitude-Swift/issues/127)) ([e92f6ed](https://github.com/amplitude/Amplitude-Swift/commit/e92f6ed2a93a034d39aab49885cf82a3b730a25c))
+
 ## [1.3.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.3...v1.3.4) (2024-02-23)
 
 
