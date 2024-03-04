@@ -1,5 +1,5 @@
-import XCTest
 import AnalyticsConnector
+import XCTest
 
 @testable import AmplitudeSwift
 
@@ -184,12 +184,13 @@ final class AmplitudeTests: XCTestCase {
         let apiKey = "testApiKeyPersist"
         storageTest = TestPersistentStorage(storagePrefix: "storage")
         interceptStorageTest = TestPersistentStorage(storagePrefix: "identify")
-        let amplitude = Amplitude(configuration: Configuration(
-            apiKey: apiKey,
-            storageProvider: storageTest,
-            identifyStorageProvider: interceptStorageTest,
-            defaultTracking: DefaultTrackingOptions.NONE
-        ))
+        let amplitude = Amplitude(
+            configuration: Configuration(
+                apiKey: apiKey,
+                storageProvider: storageTest,
+                identifyStorageProvider: interceptStorageTest,
+                defaultTracking: DefaultTrackingOptions.NONE
+            ))
 
         amplitude.setUserId(userId: "test-user")
 
@@ -216,7 +217,8 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(e1.eventType, "$identify")
         XCTAssertNil(e1.groups)
         XCTAssertNotNil(e1.userProperties)
-        XCTAssertTrue(getDictionary(e1.userProperties!).isEqual(to: ["$set": ["key-1": "value-1", "key-2": "value-2"]]))
+        XCTAssertTrue(
+            getDictionary(e1.userProperties!).isEqual(to: ["$set": ["key-1": "value-1", "key-2": "value-2"]]))
 
         let e2 = events[1]
         XCTAssertEqual(e2.eventType, "$identify")
@@ -233,12 +235,13 @@ final class AmplitudeTests: XCTestCase {
     func testAnalyticsConnector() {
         let apiKey = "test-api-key"
         let instanceName = "test-instance"
-        let amplitude = Amplitude(configuration: Configuration(
-            apiKey: apiKey,
-            instanceName: instanceName,
-            storageProvider: storageMem,
-            identifyStorageProvider: interceptStorageMem
-        ))
+        let amplitude = Amplitude(
+            configuration: Configuration(
+                apiKey: apiKey,
+                instanceName: instanceName,
+                storageProvider: storageMem,
+                identifyStorageProvider: interceptStorageMem
+            ))
 
         let userId = "some-user"
         let deviceId = "some-device"
@@ -246,14 +249,16 @@ final class AmplitudeTests: XCTestCase {
         var identitySet = false
 
         let connector = AnalyticsConnector.getInstance(instanceName)
-        connector.identityStore.addIdentityListener(key: "test-analytics-connector", { identity in
-            if identitySet {
-                XCTAssertEqual(identity.userId, userId)
-                XCTAssertEqual(identity.deviceId, deviceId)
-                XCTAssertEqual(identity.userProperties, ["prop-A": 123])
-                expectation.fulfill()
-            }
-        })
+        connector.identityStore.addIdentityListener(
+            key: "test-analytics-connector",
+            { identity in
+                if identitySet {
+                    XCTAssertEqual(identity.userId, userId)
+                    XCTAssertEqual(identity.deviceId, deviceId)
+                    XCTAssertEqual(identity.userProperties, ["prop-A": 123])
+                    expectation.fulfill()
+                }
+            })
 
         amplitude.setUserId(userId: userId)
         amplitude.setDeviceId(deviceId: deviceId)
@@ -293,10 +298,12 @@ final class AmplitudeTests: XCTestCase {
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
         XCTAssertEqual(events[0].eventType, Constants.AMP_DEEP_LINK_OPENED_EVENT)
-        XCTAssertEqual(getDictionary(events[0].eventProperties!), [
-            Constants.AMP_APP_LINK_URL_PROPERTY: "https://test-app.com",
-            Constants.AMP_APP_LINK_REFERRER_PROPERTY: "https://test-referrer.com"
-        ])
+        XCTAssertEqual(
+            getDictionary(events[0].eventProperties!),
+            [
+                Constants.AMP_APP_LINK_URL_PROPERTY: "https://test-app.com",
+                Constants.AMP_APP_LINK_REFERRER_PROPERTY: "https://test-referrer.com",
+            ])
     }
 
     func testTrackURLOpened() throws {
@@ -314,9 +321,11 @@ final class AmplitudeTests: XCTestCase {
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
         XCTAssertEqual(events[0].eventType, Constants.AMP_DEEP_LINK_OPENED_EVENT)
-        XCTAssertEqual(getDictionary(events[0].eventProperties!), [
-            Constants.AMP_APP_LINK_URL_PROPERTY: "https://test-app.com"
-        ])
+        XCTAssertEqual(
+            getDictionary(events[0].eventProperties!),
+            [
+                Constants.AMP_APP_LINK_URL_PROPERTY: "https://test-app.com"
+            ])
     }
 
     func testTrackNSURLOpened() throws {
@@ -334,9 +343,11 @@ final class AmplitudeTests: XCTestCase {
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
         XCTAssertEqual(events[0].eventType, Constants.AMP_DEEP_LINK_OPENED_EVENT)
-        XCTAssertEqual(getDictionary(events[0].eventProperties!), [
-            Constants.AMP_APP_LINK_URL_PROPERTY: "https://test-app.com"
-        ])
+        XCTAssertEqual(
+            getDictionary(events[0].eventProperties!),
+            [
+                Constants.AMP_APP_LINK_URL_PROPERTY: "https://test-app.com"
+            ])
     }
 
     func testTrackScreenView() throws {
@@ -354,9 +365,11 @@ final class AmplitudeTests: XCTestCase {
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
         XCTAssertEqual(events[0].eventType, Constants.AMP_SCREEN_VIEWED_EVENT)
-        XCTAssertEqual(getDictionary(events[0].eventProperties!), [
-            Constants.AMP_APP_SCREEN_NAME_PROPERTY: "main view"
-        ])
+        XCTAssertEqual(
+            getDictionary(events[0].eventProperties!),
+            [
+                Constants.AMP_APP_SCREEN_NAME_PROPERTY: "main view"
+            ])
     }
 
     func testOutOfSessionEvent() {
@@ -376,6 +389,43 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(events[0].sessionId, -1)
     }
 
+    func testEventProcessingBeforeOnEnterForeground() async {
+        let configuration = Configuration(
+            apiKey: "api-key",
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            defaultTracking: DefaultTrackingOptions(sessions: false)
+        )
+        let amplitude = Amplitude(configuration: configuration)
+        amplitude.sessions = SessionsWithDelayedEventStartProcessing(amplitude: amplitude)
+        let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+
+        let oneHourEarlierTimestamp = timestamp - (1 * 60 * 60 * 1000)
+        amplitude.setSessionId(timestamp: oneHourEarlierTimestamp)
+
+        @Sendable
+        func processStartSessionEvent() async {
+            amplitude.onEnterForeground(timestamp: timestamp)
+        }
+
+        func processRegularEvent() async {
+            amplitude.track(eventType: "test_event")
+        }
+
+        // We process the session start event first. The session class will wait for 3 seconds before it processes
+        // the event
+        async let task = processStartSessionEvent()
+        // Sleep for 1 second and process a regular event. This is to try the case where an event gets processed
+        // before the session start event
+        sleep(1)
+        await processRegularEvent()
+        await task
+
+        // We want to make sure that a new session was started
+        XCTAssertTrue(amplitude.getSessionId() > oneHourEarlierTimestamp)
+
+    }
+
     func testMigrationToApiKeyAndInstanceNameStorage() throws {
         let legacyUserId = "legacy-user-id"
         let config = Configuration(
@@ -392,15 +442,16 @@ final class AmplitudeTests: XCTestCase {
         let legacyIdentityStorage = PersistentStorage(storagePrefix: "identify-\(config.getNormalizeInstanceName())")
 
         // Init Amplitude using legacy storage
-        let legacyStorageAmplitude = FakeAmplitudeWithNoInstNameOnlyMigration(configuration: Configuration(
-            apiKey: config.apiKey,
-            flushQueueSize: config.flushQueueSize,
-            flushIntervalMillis: config.flushIntervalMillis,
-            storageProvider: legacyEventStorage,
-            identifyStorageProvider: legacyIdentityStorage,
-            logLevel: config.logLevel,
-            defaultTracking: config.defaultTracking
-        ))
+        let legacyStorageAmplitude = FakeAmplitudeWithNoInstNameOnlyMigration(
+            configuration: Configuration(
+                apiKey: config.apiKey,
+                flushQueueSize: config.flushQueueSize,
+                flushIntervalMillis: config.flushIntervalMillis,
+                storageProvider: legacyEventStorage,
+                identifyStorageProvider: legacyIdentityStorage,
+                logLevel: config.logLevel,
+                defaultTracking: config.defaultTracking
+            ))
 
         let legacyDeviceId = legacyStorageAmplitude.getDeviceId()
 
@@ -441,13 +492,13 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertNotNil(legacyEventsString)
 
         #if os(macOS)
-        // We don't want to transfer event data in non-sanboxed apps
-        XCTAssertFalse(amplitude.isSandboxEnabled())
-        XCTAssertEqual(eventFiles?.count ?? 0, 0)
+            // We don't want to transfer event data in non-sanboxed apps
+            XCTAssertFalse(amplitude.isSandboxEnabled())
+            XCTAssertEqual(eventFiles?.count ?? 0, 0)
         #else
-        XCTAssertTrue(eventsString != "")
-        XCTAssertEqual(legacyEventsString, eventsString)
-        XCTAssertEqual(eventFiles?.count ?? 0, 1)
+            XCTAssertTrue(eventsString != "")
+            XCTAssertEqual(legacyEventsString, eventsString)
+            XCTAssertEqual(eventFiles?.count ?? 0, 1)
         #endif
 
         // clear storage
@@ -458,81 +509,84 @@ final class AmplitudeTests: XCTestCase {
     }
 
     #if os(macOS)
-    func testMigrationToApiKeyAndInstanceNameStorageMacSandboxEnabled() throws {
-        let legacyUserId = "legacy-user-id"
-        let config = Configuration(
-            apiKey: "amp-mac-migration-api-key",
-            // don't transfer any events
-            flushQueueSize: 1000,
-            flushIntervalMillis: 99999,
-            logLevel: LogLevelEnum.DEBUG,
-            defaultTracking: DefaultTrackingOptions.NONE
-        )
+        func testMigrationToApiKeyAndInstanceNameStorageMacSandboxEnabled() throws {
+            let legacyUserId = "legacy-user-id"
+            let config = Configuration(
+                apiKey: "amp-mac-migration-api-key",
+                // don't transfer any events
+                flushQueueSize: 1000,
+                flushIntervalMillis: 99999,
+                logLevel: LogLevelEnum.DEBUG,
+                defaultTracking: DefaultTrackingOptions.NONE
+            )
 
-        // Create storages using instance name only
-        let legacyEventStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "storage-\(config.getNormalizeInstanceName())")
-        let legacyIdentityStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "identify-\(config.getNormalizeInstanceName())")
+            // Create storages using instance name only
+            let legacyEventStorage = FakePersistentStorageAppSandboxEnabled(
+                storagePrefix: "storage-\(config.getNormalizeInstanceName())")
+            let legacyIdentityStorage = FakePersistentStorageAppSandboxEnabled(
+                storagePrefix: "identify-\(config.getNormalizeInstanceName())")
 
-        // Init Amplitude using legacy storage
-        let legacyStorageAmplitude = FakeAmplitudeWithNoInstNameOnlyMigration(configuration: Configuration(
-            apiKey: config.apiKey,
-            flushQueueSize: config.flushQueueSize,
-            flushIntervalMillis: config.flushIntervalMillis,
-            storageProvider: legacyEventStorage,
-            identifyStorageProvider: legacyIdentityStorage,
-            logLevel: config.logLevel,
-            defaultTracking: config.defaultTracking
-        ))
+            // Init Amplitude using legacy storage
+            let legacyStorageAmplitude = FakeAmplitudeWithNoInstNameOnlyMigration(
+                configuration: Configuration(
+                    apiKey: config.apiKey,
+                    flushQueueSize: config.flushQueueSize,
+                    flushIntervalMillis: config.flushIntervalMillis,
+                    storageProvider: legacyEventStorage,
+                    identifyStorageProvider: legacyIdentityStorage,
+                    logLevel: config.logLevel,
+                    defaultTracking: config.defaultTracking
+                ))
 
-        let legacyDeviceId = legacyStorageAmplitude.getDeviceId()
+            let legacyDeviceId = legacyStorageAmplitude.getDeviceId()
 
-        // set userId
-        legacyStorageAmplitude.setUserId(userId: legacyUserId)
-        XCTAssertEqual(legacyUserId, legacyStorageAmplitude.getUserId())
+            // set userId
+            legacyStorageAmplitude.setUserId(userId: legacyUserId)
+            XCTAssertEqual(legacyUserId, legacyStorageAmplitude.getUserId())
 
-        // track events to legacy storage
-        legacyStorageAmplitude.identify(identify: Identify().set(property: "user-prop", value: true))
-        legacyStorageAmplitude.track(event: BaseEvent(eventType: "Legacy Storage Event"))
+            // track events to legacy storage
+            legacyStorageAmplitude.identify(identify: Identify().set(property: "user-prop", value: true))
+            legacyStorageAmplitude.track(event: BaseEvent(eventType: "Legacy Storage Event"))
 
-        guard let legacyEventFiles: [URL]? = legacyEventStorage.read(key: StorageKey.EVENTS) else { return }
+            guard let legacyEventFiles: [URL]? = legacyEventStorage.read(key: StorageKey.EVENTS) else { return }
 
-        var legacyEventsString = ""
-        legacyEventFiles?.forEach { file in
-            legacyEventsString = legacyEventStorage.getEventsString(eventBlock: file) ?? ""
+            var legacyEventsString = ""
+            legacyEventFiles?.forEach { file in
+                legacyEventsString = legacyEventStorage.getEventsString(eventBlock: file) ?? ""
+            }
+
+            XCTAssertEqual(legacyEventFiles?.count ?? 0, 1)
+
+            let amplitude = FakeAmplitudeWithSandboxEnabled(configuration: config)
+            let deviceId = amplitude.getDeviceId()
+            let userId = amplitude.getUserId()
+
+            guard let eventFiles: [URL]? = amplitude.storage.read(key: StorageKey.EVENTS) else { return }
+
+            var eventsString = ""
+            eventFiles?.forEach { file in
+                eventsString = legacyEventStorage.getEventsString(eventBlock: file) ?? ""
+            }
+
+            XCTAssertEqual(legacyDeviceId != nil, true)
+            XCTAssertEqual(deviceId != nil, true)
+            XCTAssertEqual(legacyDeviceId, deviceId)
+
+            XCTAssertEqual(legacyUserId, userId)
+
+            XCTAssertNotNil(legacyEventsString)
+
+            // Transfer event data in sandboxed apps
+            XCTAssertTrue(eventsString == "")
+            XCTAssertNotEqual(legacyEventsString, eventsString)
+            XCTAssertEqual(eventFiles?.count ?? 0, 0)
+
+            // clear storage
+            amplitude.storage.reset()
+            amplitude.identifyStorage.reset()
+            legacyStorageAmplitude.storage.reset()
+            legacyStorageAmplitude.identifyStorage.reset()
         }
-
-        XCTAssertEqual(legacyEventFiles?.count ?? 0, 1)
-
-        let amplitude = FakeAmplitudeWithSandboxEnabled(configuration: config)
-        let deviceId = amplitude.getDeviceId()
-        let userId = amplitude.getUserId()
-
-        guard let eventFiles: [URL]? = amplitude.storage.read(key: StorageKey.EVENTS) else { return }
-
-        var eventsString = ""
-        eventFiles?.forEach { file in
-            eventsString = legacyEventStorage.getEventsString(eventBlock: file) ?? ""
-        }
-
-        XCTAssertEqual(legacyDeviceId != nil, true)
-        XCTAssertEqual(deviceId != nil, true)
-        XCTAssertEqual(legacyDeviceId, deviceId)
-
-        XCTAssertEqual(legacyUserId, userId)
-
-        XCTAssertNotNil(legacyEventsString)
-
-        // Transfer event data in sandboxed apps
-        XCTAssertTrue(eventsString == "")
-        XCTAssertNotEqual(legacyEventsString, eventsString)
-        XCTAssertEqual(eventFiles?.count ?? 0, 0)
-
-        // clear storage
-        amplitude.storage.reset()
-        amplitude.identifyStorage.reset()
-        legacyStorageAmplitude.storage.reset()
-        legacyStorageAmplitude.identifyStorage.reset()
-    }
     #endif
 
     func testRemnantDataNotMigratedInNonSandboxedApps() throws {

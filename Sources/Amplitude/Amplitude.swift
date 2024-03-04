@@ -319,12 +319,13 @@ public class Amplitude {
     }
 
     func onEnterForeground(timestamp: Int64) {
-        inForeground = true
         let dummySessionStartEvent = BaseEvent(
             timestamp: timestamp,
             eventType: Constants.AMP_SESSION_START_EVENT
         )
         let events = sessions.processEvent(event: dummySessionStartEvent, inForeground: false)
+        // Set inForeground to true only after we have successfully started a new session if needed. 
+        inForeground = true
         events.forEach { e in timeline.processEvent(event: e) }
     }
 
