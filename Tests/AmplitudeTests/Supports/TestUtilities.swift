@@ -289,3 +289,12 @@ final class MockPathCreation: PathCreationProtocol {
         subject.send(networkPath)
     }
 }
+
+class SessionsWithDelayedEventStartProcessing: Sessions {
+    override func processEvent(event: BaseEvent, inForeground: Bool) -> [BaseEvent] {
+        if (event.eventType == Constants.AMP_SESSION_START_EVENT) {
+            sleep(3)
+        }
+        return super.processEvent(event: event, inForeground: inForeground)
+    }
+}

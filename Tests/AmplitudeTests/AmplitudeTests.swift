@@ -340,6 +340,43 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(events[0].eventType, eventType)
         XCTAssertEqual(events[0].sessionId, -1)
     }
+    
+    func testEventProcessingBeforeOnEnterForeground() async {
+        let configuration = Configuration(
+            apiKey: "api-key",
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            defaultTracking: DefaultTrackingOptions(sessions: false)
+        )
+        let amplitude = Amplitude(configuration: configuration)
+        amplitude.sessions = SessionsWithDelayedEventStartProcessing(amplitude: amplitude)
+        let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+        
+        let oneHourEarlierTimestamp = timestamp - (1 * 60 * 60 * 1000)
+        amplitude.setSessionId(timestamp: oneHourEarlierTimestamp)
+
+        @Sendable
+        func processStartSessionEvent() async {
+            amplitude.onEnterForeground(timestamp: timestamp)
+        }
+        
+        func processRegularEvent() async {
+            amplitude.track(eventType: "test_event")
+        }
+        
+        // We process the session start event first. The session class will wait for 3 seconds before it processes
+        // the event
+        async let task = processStartSessionEvent();
+        // Sleep for 1 second and process a regular event. This is to try the case where an event gets processed
+        // before the session start event
+        sleep(1)
+        await processRegularEvent();
+        await task;
+        
+        // We want to make sure that a new session was started
+        XCTAssertTrue(amplitude.getSessionId() > oneHourEarlierTimestamp)
+        
+    }
 
     func testMigrationToApiKeyAndInstanceNameStorage() throws {
         let legacyUserId = "legacy-user-id"
