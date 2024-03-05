@@ -1,3 +1,10 @@
+## [1.3.6](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.5...v1.3.6) (2024-03-05)
+
+
+### Bug Fixes
+
+* Set inForeground to true after a new session has been started ([#124](https://github.com/amplitude/Amplitude-Swift/issues/124)) ([3780c44](https://github.com/amplitude/Amplitude-Swift/commit/3780c44fc65f1dd8913c25cf70fbe189e61fc315))
+
 ## [1.3.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.4...v1.3.5) (2024-02-28)
 
 
