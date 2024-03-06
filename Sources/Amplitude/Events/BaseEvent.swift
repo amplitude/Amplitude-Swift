@@ -269,4 +269,18 @@ extension BaseEvent {
         let decoder = JSONDecoder()
         return try? decoder.decode(T.self, from: jsonData)
     }
+    
+    static func toJSONString(events: [BaseEvent]) -> String {
+        var result = "";
+        do {
+            let encoder = JSONEncoder()
+            let json = try encoder.encode(events)
+            if let printed = String(data: json, encoding: .utf8) {
+                result = printed
+            }
+        } catch {
+            result = ""
+        }
+        return result
+    }
 }

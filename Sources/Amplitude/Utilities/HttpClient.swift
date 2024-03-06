@@ -10,9 +10,11 @@ import Foundation
 class HttpClient {
     let configuration: Configuration
     internal let session: URLSession
+    let diagnostics: Diagnostics
 
-    init(configuration: Configuration) {
+    init(configuration: Configuration, diagnostics: Diagnostics) {
         self.configuration = configuration
+        self.diagnostics = diagnostics
 
         let sessionConfiguration = URLSessionConfiguration.default
         sessionConfiguration.httpMaximumConnectionsPerHost = 2
@@ -82,6 +84,14 @@ class HttpClient {
             requestPayload += """
                 ,"options":{"min_id_length":\(minIdLength)}
                 """
+        }
+        if (diagnostics.hasDiagnostics()) {
+            let diagnosticsInfo = diagnostics.extractDiagonostics()
+            if (!diagnosticsInfo.isEmpty) {
+                requestPayload += """
+                ,"request_metadata":{"sdk":\(diagnosticsInfo)}
+                """
+            }
         }
         requestPayload += "}"
         return requestPayload.data(using: .utf8)

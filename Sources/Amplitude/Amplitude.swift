@@ -30,6 +30,10 @@ public class Amplitude {
     public lazy var logger: (any Logger)? = {
         return self.configuration.loggerProvider
     }()
+    
+    public var diagonostics: Diagnostics {
+        return Diagnostics()
+    }
 
     public init(
         configuration: Configuration

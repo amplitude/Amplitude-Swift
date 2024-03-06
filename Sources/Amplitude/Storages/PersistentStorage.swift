@@ -37,6 +37,7 @@ class PersistentStorage: Storage {
         self.eventCallbackMap = [String: EventCallback]()
         // Make sure Amplitude data is sandboxed per app
         self.appPath = isStorageSandboxed() ? "" : "\(Bundle.main.bundleIdentifier!)/"
+        handleV1Files()
     }
 
     func write(key: StorageKey, value: Any?) throws {
@@ -77,6 +78,13 @@ class PersistentStorage: Storage {
         var content: String?
         do {
             content = try String(contentsOf: eventBlock, encoding: .utf8)
+            if (content?.hasSuffix(PersistentStorage.DELMITER) == true) {
+                // v2 file
+                return readV2File(content: content!)
+            } else {
+                // handle v1 file
+                return readV1File(content: content!)
+            }
         } catch {
             amplitude?.logger?.error(message: error.localizedDescription)
         }
@@ -188,6 +196,7 @@ extension PersistentStorage {
     static let AMP_STORAGE_PREFIX = "com.amplitude.storage"
     static let MAX_FILE_SIZE = 975000  // 975KB
     static let TEMP_FILE_EXTENSION = "tmp"
+    static let DELMITER = "\u{0000}"
 
     enum Exception: Error {
         case unsupportedType
@@ -276,11 +285,7 @@ extension PersistentStorage {
     private func storeEvent(toFile file: URL, event: BaseEvent) {
         var storeFile = file
 
-        var newFile = false
-        if fileManager.fileExists(atPath: storeFile.path) == false {
-            start(file: storeFile)
-            newFile = true
-        } else if outputStream == nil {
+        if fileManager.fileExists(atPath: storeFile.path) == false || outputStream == nil {
             // this can happen if an instance was terminated before finishing a file.
             open(file: storeFile)
         }
@@ -293,20 +298,14 @@ extension PersistentStorage {
             finish(file: storeFile)
             // Set the new file path
             storeFile = getCurrentEventFile()
-            start(file: storeFile)
-            newFile = true
         }
 
-        let jsonString = event.toString()
+        let jsonString = event.toString().replacingOccurrences(of: PersistentStorage.DELMITER, with: "")
         do {
             if outputStream == nil {
                 amplitude?.logger?.error(message: "OutputStream is nil with file: \(storeFile)")
             }
-            if newFile == false {
-                // prepare for the next entry
-                try outputStream?.write(",")
-            }
-            try outputStream?.write(jsonString)
+            try outputStream?.write("\(jsonString)\(PersistentStorage.DELMITER)")
         } catch {
             amplitude?.logger?.error(message: error.localizedDescription)
         }
@@ -319,28 +318,16 @@ extension PersistentStorage {
             return
         }
 
-        start(file: storeFile)
-        let jsonString = events.map { $0.toString() }.joined(separator: ", ")
+        let jsonString = events.map { $0.toString().replacingOccurrences(of: PersistentStorage.DELMITER, with: "")  }.joined(separator: PersistentStorage.DELMITER)
         do {
             if outputStream == nil {
                 amplitude?.logger?.error(message: "OutputStream is nil with file: \(storeFile)")
             }
-            try outputStream?.write(jsonString)
+            try outputStream?.write("\(jsonString)\(PersistentStorage.DELMITER)")
         } catch {
             amplitude?.logger?.error(message: error.localizedDescription)
         }
         finish(file: storeFile)
-    }
-
-    private func start(file: URL) {
-        let contents = "["
-        do {
-            outputStream = try OutputFileStream(fileURL: file)
-            try outputStream?.create()
-            try outputStream?.write(contents)
-        } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
-        }
     }
 
     private func open(file: URL) {
@@ -358,19 +345,6 @@ extension PersistentStorage {
     }
 
     private func finish(file: URL) {
-        guard let outputStream = self.outputStream else {
-            return
-        }
-
-        let fileEnding = "]"
-        do {
-            try outputStream.write(fileEnding)
-            try outputStream.close()
-        } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
-        }
-        self.outputStream = nil
-
         let fileWithoutTemp = file.deletingPathExtension()
         do {
             try fileManager.moveItem(at: file, to: fileWithoutTemp)
@@ -380,5 +354,58 @@ extension PersistentStorage {
 
         let currentFileIndex: Int = (getCurrentEventFileIndex() ?? 0) + 1
         userDefaults?.set(currentFileIndex, forKey: eventsFileKey)
+    }
+
+    private func handleV1Files() {
+        syncQueue.sync {
+            let allFiles = self.getEventFiles(includeUnfinished: true)
+            for file in allFiles {
+                do {
+                    var content = try String(contentsOf: file, encoding: .utf8)
+                    if (content.hasSuffix(PersistentStorage.DELMITER)) {
+                        break // already handled and in v2 format
+                    }
+                    
+                    let normalizedContent = "[\(content.trimmingCharacters(in: ["[", ",", "]"]))]"
+                    let events = BaseEvent.fromArrayString(jsonString: normalizedContent)
+                    if (events != nil) {
+                        storeEventsInNewFile(toFile: file, events: events!)
+                    }
+                    if (file.pathExtension != "") {
+                        finish(file: file)
+                    }
+                } catch(let error) {
+                    amplitude?.diagonostics.addErrorLog("Error migrating file: \(file.path) for \(error.localizedDescription)")
+                    amplitude?.logger?.error(message: error.localizedDescription)
+                }
+            }
+        }
+    }
+    
+    private func readV2File(content: String) -> String {
+        var events: [BaseEvent] = [BaseEvent]()
+        if (content.hasSuffix(PersistentStorage.DELMITER)) {
+            content.components(separatedBy: PersistentStorage.DELMITER).forEach{
+                if let event = BaseEvent.fromString(jsonString: String($0)) {
+                    events.append(event)
+                }
+            }
+        }
+        return BaseEvent.toJSONString(events: events)
+    }
+    
+    private func readV1File(content: String) -> String {
+        var result = ""
+        do {
+            let normalizedContent = "[\(content.trimmingCharacters(in: ["[", ",", "]"]))]"
+            let events = BaseEvent.fromArrayString(jsonString: normalizedContent)
+            if (events != nil) {
+                result = normalizedContent;
+            }
+        } catch {
+            amplitude?.diagonostics.addMalformedEvent(content);
+            amplitude?.logger?.error(message: error.localizedDescription)
+        }
+        return result
     }
 }
