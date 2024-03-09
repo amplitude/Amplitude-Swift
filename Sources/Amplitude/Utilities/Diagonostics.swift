@@ -10,10 +10,8 @@ import Foundation
 public class Diagnostics {
     private var malformedEvents: [String]?
     private var errorLogs: [String]?
-    
-    init(){
-        
-    }
+
+    init(){}
 
     func addMalformedEvent(_ event: String) {
         if malformedEvents == nil {

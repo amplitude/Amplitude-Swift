@@ -30,10 +30,8 @@ public class Amplitude {
     public lazy var logger: (any Logger)? = {
         return self.configuration.loggerProvider
     }()
-    
-    public var diagonostics: Diagnostics {
-        return Diagnostics()
-    }
+
+    public var diagonostics: Diagnostics = Diagnostics()
 
     public init(
         configuration: Configuration
@@ -42,6 +40,9 @@ public class Amplitude {
 
         let contextPlugin = ContextPlugin()
         self.contextPlugin = contextPlugin
+
+        (self.storage as? PersistentStorage)?.amplitude = self
+        (self.identifyStorage as? PersistentStorage)?.amplitude = self
 
         migrateApiKeyStorages()
         migrateDefaultInstanceStorages()

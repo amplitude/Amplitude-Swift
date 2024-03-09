@@ -10,7 +10,7 @@ import XCTest
 @testable import AmplitudeSwift
 
 final class DiagnosticsTests: XCTestCase {
-    
+
     func testAddMalformedEvent() {
         let diagnostics = Diagnostics()
         diagnostics.addMalformedEvent("event")
