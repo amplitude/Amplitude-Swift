@@ -27,6 +27,7 @@ class PersistentStorage: Storage {
     private var eventCallbackMap: [String: EventCallback]
     private var appPath: String!
     let syncQueue = DispatchQueueHolder.storageQueue
+    let storageVersionKey: String
 
     init(storagePrefix: String) {
         self.storagePrefix = storagePrefix == PersistentStorage.DEFAULT_STORAGE_PREFIX || storagePrefix.starts(with: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-")
@@ -35,6 +36,7 @@ class PersistentStorage: Storage {
         self.userDefaults = UserDefaults(suiteName: "\(PersistentStorage.AMP_STORAGE_PREFIX).\(self.storagePrefix)")
         self.fileManager = FileManager.default
         self.eventCallbackMap = [String: EventCallback]()
+        self.storageVersionKey = "\(PersistentStorage.STORAGE_VERSION).\(self.storagePrefix)"
         // Make sure Amplitude data is sandboxed per app
         self.appPath = isStorageSandboxed() ? "" : "\(Bundle.main.bundleIdentifier!)/"
         handleV1Files()
@@ -197,6 +199,7 @@ extension PersistentStorage {
     static let MAX_FILE_SIZE = 975000  // 975KB
     static let TEMP_FILE_EXTENSION = "tmp"
     static let DELMITER = "\u{0000}"
+    static let STORAGE_VERSION = "amplitude.events.storage.version"
 
     enum Exception: Error {
         case unsupportedType
@@ -262,7 +265,7 @@ extension PersistentStorage {
             }
         }
         let sorted = files?.sorted { (left, right) -> Bool in
-            return left.lastPathComponent > right.lastPathComponent
+            return left.lastPathComponent < right.lastPathComponent
         }
         if let s = sorted {
             result = s
@@ -329,7 +332,7 @@ extension PersistentStorage {
         let storeFile = file
 
         guard fileManager.fileExists(atPath: storeFile.path) != true else {
-            amplitude?.diagonostics.addErrorLog("Spllited file duplicate for path: \(storeFile.path)")
+            amplitude?.diagonostics.addErrorLog("Splited file duplicate for path: \(storeFile.path)")
             return
         }
 
@@ -411,6 +414,10 @@ extension PersistentStorage {
 
     private func handleV1Files() {
         syncQueue.sync {
+            let currentStorageVersion = (userDefaults?.object(forKey: self.storageVersionKey) as? Int) ?? 0
+            if (currentStorageVersion > 1) {
+                return
+            }
             let allFiles = self.getEventFiles(includeUnfinished: true)
             for file in allFiles {
                 do {
@@ -422,7 +429,7 @@ extension PersistentStorage {
                     let normalizedContent = "[\(content.trimmingCharacters(in: ["[", ",", "]"]))]"
                     let events = BaseEvent.fromArrayString(jsonString: normalizedContent)
                     if (events != nil) {
-                        storeEventsInNewFile(toFile: file, events: events!)
+                        migrateFile(file: file, events: events!)
                     }
                     if (file.pathExtension != "") {
                         finish(file: file)
@@ -432,6 +439,26 @@ extension PersistentStorage {
                     amplitude?.logger?.error(message: error.localizedDescription)
                 }
             }
+            userDefaults?.setValue(2, forKey: self.storageVersionKey)
+        }
+    }
+    
+    private func migrateFile(file: URL, events: [BaseEvent]) {
+        guard fileManager.fileExists(atPath: file.path) == true else {
+            amplitude?.diagonostics.addErrorLog("File to migrate not exists any more : \(file.path)")
+            return
+        }
+
+        do {
+            // clean up the original text
+            try "".write(to: file, atomically: true, encoding: .utf8)
+            let outputFileStream = try OutputFileStream(fileURL: file)
+            try outputFileStream.open()
+            let jsonString = events.map { $0.toString().replacingOccurrences(of: PersistentStorage.DELMITER, with: "")  }.joined(separator: PersistentStorage.DELMITER)
+            try outputFileStream.write("\(jsonString)\(PersistentStorage.DELMITER)", false)
+            try outputFileStream.close()
+        } catch {
+            amplitude?.logger?.error(message: error.localizedDescription)
         }
     }
 

@@ -82,7 +82,7 @@ internal class OutputFileStream {
         }
     }
 
-    func write(_ string: String, append: Bool = true) throws {
+    func write(_ string: String, _ append: Bool = true) throws {
         guard string.isEmpty == false else { return }
         if let data = string.data(using: .utf8) {
             if (append) {

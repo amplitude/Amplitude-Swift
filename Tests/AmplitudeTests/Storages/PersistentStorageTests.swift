@@ -243,13 +243,7 @@ final class PersistentStorageTests: XCTestCase {
         dispatchGroup.wait()
         let persistentStorage = PersistentStorage(storagePrefix: "xxx-multiple-instance")
         let storeDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
-        let filesInStoreageDirectory = try? FileManager.default.contentsOfDirectory(at: storeDirectory, includingPropertiesForKeys: nil)
         let eventFiles: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
-        let filesInStoreageDirectory2 = try? FileManager.default.contentsOfDirectory(at: storeDirectory, includingPropertiesForKeys: nil)
-        print(filesInStoreageDirectory2?.count)
-        filesInStoreageDirectory2?.forEach(  {
-            print($0)
-        })
         var eventsCount = 0
         XCTAssertNotNil(eventFiles)
         for file in eventFiles! {
@@ -258,6 +252,48 @@ final class PersistentStorageTests: XCTestCase {
             eventsCount += decodedEvents!.count
         }
         XCTAssertEqual(eventsCount, 1000)
+        persistentStorage.reset()
+    }
+
+    func testHandleEarlierVersionFiles() {
+        let persistentStorageToGetDirectory = PersistentStorage(storagePrefix: "xxx-instance")
+        let storeDirectory = persistentStorageToGetDirectory.getEventsStorageDirectory(createDirectory: false)
+        createEarilierVersionFiles(storageDirectory: storeDirectory)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance")
+        let eventFiles: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
+        XCTAssertEqual(eventFiles?.count, 6)
+        var eventsCount = 0
+        eventFiles?.forEach({
+            let eventString = persistentStorage.getEventsString(eventBlock: $0)
+            let decodedEvents = BaseEvent.fromArrayString(jsonString: eventString!)
+            eventsCount += decodedEvents?.count ?? 0
+        })
+        XCTAssertEqual(eventsCount, 10)
+        persistentStorage.reset()
+    }
+    
+    func testHandleEarlierVersionAndWriteEvents() {
+        let persistentStorageToGetDirectory = PersistentStorage(storagePrefix: "xxx-instance")
+        let storeDirectory = persistentStorageToGetDirectory.getEventsStorageDirectory(createDirectory: false)
+        createEarilierVersionFiles(storageDirectory: storeDirectory)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance")
+        try? persistentStorage.write(
+            key: StorageKey.EVENTS,
+            value: BaseEvent(eventType: "test13")
+        )
+        try? persistentStorage.write(
+            key: StorageKey.EVENTS,
+            value: BaseEvent(eventType: "test14")
+        )
+        let eventFiles: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
+        XCTAssertEqual(eventFiles?.count, 7)
+        var eventsCount = 0
+        eventFiles?.forEach({
+            let eventString = persistentStorage.getEventsString(eventBlock: $0)
+            let decodedEvents = BaseEvent.fromArrayString(jsonString: eventString!)
+            eventsCount += decodedEvents?.count ?? 0
+        })
+        XCTAssertEqual(eventsCount, 12)
         persistentStorage.reset()
     }
 
@@ -289,5 +325,31 @@ final class PersistentStorageTests: XCTestCase {
         let outputStream = try? OutputFileStream(fileURL: file)
         try? outputStream?.create()
         try? outputStream?.write(content)
+    }
+
+    private func createEarilierVersionFiles(storageDirectory: URL) {
+        let file0 = storageDirectory.appendingPathComponent("0")
+        let content0 = "[\(BaseEvent(eventType: "test1").toString()),\(BaseEvent(eventType: "test2").toString())]"
+        writeContent(file: file0, content: content0)
+
+        let file1 = storageDirectory.appendingPathComponent("1")
+        let content1 = ",\(BaseEvent(eventType: "test3").toString()),\(BaseEvent(eventType: "test4").toString())]"
+        writeContent(file: file1, content: content1)
+
+        let file2 = storageDirectory.appendingPathComponent("2")
+        let content2 = "[[\(BaseEvent(eventType: "test5").toString()),\(BaseEvent(eventType: "test6").toString())]]"
+        writeContent(file: file2, content: content2)
+
+        let file3 = storageDirectory.appendingPathComponent("3")
+        let content3 = "\(BaseEvent(eventType: "test7").toString()),\(BaseEvent(eventType: "test8").toString())]"
+        writeContent(file: file3, content: content3)
+
+        let file4 = storageDirectory.appendingPathComponent("4")
+        let content4 = "[\(BaseEvent(eventType: "test9").toString())],\(BaseEvent(eventType: "test10").toString())]"
+        writeContent(file: file4, content: content4)
+
+        let file5 = storageDirectory.appendingPathComponent("5")
+        let content5 = "[\(BaseEvent(eventType: "test11").toString()),\(BaseEvent(eventType: "test12").toString())"
+        writeContent(file: file5, content: content5)
     }
 }
