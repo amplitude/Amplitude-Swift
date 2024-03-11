@@ -194,7 +194,6 @@ final class PersistentStorageTests: XCTestCase {
 
     func testConcurrentWriteFromMultipleThreads() {
         let persistentStorage = PersistentStorage(storagePrefix: "xxx-concurrent-instance")
-        let storeDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
         persistentStorage.reset()
         let dispatchGroup = DispatchGroup()
         for i in 0..<100 {

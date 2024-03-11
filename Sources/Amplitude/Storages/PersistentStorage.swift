@@ -450,14 +450,11 @@ extension PersistentStorage {
         }
 
         do {
-            // clean up the original text
-            try "".write(to: file, atomically: true, encoding: .utf8)
-            let outputFileStream = try OutputFileStream(fileURL: file)
-            try outputFileStream.open()
             let jsonString = events.map { $0.toString().replacingOccurrences(of: PersistentStorage.DELMITER, with: "")  }.joined(separator: PersistentStorage.DELMITER)
-            try outputFileStream.write("\(jsonString)\(PersistentStorage.DELMITER)", false)
-            try outputFileStream.close()
+            let finalString = "\(jsonString)\(PersistentStorage.DELMITER)"
+            try finalString.write(to: file, atomically: true, encoding: .utf8)
         } catch {
+            amplitude?.diagonostics.addErrorLog(error.localizedDescription)
             amplitude?.logger?.error(message: error.localizedDescription)
         }
     }
