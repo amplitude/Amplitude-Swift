@@ -354,7 +354,6 @@ extension PersistentStorage {
         do {
             outputStream = try OutputFileStream(fileURL: file)
             try outputStream?.create()
-            try outputStream?.open()
         } catch {
             amplitude?.logger?.error(message: error.localizedDescription)
         }
