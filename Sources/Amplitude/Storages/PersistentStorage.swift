@@ -80,7 +80,7 @@ class PersistentStorage: Storage {
         var content: String?
         do {
             content = try String(contentsOf: eventBlock, encoding: .utf8)
-            if (content?.hasSuffix(PersistentStorage.DELMITER) == true) {
+            if content?.hasSuffix(PersistentStorage.DELMITER) == true {
                 // v2 file
                 return readV2File(content: content!)
             } else {
@@ -219,7 +219,7 @@ extension PersistentStorage {
         ).filter { (file) -> Bool in
             return file.pathExtension == PersistentStorage.TEMP_FILE_EXTENSION
         }
-        if (allOpenFiles != nil && allOpenFiles!.count > 0) {
+        if allOpenFiles != nil && allOpenFiles!.count > 0 {
             return allOpenFiles![0]
         }
         var currentFileIndex = 0
@@ -421,7 +421,7 @@ extension PersistentStorage {
             for file in allFiles {
                 do {
                     let content = try String(contentsOf: file, encoding: .utf8)
-                    if (content.hasSuffix(PersistentStorage.DELMITER)) {
+                    if content.hasSuffix(PersistentStorage.DELMITER) {
                         break // already handled and in v2 format
                     }
 
@@ -481,7 +481,7 @@ extension PersistentStorage {
         let normalizedContent = "[\(content.trimmingCharacters(in: ["[", ",", "]"]))]"
         let events = BaseEvent.fromArrayString(jsonString: normalizedContent)
         if events != nil {
-            result = normalizedContent;
+            result = normalizedContent
         }
         return result
     }
