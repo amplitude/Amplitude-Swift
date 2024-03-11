@@ -269,9 +269,9 @@ extension BaseEvent {
         let decoder = JSONDecoder()
         return try? decoder.decode(T.self, from: jsonData)
     }
-    
+
     static func toJSONString(events: [BaseEvent]) -> String {
-        var result = "";
+        var result = ""
         do {
             let encoder = JSONEncoder()
             let json = try encoder.encode(events)

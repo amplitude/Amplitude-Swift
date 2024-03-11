@@ -31,20 +31,19 @@ public class Diagnostics {
         return (malformedEvents != nil && malformedEvents!.count > 0) || (errorLogs != nil && errorLogs!.count > 0)
     }
 
-    
     /**
      * Extracts the diagnostics as a JSON string.
      * @return JSON string of diagnostics or empty if no diagnostics are present.
      */
      func extractDiagonostics() -> String {
-        if (!hasDiagnostics()) {
+        if !hasDiagnostics() {
             return ""
         }
         var diagnostics = [String: [String]]()
-        if (malformedEvents != nil && malformedEvents!.count > 0) {
+        if malformedEvents != nil && malformedEvents!.count > 0 {
             diagnostics["malformed_events"] = malformedEvents
         }
-        if (errorLogs != nil && errorLogs!.count > 0) {
+        if errorLogs != nil && errorLogs!.count > 0 {
             diagnostics["error_logs"] = errorLogs
         }
         do {

@@ -390,19 +390,18 @@ extension PersistentStorage {
         let currentFileIndex: Int = (getCurrentEventFileIndex() ?? 0) + 1
         userDefaults?.set(currentFileIndex, forKey: eventsFileKey)
     }
-    
-    private func rename(_ file:URL) {
+
+    private func rename(_ file: URL) {
         let fileWithoutTemp = file.deletingPathExtension()
         var updatedFile = fileWithoutTemp
-        if (!fileManager.fileExists(atPath: file.path)) {
+        if !fileManager.fileExists(atPath: file.path) {
             amplitude?.logger?.debug(message: "Try to rename non exist file.")
             return
         }
-        if (fileManager.fileExists(atPath: fileWithoutTemp.path)) {
+        if fileManager.fileExists(atPath: fileWithoutTemp.path) {
             amplitude?.logger?.debug(message: "File already exists \(fileWithoutTemp.path), handle gracefully.")
             let suffix = "-\(Date().timeIntervalSince1970)-\(Int.random(in: 0..<1000))"
             updatedFile = fileWithoutTemp.appendFileNameSuffix(suffix: suffix)
-            
         }
         do {
             try fileManager.moveItem(at: file, to: updatedFile)
@@ -415,7 +414,7 @@ extension PersistentStorage {
     private func handleV1Files() {
         syncQueue.sync {
             let currentStorageVersion = (userDefaults?.object(forKey: self.storageVersionKey) as? Int) ?? 0
-            if (currentStorageVersion > 1) {
+            if currentStorageVersion > 1 {
                 return
             }
             let allFiles = self.getEventFiles(includeUnfinished: true)
@@ -428,13 +427,13 @@ extension PersistentStorage {
 
                     let normalizedContent = "[\(content.trimmingCharacters(in: ["[", ",", "]"]))]"
                     let events = BaseEvent.fromArrayString(jsonString: normalizedContent)
-                    if (events != nil) {
+                    if events != nil {
                         migrateFile(file: file, events: events!)
                     }
-                    if (file.pathExtension != "") {
+                    if file.pathExtension != "" {
                         finish(file: file)
                     }
-                } catch(let error) {
+                } catch {
                     amplitude?.diagonostics.addErrorLog("Error migrating file: \(file.path) for \(error.localizedDescription)")
                     amplitude?.logger?.error(message: error.localizedDescription)
                 }
@@ -442,7 +441,7 @@ extension PersistentStorage {
             userDefaults?.setValue(2, forKey: self.storageVersionKey)
         }
     }
-    
+
     private func migrateFile(file: URL, events: [BaseEvent]) {
         guard fileManager.fileExists(atPath: file.path) == true else {
             amplitude?.diagonostics.addErrorLog("File to migrate not exists any more : \(file.path)")
@@ -461,10 +460,10 @@ extension PersistentStorage {
 
     private func readV2File(content: String) -> String {
         var events: [BaseEvent] = [BaseEvent]()
-        if (content.hasSuffix(PersistentStorage.DELMITER)) {
+        if content.hasSuffix(PersistentStorage.DELMITER) {
             content.components(separatedBy: PersistentStorage.DELMITER).forEach{
                 let currentString = String($0)
-                if (currentString.isEmpty) {
+                if currentString.isEmpty {
                     return
                 }
                 if let event = BaseEvent.fromString(jsonString: String($0)) {
@@ -481,7 +480,7 @@ extension PersistentStorage {
         var result = ""
         let normalizedContent = "[\(content.trimmingCharacters(in: ["[", ",", "]"]))]"
         let events = BaseEvent.fromArrayString(jsonString: normalizedContent)
-        if (events != nil) {
+        if events != nil {
             result = normalizedContent;
         }
         return result

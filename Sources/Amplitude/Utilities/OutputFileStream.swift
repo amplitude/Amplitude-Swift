@@ -55,7 +55,7 @@ internal class OutputFileStream {
             throw OutputStreamError.unableToOpen(fileURL.path)
         }
     }
-    
+
     func seekToEnd() {
         if (fileHandle == nil) {
             return
@@ -85,7 +85,7 @@ internal class OutputFileStream {
     func write(_ string: String, _ append: Bool = true) throws {
         guard string.isEmpty == false else { return }
         if let data = string.data(using: .utf8) {
-            if (append) {
+            if append {
                 seekToEnd()
             }
             try write(data)

@@ -85,9 +85,9 @@ class HttpClient {
                 ,"options":{"min_id_length":\(minIdLength)}
                 """
         }
-        if (diagnostics.hasDiagnostics()) {
+        if diagnostics.hasDiagnostics() {
             let diagnosticsInfo = diagnostics.extractDiagonostics()
-            if (!diagnosticsInfo.isEmpty) {
+            if !diagnosticsInfo.isEmpty {
                 requestPayload += """
                 ,"request_metadata":{"sdk":\(diagnosticsInfo)}
                 """
