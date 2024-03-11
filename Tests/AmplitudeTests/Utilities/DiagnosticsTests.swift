@@ -39,6 +39,19 @@ final class DiagnosticsTests: XCTestCase {
         XCTAssertEqual(diagnostics.extractDiagonostics(), "")
         diagnostics.addMalformedEvent("event")
         diagnostics.addErrorLog("log")
-        XCTAssertEqual(diagnostics.extractDiagonostics(), "{\"malformed_events\":[\"event\"],\"error_logs\":[\"log\"]}")
+        let result = convertToDictionary(text: diagnostics.extractDiagonostics())
+        XCTAssertEqual(result?["malformed_events"] as! [String], ["event"])
+        XCTAssertEqual(result?["error_logs"] as! [String], ["log"])
+    }
+
+    private func convertToDictionary(text: String) -> [String: Any]? {
+        if let data = text.data(using: .utf8) {
+            do {
+                return try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+        return nil
     }
 }

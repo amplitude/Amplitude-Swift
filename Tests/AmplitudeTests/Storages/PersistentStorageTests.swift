@@ -132,12 +132,12 @@ final class PersistentStorageTests: XCTestCase {
         let rawContentInFile = try? String(contentsOf: filesInStoreageDirectory![0], encoding: .utf8)
         XCTAssertEqual(rawContentInFile, "\(event1.toString())\(PersistentStorage.DELMITER)\(event2.toString())\(PersistentStorage.DELMITER)")
         persistentStorage.splitBlock(eventBlock: filesInStoreageDirectory![0], events: events)
-        let filesInStoreageDirectoryAfterSplit = try? FileManager.default.contentsOfDirectory(at: storeDirectory, includingPropertiesForKeys: nil)
+        let filesInStoreageDirectoryAfterSplit: [URL]? =  persistentStorage.read(key: StorageKey.EVENTS)
         XCTAssertEqual(filesInStoreageDirectoryAfterSplit?.count, 2)
         let rawContentInFile1 = try? String(contentsOf: filesInStoreageDirectoryAfterSplit![0], encoding: .utf8)
         let rawContentInFile2 = try? String(contentsOf: filesInStoreageDirectoryAfterSplit![1], encoding: .utf8)
-        XCTAssertEqual(rawContentInFile1, "\(event2.toString())\(PersistentStorage.DELMITER)")
-        XCTAssertEqual(rawContentInFile2, "\(event1.toString())\(PersistentStorage.DELMITER)")
+        XCTAssertEqual(rawContentInFile1, "\(event1.toString())\(PersistentStorage.DELMITER)")
+        XCTAssertEqual(rawContentInFile2, "\(event2.toString())\(PersistentStorage.DELMITER)")
         persistentStorage.reset()
     }
 
@@ -241,7 +241,6 @@ final class PersistentStorageTests: XCTestCase {
         }
         dispatchGroup.wait()
         let persistentStorage = PersistentStorage(storagePrefix: "xxx-multiple-instance")
-        let storeDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
         let eventFiles: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
         var eventsCount = 0
         XCTAssertNotNil(eventFiles)
