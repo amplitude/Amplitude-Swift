@@ -270,7 +270,7 @@ final class PersistentStorageTests: XCTestCase {
         XCTAssertEqual(eventsCount, 10)
         persistentStorage.reset()
     }
-    
+
     func testHandleEarlierVersionAndWriteEvents() {
         let persistentStorageToGetDirectory = PersistentStorage(storagePrefix: "xxx-instance")
         let storeDirectory = persistentStorageToGetDirectory.getEventsStorageDirectory(createDirectory: false)
