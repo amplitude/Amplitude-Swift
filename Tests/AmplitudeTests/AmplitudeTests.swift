@@ -141,6 +141,17 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertNil(lastEvent?.country)
     }
 
+    func testDeviceIdWithDisableIDFV() {
+        let configuration = Configuration(
+            apiKey: "testApiKeyDeviceIDWithDisableIDFV",
+            storageProvider: storage,
+            trackingOptions: TrackingOptions().disableTrackIDFV())
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        XCTAssertNotEqual(amplitude.getDeviceId(), VendorSystem.current.identifierForVendor)
+    }
+
     func testSetUserId() {
         let amplitude = Amplitude(configuration: configurationWithFakeStorage)
         XCTAssertEqual(amplitude.getUserId(), nil)
