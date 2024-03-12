@@ -502,6 +502,7 @@ extension PersistentStorage {
         var result = ""
         do {
             let encoder = JSONEncoder()
+            encoder.outputFormatting = .sortedKeys
             let json = try encoder.encode(events)
             if let printed = String(data: json, encoding: .utf8) {
                 result = printed

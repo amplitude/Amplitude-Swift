@@ -246,6 +246,7 @@ extension BaseEvent {
         var returnString = ""
         do {
             let encoder = JSONEncoder()
+            encoder.outputFormatting = .sortedKeys
             let json = try encoder.encode(self)
             if let printed = String(data: json, encoding: .utf8) {
                 returnString = printed

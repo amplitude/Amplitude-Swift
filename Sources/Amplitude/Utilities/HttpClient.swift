@@ -68,7 +68,15 @@ class HttpClient {
 
     func getRequest() throws -> URLRequest {
         let url = getUrl()
-        guard let requestUrl = URL(string: url) else {
+
+        let requestUrl: URL?
+        if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
+            requestUrl = URL(string: url, encodingInvalidCharacters: false)
+        } else {
+            requestUrl = URL(string: url)
+        }
+
+        guard let requestUrl else {
             throw Exception.invalidUrl(url: url)
         }
         var request = URLRequest(url: requestUrl, timeoutInterval: 60)
