@@ -475,7 +475,21 @@ extension PersistentStorage {
                 }
             }
         }
-        return BaseEvent.toJSONString(events: events)
+        return eventsToJSONString(events: events)
+    }
+    
+    private func eventsToJSONString(events: [BaseEvent]) -> String {
+        var result = ""
+        do {
+            let encoder = JSONEncoder()
+            let json = try encoder.encode(events)
+            if let printed = String(data: json, encoding: .utf8) {
+                result = printed
+            }
+        } catch {
+            diagonostics.addErrorLog(error.localizedDescription)
+        }
+        return result
     }
 
     private func readV1File(content: String) -> String {

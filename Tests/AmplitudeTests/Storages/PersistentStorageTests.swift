@@ -12,7 +12,7 @@ import XCTest
 final class PersistentStorageTests: XCTestCase {
     let logger = ConsoleLogger()
     let diagonostics = Diagnostics()
-    
+
     func testIsBasicType() {
         let persistentStorage = PersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics)
         var isValueBasicType = persistentStorage.isBasicType(value: 111)
@@ -185,7 +185,7 @@ final class PersistentStorageTests: XCTestCase {
         let expectedPartial = String(data: data!, encoding: .utf8) ?? ""
         XCTAssertEqual(decodedEvents!.count, 1)
         XCTAssertTrue(self.diagonostics.hasDiagnostics() == true)
-        XCTAssertEqual(self.diagonostics.extractDiagonostics(), "{\"malformed_events\":\(expectedPartial)}")
+        XCTAssertEqual(self.diagonostics.extractDiagonosticsToString(), "{\"malformed_events\":\(expectedPartial)}")
         persistentStorage.reset()
    }
 

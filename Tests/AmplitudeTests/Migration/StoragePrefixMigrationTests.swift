@@ -5,7 +5,7 @@ import XCTest
 final class StoragePrefixMigrationTests: XCTestCase {
     let logger = ConsoleLogger()
     let diagonostics = Diagnostics()
-    
+
     func testUserDefaults() throws {
         let source = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
         let destination = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)

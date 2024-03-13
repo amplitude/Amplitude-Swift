@@ -86,7 +86,7 @@ class HttpClient {
                 """
         }
         if diagnostics.hasDiagnostics() {
-            let diagnosticsInfo = diagnostics.extractDiagonostics()
+            let diagnosticsInfo = diagnostics.extractDiagonosticsToString()
             if !diagnosticsInfo.isEmpty {
                 requestPayload += """
                 ,"request_metadata":{"sdk":\(diagnosticsInfo)}

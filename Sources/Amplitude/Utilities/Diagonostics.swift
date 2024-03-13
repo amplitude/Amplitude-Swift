@@ -35,7 +35,7 @@ public class Diagnostics {
      * Extracts the diagnostics as a JSON string.
      * @return JSON string of diagnostics or empty if no diagnostics are present.
      */
-     func extractDiagonostics() -> String {
+     func extractDiagonosticsToString() -> String {
         if !hasDiagnostics() {
             return ""
         }

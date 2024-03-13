@@ -15,14 +15,14 @@ final class DiagnosticsTests: XCTestCase {
         let diagnostics = Diagnostics()
         diagnostics.addMalformedEvent("event")
         XCTAssertTrue(diagnostics.hasDiagnostics())
-        XCTAssertEqual(diagnostics.extractDiagonostics(), "{\"malformed_events\":[\"event\"]}")
+        XCTAssertEqual(diagnostics.extractDiagonosticsToString(), "{\"malformed_events\":[\"event\"]}")
     }
 
     func testAddErrorLog() {
         let diagnostics = Diagnostics()
         diagnostics.addErrorLog("log")
         XCTAssertTrue(diagnostics.hasDiagnostics())
-        XCTAssertEqual(diagnostics.extractDiagonostics(), "{\"error_logs\":[\"log\"]}")
+        XCTAssertEqual(diagnostics.extractDiagonosticsToString(), "{\"error_logs\":[\"log\"]}")
     }
 
     func testHasDiagonostics() {
@@ -36,10 +36,10 @@ final class DiagnosticsTests: XCTestCase {
 
     func testExtractDiagnostic() {
         let diagnostics = Diagnostics()
-        XCTAssertEqual(diagnostics.extractDiagonostics(), "")
+        XCTAssertEqual(diagnostics.extractDiagonosticsToString(), "")
         diagnostics.addMalformedEvent("event")
         diagnostics.addErrorLog("log")
-        let result = convertToDictionary(text: diagnostics.extractDiagonostics())
+        let result = convertToDictionary(text: diagnostics.extractDiagonosticsToString())
         XCTAssertEqual((result?["malformed_events"] as? [String]) ?? [], ["event"])
         XCTAssertEqual((result?["error_logs"] as? [String]) ?? [], ["log"])
     }
