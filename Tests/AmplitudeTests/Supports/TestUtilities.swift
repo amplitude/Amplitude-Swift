@@ -1,7 +1,7 @@
-import Foundation
-import XCTest
-import Network
 import Combine
+import Foundation
+import Network
+import XCTest
 
 @testable import AmplitudeSwift
 
@@ -111,7 +111,9 @@ class FakeInMemoryStorage: Storage {
         eventBlock: EventBlock,
         eventsString: String
     ) -> ResponseHandler {
-        FakeResponseHandler(configuration: configuration, storage: self, eventPipeline: eventPipeline, eventBlock: eventBlock, eventsString: eventsString)
+        FakeResponseHandler(
+            configuration: configuration, storage: self, eventPipeline: eventPipeline, eventBlock: eventBlock,
+            eventsString: eventsString)
     }
 }
 
@@ -134,7 +136,7 @@ class FakeHttpClient: HttpClient {
 
     override func getDate() -> Date {
         // timestamp of 2023-10-24T18:16:24.000 in UTC time zone
-        return Date(timeIntervalSince1970: 1698171384)
+        return Date(timeIntervalSince1970: 1_698_171_384)
     }
 }
 
@@ -287,5 +289,14 @@ final class MockPathCreation: PathCreationProtocol {
     func simulateNetworkChange(status: NWPath.Status) {
         let networkPath = NetworkPath(status: status)
         subject.send(networkPath)
+    }
+}
+
+class SessionsWithDelayedEventStartProcessing: Sessions {
+    override func processEvent(event: BaseEvent, inForeground: Bool) -> [BaseEvent] {
+        if event.eventType == Constants.AMP_SESSION_START_EVENT {
+            sleep(3)
+        }
+        return super.processEvent(event: event, inForeground: inForeground)
     }
 }

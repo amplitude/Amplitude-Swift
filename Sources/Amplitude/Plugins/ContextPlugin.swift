@@ -160,13 +160,13 @@ class ContextPlugin: BeforePlugin {
         if isValidDeviceId(deviceId) {
             return
         }
-        if deviceId == nil {
+        if deviceId == nil, amplitude?.configuration.trackingOptions.shouldTrackIDFV() ?? false {
             deviceId = staticContext["idfv"] as? String
         }
         if deviceId == nil {
             deviceId = NSUUID().uuidString
         }
-        _ = amplitude?.setDeviceId(deviceId: deviceId)
+        amplitude?.setDeviceId(deviceId: deviceId)
     }
 
     func isValidDeviceId(_ deviceId: String?) -> Bool {
