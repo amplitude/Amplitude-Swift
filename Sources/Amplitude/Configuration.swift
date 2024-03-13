@@ -34,6 +34,7 @@ public class Configuration {
     public internal(set) var migrateLegacyData: Bool
     public var defaultTracking: DefaultTrackingOptions
     public var offline: Bool?
+    internal let diagonostics: Diagnostics
 
     public init(
         apiKey: String,
@@ -71,12 +72,13 @@ public class Configuration {
         self.flushIntervalMillis = flushIntervalMillis
         self.instanceName = normalizedInstanceName
         self.optOut = optOut
-        self.storageProvider = storageProvider
-            ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName))
-        self.identifyStorageProvider = identifyStorageProvider
-            ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName))
+        self.diagonostics = Diagnostics()
         self.logLevel = logLevel
         self.loggerProvider = loggerProvider
+        self.storageProvider = storageProvider
+        ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics)
+        self.identifyStorageProvider = identifyStorageProvider
+        ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics)
         self.minIdLength = minIdLength
         self.partnerId = partnerId
         self.callback = callback

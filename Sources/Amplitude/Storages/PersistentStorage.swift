@@ -22,14 +22,15 @@ class PersistentStorage: Storage {
     let userDefaults: UserDefaults?
     let fileManager: FileManager
     private var outputStream: OutputFileStream?
-    internal weak var amplitude: Amplitude?
     // Store event.callback in memory as it cannot be ser/deser in files.
     private var eventCallbackMap: [String: EventCallback]
     private var appPath: String!
     let syncQueue = DispatchQueueHolder.storageQueue
     let storageVersionKey: String
+    let logger: (any Logger)?
+    let diagonostics: Diagnostics
 
-    init(storagePrefix: String) {
+    init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics) {
         self.storagePrefix = storagePrefix == PersistentStorage.DEFAULT_STORAGE_PREFIX || storagePrefix.starts(with: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-")
             ? storagePrefix
             : "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(storagePrefix)"
@@ -37,6 +38,8 @@ class PersistentStorage: Storage {
         self.fileManager = FileManager.default
         self.eventCallbackMap = [String: EventCallback]()
         self.storageVersionKey = "\(PersistentStorage.STORAGE_VERSION).\(self.storagePrefix)"
+        self.logger = logger
+        self.diagonostics = diagonostics
         // Make sure Amplitude data is sandboxed per app
         self.appPath = isStorageSandboxed() ? "" : "\(Bundle.main.bundleIdentifier!)/"
         handleV1Files()
@@ -88,7 +91,7 @@ class PersistentStorage: Storage {
                 return readV1File(content: content!)
             }
         } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
+            logger?.error(message: error.localizedDescription)
         }
         return content
     }
@@ -98,7 +101,7 @@ class PersistentStorage: Storage {
             do {
                 try fileManager.removeItem(atPath: eventBlock.path)
             } catch {
-                amplitude?.logger?.error(message: error.localizedDescription)
+                logger?.error(message: error.localizedDescription)
             }
         }
     }
@@ -114,7 +117,7 @@ class PersistentStorage: Storage {
             do {
                 try fileManager.removeItem(atPath: eventBlock.path)
             } catch {
-                amplitude?.logger?.error(message: error.localizedDescription)
+                logger?.error(message: error.localizedDescription)
             }
         }
     }
@@ -319,12 +322,12 @@ extension PersistentStorage {
         let jsonString = event.toString().replacingOccurrences(of: PersistentStorage.DELMITER, with: "")
         do {
             if outputStream == nil {
-                amplitude?.logger?.error(message: "OutputStream is nil with file: \(storeFile)")
+                logger?.error(message: "OutputStream is nil with file: \(storeFile)")
             }
             try outputStream?.write("\(jsonString)\(PersistentStorage.DELMITER)")
         } catch {
-            amplitude?.diagonostics.addErrorLog(error.localizedDescription)
-            amplitude?.logger?.error(message: error.localizedDescription)
+            diagonostics.addErrorLog(error.localizedDescription)
+            logger?.error(message: error.localizedDescription)
         }
     }
 
@@ -332,7 +335,7 @@ extension PersistentStorage {
         let storeFile = file
 
         guard fileManager.fileExists(atPath: storeFile.path) != true else {
-            amplitude?.diagonostics.addErrorLog("Splited file duplicate for path: \(storeFile.path)")
+            diagonostics.addErrorLog("Splited file duplicate for path: \(storeFile.path)")
             return
         }
 
@@ -341,11 +344,11 @@ extension PersistentStorage {
         let jsonString = events.map { $0.toString().replacingOccurrences(of: PersistentStorage.DELMITER, with: "")  }.joined(separator: PersistentStorage.DELMITER)
         do {
             if outputStream == nil {
-                amplitude?.logger?.error(message: "OutputStream is nil with file: \(storeFile)")
+                logger?.error(message: "OutputStream is nil with file: \(storeFile)")
             }
             try outputStream?.write("\(jsonString)\(PersistentStorage.DELMITER)")
         } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
+            logger?.error(message: error.localizedDescription)
         }
         finish(file: storeFile)
     }
@@ -355,7 +358,7 @@ extension PersistentStorage {
             outputStream = try OutputFileStream(fileURL: file)
             try outputStream?.create()
         } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
+            logger?.error(message: error.localizedDescription)
         }
     }
 
@@ -368,7 +371,7 @@ extension PersistentStorage {
                     try outputStream.open()
                 }
             } catch {
-                amplitude?.logger?.error(message: error.localizedDescription)
+                logger?.error(message: error.localizedDescription)
             }
         }
     }
@@ -381,7 +384,7 @@ extension PersistentStorage {
         do {
             try outputStream.close()
         } catch {
-            amplitude?.logger?.error(message: error.localizedDescription)
+            logger?.error(message: error.localizedDescription)
         }
         self.outputStream = nil
 
@@ -394,19 +397,19 @@ extension PersistentStorage {
         let fileWithoutTemp = file.deletingPathExtension()
         var updatedFile = fileWithoutTemp
         if !fileManager.fileExists(atPath: file.path) {
-            amplitude?.logger?.debug(message: "Try to rename non exist file.")
+            logger?.debug(message: "Try to rename non exist file.")
             return
         }
         if fileManager.fileExists(atPath: fileWithoutTemp.path) {
-            amplitude?.logger?.debug(message: "File already exists \(fileWithoutTemp.path), handle gracefully.")
+            logger?.debug(message: "File already exists \(fileWithoutTemp.path), handle gracefully.")
             let suffix = "-\(Date().timeIntervalSince1970)-\(Int.random(in: 0..<1000))"
             updatedFile = fileWithoutTemp.appendFileNameSuffix(suffix: suffix)
         }
         do {
             try fileManager.moveItem(at: file, to: updatedFile)
         } catch {
-            amplitude?.diagonostics.addErrorLog(error.localizedDescription)
-            amplitude?.logger?.error(message: "Unable to rename file: \(file.path)")
+            diagonostics.addErrorLog(error.localizedDescription)
+            logger?.error(message: "Unable to rename file: \(file.path)")
         }
     }
 
@@ -433,8 +436,8 @@ extension PersistentStorage {
                         finish(file: file)
                     }
                 } catch {
-                    amplitude?.diagonostics.addErrorLog("Error migrating file: \(file.path) for \(error.localizedDescription)")
-                    amplitude?.logger?.error(message: error.localizedDescription)
+                    diagonostics.addErrorLog("Error migrating file: \(file.path) for \(error.localizedDescription)")
+                    logger?.error(message: error.localizedDescription)
                 }
             }
             userDefaults?.setValue(2, forKey: self.storageVersionKey)
@@ -443,7 +446,7 @@ extension PersistentStorage {
 
     private func migrateFile(file: URL, events: [BaseEvent]) {
         guard fileManager.fileExists(atPath: file.path) == true else {
-            amplitude?.diagonostics.addErrorLog("File to migrate not exists any more : \(file.path)")
+            diagonostics.addErrorLog("File to migrate not exists any more : \(file.path)")
             return
         }
 
@@ -452,8 +455,8 @@ extension PersistentStorage {
             let finalString = "\(jsonString)\(PersistentStorage.DELMITER)"
             try finalString.write(to: file, atomically: true, encoding: .utf8)
         } catch {
-            amplitude?.diagonostics.addErrorLog(error.localizedDescription)
-            amplitude?.logger?.error(message: error.localizedDescription)
+            diagonostics.addErrorLog(error.localizedDescription)
+            logger?.error(message: error.localizedDescription)
         }
     }
 
@@ -468,7 +471,7 @@ extension PersistentStorage {
                 if let event = BaseEvent.fromString(jsonString: String($0)) {
                     events.append(event)
                 } else {
-                    amplitude?.diagonostics.addMalformedEvent(String($0))
+                    diagonostics.addMalformedEvent(String($0))
                 }
             }
         }

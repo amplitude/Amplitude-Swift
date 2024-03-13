@@ -3,9 +3,12 @@ import XCTest
 @testable import AmplitudeSwift
 
 final class StoragePrefixMigrationTests: XCTestCase {
+    let logger = ConsoleLogger()
+    let diagonostics = Diagnostics()
+    
     func testUserDefaults() throws {
-        let source = PersistentStorage(storagePrefix: NSUUID().uuidString)
-        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString)
+        let source = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
+        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
 
         try source.write(key: StorageKey.DEVICE_ID, value: "source-device")
         try source.write(key: StorageKey.USER_ID, value: "source-user")
@@ -58,8 +61,8 @@ final class StoragePrefixMigrationTests: XCTestCase {
     }
 
     func testEventFiles() throws {
-        let source = PersistentStorage(storagePrefix: NSUUID().uuidString)
-        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString)
+        let source = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
+        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
 
         try source.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "event-1"))
         try source.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "event-2"))
@@ -92,8 +95,8 @@ final class StoragePrefixMigrationTests: XCTestCase {
     }
 
     func testMissingSource() throws {
-        let source = PersistentStorage(storagePrefix: NSUUID().uuidString)
-        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString)
+        let source = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
+        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
 
         var destinationDeviceId: String? = destination.read(key: StorageKey.DEVICE_ID)
         var destinationLastEventId: Int? = destination.read(key: StorageKey.LAST_EVENT_ID)
@@ -116,8 +119,8 @@ final class StoragePrefixMigrationTests: XCTestCase {
     }
 
     func testMoveEventFilesWithDuplicatedName() throws {
-        let source = PersistentStorage(storagePrefix: NSUUID().uuidString)
-        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString)
+        let source = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
+        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
 
         try source.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "event-1"))
         source.rollover()
