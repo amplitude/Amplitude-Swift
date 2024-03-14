@@ -83,7 +83,7 @@ class PersistentStorage: Storage {
         var content: String?
         do {
             content = try String(contentsOf: eventBlock, encoding: .utf8)
-            if content?.hasSuffix(PersistentStorage.DELMITER) == true {
+            if eventBlock.hasPrefix(PersistentStorage.STORAGE_V2_PREFIX) {
                 // v2 file
                 return readV2File(content: content!)
             } else {
@@ -203,6 +203,7 @@ extension PersistentStorage {
     static let TEMP_FILE_EXTENSION = "tmp"
     static let DELMITER = "\u{0000}"
     static let STORAGE_VERSION = "amplitude.events.storage.version"
+    static let STORAGE_V2_PREFIX = "v2-"
 
     enum Exception: Error {
         case unsupportedType
@@ -238,7 +239,7 @@ extension PersistentStorage {
 
     private func getEventsFile(index: Int) -> URL {
         let dir = getEventsStorageDirectory()
-        let fileURL = dir.appendingPathComponent("\(index)").appendingPathExtension(
+        let fileURL = dir.appendingPathComponent("\(PersistentStorage.STORAGE_V2_PREFIX)\(index)").appendingPathExtension(
             PersistentStorage.TEMP_FILE_EXTENSION
         )
         return fileURL
@@ -422,6 +423,10 @@ extension PersistentStorage {
             let allFiles = self.getEventFiles(includeUnfinished: true)
             for file in allFiles {
                 do {
+                    if file.hasPrefix(PersistentStorage.STORAGE_V2_PREFIX) {
+                        logger?.debug(message: "file already migrated")
+                        return
+                    }
                     let content = try String(contentsOf: file, encoding: .utf8)
                     if content.hasSuffix(PersistentStorage.DELMITER) {
                         break // already handled and in v2 format
@@ -435,6 +440,7 @@ extension PersistentStorage {
                     if file.pathExtension != "" {
                         finish(file: file)
                     }
+                    migrateFileName(file)
                 } catch {
                     diagonostics.addErrorLog("Error migrating file: \(file.path) for \(error.localizedDescription)")
                     logger?.error(message: error.localizedDescription)
@@ -460,19 +466,31 @@ extension PersistentStorage {
         }
     }
 
+    private func migrateFileName(_ file: URL) {
+        let fileNameV2 = file.appendFileNamePrefix(prefix: PersistentStorage.STORAGE_V2_PREFIX).deletingPathExtension()
+        if fileManager.fileExists(atPath: fileNameV2.path) {
+            logger?.debug(message: "Migrate found an existing file.")
+            return
+        }
+        do {
+            try fileManager.moveItem(at: file, to: fileNameV2)
+        } catch {
+            diagonostics.addErrorLog(error.localizedDescription)
+            logger?.error(message: "Unable to migrate file: \(file.path)")
+        }
+    }
+
     private func readV2File(content: String) -> String {
         var events: [BaseEvent] = [BaseEvent]()
-        if content.hasSuffix(PersistentStorage.DELMITER) {
-            content.components(separatedBy: PersistentStorage.DELMITER).forEach{
-                let currentString = String($0)
-                if currentString.isEmpty {
-                    return
-                }
-                if let event = BaseEvent.fromString(jsonString: String($0)) {
-                    events.append(event)
-                } else {
-                    diagonostics.addMalformedEvent(String($0))
-                }
+        content.components(separatedBy: PersistentStorage.DELMITER).forEach{
+            let currentString = String($0)
+            if currentString.isEmpty {
+                return
+            }
+            if let event = BaseEvent.fromString(jsonString: String($0)) {
+                events.append(event)
+            } else {
+                diagonostics.addMalformedEvent(String($0))
             }
         }
         return eventsToJSONString(events: events)

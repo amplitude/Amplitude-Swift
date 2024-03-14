@@ -166,14 +166,14 @@ final class PersistentStorageTests: XCTestCase {
     }
 
    func testMalformedEventInDiagnostics() {
-        let apiKey = "testApiKeyPersist"
-       let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics)
         let storeDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
-        let currentFile = storeDirectory.appendingPathComponent("\(0)")
+        let currentFile = storeDirectory.appendingPathComponent("\(PersistentStorage.STORAGE_V2_PREFIX)\(0)")
         let event1 = BaseEvent(eventType: "test1")
         let partial = "{\"event_type\":\"test1\",\"user_id\":\"159995596214061\",\"device_id\":\"9b935bb3cd75\","
         let malformedContent = "\(event1.toString())\(PersistentStorage.DELMITER)\(partial)\(PersistentStorage.DELMITER)"
         writeContent(file: currentFile, content: malformedContent)
+        let rawFiles = try? FileManager.default.contentsOfDirectory(at: storeDirectory, includingPropertiesForKeys: nil)
         let eventFiles: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
         XCTAssertEqual(eventFiles?.count, 1)
 
@@ -253,6 +253,7 @@ final class PersistentStorageTests: XCTestCase {
     func testHandleEarlierVersionFiles() {
         let persistentStorageToGetDirectory = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics)
         let storeDirectory = persistentStorageToGetDirectory.getEventsStorageDirectory(createDirectory: false)
+        persistentStorageToGetDirectory.reset()
         createEarilierVersionFiles(storageDirectory: storeDirectory)
         let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics)
         let eventFiles: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
@@ -270,6 +271,7 @@ final class PersistentStorageTests: XCTestCase {
     func testHandleEarlierVersionAndWriteEvents() {
         let persistentStorageToGetDirectory = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics)
         let storeDirectory = persistentStorageToGetDirectory.getEventsStorageDirectory(createDirectory: false)
+        persistentStorageToGetDirectory.reset()
         createEarilierVersionFiles(storageDirectory: storeDirectory)
         let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics)
         try? persistentStorage.write(

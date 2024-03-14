@@ -15,4 +15,17 @@ extension URL {
         }
         return deletingLastPathComponent().appendingPathComponent(filename)
     }
+
+    func appendFileNamePrefix(prefix: String) -> URL {
+        var filename = "\(prefix)" + deletingPathExtension().lastPathComponent
+        if !pathExtension.isEmpty {
+            filename += ".\(pathExtension)"
+        }
+        return deletingLastPathComponent().appendingPathComponent(filename)
+    }
+
+    func hasPrefix(_ prefix: String) -> Bool {
+        let filename = deletingPathExtension().lastPathComponent
+        return filename.hasPrefix(prefix)
+    }
 }
