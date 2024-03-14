@@ -33,6 +33,7 @@ public class Diagnostics {
 
     /**
      * Extracts the diagnostics as a JSON string.
+     * Warning: This will clear stored diagnostics.
      * @return JSON string of diagnostics or empty if no diagnostics are present.
      */
      func extractDiagonosticsToString() -> String {
