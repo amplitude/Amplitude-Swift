@@ -10,7 +10,7 @@ import Foundation
 class HttpClient {
     let configuration: Configuration
     internal let session: URLSession
-    
+
     private lazy var dateFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions.insert(.withFractionalSeconds)
