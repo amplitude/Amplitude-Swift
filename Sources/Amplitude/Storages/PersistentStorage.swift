@@ -372,6 +372,7 @@ extension PersistentStorage {
                     try outputStream.open()
                 }
             } catch {
+                diagonostics.addErrorLog(error.localizedDescription)
                 logger?.error(message: error.localizedDescription)
             }
         }
@@ -385,6 +386,7 @@ extension PersistentStorage {
         do {
             try outputStream.close()
         } catch {
+            diagonostics.addErrorLog(error.localizedDescription)
             logger?.error(message: error.localizedDescription)
         }
         self.outputStream = nil
