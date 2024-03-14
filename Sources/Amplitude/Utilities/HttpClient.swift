@@ -10,6 +10,12 @@ import Foundation
 class HttpClient {
     let configuration: Configuration
     internal let session: URLSession
+    
+    private lazy var dateFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions.insert(.withFractionalSeconds)
+        return formatter
+    }()
 
     init(configuration: Configuration) {
         self.configuration = configuration
@@ -72,9 +78,7 @@ class HttpClient {
 
     func getRequestData(events: String) -> Data? {
         let apiKey = configuration.apiKey
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions.insert(.withFractionalSeconds)
-        let clientUploadTime: String = formatter.string(from: getDate())
+        let clientUploadTime: String = dateFormatter.string(from: getDate())
         var requestPayload = """
             {"api_key":"\(apiKey)","client_upload_time":"\(clientUploadTime)","events":\(events)
             """
