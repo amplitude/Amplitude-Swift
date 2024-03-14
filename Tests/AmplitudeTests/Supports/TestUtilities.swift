@@ -47,62 +47,75 @@ class FakeInMemoryStorage: Storage {
     var keyValueStore = [String: Any?]()
     var eventsStore = [URL: [BaseEvent]]()
     var index = URL(string: "0")!
+    let storageQueue = DispatchQueue(label: "Amplitude.FakeInMemoryStorage")
 
     func write(key: StorageKey, value: Any?) throws {
-        switch key {
-        case .EVENTS:
-            if let event = value as? BaseEvent {
-                var chunk = eventsStore[index, default: [BaseEvent]()]
-                chunk.append(event)
-                eventsStore[index] = chunk
+        storageQueue.sync {
+            switch key {
+            case .EVENTS:
+                if let event = value as? BaseEvent {
+                    var chunk = eventsStore[index, default: [BaseEvent]()]
+                    chunk.append(event)
+                    eventsStore[index] = chunk
+                }
+            default:
+                keyValueStore[key.rawValue] = value
             }
-        default:
-            keyValueStore[key.rawValue] = value
         }
     }
 
     func read<T>(key: StorageKey) -> T? {
-        var result: T?
-        switch key {
-        case .EVENTS:
-            result = Array(eventsStore.keys) as? T
-        default:
-            result = keyValueStore[key.rawValue] as? T
+        storageQueue.sync {
+            var result: T?
+            switch key {
+            case .EVENTS:
+                result = Array(eventsStore.keys) as? T
+            default:
+                result = keyValueStore[key.rawValue] as? T
+            }
+            return result
         }
-        return result
     }
 
     func getEventsString(eventBlock: EventBlock) -> String? {
-        var content: String?
-        content = "["
-        content = content! + (eventsStore[eventBlock] ?? []).map { $0.toString() }.joined(separator: ", ")
-        content = content! + "]"
-        return content
+        storageQueue.sync {
+            var content: String?
+            content = "["
+            content = content! + (eventsStore[eventBlock] ?? []).map { $0.toString() }.joined(separator: ", ")
+            content = content! + "]"
+            return content
+        }
     }
 
     func rollover() {
     }
 
     func reset() {
-        keyValueStore.removeAll()
-        eventsStore.removeAll()
+        storageQueue.sync {
+            keyValueStore.removeAll()
+            eventsStore.removeAll()
+        }
     }
 
     func remove(eventBlock: EventBlock) {
-        eventsStore.removeValue(forKey: eventBlock)
+        storageQueue.sync {
+            _ = eventsStore.removeValue(forKey: eventBlock)
+        }
     }
 
     func splitBlock(eventBlock: EventBlock, events: [BaseEvent]) {
     }
 
     func events() -> [BaseEvent] {
-        var result: [BaseEvent] = []
-        for (_, value) in eventsStore {
-            for event in value {
-                result.append(event)
+        storageQueue.sync {
+            var result: [BaseEvent] = []
+            for (_, value) in eventsStore {
+                for event in value {
+                    result.append(event)
+                }
             }
+            return result
         }
-        return result
     }
 
     nonisolated func getResponseHandler(
@@ -121,6 +134,7 @@ class FakeHttpClient: HttpClient {
     var uploadCount: Int = 0
     var uploadedEvents: [String] = []
     var uploadExpectations: [XCTestExpectation] = []
+    var uploadResults: [Result<Int, Error>] = []
 
     override func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void)
         -> URLSessionDataTask?
@@ -130,10 +144,16 @@ class FakeHttpClient: HttpClient {
         if !uploadExpectations.isEmpty {
             uploadExpectations.removeFirst().fulfill()
         }
-        DispatchQueue.global().async {
-            completion(Result.success(200))
+        let result: Result<Int, Error>
+        if uploadResults.isEmpty {
+            result = .success(200)
+        } else {
+            result = uploadResults.removeFirst()
         }
-        return nil
+        DispatchQueue.global().async {
+            completion(result)
+        }
+        return URLSession.shared.dataTask(with: URLRequest(url: URL(string: "https://www.amplitude.com")!))
     }
 
     override func getDate() -> Date {
