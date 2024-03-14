@@ -19,7 +19,7 @@ public class EventPipeline {
         let events: String
         let task: URLSessionDataTask
     }
-    private var uploads = [UploadTaskInfo]()
+    private var uploads = [URL: UploadTaskInfo]()
 
     init(amplitude: Amplitude) {
         self.amplitude = amplitude
@@ -54,32 +54,36 @@ public class EventPipeline {
         eventCount = 0
         guard let storage = self.storage else { return }
         storage.rollover()
-        guard let eventFiles: [URL]? = storage.read(key: StorageKey.EVENTS) else { return }
-        cleanupUploads()
-        if pendingUploads == 0 {
-            for eventFile in eventFiles! {
-                guard let eventsString = storage.getEventsString(eventBlock: eventFile) else {
-                    continue
+        guard let eventFiles: [URL] = storage.read(key: StorageKey.EVENTS) else { return }
+        for eventFile in eventFiles {
+            uploadsQueue.sync {
+                guard uploads[eventFile] == nil else {
+                    amplitude.logger?.log(message: "Existing upload in progress, skipping...")
+                    return
                 }
-                if eventsString.isEmpty {
-                    continue
+                guard let eventsString = storage.getEventsString(eventBlock: eventFile),
+                      !eventsString.isEmpty else {
+                    return
                 }
                 let uploadTask = httpClient.upload(events: eventsString) { [weak self] result in
+                    guard let self else {
+                        return
+                    }
                     let responseHandler = storage.getResponseHandler(
-                        configuration: self!.amplitude.configuration,
-                        eventPipeline: self!,
+                        configuration: self.amplitude.configuration,
+                        eventPipeline: self,
                         eventBlock: eventFile,
                         eventsString: eventsString
                     )
                     responseHandler.handle(result: result)
-                    self?.cleanupUploads()
+                    self.completeUpload(for: eventFile)
                 }
-                if let upload = uploadTask {
-                    add(uploadTask: UploadTaskInfo(events: eventsString, task: upload))
+                if let uploadTask {
+                    uploads[eventFile] = UploadTaskInfo(events: eventsString, task: uploadTask)
                 }
             }
-            completion?()
         }
+        completion?()
     }
 
     func start() {
@@ -101,31 +105,10 @@ public class EventPipeline {
 }
 
 extension EventPipeline {
-    internal func cleanupUploads() {
-        uploadsQueue.sync {
-            let before = uploads.count
-            var newPending = uploads
-            newPending.removeAll { uploadInfo in
-                let shouldRemove = uploadInfo.task.state != .running
-                return shouldRemove
-            }
-            uploads = newPending
-            let after = uploads.count
-            amplitude.logger?.log(message: "Cleaned up \(before - after) non-running uploads.")
-        }
-    }
 
-    internal var pendingUploads: Int {
-        var uploadsCount = 0
+    func completeUpload(for eventBlock: URL) {
         uploadsQueue.sync {
-            uploadsCount = uploads.count
-        }
-        return uploadsCount
-    }
-
-    internal func add(uploadTask: UploadTaskInfo) {
-        uploadsQueue.sync {
-            uploads.append(uploadTask)
+            uploads[eventBlock] = nil
         }
     }
 }

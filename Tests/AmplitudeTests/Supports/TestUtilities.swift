@@ -130,7 +130,9 @@ class FakeHttpClient: HttpClient {
         if !uploadExpectations.isEmpty {
             uploadExpectations.removeFirst().fulfill()
         }
-        completion(Result.success(200))
+        DispatchQueue.global().async {
+            completion(Result.success(200))
+        }
         return nil
     }
 
