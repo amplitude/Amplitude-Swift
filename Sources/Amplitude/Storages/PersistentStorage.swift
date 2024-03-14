@@ -495,7 +495,7 @@ extension PersistentStorage {
         }
         return eventsToJSONString(events: events)
     }
-    
+
     private func eventsToJSONString(events: [BaseEvent]) -> String {
         var result = ""
         do {

@@ -146,9 +146,9 @@ final class StoragePrefixMigrationTests: XCTestCase {
         XCTAssertEqual(sourceEventFiles.count, 0)
 
         destinationEventFiles = destination.getEventFiles(includeUnfinished: true)
-        XCTAssertEqual(destinationEventFiles[0].lastPathComponent, "0")
-        XCTAssertEqual(destinationEventFiles[1].lastPathComponent.prefix(2), "0-")
-        XCTAssertEqual(destinationEventFiles[2].lastPathComponent, "1")
+        XCTAssertEqual(destinationEventFiles[0].lastPathComponent, "v2-0")
+        XCTAssertEqual(destinationEventFiles[1].lastPathComponent.prefix(5), "v2-0-")
+        XCTAssertEqual(destinationEventFiles[2].lastPathComponent, "v2-1")
         XCTAssertEqual(try getFileSize(destinationEventFiles[1]), sourceFileSizes[0])
         XCTAssertEqual(try getFileSize(destinationEventFiles[2]), sourceFileSizes[1])
         XCTAssertEqual(try getFileSize(destinationEventFiles[0]), destinationFileSizes[0])
