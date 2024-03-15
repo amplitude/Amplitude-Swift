@@ -46,14 +46,29 @@ class UIKitScreenViews {
             method_exchangeImplementations(originalViewDidAppear, swizzledViewDidAppear)
         }
     }
+
+    static func screenName(for viewController: UIViewController) -> String {
+        if let title = viewController.title, !title.isEmpty {
+            return title
+        }
+        let className = String(describing: type(of: viewController))
+            .replacingOccurrences(of: "ViewController", with: "")
+        if !className.isEmpty {
+            return className
+        }
+        return "Unknown"
+    }
 }
 
 extension UIViewController {
+
     @objc func amp_viewDidAppear(_ animated: Bool) {
         amp_viewDidAppear(animated)
 
-        let bundle = Bundle(for: self.classForCoder)
-        if !bundle.bundlePath.hasPrefix(Bundle.main.bundlePath) {
+        // Only record screen events for view controllers owned by the app
+        let viewControllerBundlePath = Bundle(for: classForCoder).bundleURL.resolvingSymlinksInPath().path
+        let mainBundlePath = Bundle.main.bundleURL.resolvingSymlinksInPath().path
+        guard viewControllerBundlePath.hasPrefix(mainBundlePath) else {
             return
         }
 
@@ -65,17 +80,10 @@ extension UIViewController {
             return
         }
 
-        var name = top.title
-        if name == nil || name!.isEmpty {
-            // if no class title, try view controller's description
-            name = String(describing: top.self.description).replacingOccurrences(of: "ViewController", with: "")
-            if name == nil || name!.isEmpty {
-                name = "Unknown"
-            }
-        }
+        let screenName = UIKitScreenViews.screenName(for: top)
 
         for amplitude in UIKitScreenViews.amplitudes {
-            amplitude.value?.track(event: ScreenViewedEvent(screenName: name!))
+            amplitude.value?.track(event: ScreenViewedEvent(screenName: screenName))
         }
     }
 
