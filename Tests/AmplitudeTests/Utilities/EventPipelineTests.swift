@@ -15,10 +15,14 @@ final class EventPipelineTests: XCTestCase {
     private var configuration: Configuration!
     private var pipeline: EventPipeline!
     private var httpClient: FakeHttpClient!
+    private var storage: PersistentStorage!
 
     override func setUp() {
         super.setUp()
-        let storage = FakeInMemoryStorage()
+        storage = PersistentStorage(
+            storagePrefix: "event-pipeline-tests",
+            logger: nil,
+            diagonostics: Diagnostics())
         configuration = Configuration(
             apiKey: "testApiKey",
             flushIntervalMillis: Int(Self.FLUSH_INTERVAL_SECONDS * 1000),
@@ -28,6 +32,11 @@ final class EventPipelineTests: XCTestCase {
         httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagonostics)
         pipeline = EventPipeline(amplitude: amplitude)
         pipeline.httpClient = httpClient
+    }
+
+    override func tearDown() {
+        super.tearDown()
+        storage.reset()
     }
 
     func testInit() {
@@ -76,5 +85,58 @@ final class EventPipelineTests: XCTestCase {
 
         XCTAssertEqual(pipeline.amplitude.configuration.offline, true)
         XCTAssertEqual(httpClient.uploadCount, 0, "There should be no uploads when offline")
+    }
+
+    func testSimultaneousFlush() {
+        let testEvent = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
+        try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
+
+        let flushExpectations = (0..<2).map { _ in
+            let expectation = expectation(description: "flush")
+            pipeline.flush {
+                expectation.fulfill()
+            }
+            return expectation
+        }
+
+        let waitResult = XCTWaiter.wait(for: flushExpectations, timeout: 1)
+        XCTAssertNotEqual(waitResult, .timedOut)
+        XCTAssertEqual(httpClient.uploadCount, 1)
+        let uploadedEvents = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[0])
+        XCTAssertEqual(uploadedEvents?.count, 1)
+        XCTAssertEqual(uploadedEvents![0].eventType, "testEvent")
+    }
+
+    func testInvalidEventUpload() {
+        (0..<2).forEach { i in
+            let testEvent = BaseEvent(userId: "test", deviceId: "test-machine", eventType: "testEvent-\(i)")
+            try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
+        }
+
+        let invalidResponseData = "{\"events_with_invalid_fields\": {\"user_id\": [0]}}".data(using: .utf8)!
+
+        httpClient.uploadResults = [
+            .failure(HttpClient.Exception.httpError(code: 400, data: invalidResponseData))
+        ]
+
+        let uploadExpectations = (0..<2).map { _ in expectation(description: "httpresponse") }
+        httpClient.uploadExpectations = uploadExpectations
+
+        pipeline.flush()
+        wait(for: [uploadExpectations[0]], timeout: 1)
+
+        pipeline.flush()
+        wait(for: [uploadExpectations[1]], timeout: 1)
+
+        XCTAssertEqual(httpClient.uploadCount, 2)
+
+        let uploadedEvents0 = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[0])
+        XCTAssertEqual(uploadedEvents0?.count, 2)
+        XCTAssertEqual(uploadedEvents0?[0].eventType, "testEvent-0")
+        XCTAssertEqual(uploadedEvents0?[1].eventType, "testEvent-1")
+
+        let uploadedEvents1 = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[1])
+        XCTAssertEqual(uploadedEvents1?.count, 1)
+        XCTAssertEqual(uploadedEvents1?[0].eventType, "testEvent-1")
     }
 }
