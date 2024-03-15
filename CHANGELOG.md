@@ -1,3 +1,17 @@
+# [1.4.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.6...v1.4.0) (2024-03-15)
+
+
+### Bug Fixes
+
+* Don't use idfv as deviceID if disabled. ([#133](https://github.com/amplitude/Amplitude-Swift/issues/133)) ([76ef012](https://github.com/amplitude/Amplitude-Swift/commit/76ef012e2949ff4722033ef59b188e4b9e98bc5b))
+* Fixes for automatic screen tracking ([#137](https://github.com/amplitude/Amplitude-Swift/issues/137)) ([55b2ca9](https://github.com/amplitude/Amplitude-Swift/commit/55b2ca95c9335188ae469a3fb3e39e978af84f9e))
+* tests on iOS 17 ([#136](https://github.com/amplitude/Amplitude-Swift/issues/136)) ([04e5d03](https://github.com/amplitude/Amplitude-Swift/commit/04e5d036d4690ceebce0603f5b52bb6e988ab3c9))
+
+
+### Features
+
+* migrate storage to for better thread safety ([#129](https://github.com/amplitude/Amplitude-Swift/issues/129)) ([2bbe919](https://github.com/amplitude/Amplitude-Swift/commit/2bbe919b78b2a102403f34dce2b0c3d9daf8c3e1))
+
 ## [1.3.6](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.5...v1.3.6) (2024-03-05)
 
 
