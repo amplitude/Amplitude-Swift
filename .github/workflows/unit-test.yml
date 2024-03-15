@@ -9,13 +9,13 @@ on:
 
 jobs:
   test:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Set Xcode 14
+      - name: Set Xcode 15
         run: |
-          sudo xcode-select -switch /Applications/Xcode_14.1.app
+          sudo xcode-select -switch /Applications/Xcode_15.2.app
       - name: List Simulators
         run: |
           xcrun simctl list
@@ -27,7 +27,7 @@ jobs:
           xcodebuild test \
             -scheme Amplitude-Swift-Package \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 14'
+            -destination 'platform=iOS Simulator,name=iPhone 15'
       - name: macOS Tests
         run: |
           xcodebuild test \
@@ -54,4 +54,4 @@ jobs:
           xcodebuild test \
             -scheme AmplitudeObjCExample \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 14'
+            -destination 'platform=iOS Simulator,name=iPhone 15'

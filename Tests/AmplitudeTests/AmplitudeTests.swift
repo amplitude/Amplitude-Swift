@@ -87,10 +87,10 @@ final class AmplitudeTests: XCTestCase {
     func testFilterAndEnrichmentPlugin() {
         let apiKey = "testFilterAndEnrichmentPlugin"
         let enrichedEventType = "Enriched Event"
-        storageTest = TestPersistentStorage(storagePrefix: "storage-\(apiKey)", logger: self.logger, diagonostics: self.diagonostics)
+        let storage = FakeInMemoryStorage()
         let amplitude = Amplitude(configuration: Configuration(
             apiKey: apiKey,
-            storageProvider: storageTest
+            storageProvider: storage
         ))
 
         class TestFilterAndEnrichmentPlugin: EnrichmentPlugin {
@@ -110,7 +110,7 @@ final class AmplitudeTests: XCTestCase {
         amplitude.track(event: BaseEvent(eventType: enrichedEventType))
         amplitude.track(event: BaseEvent(eventType: "Other Event"))
 
-        let events = storageTest.events()
+        let events = storage.events()
         XCTAssertEqual(events[0].eventType, enrichedEventType)
         XCTAssertEqual(getDictionary(events[0].eventProperties!), [
             "testPropertyKey": "testPropertyValue"
