@@ -65,13 +65,31 @@ import Foundation
         }
 
         override func beginBackgroundTask() -> BackgroundTaskCompletionCallback? {
-            var id: UIBackgroundTaskIdentifier = .invalid
-            let callback = { () in
-                UIApplication.shared.endBackgroundTask(id)
-                id = .invalid
+            if isRunningInAppExtension {
+                let semaphore = DispatchSemaphore(value: 0)
+                ProcessInfo.processInfo.performExpiringActivity(withReason: "Amplitude") { expired in
+                    guard !expired else {
+                        // If we've expired, just let the system terminate the process
+                        return
+                    }
+                    semaphore.wait()
+                }
+                return {
+                    semaphore.signal()
+                }
+            } else {
+                var id: UIBackgroundTaskIdentifier = .invalid
+                let callback = { () in
+                    UIApplication.shared.endBackgroundTask(id)
+                    id = .invalid
+                }
+                id = UIApplication.shared.beginBackgroundTask(withName: "amplitude", expirationHandler: callback)
+                return callback
             }
-            id = UIApplication.shared.beginBackgroundTask(withName: "amplitude", expirationHandler: callback)
-            return callback
+        }
+
+        private var isRunningInAppExtension: Bool {
+            return Bundle.main.bundlePath.hasSuffix(".appex")
         }
     }
 #endif
