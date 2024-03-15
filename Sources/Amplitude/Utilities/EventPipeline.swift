@@ -23,7 +23,7 @@ public class EventPipeline {
 
     init(amplitude: Amplitude) {
         self.amplitude = amplitude
-        self.httpClient = HttpClient(configuration: amplitude.configuration)
+        self.httpClient = HttpClient(configuration: amplitude.configuration, diagnostics: amplitude.configuration.diagonostics)
         self.flushTimer = QueueTimer(interval: getFlushInterval()) { [weak self] in
             self?.flush()
         }

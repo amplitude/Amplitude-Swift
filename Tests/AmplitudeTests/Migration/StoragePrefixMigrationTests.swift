@@ -3,9 +3,12 @@ import XCTest
 @testable import AmplitudeSwift
 
 final class StoragePrefixMigrationTests: XCTestCase {
+    let logger = ConsoleLogger()
+    let diagonostics = Diagnostics()
+
     func testUserDefaults() throws {
-        let source = PersistentStorage(storagePrefix: NSUUID().uuidString)
-        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString)
+        let source = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
+        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
 
         try source.write(key: StorageKey.DEVICE_ID, value: "source-device")
         try source.write(key: StorageKey.USER_ID, value: "source-user")
@@ -58,8 +61,8 @@ final class StoragePrefixMigrationTests: XCTestCase {
     }
 
     func testEventFiles() throws {
-        let source = PersistentStorage(storagePrefix: NSUUID().uuidString)
-        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString)
+        let source = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
+        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
 
         try source.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "event-1"))
         try source.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "event-2"))
@@ -92,8 +95,8 @@ final class StoragePrefixMigrationTests: XCTestCase {
     }
 
     func testMissingSource() throws {
-        let source = PersistentStorage(storagePrefix: NSUUID().uuidString)
-        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString)
+        let source = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
+        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
 
         var destinationDeviceId: String? = destination.read(key: StorageKey.DEVICE_ID)
         var destinationLastEventId: Int? = destination.read(key: StorageKey.LAST_EVENT_ID)
@@ -116,8 +119,8 @@ final class StoragePrefixMigrationTests: XCTestCase {
     }
 
     func testMoveEventFilesWithDuplicatedName() throws {
-        let source = PersistentStorage(storagePrefix: NSUUID().uuidString)
-        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString)
+        let source = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
+        let destination = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics)
 
         try source.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "event-1"))
         source.rollover()
@@ -143,12 +146,12 @@ final class StoragePrefixMigrationTests: XCTestCase {
         XCTAssertEqual(sourceEventFiles.count, 0)
 
         destinationEventFiles = destination.getEventFiles(includeUnfinished: true)
-        XCTAssertEqual(destinationEventFiles[0].lastPathComponent, "1")
-        XCTAssertEqual(destinationEventFiles[1].lastPathComponent.prefix(2), "0-")
-        XCTAssertEqual(destinationEventFiles[2].lastPathComponent, "0")
-        XCTAssertEqual(try getFileSize(destinationEventFiles[0]), sourceFileSizes[0])
-        XCTAssertEqual(try getFileSize(destinationEventFiles[1]), sourceFileSizes[1])
-        XCTAssertEqual(try getFileSize(destinationEventFiles[2]), destinationFileSizes[0])
+        XCTAssertEqual(destinationEventFiles[0].lastPathComponent, "v2-0")
+        XCTAssertEqual(destinationEventFiles[1].lastPathComponent.prefix(5), "v2-0-")
+        XCTAssertEqual(destinationEventFiles[2].lastPathComponent, "v2-1")
+        XCTAssertEqual(try getFileSize(destinationEventFiles[1]), sourceFileSizes[0])
+        XCTAssertEqual(try getFileSize(destinationEventFiles[2]), sourceFileSizes[1])
+        XCTAssertEqual(try getFileSize(destinationEventFiles[0]), destinationFileSizes[0])
     }
 
     private func getFileSize(_ url: URL) throws -> Int {

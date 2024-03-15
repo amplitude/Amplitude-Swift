@@ -16,10 +16,12 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
     private var eventPipeline: EventPipeline!
     private var eventBlock: URL!
     private var eventsString: String!
+    private let logger = ConsoleLogger()
+    private let diagonostics = Diagnostics()
 
     override func setUp() {
         super.setUp()
-        storage = PersistentStorage(storagePrefix: "storage")
+        storage = PersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics)
         configuration = Configuration(apiKey: "testApiKey", storageProvider: storage)
         amplitude = Amplitude(configuration: configuration)
         eventPipeline = EventPipeline(amplitude: amplitude)
@@ -50,7 +52,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
               {"event_type":"test","insert_id":"c8d58999-7539-4184-8a7d-54302697baf0","user_id":"test-user"}
             ]
             """
-        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage")
+        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics)
         let handler = PersistentStorageResponseHandler(
             configuration: configuration,
             storage: fakePersistentStorage,
@@ -83,7 +85,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             ]
             """
 
-        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage")
+        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics)
         let handler = PersistentStorageResponseHandler(
             configuration: configuration,
             storage: fakePersistentStorage,
@@ -108,7 +110,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             ]
             """
 
-        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage")
+        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics)
         let handler = PersistentStorageResponseHandler(
             configuration: configuration,
             storage: fakePersistentStorage,
