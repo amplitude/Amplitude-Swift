@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.4.0...v1.4.1) (2024-03-19)
+
+
+### Bug Fixes
+
+* Rely on on task completion vs http completion to end tasks ([#134](https://github.com/amplitude/Amplitude-Swift/issues/134)) ([b17e704](https://github.com/amplitude/Amplitude-Swift/commit/b17e7044e20e2690837dc5b87e7f0789540e7458))
+
 # [1.4.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.3.6...v1.4.0) (2024-03-15)
 
 
