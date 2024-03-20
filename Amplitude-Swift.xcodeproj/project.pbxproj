@@ -112,7 +112,7 @@
 		OBJ_156 /* HttpClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_72 /* HttpClientTests.swift */; };
 		OBJ_157 /* PersistentStorageResponseHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_73 /* PersistentStorageResponseHandlerTests.swift */; };
 		OBJ_158 /* UrlExtensionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_74 /* UrlExtensionTests.swift */; };
-		OBJ_160 /* Amplitude_Swift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "amplitude-swift::Amplitude-Swift::Product" /* Amplitude_Swift.framework */; };
+		OBJ_160 /* AmplitudeSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "amplitude-swift::Amplitude-Swift::Product" /* AmplitudeSwift.framework */; };
 		OBJ_88 /* Amplitude.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_8 /* Amplitude.swift */; };
 		OBJ_89 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Configuration.swift */; };
 		OBJ_90 /* ConsoleLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* ConsoleLogger.swift */; };
@@ -253,7 +253,7 @@
 		OBJ_81 /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
 		OBJ_82 /* AmplitudeSwift.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = AmplitudeSwift.podspec; sourceTree = "<group>"; };
 		OBJ_9 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
-		"amplitude-swift::Amplitude-Swift::Product" /* Amplitude_Swift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = Amplitude_Swift.framework; path = AmplitudeSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		"amplitude-swift::Amplitude-Swift::Product" /* AmplitudeSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AmplitudeSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"amplitude-swift::Amplitude-SwiftTests::Product" /* Amplitude_SwiftTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; name = Amplitude_SwiftTests.xctest; path = "Amplitude-SwiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -270,7 +270,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_160 /* Amplitude_Swift.framework in Frameworks */,
+				OBJ_160 /* AmplitudeSwift.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -541,7 +541,7 @@
 		OBJ_75 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				"amplitude-swift::Amplitude-Swift::Product" /* Amplitude_Swift.framework */,
+				"amplitude-swift::Amplitude-Swift::Product" /* AmplitudeSwift.framework */,
 				"amplitude-swift::Amplitude-SwiftTests::Product" /* Amplitude_SwiftTests.xctest */,
 			);
 			name = Products;
@@ -567,7 +567,7 @@
 				BA34B23B2AA0723A00F88097 /* AnalyticsConnector */,
 			);
 			productName = Amplitude_Swift;
-			productReference = "amplitude-swift::Amplitude-Swift::Product" /* Amplitude_Swift.framework */;
+			productReference = "amplitude-swift::Amplitude-Swift::Product" /* AmplitudeSwift.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		"amplitude-swift::Amplitude-SwiftTests" /* Amplitude-SwiftTests */ = {
@@ -954,6 +954,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
 				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
 				ENABLE_TESTABILITY = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -991,6 +992,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
 				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
 				ENABLE_TESTABILITY = YES;
 				FRAMEWORK_SEARCH_PATHS = (
