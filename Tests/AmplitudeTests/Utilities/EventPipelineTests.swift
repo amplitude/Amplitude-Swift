@@ -10,7 +10,7 @@ import XCTest
 @testable import AmplitudeSwift
 
 final class EventPipelineTests: XCTestCase {
-    private static let FLUSH_INTERVAL_SECONDS = 1.0
+    private static let FLUSH_INTERVAL_SECONDS = 10.0
 
     private var configuration: Configuration!
     private var pipeline: EventPipeline!
@@ -108,25 +108,31 @@ final class EventPipelineTests: XCTestCase {
     }
 
     func testInvalidEventUpload() {
-        (0..<2).forEach { i in
-            let testEvent = BaseEvent(userId: "test", deviceId: "test-machine", eventType: "testEvent-\(i)")
-            try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
-        }
-
         let invalidResponseData = "{\"events_with_invalid_fields\": {\"user_id\": [0]}}".data(using: .utf8)!
 
         httpClient.uploadResults = [
             .failure(HttpClient.Exception.httpError(code: 400, data: invalidResponseData))
         ]
 
-        let uploadExpectations = (0..<2).map { _ in expectation(description: "httpresponse") }
+        let uploadExpectations = (0..<2).map { i in expectation(description: "httpresponse-\(i)") }
         httpClient.uploadExpectations = uploadExpectations
 
-        pipeline.flush()
-        wait(for: [uploadExpectations[0]], timeout: 1)
+        (0..<2).forEach { i in
+            let testEvent = BaseEvent(userId: "test", deviceId: "test-machine", eventType: "testEvent-\(i)")
+            try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
+        }
 
-        pipeline.flush()
-        wait(for: [uploadExpectations[1]], timeout: 1)
+        let flushExpectation1 = expectation(description: "flush-1")
+        pipeline.flush {
+            flushExpectation1.fulfill()
+        }
+        wait(for: [uploadExpectations[0], flushExpectation1], timeout: 1)
+
+        let flushExpectation2 = expectation(description: "flush-2")
+        pipeline.flush {
+            flushExpectation2.fulfill()
+        }
+        wait(for: [uploadExpectations[1], flushExpectation2], timeout: 1)
 
         XCTAssertEqual(httpClient.uploadCount, 2)
 
