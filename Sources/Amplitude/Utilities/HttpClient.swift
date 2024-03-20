@@ -70,11 +70,15 @@ class HttpClient {
         let url = getUrl()
 
         let requestUrl: URL?
+#if compiler(>=5.9)
         if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
             requestUrl = URL(string: url, encodingInvalidCharacters: false)
         } else {
             requestUrl = URL(string: url)
         }
+#else
+        requestUrl = URL(string: url)
+#endif
 
         guard let requestUrl else {
             throw Exception.invalidUrl(url: url)
