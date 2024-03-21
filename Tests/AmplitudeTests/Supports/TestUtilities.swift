@@ -141,17 +141,20 @@ class FakeHttpClient: HttpClient {
     {
         uploadCount += 1
         uploadedEvents.append(events)
-        if !uploadExpectations.isEmpty {
-            uploadExpectations.removeFirst().fulfill()
-        }
+
         let result: Result<Int, Error>
         if uploadResults.isEmpty {
             result = .success(200)
         } else {
             result = uploadResults.removeFirst()
         }
-        DispatchQueue.global().async {
+
+        DispatchQueue.global().async { [weak self] in
             completion(result)
+
+            if let self, !self.uploadExpectations.isEmpty {
+                self.uploadExpectations.removeFirst().fulfill()
+            }
         }
         return URLSession.shared.dataTask(with: URLRequest(url: URL(string: "https://www.amplitude.com")!))
     }
