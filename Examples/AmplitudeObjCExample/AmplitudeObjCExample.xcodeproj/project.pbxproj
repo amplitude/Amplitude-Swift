@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4E890A202BAB82DF00B3F736 /* Amplitude_Swift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E890A142BAB814A00B3F736 /* Amplitude_Swift.framework */; };
 		BA2E1DA42AC1EA220074E74F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BA2E1DA32AC1EA220074E74F /* AppDelegate.m */; };
 		BA2E1DA72AC1EA220074E74F /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BA2E1DA62AC1EA220074E74F /* SceneDelegate.m */; };
 		BA2E1DAA2AC1EA220074E74F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA2E1DA92AC1EA220074E74F /* ViewController.m */; };
@@ -15,11 +16,30 @@
 		BA2E1DB22AC1EA230074E74F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BA2E1DB02AC1EA230074E74F /* LaunchScreen.storyboard */; };
 		BA2E1DB52AC1EA230074E74F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BA2E1DB42AC1EA230074E74F /* main.m */; };
 		BA2E1DBF2AC1EA240074E74F /* AmplitudeObjCExampleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BA2E1DBE2AC1EA240074E74F /* AmplitudeObjCExampleTests.m */; };
-		BA2E1DDE2AC1F1CA0074E74F /* AmplitudeSwift in Frameworks */ = {isa = PBXBuildFile; productRef = BA2E1DDD2AC1F1CA0074E74F /* AmplitudeSwift */; };
-		BAB79A442AC3042200F191C9 /* AmplitudeSwift in Frameworks */ = {isa = PBXBuildFile; productRef = BAB79A432AC3042200F191C9 /* AmplitudeSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		4E890A132BAB814A00B3F736 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4E890A0C2BAB814A00B3F736 /* Amplitude-Swift.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = "amplitude-swift::Amplitude-Swift::Product";
+			remoteInfo = "Amplitude-Swift";
+		};
+		4E890A152BAB814A00B3F736 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4E890A0C2BAB814A00B3F736 /* Amplitude-Swift.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = "amplitude-swift::Amplitude-SwiftTests::Product";
+			remoteInfo = "Amplitude-SwiftTests";
+		};
+		4E890A192BAB826900B3F736 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4E890A0C2BAB814A00B3F736 /* Amplitude-Swift.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = "amplitude-swift::Amplitude-Swift";
+			remoteInfo = "Amplitude-Swift";
+		};
 		BA2E1DBB2AC1EA230074E74F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BA2E1D972AC1EA220074E74F /* Project object */;
@@ -30,6 +50,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4E890A0C2BAB814A00B3F736 /* Amplitude-Swift.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Amplitude-Swift.xcodeproj"; path = "../../Amplitude-Swift.xcodeproj"; sourceTree = "<group>"; };
 		BA2E1D9F2AC1EA220074E74F /* AmplitudeObjCExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AmplitudeObjCExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA2E1DA22AC1EA220074E74F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		BA2E1DA32AC1EA220074E74F /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -51,7 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BA2E1DDE2AC1F1CA0074E74F /* AmplitudeSwift in Frameworks */,
+				4E890A202BAB82DF00B3F736 /* Amplitude_Swift.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,16 +80,25 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BAB79A442AC3042200F191C9 /* AmplitudeSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4E890A0D2BAB814A00B3F736 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4E890A142BAB814A00B3F736 /* Amplitude_Swift.framework */,
+				4E890A162BAB814A00B3F736 /* Amplitude_SwiftTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		BA2E1D962AC1EA220074E74F = {
 			isa = PBXGroup;
 			children = (
+				4E890A0C2BAB814A00B3F736 /* Amplitude-Swift.xcodeproj */,
 				BA2E1DA12AC1EA220074E74F /* AmplitudeObjCExample */,
 				BA2E1DBD2AC1EA240074E74F /* AmplitudeObjCExampleTests */,
 				BA2E1DA02AC1EA220074E74F /* Products */,
@@ -132,10 +162,10 @@
 			buildRules = (
 			);
 			dependencies = (
+				4E890A1A2BAB826900B3F736 /* PBXTargetDependency */,
 			);
 			name = AmplitudeObjCExample;
 			packageProductDependencies = (
-				BA2E1DDD2AC1F1CA0074E74F /* AmplitudeSwift */,
 			);
 			productName = AmplitudeObjCExample;
 			productReference = BA2E1D9F2AC1EA220074E74F /* AmplitudeObjCExample.app */;
@@ -156,7 +186,6 @@
 			);
 			name = AmplitudeObjCExampleTests;
 			packageProductDependencies = (
-				BAB79A432AC3042200F191C9 /* AmplitudeSwift */,
 			);
 			productName = AmplitudeObjCExampleTests;
 			productReference = BA2E1DBA2AC1EA230074E74F /* AmplitudeObjCExampleTests.xctest */;
@@ -190,10 +219,15 @@
 			);
 			mainGroup = BA2E1D962AC1EA220074E74F;
 			packageReferences = (
-				BA2E1DDC2AC1F1CA0074E74F /* XCRemoteSwiftPackageReference "Amplitude-Swift" */,
 			);
 			productRefGroup = BA2E1DA02AC1EA220074E74F /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 4E890A0D2BAB814A00B3F736 /* Products */;
+					ProjectRef = 4E890A0C2BAB814A00B3F736 /* Amplitude-Swift.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				BA2E1D9E2AC1EA220074E74F /* AmplitudeObjCExample */,
@@ -201,6 +235,25 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		4E890A142BAB814A00B3F736 /* Amplitude_Swift.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = Amplitude_Swift.framework;
+			path = AmplitudeSwift.framework;
+			remoteRef = 4E890A132BAB814A00B3F736 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		4E890A162BAB814A00B3F736 /* Amplitude_SwiftTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = file;
+			name = Amplitude_SwiftTests.xctest;
+			path = "Amplitude-SwiftTests.xctest";
+			remoteRef = 4E890A152BAB814A00B3F736 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		BA2E1D9D2AC1EA220074E74F /* Resources */ = {
@@ -245,6 +298,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		4E890A1A2BAB826900B3F736 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Amplitude-Swift";
+			targetProxy = 4E890A192BAB826900B3F736 /* PBXContainerItemProxy */;
+		};
 		BA2E1DBC2AC1EA230074E74F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BA2E1D9E2AC1EA220074E74F /* AmplitudeObjCExample */;
@@ -499,30 +557,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		BA2E1DDC2AC1F1CA0074E74F /* XCRemoteSwiftPackageReference "Amplitude-Swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "../../../Amplitude-Swift";
-			requirement = {
-				branch = HEAD;
-				kind = branch;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		BA2E1DDD2AC1F1CA0074E74F /* AmplitudeSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BA2E1DDC2AC1F1CA0074E74F /* XCRemoteSwiftPackageReference "Amplitude-Swift" */;
-			productName = AmplitudeSwift;
-		};
-		BAB79A432AC3042200F191C9 /* AmplitudeSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BA2E1DDC2AC1F1CA0074E74F /* XCRemoteSwiftPackageReference "Amplitude-Swift" */;
-			productName = AmplitudeSwift;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = BA2E1D972AC1EA220074E74F /* Project object */;
 }
