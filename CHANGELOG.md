@@ -1,3 +1,12 @@
+## [1.4.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.4.1...v1.4.2) (2024-03-22)
+
+
+### Bug Fixes
+
+* better carthage support ([#142](https://github.com/amplitude/Amplitude-Swift/issues/142)) ([a6f1559](https://github.com/amplitude/Amplitude-Swift/commit/a6f155998e1472da05fa413ed1434168ba72e81a))
+* Fix compilation on Xcode 14.x ([#141](https://github.com/amplitude/Amplitude-Swift/issues/141)) ([8eedaab](https://github.com/amplitude/Amplitude-Swift/commit/8eedaab14b9b0be9ecd6575a950763e760c60e4e))
+* Use appropriate background task API for app extensions ([#138](https://github.com/amplitude/Amplitude-Swift/issues/138)) ([7231bee](https://github.com/amplitude/Amplitude-Swift/commit/7231beec5921e5ec7bf8d0d4d62c7464ff13a344))
+
 ## [1.4.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.4.0...v1.4.1) (2024-03-19)
 
 
