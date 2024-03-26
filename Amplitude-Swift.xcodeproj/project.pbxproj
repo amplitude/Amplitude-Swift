@@ -25,6 +25,7 @@
 		3E281B8E2B96833D009D913B /* DiagnosticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E281B8D2B96833D009D913B /* DiagnosticsTests.swift */; };
 		3E281B912B9BCC14009D913B /* DispatchQueueHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E281B902B9BCC14009D913B /* DispatchQueueHolder.swift */; };
 		4E2B646B2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E2B646A2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift */; };
+		4E3871622BB34DBC002890AB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */; };
 		8EDEC02B99EE2092B567A61D /* ObjCIngestionMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC500EBDA8B813056E2DB /* ObjCIngestionMetadata.swift */; };
 		8EDEC1073A308B12B5CCD975 /* AnalyticsConnectorPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECD39BAA97DD4320C0AA5 /* AnalyticsConnectorPlugin.swift */; };
 		8EDEC10C56FA7F7DEEB48B6F /* ObjCBaseEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECCFD935A0C5A6FE85E87 /* ObjCBaseEvent.swift */; };
@@ -557,6 +558,7 @@
 				OBJ_87 /* Sources */,
 				OBJ_125 /* Frameworks */,
 				3E281B8F2B98EC92009D913B /* ShellScript */,
+				4E3871612BB34DB1002890AB /* Resources */,
 			);
 			buildRules = (
 			);
@@ -635,6 +637,14 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		4E3871612BB34DB1002890AB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4E3871622BB34DBC002890AB /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BA994B9C2A4F4FBE00D0913F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
