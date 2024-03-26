@@ -44,6 +44,32 @@ final class DiagnosticsTests: XCTestCase {
         XCTAssertEqual((result?["error_logs"] as? [String]) ?? [], ["log"])
     }
 
+    func testDedupsErrorLogs() {
+        let diagnostics = Diagnostics()
+        diagnostics.addErrorLog("dup")
+        diagnostics.addErrorLog("dup")
+        let result = convertToDictionary(text: diagnostics.extractDiagonosticsToString())
+        XCTAssertEqual(result?["error_logs"] as? [String], ["dup"])
+    }
+
+    func testTrimsMaxErrorLogs() {
+        let maxErrorLogs = 10
+        let diagnostics = Diagnostics()
+        (0..<maxErrorLogs + 1).forEach {
+            diagnostics.addErrorLog("\($0)")
+        }
+        let result = convertToDictionary(text: diagnostics.extractDiagonosticsToString())
+        guard let errorLogs = result?["error_logs"] as? [String] else {
+            XCTFail("Unable to extract error logs")
+            return
+        }
+
+        XCTAssertEqual(errorLogs.count, maxErrorLogs)
+        (0..<maxErrorLogs).forEach {
+            XCTAssertEqual(String(describing: $0 + 1), errorLogs[$0])
+        }
+    }
+
     private func convertToDictionary(text: String) -> [String: Any]? {
         if let data = text.data(using: .utf8) {
             do {

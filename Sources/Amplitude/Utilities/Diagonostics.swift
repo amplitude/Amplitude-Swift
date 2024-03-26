@@ -8,8 +8,11 @@
 import Foundation
 
 public class Diagnostics {
+
+    private static let MAX_ERROR_LOGS = 10
+
     private var malformedEvents: [String]?
-    private var errorLogs: [String]?
+    private var errorLogs = NSMutableOrderedSet(capacity: 10)
 
     init(){}
 
@@ -21,14 +24,16 @@ public class Diagnostics {
     }
 
     func addErrorLog(_ log: String) {
-        if errorLogs == nil {
-            errorLogs = [String]()
+        errorLogs.add(log)
+
+        // trim to MAX_ERROR_LOGS elements
+        while errorLogs.count > Self.MAX_ERROR_LOGS {
+            errorLogs.removeObject(at: 0)
         }
-        errorLogs?.append(log)
     }
 
     func hasDiagnostics() -> Bool {
-        return (malformedEvents != nil && malformedEvents!.count > 0) || (errorLogs != nil && errorLogs!.count > 0)
+        return (malformedEvents != nil && malformedEvents!.count > 0) || errorLogs.count > 0
     }
 
     /**
@@ -44,13 +49,13 @@ public class Diagnostics {
         if malformedEvents != nil && malformedEvents!.count > 0 {
             diagnostics["malformed_events"] = malformedEvents
         }
-        if errorLogs != nil && errorLogs!.count > 0 {
-            diagnostics["error_logs"] = errorLogs
+         if errorLogs.count > 0, let errorStrings = errorLogs.array as? [String] {
+             diagnostics["error_logs"] = errorStrings
         }
         do {
             let data = try JSONSerialization.data(withJSONObject: diagnostics, options: [])
             malformedEvents?.removeAll()
-            errorLogs?.removeAll()
+            errorLogs.removeAllObjects()
             return String(data: data, encoding: .utf8) ?? ""
         } catch {
             return ""
