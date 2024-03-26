@@ -13,17 +13,21 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target  = '13.0'
   s.ios.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
+  s.ios.resources          = 'Sources/Amplitude/PrivacyInfo.xcprivacy'
 
   s.tvos.deployment_target = '13.0'
   s.tvos.source_files      = 'Sources/Amplitude/**/*.{h,swift}'
+  s.tvos.resources          = 'Sources/Amplitude/PrivacyInfo.xcprivacy'
 
   s.osx.deployment_target  = '10.15'
   s.osx.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
+  s.osx.resources          = 'Sources/Amplitude/PrivacyInfo.xcprivacy'
 
   # temporary disable watchos support due to: https://github.com/CocoaPods/CocoaPods/issues/11558
   # unpaired watchos will cause failure, the fix of the above issue is merged but not released
   # s.watchos.deployment_target  = '7.0'
   # s.watchos.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
+  # s.watchos.resources          = 'Sources/Amplitude/PrivacyInfo.xcprivacy'
 
   s.dependency 'AnalyticsConnector', '~> 1.0.1'
 

@@ -30,7 +30,8 @@ let package = Package(
                 .product(name: "AnalyticsConnector", package: "analytics-connector-ios")
             ],
             path: "Sources/Amplitude",
-            exclude: ["../../Examples/", "../../Tests/"]
+            exclude: ["../../Examples/", "../../Tests/"],
+            resources: [.copy("PrivacyInfo.xcprivacy")]
         ),
         .testTarget(
             name: "Amplitude-SwiftTests",
