@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.4.2...v1.4.3) (2024-03-26)
+
+
+### Bug Fixes
+
+* Trim and dedup error logs ([#147](https://github.com/amplitude/Amplitude-Swift/issues/147)) ([1eb1633](https://github.com/amplitude/Amplitude-Swift/commit/1eb1633b5e3e5c0cd9f839e4a25d6c16723b4010))
+
 ## [1.4.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.4.1...v1.4.2) (2024-03-22)
 
 
