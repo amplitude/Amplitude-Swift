@@ -1,3 +1,10 @@
+## [1.4.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.4.3...v1.4.4) (2024-04-01)
+
+
+### Bug Fixes
+
+* expose DET utils for flutter plugin ([dc7c619](https://github.com/amplitude/Amplitude-Swift/commit/dc7c6192fc439edb923798def08a3c3ce568e6e8))
+
 ## [1.4.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.4.2...v1.4.3) (2024-03-26)
 
 
