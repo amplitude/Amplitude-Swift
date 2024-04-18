@@ -1,3 +1,10 @@
+## [1.4.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.4.4...v1.4.5) (2024-04-18)
+
+
+### Bug Fixes
+
+* Adopt resource bundle for privacy manifest in Cocoapods ([#156](https://github.com/amplitude/Amplitude-Swift/issues/156)) ([bdf2f43](https://github.com/amplitude/Amplitude-Swift/commit/bdf2f4375a71231d87b33e701571e36f2e67a0f1))
+
 ## [1.4.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.4.3...v1.4.4) (2024-04-01)
 
 
