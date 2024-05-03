@@ -26,8 +26,10 @@ final class AmplitudeIOSTests: XCTestCase {
             identifyStorageProvider: interceptStorageMem,
             defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
         )
-        _ = Amplitude(configuration: configuration)
+        let amplitude = Amplitude(configuration: configuration)
         NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+
+        amplitude.waitForTrackingQueue()
 
         let info = Bundle.main.infoDictionary
         let currentBuild = info?["CFBundleVersion"] ?? ""
@@ -58,8 +60,9 @@ final class AmplitudeIOSTests: XCTestCase {
         try storageMem.write(key: StorageKey.LAST_EVENT_TIME, value: 123 as Int64)
         try storageMem.write(key: StorageKey.APP_BUILD, value: "abc")
         try storageMem.write(key: StorageKey.APP_VERSION, value: "xyz")
-        _ = Amplitude(configuration: configuration)
+        let amplitude = Amplitude(configuration: configuration)
         NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+        amplitude.waitForTrackingQueue()
 
         let info = Bundle.main.infoDictionary
         let currentBuild = info?["CFBundleVersion"] ?? ""
@@ -97,8 +100,9 @@ final class AmplitudeIOSTests: XCTestCase {
         try storageMem.write(key: StorageKey.LAST_EVENT_TIME, value: 123 as Int64)
         try storageMem.write(key: StorageKey.APP_BUILD, value: currentBuild)
         try storageMem.write(key: StorageKey.APP_VERSION, value: currentVersion)
-        _ = Amplitude(configuration: configuration)
+        let amplitude = Amplitude(configuration: configuration)
         NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+        amplitude.waitForTrackingQueue()
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
@@ -122,8 +126,9 @@ final class AmplitudeIOSTests: XCTestCase {
         let currentBuild = info?["CFBundleVersion"] ?? ""
         let currentVersion = info?["CFBundleShortVersionString"] ?? ""
 
-        _ = Amplitude(configuration: configuration)
+        let amplitude = Amplitude(configuration: configuration)
         NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        amplitude.waitForTrackingQueue()
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
@@ -143,8 +148,9 @@ final class AmplitudeIOSTests: XCTestCase {
             defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
         )
 
-        _ = Amplitude(configuration: configuration)
+        let amplitude = Amplitude(configuration: configuration)
         NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        amplitude.waitForTrackingQueue()
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)

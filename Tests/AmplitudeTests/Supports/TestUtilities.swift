@@ -306,7 +306,7 @@ final class MockPathCreation: PathCreationProtocol {
     var networkPathPublisher: AnyPublisher<NetworkPath, Never>?
     private let subject = PassthroughSubject<NetworkPath, Never>()
 
-    func start() {
+    func start(queue: DispatchQueue) {
         networkPathPublisher = subject.eraseToAnyPublisher()
     }
 

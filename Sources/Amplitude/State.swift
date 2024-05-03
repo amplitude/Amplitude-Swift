@@ -8,7 +8,7 @@
 import Foundation
 
 class State {
-    var userId: String? {
+    @Atomic var userId: String? {
         didSet {
             for plugin in plugins {
                 plugin.onUserIdChanged(userId)
@@ -16,7 +16,7 @@ class State {
         }
     }
 
-    var deviceId: String? {
+    @Atomic var deviceId: String? {
         didSet {
             for plugin in plugins {
                 plugin.onDeviceIdChanged(deviceId)

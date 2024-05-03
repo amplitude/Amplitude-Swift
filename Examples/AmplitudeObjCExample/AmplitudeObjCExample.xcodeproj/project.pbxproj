@@ -3,11 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4E890A202BAB82DF00B3F736 /* Amplitude_Swift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E890A142BAB814A00B3F736 /* Amplitude_Swift.framework */; };
+		4E3ECB742BE5B96400FD5CC0 /* TestAmplitude.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E3ECB732BE5B96400FD5CC0 /* TestAmplitude.swift */; };
+		4E890A202BAB82DF00B3F736 /* AmplitudeSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E890A142BAB814A00B3F736 /* AmplitudeSwift.framework */; };
 		BA2E1DA42AC1EA220074E74F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BA2E1DA32AC1EA220074E74F /* AppDelegate.m */; };
 		BA2E1DA72AC1EA220074E74F /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BA2E1DA62AC1EA220074E74F /* SceneDelegate.m */; };
 		BA2E1DAA2AC1EA220074E74F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA2E1DA92AC1EA220074E74F /* ViewController.m */; };
@@ -50,6 +51,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4E3ECB732BE5B96400FD5CC0 /* TestAmplitude.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAmplitude.swift; sourceTree = "<group>"; };
 		4E890A0C2BAB814A00B3F736 /* Amplitude-Swift.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Amplitude-Swift.xcodeproj"; path = "../../Amplitude-Swift.xcodeproj"; sourceTree = "<group>"; };
 		BA2E1D9F2AC1EA220074E74F /* AmplitudeObjCExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AmplitudeObjCExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA2E1DA22AC1EA220074E74F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -72,7 +74,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4E890A202BAB82DF00B3F736 /* Amplitude_Swift.framework in Frameworks */,
+				4E890A202BAB82DF00B3F736 /* AmplitudeSwift.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,7 +91,7 @@
 		4E890A0D2BAB814A00B3F736 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4E890A142BAB814A00B3F736 /* Amplitude_Swift.framework */,
+				4E890A142BAB814A00B3F736 /* AmplitudeSwift.framework */,
 				4E890A162BAB814A00B3F736 /* Amplitude_SwiftTests.xctest */,
 			);
 			name = Products;
@@ -137,6 +139,7 @@
 			isa = PBXGroup;
 			children = (
 				BA2E1DBE2AC1EA240074E74F /* AmplitudeObjCExampleTests.m */,
+				4E3ECB732BE5B96400FD5CC0 /* TestAmplitude.swift */,
 			);
 			path = AmplitudeObjCExampleTests;
 			sourceTree = "<group>";
@@ -205,12 +208,12 @@
 					};
 					BA2E1DB92AC1EA230074E74F = {
 						CreatedOnToolsVersion = 14.2;
-						TestTargetID = BA2E1D9E2AC1EA220074E74F;
+						LastSwiftMigration = 1530;
 					};
 				};
 			};
 			buildConfigurationList = BA2E1D9A2AC1EA220074E74F /* Build configuration list for PBXProject "AmplitudeObjCExample" */;
-			compatibilityVersion = "Xcode 14.0";
+			compatibilityVersion = "Xcode 15.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -237,10 +240,9 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		4E890A142BAB814A00B3F736 /* Amplitude_Swift.framework */ = {
+		4E890A142BAB814A00B3F736 /* AmplitudeSwift.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			name = Amplitude_Swift.framework;
 			path = AmplitudeSwift.framework;
 			remoteRef = 4E890A132BAB814A00B3F736 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -292,6 +294,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BA2E1DBF2AC1EA240074E74F /* AmplitudeObjCExampleTests.m in Sources */,
+				4E3ECB742BE5B96400FD5CC0 /* TestAmplitude.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -495,7 +498,7 @@
 		BA2E1DD22AC1EA240074E74F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -504,15 +507,16 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.amplitude.AmplitudeObjCExampleTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AmplitudeObjCExample.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AmplitudeObjCExample";
 			};
 			name = Debug;
 		};
 		BA2E1DD32AC1EA240074E74F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -521,8 +525,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.amplitude.AmplitudeObjCExampleTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AmplitudeObjCExample.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AmplitudeObjCExample";
 			};
 			name = Release;
 		};
