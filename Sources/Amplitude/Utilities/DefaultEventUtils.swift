@@ -1,7 +1,7 @@
 import Foundation
 
 public class DefaultEventUtils {
-    private var amplitude: Amplitude?
+    private weak var amplitude: Amplitude?
 
     public init(amplitude: Amplitude) {
         self.amplitude = amplitude

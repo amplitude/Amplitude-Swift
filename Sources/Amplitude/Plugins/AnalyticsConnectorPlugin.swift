@@ -8,12 +8,17 @@ class AnalyticsConnectorPlugin: BeforePlugin {
     override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
         connector = AnalyticsConnector.getInstance(amplitude.configuration.instanceName)
-        connector!.eventBridge.setEventReceiver { event in
-            amplitude.track(event: BaseEvent(
-                eventType: event.eventType,
-                eventProperties: event.eventProperties as? [String: Any],
-                userProperties: event.userProperties as? [String: Any]
-            ))
+        let logger = amplitude.logger
+        connector!.eventBridge.setEventReceiver { [weak amplitude, logger] event in
+            if let amplitude = amplitude {
+                amplitude.track(event: BaseEvent(
+                    eventType: event.eventType,
+                    eventProperties: event.eventProperties as? [String: Any],
+                    userProperties: event.userProperties as? [String: Any]
+                ))
+            } else {
+                logger?.error(message: "Amplitude instance has been deallocated, please maintain a strong reference to track events from Experiment")
+            }
         }
     }
 

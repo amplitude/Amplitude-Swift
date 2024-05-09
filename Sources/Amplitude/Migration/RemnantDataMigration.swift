@@ -6,16 +6,20 @@ class RemnantDataMigration {
     private static let PREVIOUS_SESSION_TIME_KEY = "previous_session_time"
     private static let PREVIOUS_SESSION_ID_KEY = "previous_session_id"
 
-    private let amplitude: Amplitude
-    private let storage: LegacyDatabaseStorage
+    private let logger: (any Logger)?
+    private let storage: Storage
+    private let identifyStorage: Storage
+    private let legacyStorage: LegacyDatabaseStorage
 
     init(_ amplitude: Amplitude) {
-        self.amplitude = amplitude
-        self.storage = LegacyDatabaseStorage.getStorage(amplitude.configuration.instanceName, amplitude.logger)
+        logger = amplitude.logger
+        storage = amplitude.storage
+        identifyStorage = amplitude.identifyStorage
+        legacyStorage = LegacyDatabaseStorage.getStorage(amplitude.configuration.instanceName, amplitude.logger)
     }
 
     func execute() {
-        let firstRunSinceUpgrade = amplitude.storage.read(key: StorageKey.LAST_EVENT_TIME) == nil
+        let firstRunSinceUpgrade = storage.read(key: StorageKey.LAST_EVENT_TIME) == nil
 
         moveDeviceAndUserId()
         moveSessionData()
@@ -31,52 +35,52 @@ class RemnantDataMigration {
         }
 
         if maxEventId > 0 {
-            let currentLastEventId: Int64? = amplitude.storage.read(key: StorageKey.LAST_EVENT_ID)
+            let currentLastEventId: Int64? = storage.read(key: StorageKey.LAST_EVENT_ID)
             if currentLastEventId == nil || currentLastEventId! <= 0 {
-                try? amplitude.storage.write(key: StorageKey.LAST_EVENT_ID, value: maxEventId)
+                try? storage.write(key: StorageKey.LAST_EVENT_ID, value: maxEventId)
             }
         }
     }
 
     private func moveDeviceAndUserId() {
-        let currentDeviceId: String? = amplitude.storage.read(key: StorageKey.DEVICE_ID)
+        let currentDeviceId: String? = storage.read(key: StorageKey.DEVICE_ID)
         if currentDeviceId == nil || currentDeviceId! == "" {
-            if let deviceId = storage.getValue(RemnantDataMigration.DEVICE_ID_KEY) {
-                try? amplitude.storage.write(key: StorageKey.DEVICE_ID, value: deviceId)
+            if let deviceId = legacyStorage.getValue(RemnantDataMigration.DEVICE_ID_KEY) {
+                try? storage.write(key: StorageKey.DEVICE_ID, value: deviceId)
             }
         }
 
-        let currentUserId: String? = amplitude.storage.read(key: StorageKey.USER_ID)
+        let currentUserId: String? = storage.read(key: StorageKey.USER_ID)
         if currentUserId == nil || currentUserId == "" {
-            if let userId = storage.getValue(RemnantDataMigration.USER_ID_KEY) {
-                try? amplitude.storage.write(key: StorageKey.USER_ID, value: userId)
+            if let userId = legacyStorage.getValue(RemnantDataMigration.USER_ID_KEY) {
+                try? storage.write(key: StorageKey.USER_ID, value: userId)
             }
         }
     }
 
     private func moveSessionData() {
-        let currentSessionId: Int64? = amplitude.storage.read(key: StorageKey.PREVIOUS_SESSION_ID)
-        let currentLastEventTime: Int64? = amplitude.storage.read(key: StorageKey.LAST_EVENT_TIME)
+        let currentSessionId: Int64? = storage.read(key: StorageKey.PREVIOUS_SESSION_ID)
+        let currentLastEventTime: Int64? = storage.read(key: StorageKey.LAST_EVENT_TIME)
 
-        let previousSessionId = storage.getLongValue(RemnantDataMigration.PREVIOUS_SESSION_ID_KEY)
-        let lastEventTime = storage.getLongValue(RemnantDataMigration.PREVIOUS_SESSION_TIME_KEY)
+        let previousSessionId = legacyStorage.getLongValue(RemnantDataMigration.PREVIOUS_SESSION_ID_KEY)
+        let lastEventTime = legacyStorage.getLongValue(RemnantDataMigration.PREVIOUS_SESSION_TIME_KEY)
 
         if (currentSessionId == nil || currentSessionId! < 0) && previousSessionId != nil && previousSessionId! >= 0 {
-            try? amplitude.storage.write(key: StorageKey.PREVIOUS_SESSION_ID, value: previousSessionId)
-            storage.removeLongValue(RemnantDataMigration.PREVIOUS_SESSION_ID_KEY)
+            try? storage.write(key: StorageKey.PREVIOUS_SESSION_ID, value: previousSessionId)
+            legacyStorage.removeLongValue(RemnantDataMigration.PREVIOUS_SESSION_ID_KEY)
         }
 
         if (currentLastEventTime == nil || currentLastEventTime! < 0) && lastEventTime != nil && lastEventTime! >= 0 {
-            try? amplitude.storage.write(key: StorageKey.LAST_EVENT_TIME, value: lastEventTime)
-            storage.removeLongValue(RemnantDataMigration.PREVIOUS_SESSION_TIME_KEY)
+            try? storage.write(key: StorageKey.LAST_EVENT_TIME, value: lastEventTime)
+            legacyStorage.removeLongValue(RemnantDataMigration.PREVIOUS_SESSION_TIME_KEY)
         }
     }
 
     private func moveEvents() -> Int64 {
         var maxEventId: Int64 = -1
-        let remnantEvents = storage.readEvents()
+        let remnantEvents = legacyStorage.readEvents()
         remnantEvents.forEach { event in
-            let eventId = moveEvent(event, amplitude.storage, storage.removeEvent)
+            let eventId = moveEvent(event, storage, legacyStorage.removeEvent)
             if maxEventId < eventId {
                 maxEventId = eventId
             }
@@ -86,9 +90,9 @@ class RemnantDataMigration {
 
     private func moveIdentifies() -> Int64 {
         var maxEventId: Int64 = -1
-        let remnantEvents = storage.readIdentifies()
+        let remnantEvents = legacyStorage.readIdentifies()
         remnantEvents.forEach { event in
-            let eventId = moveEvent(event, amplitude.storage, storage.removeIdentify)
+            let eventId = moveEvent(event, storage, legacyStorage.removeIdentify)
             if maxEventId < eventId {
                 maxEventId = eventId
             }
@@ -97,9 +101,9 @@ class RemnantDataMigration {
     }
 
     private func moveInterceptedIdentifies() {
-        let remnantEvents = storage.readInterceptedIdentifies()
+        let remnantEvents = legacyStorage.readInterceptedIdentifies()
         remnantEvents.forEach { event in
-            _ = moveEvent(event, amplitude.identifyStorage, storage.removeInterceptedIdentify)
+            _ = moveEvent(event, identifyStorage, legacyStorage.removeInterceptedIdentify)
         }
     }
 
@@ -113,7 +117,7 @@ class RemnantDataMigration {
             removeFromSource(rowId!)
             return rowId!
         } catch {
-            amplitude.logger?.error(message: "event migration failed: \(error)")
+            logger?.error(message: "event migration failed: \(error)")
             return -1
         }
     }
