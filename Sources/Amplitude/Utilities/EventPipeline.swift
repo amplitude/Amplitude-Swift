@@ -8,9 +8,11 @@
 import Foundation
 
 public class EventPipeline {
-    let amplitude: Amplitude
     var httpClient: HttpClient
-    var storage: Storage? { amplitude.storage }
+    let storage: Storage?
+    let logger: (any Logger)?
+    let configuration: Configuration
+
     @Atomic internal var eventCount: Int = 0
     internal var flushTimer: QueueTimer?
     private let uploadsQueue = DispatchQueue(label: "uploadsQueue.amplitude.com")
@@ -22,11 +24,13 @@ public class EventPipeline {
     private var uploads = [URL: UploadTaskInfo]()
 
     init(amplitude: Amplitude) {
-        self.amplitude = amplitude
-        self.httpClient = HttpClient(configuration: amplitude.configuration,
-                                     diagnostics: amplitude.configuration.diagonostics,
-                                     callbackQueue: amplitude.trackingQueue)
-        self.flushTimer = QueueTimer(interval: getFlushInterval(), queue: amplitude.trackingQueue) { [weak self] in
+        storage = amplitude.storage
+        logger = amplitude.logger
+        configuration = amplitude.configuration
+        httpClient = HttpClient(configuration: amplitude.configuration,
+                                diagnostics: amplitude.configuration.diagonostics,
+                                callbackQueue: amplitude.trackingQueue)
+        flushTimer = QueueTimer(interval: getFlushInterval(), queue: amplitude.trackingQueue) { [weak self] in
             self?.flush()
         }
     }
@@ -42,17 +46,17 @@ public class EventPipeline {
             }
             completion?()
         } catch {
-            amplitude.logger?.error(message: "Error when storing event: \(error.localizedDescription)")
+            logger?.error(message: "Error when storing event: \(error.localizedDescription)")
         }
     }
 
     func flush(completion: (() -> Void)? = nil) {
-        if self.amplitude.configuration.offline == true {
-            self.amplitude.logger?.debug(message: "Skipping flush while offline.")
+        if configuration.offline == true {
+            logger?.debug(message: "Skipping flush while offline.")
             return
         }
 
-        amplitude.logger?.log(message: "Start flushing \(eventCount) events")
+        logger?.log(message: "Start flushing \(eventCount) events")
         eventCount = 0
         guard let storage = self.storage else { return }
         storage.rollover()
@@ -60,19 +64,16 @@ public class EventPipeline {
         for eventFile in eventFiles {
             uploadsQueue.sync {
                 guard uploads[eventFile] == nil else {
-                    amplitude.logger?.log(message: "Existing upload in progress, skipping...")
+                    logger?.log(message: "Existing upload in progress, skipping...")
                     return
                 }
                 guard let eventsString = storage.getEventsString(eventBlock: eventFile),
                       !eventsString.isEmpty else {
                     return
                 }
-                let uploadTask = httpClient.upload(events: eventsString) { [weak self] result in
-                    guard let self else {
-                        return
-                    }
+                let uploadTask = httpClient.upload(events: eventsString) { [self] result in
                     let responseHandler = storage.getResponseHandler(
-                        configuration: self.amplitude.configuration,
+                        configuration: self.configuration,
                         eventPipeline: self,
                         eventBlock: eventFile,
                         eventsString: eventsString
@@ -97,11 +98,11 @@ public class EventPipeline {
     }
 
     private func getFlushInterval() -> TimeInterval {
-        return TimeInterval.milliseconds(amplitude.configuration.flushIntervalMillis)
+        return TimeInterval.milliseconds(configuration.flushIntervalMillis)
     }
 
     private func getFlushCount() -> Int {
-        let count = amplitude.configuration.flushQueueSize
+        let count = configuration.flushQueueSize
         return count != 0 ? count : 1
     }
 }

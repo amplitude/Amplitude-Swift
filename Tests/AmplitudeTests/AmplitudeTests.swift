@@ -726,6 +726,51 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(allEventIds, Set(eventCollector.events.map(\.eventType)))
     }
 
+    func testDealloc() {
+        class TestAmplitude: Amplitude {
+
+            static let expectedEventType = "Test"
+
+            class TestStorage: InMemoryStorage {
+
+                private let expectation: XCTestExpectation
+
+                init(expectation: XCTestExpectation) {
+                    self.expectation = expectation
+                }
+
+                override func write(key: StorageKey, value: Any?) {
+                    if key == .EVENTS, let event = value as? BaseEvent, event.eventType == TestAmplitude.expectedEventType {
+                        expectation.fulfill()
+                    }
+                }
+            }
+
+            private let deallocExpectation: XCTestExpectation
+
+            init(deallocExpectation: XCTestExpectation, trackExpectation: XCTestExpectation) {
+                self.deallocExpectation = deallocExpectation
+                super.init(configuration: Configuration(apiKey: "test-api-key",
+                                                        storageProvider: TestStorage(expectation: trackExpectation)))
+            }
+
+            deinit {
+                deallocExpectation.fulfill()
+            }
+        }
+
+        let deallocExpectation = XCTestExpectation(description: "Amplitude object deallocates")
+        let trackExpectation = XCTestExpectation(description: "Event persisted to storage")
+
+        autoreleasepool {
+            let amplitude = TestAmplitude(deallocExpectation: deallocExpectation,
+                                          trackExpectation: trackExpectation)
+            amplitude.track(eventType: TestAmplitude.expectedEventType)
+            wait(for: [trackExpectation], timeout: 10.0)
+        }
+        wait(for: [deallocExpectation], timeout: 10.0)
+    }
+
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
         return NSDictionary(dictionary: props as [AnyHashable: Any])
     }

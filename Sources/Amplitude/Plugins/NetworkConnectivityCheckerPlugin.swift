@@ -54,14 +54,19 @@ open class NetworkConnectivityCheckerPlugin: BeforePlugin {
         amplitude.logger?.debug(message: "Installing NetworkConnectivityCheckerPlugin, offline feature should be supported.")
 
         pathCreation.start(queue: amplitude.trackingQueue)
+        let logger = amplitude.logger
         pathUpdateCancellable = pathCreation.networkPathPublisher?
-            .sink(receiveValue: { [weak self] networkPath in
-                let isOffline = !(networkPath.status == .satisfied)
-                if self?.amplitude?.configuration.offline == isOffline {
+            .sink(receiveValue: { [weak amplitude, logger] networkPath in
+                guard let amplitude = amplitude else {
+                    logger?.debug(message: "Received network connectivity updated when amplitude instance has been deallocated")
                     return
                 }
-                self?.amplitude?.logger?.debug(message: "Network connectivity changed to \(isOffline ? "offline" : "online").")
-                self?.amplitude?.configuration.offline = isOffline
+                let isOffline = !(networkPath.status == .satisfied)
+                if amplitude.configuration.offline == isOffline {
+                    return
+                }
+                amplitude.logger?.debug(message: "Network connectivity changed to \(isOffline ? "offline" : "online").")
+                amplitude.configuration.offline = isOffline
                 if !isOffline {
                     amplitude.flush()
                 }

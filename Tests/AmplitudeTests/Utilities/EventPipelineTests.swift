@@ -43,7 +43,7 @@ final class EventPipelineTests: XCTestCase {
     }
 
     func testInit() {
-        XCTAssertEqual(pipeline.amplitude.configuration.apiKey, configuration.apiKey)
+        XCTAssertEqual(pipeline.configuration.apiKey, configuration.apiKey)
     }
 
     func testPutEvent() {
@@ -77,18 +77,18 @@ final class EventPipelineTests: XCTestCase {
     }
 
     func testFlushWhenOffline() {
-        pipeline.amplitude.configuration.offline = false
+        pipeline.configuration.offline = false
 
         let testEvent = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
         try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
 
         XCTAssertEqual(httpClient.uploadCount, 0)
-        XCTAssertEqual(pipeline.amplitude.configuration.offline, false)
+        XCTAssertEqual(pipeline.configuration.offline, false)
 
-        pipeline.amplitude.configuration.offline = true
+        pipeline.configuration.offline = true
         pipeline.flush()
 
-        XCTAssertEqual(pipeline.amplitude.configuration.offline, true)
+        XCTAssertEqual(pipeline.configuration.offline, true)
         XCTAssertEqual(httpClient.uploadCount, 0, "There should be no uploads when offline")
     }
 
