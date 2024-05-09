@@ -155,8 +155,8 @@ class ContextPlugin: BeforePlugin {
         }
     }
 
-    func initializeDeviceId() {
-        var deviceId = amplitude?.state.deviceId
+    func initializeDeviceId(forceReset: Bool = false) {
+        var deviceId = forceReset ? nil : amplitude?.state.deviceId
         if isValidDeviceId(deviceId) {
             return
         }

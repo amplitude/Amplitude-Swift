@@ -21,7 +21,7 @@ public struct NetworkPath {
 // Protocol for creating network paths
 protocol PathCreationProtocol {
     var networkPathPublisher: AnyPublisher<NetworkPath, Never>? { get }
-    func start()
+    func start(queue: DispatchQueue)
 }
 
 // Implementation of PathCreationProtocol using NWPathMonitor
@@ -30,12 +30,12 @@ final class PathCreation: PathCreationProtocol {
     private let subject = PassthroughSubject<NWPath, Never>()
     private let monitor = NWPathMonitor()
 
-    func start() {
+    func start(queue: DispatchQueue) {
         monitor.pathUpdateHandler = subject.send
         networkPathPublisher = subject
             .map { NetworkPath(status: $0.status) }
             .eraseToAnyPublisher()
-        monitor.start(queue: .main)
+        monitor.start(queue: queue)
     }
 }
 
@@ -53,7 +53,7 @@ open class NetworkConnectivityCheckerPlugin: BeforePlugin {
         super.setup(amplitude: amplitude)
         amplitude.logger?.debug(message: "Installing NetworkConnectivityCheckerPlugin, offline feature should be supported.")
 
-        pathCreation.start()
+        pathCreation.start(queue: amplitude.trackingQueue)
         pathUpdateCancellable = pathCreation.networkPathPublisher?
             .sink(receiveValue: { [weak self] networkPath in
                 let isOffline = !(networkPath.status == .satisfied)

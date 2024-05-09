@@ -1,3 +1,4 @@
+#import <AmplitudeObjCExampleTests-Swift.h>
 #import <XCTest/XCTest.h>
 @import AmplitudeSwift;
 
@@ -21,8 +22,14 @@
         @"prop-bool-array": @[@true, @false, @true],
         @"prop-object": @{@"nested-prop-1": @555, @"nested-prop-2": @"nested-string"}
     };
-    [amplitude track:@"Event-A" eventProperties:eventProperties];
-    
+    AMPBaseEvent *event = [[AMPBaseEvent alloc] initWithEventType:@"Event-A"
+                                                  eventProperties:eventProperties];
+    XCTestExpectation *expectation = [[XCTestExpectation alloc] initWithDescription:@"event tracked"];
+    [amplitude track:event callback:^(AMPBaseEvent *event, NSInteger code, NSString *message) {
+        [expectation fulfill];
+    }];
+    [self waitForExpectations:@[expectation]];
+
     NSArray<NSString*>* eventsStrings = [amplitude.storage getEventsStrings];
     NSArray* events = [self parseEvents:eventsStrings];
     XCTAssertEqual(events.count, 1);
@@ -40,8 +47,16 @@
         @"prop-string": @"string-value",
         @"prop-int": @111
     };
-    [amplitude track:@"Event-A" eventProperties:eventProperties options:eventOptions];
-    
+    AMPBaseEvent *event = [[AMPBaseEvent alloc] initWithEventType:@"Event-A"
+                                                  eventProperties:eventProperties];
+    XCTestExpectation *expectation = [[XCTestExpectation alloc] initWithDescription:@"event tracked"];
+    [amplitude track:event
+             options:eventOptions
+            callback:^(AMPBaseEvent *event, NSInteger code, NSString *message) {
+        [expectation fulfill];
+    }];
+    [self waitForExpectations:@[expectation]];
+
     NSArray<NSString*>* eventsStrings = [amplitude.storage getEventsStrings];
     NSArray* events = [self parseEvents:eventsStrings];
     XCTAssertEqual(events.count, 1);
@@ -62,8 +77,15 @@
     [identify add:@"user-sum-prop" valueInt:7];
     [identify remove:@"user-agg-prop" value: @"item1"];
     [identify unset:@"user-deprecated-prop"];
-    [amplitude identify:identify];
-    
+
+    XCTestExpectation *expectation = [[XCTestExpectation alloc] initWithDescription:@"identify tracked"];
+    AMPEventOptions *options = [[AMPEventOptions alloc] init];
+    options.callback = ^(AMPBaseEvent *event, NSInteger code, NSString *message) {
+        [expectation fulfill];
+    };
+    [amplitude identify:identify options:options];
+    [self waitForExpectations:@[expectation]];
+
     NSDictionary* expectedUserProperties = @{
         @"$set": @{@"user-string-prop": @"string-value"},
         @"$setOnce": @{@"user-int-prop": @111},
@@ -86,8 +108,15 @@
     
     AMPIdentify* identify = [AMPIdentify new];
     [identify clearAll];
-    [amplitude identify:identify];
-    
+
+    XCTestExpectation *expectation = [[XCTestExpectation alloc] initWithDescription:@"identify tracked"];
+    AMPEventOptions *options = [[AMPEventOptions alloc] init];
+    options.callback = ^(AMPBaseEvent *event, NSInteger code, NSString *message) {
+        [expectation fulfill];
+    };
+    [amplitude identify:identify options:options];
+    [self waitForExpectations:@[expectation]];
+
     NSDictionary* expectedUserProperties = @{
         @"$clearAll": @"-"
     };
@@ -101,14 +130,28 @@
 
 - (void)testIdentify_InterceptedIdentifies {
     Amplitude* amplitude = [self getAmplitude:@"identify-interceptedIdentifies"];
-    
+
     AMPIdentify* identify1 = [AMPIdentify new];
     [identify1 set:@"user-string-prop" value:@"string-value"];
-    [amplitude identify:identify1];
-    
+
+    XCTestExpectation *expectation1 = [[XCTestExpectation alloc] initWithDescription:@"identify 1 tracked"];
+    AMPEventOptions *options1 = [[AMPEventOptions alloc] init];
+    options1.callback = ^(AMPBaseEvent *event, NSInteger code, NSString *message) {
+        [expectation1 fulfill];
+    };
+    [amplitude identify:identify1 options:options1];
+
     AMPIdentify* identify2 = [AMPIdentify new];
     [identify2 set:@"user-int-prop" value:@111];
-    [amplitude identify:identify2];
+
+    XCTestExpectation *expectation2 = [[XCTestExpectation alloc] initWithDescription:@"identify 1 tracked"];
+    AMPEventOptions *options2 = [[AMPEventOptions alloc] init];
+    options2.callback = ^(AMPBaseEvent *event, NSInteger code, NSString *message) {
+        [expectation2 fulfill];
+    };
+    [amplitude identify:identify2 options:options2];
+
+    [self waitForExpectations:@[expectation1, expectation2]];
 
     NSDictionary* expectedUserProperties1 = @{
         @"$set": @{@"user-string-prop": @"string-value"}
@@ -138,8 +181,15 @@
     [identify add:@"user-sum-prop" valueInt:7];
     [identify remove:@"user-agg-prop" value: @"item1"];
     [identify unset:@"user-deprecated-prop"];
-    [amplitude groupIdentify:@"type-1" groupName:@"name-1" identify:identify];
-    
+
+    XCTestExpectation *expectation = [[XCTestExpectation alloc] initWithDescription:@"group identify tracked"];
+    AMPEventOptions *options = [[AMPEventOptions alloc] init];
+    options.callback = ^(AMPBaseEvent *event, NSInteger code, NSString *message) {
+        [expectation fulfill];
+    };
+    [amplitude groupIdentify:@"type-1" groupName:@"name-1" identify:identify options:options];
+    [self waitForExpectations:@[expectation]];
+
     NSDictionary* expectedGroupProperties = @{
         @"$set": @{@"user-string-prop": @"string-value"},
         @"$setOnce": @{@"user-int-prop": @111},
@@ -160,10 +210,16 @@
 
 - (void)testSetGroup {
     Amplitude* amplitude = [self getAmplitude:@"setGroup"];
-    
-    NSString* groupName = @"name-1";
-    [amplitude setGroup:@"type-1" groupName:groupName];
-    
+
+    XCTestExpectation *expectation = [[XCTestExpectation alloc] initWithDescription:@"set group tracked"];
+    AMPEventOptions *options = [[AMPEventOptions alloc] init];
+    options.callback = ^(AMPBaseEvent *event, NSInteger code, NSString *message) {
+        [expectation fulfill];
+    };
+    NSString *groupName = @"name-1";
+    [amplitude setGroup:@"type-1" groupName:groupName options:options];
+    [self waitForExpectations:@[expectation]];
+
     NSArray<NSString*>* eventsStrings = [amplitude.storage getEventsStrings];
     NSArray* events = [self parseEvents:eventsStrings];
     XCTAssertEqual(events.count, 1);
@@ -174,10 +230,16 @@
 
 - (void)testSetGroup_Multiple {
     Amplitude* amplitude = [self getAmplitude:@"setGroup_Multiple"];
-    
+
+    XCTestExpectation *expectation = [[XCTestExpectation alloc] initWithDescription:@"set group tracked"];
+    AMPEventOptions *options = [[AMPEventOptions alloc] init];
+    options.callback = ^(AMPBaseEvent *event, NSInteger code, NSString *message) {
+        [expectation fulfill];
+    };
     NSArray<NSString*>* groupNames = @[@"name-1", @"name-2"];
-    [amplitude setGroup:@"type-1" groupNames:groupNames];
-    
+    [amplitude setGroup:@"type-1" groupNames:groupNames options:options];
+    [self waitForExpectations:@[expectation]];
+
     NSArray<NSString*>* eventsStrings = [amplitude.storage getEventsStrings];
     NSArray* events = [self parseEvents:eventsStrings];
     XCTAssertEqual(events.count, 1);
@@ -195,11 +257,16 @@
         return event;
     }]];
    
-    [amplitude track:@"Event-A" eventProperties:@{
-        @"prop-string": @"string-value",
-        @"prop-int": @111
-    }];
-    
+    XCTestExpectation *expectation = [[XCTestExpectation alloc] initWithDescription:@"group identify tracked"];
+    AMPEventOptions *options = [[AMPEventOptions alloc] init];
+    options.callback = ^(AMPBaseEvent *event, NSInteger code, NSString *message) {
+        [expectation fulfill];
+    };
+    [amplitude track:@"Event-A"
+     eventProperties: @{@"prop-string": @"string-value", @"prop-int": @111}
+             options:options];
+    [self waitForExpectations:@[expectation]];
+
     NSDictionary* expectedEventProperties = @{
         @"prop-string": @"string-value",
         @"prop-int": @111,
@@ -259,7 +326,7 @@
     NSString* instanceName = [NSString stringWithFormat:@"%@-%f", instancePrefix, [[NSDate date] timeIntervalSince1970]];
     AMPConfiguration* configuration = [AMPConfiguration initWithApiKey:@"API-KEY" instanceName:instanceName];
     configuration.defaultTracking = AMPDefaultTrackingOptions.NONE;
-    Amplitude* amplitude = [Amplitude initWithConfiguration:configuration];
+    Amplitude *amplitude = [[TestAmplitude alloc] initWithConfiguration:configuration];
     return amplitude;
 }
 

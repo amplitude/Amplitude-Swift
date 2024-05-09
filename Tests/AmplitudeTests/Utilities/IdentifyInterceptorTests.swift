@@ -135,9 +135,8 @@ final class IdentifyInterceptorTests: XCTestCase {
             destination: ["key-1": nil, "key-2": "value-2", "key-3": nil, "key-4": nil],
             source: ["key-1": "value-1", "key-2": nil, "key-3": nil, "key-5": nil]
         )
-        XCTAssertTrue(getDictionary(merged).isEqual(
-            to: ["key-1": "value-1", "key-2": "value-2", "key-3": nil, "key-4": nil, "key-5": nil])
-        )
+        XCTAssertEqual(getDictionary(merged),
+                       ["key-1": "value-1", "key-2": "value-2", "key-3": nil, "key-4": nil, "key-5": nil] as NSDictionary)
 
         merged = interceptor.mergeUserProperties(
             destination: ["key-1": NSNull(), "key-2": "value-2", "key-3": NSNull(), "key-4": NSNull()],

@@ -9,8 +9,9 @@ import Foundation
 
 class HttpClient {
     let configuration: Configuration
-    internal let session: URLSession
+    let session: URLSession
     let diagnostics: Diagnostics
+    let callbackQueue: DispatchQueue
 
     private lazy var dateFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
@@ -18,9 +19,10 @@ class HttpClient {
         return formatter
     }()
 
-    init(configuration: Configuration, diagnostics: Diagnostics) {
+    init(configuration: Configuration, diagnostics: Diagnostics, callbackQueue: DispatchQueue? = nil) {
         self.configuration = configuration
         self.diagnostics = diagnostics
+        self.callbackQueue = callbackQueue ?? .global()
 
         let sessionConfiguration = URLSessionConfiguration.default
         sessionConfiguration.httpMaximumConnectionsPerHost = 2
@@ -35,18 +37,20 @@ class HttpClient {
             let request = try getRequest()
             let requestData = getRequestData(events: events)
 
-            sessionTask = session.uploadTask(with: request, from: requestData) { data, response, error in
-                if error != nil {
-                    completion(.failure(error!))
-                } else if let httpResponse = response as? HTTPURLResponse {
-                    switch httpResponse.statusCode {
-                    case 1..<300:
-                        completion(.success(httpResponse.statusCode))
-                    default:
-                        completion(.failure(Exception.httpError(code: httpResponse.statusCode, data: data)))
+            sessionTask = session.uploadTask(with: request, from: requestData) { [callbackQueue] data, response, error in
+                callbackQueue.async {
+                    if error != nil {
+                        completion(.failure(error!))
+                    } else if let httpResponse = response as? HTTPURLResponse {
+                        switch httpResponse.statusCode {
+                        case 1..<300:
+                            completion(.success(httpResponse.statusCode))
+                        default:
+                            completion(.failure(Exception.httpError(code: httpResponse.statusCode, data: data)))
+                        }
                     }
+                    backgroundTaskCompletion?()
                 }
-                backgroundTaskCompletion?()
             }
             sessionTask!.resume()
         } catch {

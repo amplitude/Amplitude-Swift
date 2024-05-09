@@ -72,6 +72,7 @@ final class AmplitudeTests: XCTestCase {
         let outputReader = OutputReaderPlugin()
         amplitude.add(plugin: outputReader)
         amplitude.track(event: BaseEvent(eventType: "testEvent"))
+        amplitude.waitForTrackingQueue()
 
         let lastEvent = outputReader.lastEvent
         XCTAssertEqual(lastEvent?.library, "\(Constants.SDK_LIBRARY)/\(Constants.SDK_VERSION)")
@@ -109,6 +110,7 @@ final class AmplitudeTests: XCTestCase {
         amplitude.add(plugin: testPlugin)
         amplitude.track(event: BaseEvent(eventType: enrichedEventType))
         amplitude.track(event: BaseEvent(eventType: "Other Event"))
+        amplitude.waitForTrackingQueue()
 
         let events = storage.events()
         XCTAssertEqual(events[0].eventType, enrichedEventType)
@@ -179,6 +181,7 @@ final class AmplitudeTests: XCTestCase {
         amplitude.setUserId(userId: "test-user")
         amplitude.identify(identify: Identify().set(property: "key-1", value: "value-1"))
         amplitude.identify(identify: Identify().set(property: "key-2", value: "value-2"))
+        amplitude.waitForTrackingQueue()
 
         var intercepts = interceptStorageMem.events()
         var events = storageMem.events()
@@ -186,6 +189,7 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(events.count, 0)
 
         amplitude.flush()
+        amplitude.waitForTrackingQueue()
 
         intercepts = interceptStorageMem.events()
         events = storageMem.events()
@@ -209,6 +213,7 @@ final class AmplitudeTests: XCTestCase {
         // send 2 $set only Identify's, should be intercepted
         amplitude.identify(identify: Identify().set(property: "key-1", value: "value-1"))
         amplitude.identify(identify: Identify().set(property: "key-2", value: "value-2"))
+        amplitude.waitForTrackingQueue()
 
         var intercepts = interceptStorageTest.events()
         var events = storageTest.events()
@@ -217,6 +222,7 @@ final class AmplitudeTests: XCTestCase {
 
         // setGroup event should not be intercepted
         amplitude.setGroup(groupType: "group-type", groupName: "group-name")
+        amplitude.waitForTrackingQueue()
 
         intercepts = interceptStorageTest.events()
         XCTAssertEqual(intercepts.count, 0)
@@ -306,6 +312,7 @@ final class AmplitudeTests: XCTestCase {
         userActivity.referrerURL = URL(string: "https://test-referrer.com")
 
         amplitude.track(event: DeepLinkOpenedEvent(activity: userActivity))
+        amplitude.waitForTrackingQueue()
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
@@ -329,6 +336,7 @@ final class AmplitudeTests: XCTestCase {
         let amplitude = Amplitude(configuration: configuration)
 
         amplitude.track(event: DeepLinkOpenedEvent(url: URL(string: "https://test-app.com")!))
+        amplitude.waitForTrackingQueue()
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
@@ -351,6 +359,7 @@ final class AmplitudeTests: XCTestCase {
         let amplitude = Amplitude(configuration: configuration)
 
         amplitude.track(event: DeepLinkOpenedEvent(url: NSURL(string: "https://test-app.com")!))
+        amplitude.waitForTrackingQueue()
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
@@ -373,6 +382,7 @@ final class AmplitudeTests: XCTestCase {
         let amplitude = Amplitude(configuration: configuration)
 
         amplitude.track(event: ScreenViewedEvent(screenName: "main view"))
+        amplitude.waitForTrackingQueue()
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
@@ -395,6 +405,7 @@ final class AmplitudeTests: XCTestCase {
         let eventOptions = EventOptions(sessionId: -1)
         let eventType = "out of session event"
         amplitude.track(eventType: eventType, options: eventOptions)
+        amplitude.waitForTrackingQueue()
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
         XCTAssertEqual(events[0].eventType, eventType)
@@ -415,23 +426,23 @@ final class AmplitudeTests: XCTestCase {
         let oneHourEarlierTimestamp = timestamp - (1 * 60 * 60 * 1000)
         amplitude.setSessionId(timestamp: oneHourEarlierTimestamp)
 
-        @Sendable
-        func processStartSessionEvent() async {
+        // We process the session start event first. The session class will wait for 3 seconds before it processes
+        // the event
+        let processSessionStartEvent = Task.detached {
             amplitude.onEnterForeground(timestamp: timestamp)
         }
 
-        func processRegularEvent() async {
+        // Sleep for 1 second and process a regular event. This is to try the case where an event gets processed
+        // before the session start event
+        let processRegularEvent = Task.detached {
+            try await Task.sleep(nanoseconds: NSEC_PER_SEC)
             amplitude.track(eventType: "test_event")
         }
 
-        // We process the session start event first. The session class will wait for 3 seconds before it processes
-        // the event
-        async let task = processStartSessionEvent()
-        // Sleep for 1 second and process a regular event. This is to try the case where an event gets processed
-        // before the session start event
-        sleep(1)
-        await processRegularEvent()
-        await task
+        _ = await processRegularEvent.result
+        _ = await processSessionStartEvent.result
+
+        amplitude.waitForTrackingQueue()
 
         // We want to make sure that a new session was started
         XCTAssertTrue(amplitude.getSessionId() > oneHourEarlierTimestamp)
@@ -474,6 +485,7 @@ final class AmplitudeTests: XCTestCase {
         // track events to legacy storage
         legacyStorageAmplitude.identify(identify: Identify().set(property: "user-prop", value: true))
         legacyStorageAmplitude.track(event: BaseEvent(eventType: "Legacy Storage Event"))
+        legacyStorageAmplitude.waitForTrackingQueue()
 
         guard let legacyEventFiles: [URL]? = legacyEventStorage.read(key: StorageKey.EVENTS) else { return }
 
@@ -557,6 +569,7 @@ final class AmplitudeTests: XCTestCase {
             // track events to legacy storage
             legacyStorageAmplitude.identify(identify: Identify().set(property: "user-prop", value: true))
             legacyStorageAmplitude.track(event: BaseEvent(eventType: "Legacy Storage Event"))
+            legacyStorageAmplitude.waitForTrackingQueue()
 
             guard let legacyEventFiles: [URL]? = legacyEventStorage.read(key: StorageKey.EVENTS) else { return }
 
@@ -675,8 +688,42 @@ final class AmplitudeTests: XCTestCase {
     }
     #endif
 
+    func testReset() {
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "test-api-key"))
+        amplitude.setUserId(userId: "originalUserId")
+        amplitude.setDeviceId(deviceId: "originalDeviceId")
+        amplitude.reset()
+        XCTAssertNil(amplitude.getUserId())
+        XCTAssertNotEqual(amplitude.getDeviceId(), "originalDeviceId")
+    }
+
     func testInit_Offline() {
         XCTAssertEqual(Amplitude(configuration: configuration).configuration.offline, false)
+    }
+
+    func testConcurrentAccess() {
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "test-api-key",
+                                                               storageProvider: InMemoryStorage(),
+                                                               defaultTracking: .init(sessions: true,
+                                                                                      appLifecycles: true)))
+        let eventCollector = EventCollectorPlugin()
+        amplitude.add(plugin: eventCollector)
+        let sessionID = Int64(Date().timeIntervalSince1970 * 1000)
+        amplitude.setSessionId(timestamp: sessionID)
+
+        DispatchQueue.concurrentPerform(iterations: 100) { i in
+            amplitude.onEnterForeground(timestamp: Int64(Date().timeIntervalSince1970 * 1000))
+            amplitude.track(eventType: "Test Event \(i)")
+            amplitude.onExitForeground(timestamp: Int64(Date().timeIntervalSince1970 * 1000))
+        }
+
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertEqual(amplitude.getSessionId(), sessionID)
+
+        var allEventIds = Set((0..<100).map { "Test Event \($0)" })
+        allEventIds.insert("session_start")
+        XCTAssertEqual(allEventIds, Set(eventCollector.events.map(\.eventType)))
     }
 
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {

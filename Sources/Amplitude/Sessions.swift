@@ -4,7 +4,7 @@ public class Sessions {
     private let amplitude: Amplitude
 
     private var _sessionId: Int64 = -1
-    var sessionId: Int64 {
+    private(set) var sessionId: Int64 {
         get { _sessionId }
         set {
             _sessionId = newValue
@@ -17,7 +17,7 @@ public class Sessions {
     }
 
     private var _lastEventId: Int64 = 0
-    var lastEventId: Int64 {
+    private(set) var lastEventId: Int64 {
         get { _lastEventId }
         set {
             _lastEventId = newValue

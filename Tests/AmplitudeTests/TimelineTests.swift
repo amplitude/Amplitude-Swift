@@ -17,7 +17,7 @@ final class TimelineTests: XCTestCase {
         amplitude.add(plugin: testPlugin)
         amplitude.track(event: BaseEvent(eventType: "testEvent"))
 
-        wait(for: [expectation], timeout: 1.0)
+        wait(for: [expectation], timeout: 10.0)
     }
 
     func testTimelineWithTwoPlugin() {
@@ -38,6 +38,6 @@ final class TimelineTests: XCTestCase {
         amplitude.add(plugin: testPlugin2)
         amplitude.track(event: BaseEvent(eventType: "testEvent"))
 
-        wait(for: [expectation, expectation2], timeout: 1.0)
+        wait(for: [expectation, expectation2], timeout: 10.0)
     }
 }
