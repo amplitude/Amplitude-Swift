@@ -1,3 +1,11 @@
+# [1.5.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.4.5...v1.5.0) (2024-05-10)
+
+
+### Features
+
+* Dispatch operations to internal queue ([#159](https://github.com/amplitude/Amplitude-Swift/issues/159)) ([83d24f7](https://github.com/amplitude/Amplitude-Swift/commit/83d24f7b4e2131c578889997ef4d11b2e7323248))
+* Fix retain cycles in Amplitude so instance will not leak memory ([#161](https://github.com/amplitude/Amplitude-Swift/issues/161)) ([492d1fd](https://github.com/amplitude/Amplitude-Swift/commit/492d1fda2f14a2224905026cf02dbae07950fd99))
+
 ## [1.4.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.4.4...v1.4.5) (2024-04-18)
 
 
