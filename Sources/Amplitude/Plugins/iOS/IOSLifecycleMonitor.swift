@@ -17,7 +17,6 @@
             UIApplication.willEnterForegroundNotification,
             UIApplication.didFinishLaunchingNotification,
         ]
-        private var trackAppOpenedEventOnEnterForeground: Bool = true
         private var utils: DefaultEventUtils?
 
         override init() {
@@ -67,22 +66,35 @@
 
         func applicationWillEnterForeground(notification: NSNotification) {
             let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+
+            let fromBackground: Bool
+            if let sharedApplication = application {
+                switch sharedApplication.applicationState {
+                case .active, .inactive:
+                    fromBackground = false
+                case .background:
+                    fromBackground = true
+                @unknown default:
+                    fromBackground = false
+                }
+            } else {
+                fromBackground = false
+            }
+
             self.amplitude?.onEnterForeground(timestamp: timestamp)
-            if self.amplitude?.configuration.defaultTracking.appLifecycles == true && self.trackAppOpenedEventOnEnterForeground {
+            if self.amplitude?.configuration.defaultTracking.appLifecycles == true {
                 let info = Bundle.main.infoDictionary
                 let currentBuild = info?["CFBundleVersion"] as? String
                 let currentVersion = info?["CFBundleShortVersionString"] as? String
                 self.amplitude?.track(eventType: Constants.AMP_APPLICATION_OPENED_EVENT, eventProperties: [
                     Constants.AMP_APP_BUILD_PROPERTY: currentBuild ?? "",
                     Constants.AMP_APP_VERSION_PROPERTY: currentVersion ?? "",
-                    Constants.AMP_APP_FROM_BACKGROUND_PROPERTY: true,
+                    Constants.AMP_APP_FROM_BACKGROUND_PROPERTY: fromBackground,
                 ])
             }
         }
 
         func didEnterBackground(notification: NSNotification) {
-            self.trackAppOpenedEventOnEnterForeground = true
-
             let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
             self.amplitude?.onExitForeground(timestamp: timestamp)
             if self.amplitude?.configuration.defaultTracking.appLifecycles == true {
@@ -91,8 +103,6 @@
         }
 
         func applicationDidFinishLaunchingNotification(notification: NSNotification) {
-            self.trackAppOpenedEventOnEnterForeground = false
-
             utils?.trackAppUpdatedInstalledEvent()
         }
     }

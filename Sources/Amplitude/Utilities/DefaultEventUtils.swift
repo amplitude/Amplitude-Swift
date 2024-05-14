@@ -29,11 +29,6 @@ public class DefaultEventUtils {
                     Constants.AMP_APP_PREVIOUS_VERSION_PROPERTY: previousVersion ?? "",
                 ])
             }
-            self.amplitude?.track(eventType: Constants.AMP_APPLICATION_OPENED_EVENT, eventProperties: [
-                Constants.AMP_APP_BUILD_PROPERTY: currentBuild ?? "",
-                Constants.AMP_APP_VERSION_PROPERTY: currentVersion ?? "",
-                Constants.AMP_APP_FROM_BACKGROUND_PROPERTY: false,
-            ])
         }
 
         if currentBuild != previousBuild {
