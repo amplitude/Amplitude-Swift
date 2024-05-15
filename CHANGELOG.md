@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.5.0...v1.5.1) (2024-05-15)
+
+
+### Bug Fixes
+
+* Improve application opened event reliability ([#165](https://github.com/amplitude/Amplitude-Swift/issues/165)) ([d3b9de7](https://github.com/amplitude/Amplitude-Swift/commit/d3b9de7d200274c5f43e036b221c7669011869a6))
+
 # [1.5.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.4.5...v1.5.0) (2024-05-10)
 
 
