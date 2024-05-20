@@ -104,7 +104,7 @@ class ContextPlugin: BeforePlugin {
         let trackingOptions = configuration?.trackingOptions
 
         if configuration?.enableCoppaControl ?? false {
-            trackingOptions?.mergeIn(other: TrackingOptions().forCoppaControl())
+            trackingOptions?.mergeIn(other: TrackingOptions.forCoppaControl())
         }
 
         if trackingOptions?.shouldTrackVersionName() ?? false {
