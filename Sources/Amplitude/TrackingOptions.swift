@@ -11,7 +11,7 @@ public class TrackingOptions {
 
     public init() {}
 
-    private let COPPA_CONTROL_PROPERTIES = [
+    private static let COPPA_CONTROL_PROPERTIES = [
         Constants.AMP_TRACKING_OPTION_IDFA,
         Constants.AMP_TRACKING_OPTION_IDFV,
         Constants.AMP_TRACKING_OPTION_CITY,
@@ -160,7 +160,7 @@ public class TrackingOptions {
         return self
     }
 
-    func forCoppaControl() -> TrackingOptions {
+    static func forCoppaControl() -> TrackingOptions {
         let trackingOptions = TrackingOptions()
         for property in COPPA_CONTROL_PROPERTIES {
             trackingOptions.disableTrackingField(field: property)
