@@ -158,6 +158,63 @@ final class AmplitudeIOSTests: XCTestCase {
         method_setImplementation(originalMethod, originalImplementation)
     }
 
+    func testDidBecomeActivePreSceneDelegate() {
+
+        class TestApplication: NSObject, UIApplicationDelegate {
+
+            // Override UIApplicationDelegate to self, which does not implement application(_:configurationForConnecting:connectingSceneSession:)
+            weak var delegate: UIApplicationDelegate? {
+                return self
+            }
+
+            static let sharedTest = TestApplication()
+
+            @objc class var shared: AnyObject {
+                return sharedTest
+            }
+        }
+
+        guard let originalMethod = class_getClassMethod(UIApplication.self, #selector(getter: UIApplication.shared)),
+              let testMethod = class_getClassMethod(TestApplication.self, #selector(getter: TestApplication.shared)) else {
+            XCTFail("Unable to find methods to swizzle")
+            return
+        }
+        let originalImplementation = method_getImplementation(originalMethod)
+        let testImplementation = method_getImplementation(testMethod)
+        method_setImplementation(originalMethod, testImplementation)
+
+        let configuration = Configuration(
+            apiKey: "api-key",
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            defaultTracking: DefaultTrackingOptions(sessions: false, appLifecycles: true)
+        )
+
+        let info = Bundle.main.infoDictionary
+        let currentBuild = info?["CFBundleVersion"] ?? ""
+        let currentVersion = info?["CFBundleShortVersionString"] ?? ""
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+
+        amplitude.waitForTrackingQueue()
+
+        let events = storageMem.events()
+        XCTAssertEqual(events.count, 2)
+        XCTAssertEqual(events[1].eventType, Constants.AMP_APPLICATION_OPENED_EVENT)
+        XCTAssertEqual(getDictionary(events[1].eventProperties!), [
+            Constants.AMP_APP_BUILD_PROPERTY: currentBuild,
+            Constants.AMP_APP_VERSION_PROPERTY: currentVersion,
+            Constants.AMP_APP_FROM_BACKGROUND_PROPERTY: false
+        ])
+
+        // re-replace UIApplication.shared
+        method_setImplementation(originalMethod, originalImplementation)
+    }
+
     func testDidEnterBackground() throws {
         let configuration = Configuration(
             apiKey: "api-key",

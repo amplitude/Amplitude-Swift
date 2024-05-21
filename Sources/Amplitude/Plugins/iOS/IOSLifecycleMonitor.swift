@@ -16,8 +16,10 @@
             UIApplication.didEnterBackgroundNotification,
             UIApplication.willEnterForegroundNotification,
             UIApplication.didFinishLaunchingNotification,
+            UIApplication.didBecomeActiveNotification,
         ]
         private var utils: DefaultEventUtils?
+        private var sendApplicationOpenedOnDidBecomeActive = false
 
         override init() {
             // TODO: Check if lifecycle plugin works for app extension
@@ -37,14 +39,16 @@
         }
 
         @objc
-        func notificationResponse(notification: NSNotification) {
+        func notificationResponse(notification: Notification) {
             switch notification.name {
             case UIApplication.didEnterBackgroundNotification:
-                self.didEnterBackground(notification: notification)
+                didEnterBackground(notification: notification)
             case UIApplication.willEnterForegroundNotification:
-                self.applicationWillEnterForeground(notification: notification)
+                applicationWillEnterForeground(notification: notification)
             case UIApplication.didFinishLaunchingNotification:
-                self.applicationDidFinishLaunchingNotification(notification: notification)
+                applicationDidFinishLaunchingNotification(notification: notification)
+            case UIApplication.didBecomeActiveNotification:
+                applicationDidBecomeActive(notification: notification)
             default:
                 break
             }
@@ -64,7 +68,7 @@
 
         }
 
-        func applicationWillEnterForeground(notification: NSNotification) {
+        func applicationWillEnterForeground(notification: Notification) {
             let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
 
             let fromBackground: Bool
@@ -81,20 +85,11 @@
                 fromBackground = false
             }
 
-            self.amplitude?.onEnterForeground(timestamp: timestamp)
-            if self.amplitude?.configuration.defaultTracking.appLifecycles == true {
-                let info = Bundle.main.infoDictionary
-                let currentBuild = info?["CFBundleVersion"] as? String
-                let currentVersion = info?["CFBundleShortVersionString"] as? String
-                self.amplitude?.track(eventType: Constants.AMP_APPLICATION_OPENED_EVENT, eventProperties: [
-                    Constants.AMP_APP_BUILD_PROPERTY: currentBuild ?? "",
-                    Constants.AMP_APP_VERSION_PROPERTY: currentVersion ?? "",
-                    Constants.AMP_APP_FROM_BACKGROUND_PROPERTY: fromBackground,
-                ])
-            }
+            amplitude?.onEnterForeground(timestamp: timestamp)
+            sendApplicationOpened(fromBackground: fromBackground)
         }
 
-        func didEnterBackground(notification: NSNotification) {
+        func didEnterBackground(notification: Notification) {
             let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
             self.amplitude?.onExitForeground(timestamp: timestamp)
             if self.amplitude?.configuration.defaultTracking.appLifecycles == true {
@@ -102,8 +97,40 @@
             }
         }
 
-        func applicationDidFinishLaunchingNotification(notification: NSNotification) {
+        func applicationDidFinishLaunchingNotification(notification: Notification) {
             utils?.trackAppUpdatedInstalledEvent()
+
+            // Pre SceneDelegate apps wil not fire a willEnterForeground notification on app launch.
+            // Instead, use the initial applicationDidBecomeActive
+            let usesSceneDelegate = application?.delegate?.responds(to: #selector(UIApplicationDelegate.application(_:configurationForConnecting:options:))) ?? false
+            if !usesSceneDelegate {
+                sendApplicationOpenedOnDidBecomeActive = true
+            }
+        }
+
+        func applicationDidBecomeActive(notification: Notification) {
+            guard sendApplicationOpenedOnDidBecomeActive else {
+                return
+            }
+            sendApplicationOpenedOnDidBecomeActive = false
+
+            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+            amplitude?.onEnterForeground(timestamp: timestamp)
+            sendApplicationOpened(fromBackground: false)
+        }
+
+        private func sendApplicationOpened(fromBackground: Bool) {
+            guard amplitude?.configuration.defaultTracking.appLifecycles ?? false else {
+                return
+            }
+            let info = Bundle.main.infoDictionary
+            let currentBuild = info?["CFBundleVersion"] as? String
+            let currentVersion = info?["CFBundleShortVersionString"] as? String
+            self.amplitude?.track(eventType: Constants.AMP_APPLICATION_OPENED_EVENT, eventProperties: [
+                Constants.AMP_APP_BUILD_PROPERTY: currentBuild ?? "",
+                Constants.AMP_APP_VERSION_PROPERTY: currentVersion ?? "",
+                Constants.AMP_APP_FROM_BACKGROUND_PROPERTY: fromBackground,
+            ])
         }
     }
 
