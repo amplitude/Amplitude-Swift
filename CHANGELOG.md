@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.5.1...v1.5.2) (2024-05-21)
+
+
+### Bug Fixes
+
+* Send application opened for apps not yet using scene delegates ([#167](https://github.com/amplitude/Amplitude-Swift/issues/167)) ([dd43026](https://github.com/amplitude/Amplitude-Swift/commit/dd43026b59cf5a2be1c0a7dea1e5247d67a1c229))
+
 ## [1.5.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.5.0...v1.5.1) (2024-05-15)
 
 
