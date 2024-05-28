@@ -13,14 +13,14 @@
     class WatchOSLifecycleMonitor: UtilityPlugin {
         var wasBackgrounded: Bool = false
 
-        private var watchExtension = WKExtension.shared()
+        private var watchExtension = WKApplication.shared()
         private var appNotifications: [NSNotification.Name] = [
-            WKExtension.applicationWillEnterForegroundNotification,
-            WKExtension.applicationDidEnterBackgroundNotification,
+            WKApplication.willEnterForegroundNotification,
+            WKApplication.didEnterBackgroundNotification,
         ]
 
         override init() {
-            watchExtension = WKExtension.shared()
+            watchExtension = WKApplication.shared()
             super.init()
             setupListeners()
         }
@@ -28,9 +28,9 @@
         @objc
         func notificationResponse(notification: NSNotification) {
             switch notification.name {
-            case WKExtension.applicationWillEnterForegroundNotification:
+            case WKApplication.willEnterForegroundNotification:
                 self.applicationWillEnterForeground(notification: notification)
-            case WKExtension.applicationDidEnterBackgroundNotification:
+            case WKApplication.didEnterBackgroundNotification:
                 self.applicationDidEnterBackground(notification: notification)
             default:
                 break
