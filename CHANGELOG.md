@@ -1,3 +1,15 @@
+# [1.6.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.5.2...v1.6.0) (2024-06-04)
+
+
+### Bug Fixes
+
+* Disable network connectivity check on watchOS as it is not supported on real devices ([#174](https://github.com/amplitude/Amplitude-Swift/issues/174)) ([853e4e5](https://github.com/amplitude/Amplitude-Swift/commit/853e4e510a1c1c098f9404ef6ef4e1281c5298f4))
+
+
+### Features
+
+* support single-target Watch applications ([#163](https://github.com/amplitude/Amplitude-Swift/issues/163)) ([0d23d94](https://github.com/amplitude/Amplitude-Swift/commit/0d23d9428d564b40248c9ddd632bae9b10a62642))
+
 ## [1.5.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.5.1...v1.5.2) (2024-05-21)
 
 
