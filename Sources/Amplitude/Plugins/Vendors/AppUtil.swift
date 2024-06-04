@@ -245,6 +245,12 @@ import Foundation
         override var requiredPlugin: Plugin {
             return WatchOSLifecycleMonitor()
         }
+
+        // Per https://developer.apple.com/documentation/technotes/tn3135-low-level-networking-on-watchos,
+        // NWPathMonitor is not supported on most WatchOS apps when running on a real device.
+        override var networkConnectivityCheckingEnabled: Bool {
+            return false
+        }
     }
 #endif
 

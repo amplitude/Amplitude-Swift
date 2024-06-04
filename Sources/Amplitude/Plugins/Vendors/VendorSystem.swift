@@ -48,6 +48,10 @@ internal class VendorSystem {
         return nil
     }
 
+    var networkConnectivityCheckingEnabled: Bool {
+        return true
+    }
+
     func beginBackgroundTask() -> BackgroundTaskCompletionCallback? {
         return nil
     }
