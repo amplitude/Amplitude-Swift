@@ -55,7 +55,8 @@ public class Amplitude {
             state.userId = userId
         }
 
-        if self.configuration.offline != NetworkConnectivityCheckerPlugin.Disabled {
+        if configuration.offline != NetworkConnectivityCheckerPlugin.Disabled,
+           VendorSystem.current.networkConnectivityCheckingEnabled {
             _ = add(plugin: NetworkConnectivityCheckerPlugin())
         }
         // required plugin for specific platform, only has lifecyclePlugin now
