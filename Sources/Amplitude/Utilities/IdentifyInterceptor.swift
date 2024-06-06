@@ -22,6 +22,7 @@ public class IdentifyInterceptor {
     private var identifyTransferTimer: QueueTimer?
     private let identifyBatchIntervalMillis: Int
     private var lastIdentity: Identity?
+    private let queue: DispatchQueue
 
     private lazy var storage: any Storage = {
         return self.configuration.identifyStorageProvider
@@ -30,6 +31,7 @@ public class IdentifyInterceptor {
     init(
         configuration: Configuration,
         pipeline: EventPipeline,
+        queue: DispatchQueue,
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS
     ) {
         self.configuration = configuration
@@ -40,6 +42,7 @@ public class IdentifyInterceptor {
         }
         self.identifyBatchIntervalMillis = max(identifyBatchIntervalMillis, Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS)
         self.lastIdentity = Identity(nil, nil)
+        self.queue = queue
     }
 
     public func intercept(event: BaseEvent) -> BaseEvent? {
@@ -176,7 +179,7 @@ public class IdentifyInterceptor {
             return
         }
 
-        identifyTransferTimer = QueueTimer(interval: getIdentifyBatchInterval(), once: true) { [weak self] in
+        identifyTransferTimer = QueueTimer(interval: getIdentifyBatchInterval(), once: true, queue: queue) { [weak self] in
             let transferInterceptedIdentifyEvent = self?.transferInterceptedIdentifyEvent
             self?.identifyTransferTimer = nil
             transferInterceptedIdentifyEvent?()

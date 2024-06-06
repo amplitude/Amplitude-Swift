@@ -52,7 +52,8 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
         pipeline = EventPipeline(amplitude: amplitude)
         identifyInterceptor = IdentifyInterceptor(
             configuration: amplitude.configuration,
-            pipeline: pipeline!
+            pipeline: pipeline!,
+            queue: amplitude.trackingQueue
         )
         pipeline?.start()
 
