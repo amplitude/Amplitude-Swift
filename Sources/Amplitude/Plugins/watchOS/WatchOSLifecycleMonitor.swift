@@ -13,27 +13,57 @@
     class WatchOSLifecycleMonitor: UtilityPlugin {
         var wasBackgrounded: Bool = false
 
-        private var watchExtension = WKApplication.shared()
-        private var appNotifications: [NSNotification.Name] = [
-            WKApplication.willEnterForegroundNotification,
-            WKApplication.didEnterBackgroundNotification,
-        ]
+        var isSingleTargetApplication: Bool {
+            return Bundle.main.infoDictionary?.keys.contains("WKApplication") == true
+        }
+
+        private var appNotifications: [NSNotification.Name] {
+            if #available(watchOS 9.0, *) {
+                // `WKApplication` works on both dual-target and single-target apps
+                // When running on watchOS 9.0+
+                return [
+                    WKApplication.willEnterForegroundNotification,
+                    WKApplication.didEnterBackgroundNotification
+                ]
+            } else if !isSingleTargetApplication {
+                return [
+                    WKExtension.applicationWillEnterForegroundNotification,
+                    WKExtension.applicationDidEnterBackgroundNotification
+                ]
+            } else {
+                // Before watchOS 9.0, single-target apps don't allow using `WKExtension` or `WKApplication`
+                // So we can't utilize any notifications
+                return []
+            }
+        }
 
         override init() {
-            watchExtension = WKApplication.shared()
             super.init()
             setupListeners()
         }
 
         @objc
         func notificationResponse(notification: NSNotification) {
-            switch notification.name {
-            case WKApplication.willEnterForegroundNotification:
-                self.applicationWillEnterForeground(notification: notification)
-            case WKApplication.didEnterBackgroundNotification:
-                self.applicationDidEnterBackground(notification: notification)
-            default:
-                break
+            if #available(watchOS 9.0, *) {
+                switch notification.name {
+                case WKApplication.willEnterForegroundNotification:
+                    self.applicationWillEnterForeground(notification: notification)
+                case WKApplication.didEnterBackgroundNotification:
+                    self.applicationDidEnterBackground(notification: notification)
+                default:
+                    break
+                }
+            } else if !isSingleTargetApplication {
+                switch notification.name {
+                case WKExtension.applicationWillEnterForegroundNotification:
+                    self.applicationWillEnterForeground(notification: notification)
+                case WKExtension.applicationDidEnterBackgroundNotification:
+                    self.applicationDidEnterBackground(notification: notification)
+                default:
+                    break
+                }
+            } else {
+                return
             }
         }
 
