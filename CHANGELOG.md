@@ -1,3 +1,12 @@
+## [1.6.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.6.0...v1.6.1) (2024-06-12)
+
+
+### Bug Fixes
+
+* Add additional diagnostic logging ([#177](https://github.com/amplitude/Amplitude-Swift/issues/177)) ([e0e47a7](https://github.com/amplitude/Amplitude-Swift/commit/e0e47a747eb619dbb0f553c2025ae621bd514793))
+* dispatch identify interceptor callbacks on correct queue ([#176](https://github.com/amplitude/Amplitude-Swift/issues/176)) ([eaf6d16](https://github.com/amplitude/Amplitude-Swift/commit/eaf6d168d4a523cf4e5f279e0e34291f4ffb4887))
+* resolve compilation issue with watchOS 8.0 ([#180](https://github.com/amplitude/Amplitude-Swift/issues/180)) ([d0b7bff](https://github.com/amplitude/Amplitude-Swift/commit/d0b7bff4b228b283cc801c6ad7510f85b2bdc5a7))
+
 # [1.6.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.5.2...v1.6.0) (2024-06-04)
 
 
