@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.6.1...v1.6.2) (2024-06-14)
+
+
+### Bug Fixes
+
+* Don't use idfv for deviceId if invalid ([#183](https://github.com/amplitude/Amplitude-Swift/issues/183)) ([f17e7fa](https://github.com/amplitude/Amplitude-Swift/commit/f17e7fa13306f631314a4d28ed811397b5d2511e))
+
 ## [1.6.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.6.0...v1.6.1) (2024-06-12)
 
 
