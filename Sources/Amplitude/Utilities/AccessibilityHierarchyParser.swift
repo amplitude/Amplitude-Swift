@@ -12,7 +12,7 @@ public struct AccessibilityTarget {
 
         /// Accessibility path, in the coordinate space of the view being processed.
         case path(UIBezierPath)
-        
+
         public func contains(_ point: CGPoint) -> Bool {
             switch self {
             case .frame(let frame):
@@ -43,7 +43,7 @@ public struct AccessibilityTarget {
 
     /// The shape that will be highlighted on screen while the element is in focus.
     public var shape: Shape
-    
+
     /// The object representing the accessibility node.
     public var object: NSObject
 }
@@ -139,7 +139,7 @@ private extension NSObject {
 
         if isAccessibilityElement {
             recursiveAccessibilityHierarchy.append(AccessibilityNode(object: self))
-            
+
         } else if let accessibilityElements = accessibilityElements as? [NSObject] {
             for element in accessibilityElements {
                 recursiveAccessibilityHierarchy.append(
@@ -162,7 +162,7 @@ private extension NSObject {
                     contentsOf: subview.recursiveAccessibilityHierarchy()
                 )
             }
-            
+
         }
 
         return recursiveAccessibilityHierarchy

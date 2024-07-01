@@ -23,7 +23,7 @@ public class DefaultTrackingOptions {
         self.screenViews = screenViews
         self.userInteractions = false
     }
-    
+
     public convenience init (
         sessions: Bool = true,
         appLifecycles: Bool = false,

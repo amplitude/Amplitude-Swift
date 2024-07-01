@@ -1,7 +1,7 @@
 import UIKit
 
 public class UserInteractionEvent: BaseEvent {
-    
+
     public enum InteractionValue {
         case tap(dead: Bool = false)
         case longPress(dead: Bool = false)
@@ -9,7 +9,7 @@ public class UserInteractionEvent: BaseEvent {
         case focusGained
         case focusLost(didTextFieldChange: Bool = false)
         case sliderChanged(to: Int)
-        
+
         var description: String {
             switch self {
             case .tap(let dead): return dead ? "Dead Tapped" : "Tapped"
@@ -23,7 +23,7 @@ public class UserInteractionEvent: BaseEvent {
             }
         }
     }
-    
+
     convenience init(_ interactionValue: InteractionValue, label: String? = nil, value: String? = nil, type: UIAccessibilityTraits = .none) {
         self.init(eventType: Constants.AMP_USER_INTERACTION_EVENT, eventProperties: [
             Constants.AMP_INTERACTION_PROPERTY: interactionValue.description,
