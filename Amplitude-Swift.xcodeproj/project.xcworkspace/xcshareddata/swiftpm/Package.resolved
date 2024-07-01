@@ -1,4 +1,5 @@
 {
+  "originHash" : "280b19df31bbf756de6f122c16eea977bf10bf445435d7b3c5deebee87d0e5d6",
   "pins" : [
     {
       "identity" : "analytics-connector-ios",
@@ -8,16 +9,7 @@
         "revision" : "e2ca17ac735bcbc48b13062484541702ef45153d",
         "version" : "1.0.3"
       }
-    },
-    {
-      "identity" : "experiment-ios-client",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/amplitude/experiment-ios-client",
-      "state" : {
-        "revision" : "6a94d70915b3756daae2a989fa57f03c19547c67",
-        "version" : "1.13.5"
-      }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

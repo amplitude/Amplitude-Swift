@@ -198,7 +198,7 @@ extension UIView {
         guard let newPath = path.copy() as? UIBezierPath else {
             return UIBezierPath()
         }
-        
+
         newPath.apply(transform)
         return newPath
     }
