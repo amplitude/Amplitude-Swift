@@ -1,0 +1,15 @@
+{
+  "originHash" : "280b19df31bbf756de6f122c16eea977bf10bf445435d7b3c5deebee87d0e5d6",
+  "pins" : [
+    {
+      "identity" : "analytics-connector-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/amplitude/analytics-connector-ios.git",
+      "state" : {
+        "revision" : "e2ca17ac735bcbc48b13062484541702ef45153d",
+        "version" : "1.0.3"
+      }
+    }
+  ],
+  "version" : 3
+}
