@@ -83,6 +83,7 @@ public struct Constants {
     static let AMP_APPLICATION_BACKGROUNDED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Application Backgrounded"
     static let AMP_DEEP_LINK_OPENED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Deep Link Opened"
     static let AMP_SCREEN_VIEWED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Screen Viewed"
+    static let AMP_USER_INTERACTION_EVENT = "\(AMP_AMPLITUDE_PREFIX)User Interaction"
     static let AMP_REVENUE_EVENT = "revenue_amount"
 
     static let AMP_APP_VERSION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Version"
@@ -93,6 +94,11 @@ public struct Constants {
     static let AMP_APP_LINK_URL_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Link URL"
     static let AMP_APP_LINK_REFERRER_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Link Referrer"
     static let AMP_APP_SCREEN_NAME_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Screen Name"
+    
+    static let AMP_INTERACTION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Interaction"
+    static let AMP_ELEMENT_LABEL_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Element Label"
+    static let AMP_ELEMENT_VALUE_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Element Value"
+    static let AMP_ELEMENT_TYPE_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Element Type"
 
     public struct Configuration {
         public static let FLUSH_QUEUE_SIZE = 30
