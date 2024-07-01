@@ -66,7 +66,8 @@ public final class AccessibilityHierarchyParser {
         let accessibilityNodes = root.recursiveAccessibilityHierarchy()
 
         return accessibilityNodes.map { node in
-            let (label, value, type) = node.object.accessibilityDescriptions()
+            let description = node.object.accessibilityDescriptions()
+            let (label, value, type) = (description.label, description.value, description.type)
 
             let userInputLabels: [String]? = {
                 guard
@@ -168,14 +169,22 @@ private extension NSObject {
         return recursiveAccessibilityHierarchy
     }
 
-    func accessibilityDescriptions() -> (label: String?, value: String?, type: UIAccessibilityTraits) {
-        return (
-            accessibilityLabel?.nonEmpty(),
-            accessibilityValue?.nonEmpty(),
-            accessibilityTraits
+    func accessibilityDescriptions() -> AccessibilityInfo {
+        return AccessibilityInfo(
+            label: accessibilityLabel?.nonEmpty(),
+            value: accessibilityValue?.nonEmpty(),
+            type: accessibilityTraits
         )
     }
 
+}
+
+// MARK: -
+
+private struct AccessibilityInfo {
+    let label: String?
+    let value: String?
+    let type: UIAccessibilityTraits
 }
 
 // MARK: -
@@ -186,7 +195,10 @@ extension UIView {
         let offset = convert(CGPoint.zero, from: source)
         let transform = CGAffineTransform(translationX: offset.x, y: offset.y)
 
-        let newPath = path.copy() as! UIBezierPath
+        guard let newPath = path.copy() as? UIBezierPath else {
+            return UIBezierPath()
+        }
+        
         newPath.apply(transform)
         return newPath
     }
