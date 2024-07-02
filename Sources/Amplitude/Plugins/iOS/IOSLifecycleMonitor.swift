@@ -17,7 +17,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
         // funnel it through something to check; Could be nil.
         UIApplication.value(forKeyPath: "sharedApplication") as? UIApplication
     }
-    
+
     private var appNotifications: [NSNotification.Name] = [
         UIApplication.didEnterBackgroundNotification,
         UIApplication.willEnterForegroundNotification,
