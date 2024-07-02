@@ -134,6 +134,8 @@ extension KeyedEncodingContainer {
                 try container.encodeIfPresent(val, forKey: JSONCodingKeys(stringValue: item.key)!)
             } else if let val = item.value as? CGFloat {
                 try container.encodeIfPresent(val, forKey: JSONCodingKeys(stringValue: item.key)!)
+            } else if let val = item.value as? Decimal {
+                try container.encodeIfPresent(val, forKey: JSONCodingKeys(stringValue: item.key)!)
             } else if let val = item.value as? Bool {
                 try container.encodeIfPresent(val, forKey: JSONCodingKeys(stringValue: item.key)!)
             } else if let val = item.value as? [Any] {
