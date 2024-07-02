@@ -11,7 +11,13 @@ import Foundation
 import SwiftUI
 
 class IOSLifecycleMonitor: UtilityPlugin {
-    private var application: UIApplication?
+    private var application: UIApplication? {
+        // TODO: Check if lifecycle plugin works for app extension
+        // App extensions can't use UIApplication.shared, so
+        // funnel it through something to check; Could be nil.
+        UIApplication.value(forKeyPath: "sharedApplication") as? UIApplication
+    }
+    
     private var appNotifications: [NSNotification.Name] = [
         UIApplication.didEnterBackgroundNotification,
         UIApplication.willEnterForegroundNotification,
@@ -22,10 +28,6 @@ class IOSLifecycleMonitor: UtilityPlugin {
     private var sendApplicationOpenedOnDidBecomeActive = false
 
     override init() {
-        // TODO: Check if lifecycle plugin works for app extension
-        // App extensions can't use UIApplication.shared, so
-        // funnel it through something to check; Could be nil.
-        application = UIApplication.value(forKeyPath: "sharedApplication") as? UIApplication
         super.init()
         setupListeners()
     }
