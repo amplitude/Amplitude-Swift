@@ -52,4 +52,14 @@ public class ObjCDefaultTrackingOptions: NSObject {
             options.screenViews = value
         }
     }
+
+    @objc
+    public var userInteractions: Bool {
+        get {
+            options.userInteractions
+        }
+        set(value) {
+            options.userInteractions = value
+        }
+    }
 }
