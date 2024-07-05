@@ -1,4 +1,4 @@
-import UIKit
+import Foundation
 
 public class UserInteractionEvent: BaseEvent {
     convenience init(
