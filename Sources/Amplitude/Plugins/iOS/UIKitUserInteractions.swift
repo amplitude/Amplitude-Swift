@@ -1,8 +1,8 @@
 #if os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)
 import UIKit
 
-internal class UIKitUserInteractions {
-    static var amplitudeInstances = NSHashTable<Amplitude>.weakObjects()
+class UIKitUserInteractions {
+    fileprivate static var amplitudeInstances = NSHashTable<Amplitude>.weakObjects()
 
     private static let swizzleQueue = DispatchQueue(label: "com.amplitude.swizzle")
 
@@ -44,7 +44,7 @@ internal class UIKitUserInteractions {
     }
 }
 
-internal extension UIApplication {
+extension UIApplication {
     private var keyWindow: UIWindow? {
         connectedScenes
             .compactMap { $0 as? UIWindowScene }
@@ -57,7 +57,8 @@ internal extension UIApplication {
 
         guard
             let keyWindow = keyWindow,
-            let view = sender as? UIView
+            let view = sender as? UIView,
+            !(view is UITextField)
         else { return sendActionResult }
 
         let relevantTouch = event?.allTouches?.first {
@@ -85,7 +86,7 @@ internal extension UIApplication {
     }
 }
 
-internal extension UIView {
+extension UIView {
     private static let viewHierarchyDelimiter = " -> "
 
     struct ViewData {
@@ -126,10 +127,9 @@ internal extension UIView {
     }
 }
 
-internal extension UIResponder {
+extension UIResponder {
     var descriptiveTypeName: String {
-        let typeString = String(describing: type(of: self))
-        return typeString.replacingOccurrences(of: ">()", with: ">")
+        String(describing: type(of: self))
     }
 }
 
