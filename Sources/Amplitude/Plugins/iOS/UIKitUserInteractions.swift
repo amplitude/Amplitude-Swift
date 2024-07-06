@@ -2,21 +2,19 @@
 import UIKit
 
 class UIKitUserInteractions {
-    fileprivate static var amplitudeInstances = NSHashTable<Amplitude>.weakObjects()
+    fileprivate static let amplitudeInstances = NSHashTable<Amplitude>.weakObjects()
 
-    private static let swizzleQueue = DispatchQueue(label: "com.amplitude.swizzle")
+    private static let queue = DispatchQueue(label: "com.amplitude.autocapture", target: .global(qos: .utility))
 
-    private static var sendActionSwizzled = false
+    private static let initializeSwizzle: () = {
+        swizzleSendAction()
+    }()
 
     static func register(_ amplitude: Amplitude) {
-        swizzleQueue.sync {
+        queue.sync {
             amplitudeInstances.add(amplitude)
-
-            if !sendActionSwizzled {
-                sendActionSwizzled = true
-                swizzleSendAction()
-            }
         }
+        initializeSwizzle
     }
 
     private static func swizzleSendAction() {
