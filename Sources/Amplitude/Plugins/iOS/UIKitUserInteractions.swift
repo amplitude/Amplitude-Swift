@@ -54,11 +54,20 @@ extension UIApplication {
         let sendActionResult = amp_sendAction(action, to: target, from: sender, for: event)
 
         guard
+            sendActionResult,
             let keyWindow = keyWindow,
-            let view = sender as? UIView,
-            !(view is UITextField),
-            !(view is UISlider)
+            let view = sender as? UIView
         else { return sendActionResult }
+
+        if let textField = view as? UITextField, !textField.shouldTrack(action, for: event) {
+            return sendActionResult
+        } else {
+            #if !os(tvOS)
+            if let slider = view as? UISlider, !slider.shouldTrack(action, for: event) {
+                return sendActionResult
+            }
+            #endif
+        }
 
         let viewData = view.extractData(with: action, in: keyWindow)
 
@@ -95,6 +104,8 @@ extension UIView {
 
         if let button = self as? UIButton {
             targetText = button.titleLabel?.text
+        } else if let textField = self as? UITextField {
+            targetText = textField.placeholder
         }
 
         let viewController = window.rootViewController
@@ -123,5 +134,20 @@ extension UIResponder {
         String(describing: type(of: self))
     }
 }
+
+extension UITextField {
+    func shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool {
+        // primaryActionTriggered: is triggered when the text field loses focus.
+        return action == Selector(("primaryActionTriggered:"))
+    }
+}
+
+#if !os(tvOS)
+extension UISlider {
+    func shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool {
+        return event?.allTouches?.contains { $0.phase == .ended && $0.view == self } ?? false
+    }
+}
+#endif
 
 #endif
