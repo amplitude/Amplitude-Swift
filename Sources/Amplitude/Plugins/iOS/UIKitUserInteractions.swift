@@ -56,16 +56,9 @@ extension UIApplication {
         guard
             let keyWindow = keyWindow,
             let view = sender as? UIView,
-            !(view is UITextField)
+            !(view is UITextField),
+            !(view is UISlider)
         else { return sendActionResult }
-
-        let relevantTouch = event?.allTouches?.first {
-            $0.phase == .ended && $0.view == view
-        }
-
-        // Only capture events when the touch ended or when the
-        // action message does not correspond to a touch.
-        guard relevantTouch != nil || event == nil else { return sendActionResult }
 
         let viewData = view.extractData(with: action, in: keyWindow)
 
