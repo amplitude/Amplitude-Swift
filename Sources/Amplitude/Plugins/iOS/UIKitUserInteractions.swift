@@ -138,14 +138,14 @@ extension UIResponder {
 extension UITextField {
     func shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool {
         // primaryActionTriggered: is triggered when the text field loses focus.
-        return action == Selector(("primaryActionTriggered:"))
+        action == Selector(("primaryActionTriggered:"))
     }
 }
 
 #if !os(tvOS)
 extension UISlider {
     func shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool {
-        return event?.allTouches?.contains { $0.phase == .ended && $0.view == self } ?? false
+        event?.allTouches?.contains { $0.phase == .ended && $0.view == self } ?? false
     }
 }
 #endif
