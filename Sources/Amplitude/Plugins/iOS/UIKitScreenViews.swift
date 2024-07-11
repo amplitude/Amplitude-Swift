@@ -3,24 +3,19 @@ import Foundation
 import UIKit
 
 class UIKitScreenViews {
-    internal static let lock = NSLock()
-    internal static var amplitudes: [Weak<Amplitude>] = []
-    private static var viewDidAppearSwizzled = false
+    private static let lock = NSLock()
+    fileprivate static var amplitudes = NSHashTable<Amplitude>.weakObjects()
+    fileprivate static weak var lastTopViewController: UIViewController?
 
     static func register(_ amplitude: Amplitude) {
-        lock.lock()
-        defer { lock.unlock() }
-
-        amplitudes.append(Weak(amplitude))
-        if viewDidAppearSwizzled {
-            return
+        lock.withLock {
+            amplitudes.add(amplitude)
         }
 
-        viewDidAppearSwizzled = true
-        swizzleViewDidAppear()
+        swizzleViewDidAppear
     }
 
-    private static func swizzleViewDidAppear() {
+    private static let swizzleViewDidAppear: Void = {
         let controllerClass = UIViewController.self
         let originalSelector = #selector(UIViewController.viewDidAppear(_:))
         let swizzledSelector = #selector(UIViewController.amp_viewDidAppear(_:))
@@ -45,7 +40,7 @@ class UIKitScreenViews {
         } else {
             method_exchangeImplementations(originalViewDidAppear, swizzledViewDidAppear)
         }
-    }
+    }()
 
     static func screenName(for viewController: UIViewController) -> String {
         if let title = viewController.title, !title.isEmpty {
@@ -76,14 +71,17 @@ extension UIViewController {
             return
         }
 
-        guard let top = Self.amp_topViewController(rootViewController) else {
+        guard let top = Self.amp_topViewController(rootViewController),
+              top !== UIKitScreenViews.lastTopViewController else {
             return
         }
 
+        UIKitScreenViews.lastTopViewController = top
+
         let screenName = UIKitScreenViews.screenName(for: top)
 
-        for amplitude in UIKitScreenViews.amplitudes {
-            amplitude.value?.track(event: ScreenViewedEvent(screenName: screenName))
+        for amplitude in UIKitScreenViews.amplitudes.allObjects {
+            amplitude.track(event: ScreenViewedEvent(screenName: screenName))
         }
     }
 

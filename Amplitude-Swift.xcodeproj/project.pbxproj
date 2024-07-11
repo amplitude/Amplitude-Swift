@@ -43,7 +43,6 @@
 		8EDEC5F7208B1C327C8703D7 /* ObjCStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECF8CF745F7339B65D6DB /* ObjCStorage.swift */; };
 		8EDEC74C71FEC9056DC7358F /* ObjCLoggerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECD4B7ED7CBCD6955D097 /* ObjCLoggerProvider.swift */; };
 		8EDEC8F8DD2CDCD6568512F8 /* RemnantDataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */; };
-		8EDEC94F3562C2FACAA58A3D /* Weak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC54AB4DF9E1074C3D6A4 /* Weak.swift */; };
 		8EDEC972AEB33E4528F7FEEB /* StoragePrefixMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC9B98272069D70D08EA4 /* StoragePrefixMigrationTests.swift */; };
 		8EDEC977C03AA2676724F436 /* BasePlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC448C42C8C0A464FAA15 /* BasePlugins.swift */; };
 		8EDEC98799DCB6610B8DBA19 /* ObjCAmplitude.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC1576C95A2EB2FEF00A8 /* ObjCAmplitude.swift */; };
@@ -166,7 +165,6 @@
 		8EDEC48D9C242C1A39AABCC4 /* ObjCTrackingOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCTrackingOptions.swift; sourceTree = "<group>"; };
 		8EDEC4F83BFAA664749FAEF0 /* QueueTimeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueueTimeTests.swift; sourceTree = "<group>"; };
 		8EDEC500EBDA8B813056E2DB /* ObjCIngestionMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCIngestionMetadata.swift; sourceTree = "<group>"; };
-		8EDEC54AB4DF9E1074C3D6A4 /* Weak.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Weak.swift; sourceTree = "<group>"; };
 		8EDEC5A50E197C9C5067C19E /* ObjCIdentify.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCIdentify.swift; sourceTree = "<group>"; };
 		8EDEC650EF79B104DC3C9F4C /* UIKitScreenViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitScreenViews.swift; sourceTree = "<group>"; };
 		8EDEC6A9899998F823C278F7 /* RemnantDataMigrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemnantDataMigrationTests.swift; sourceTree = "<group>"; };
@@ -427,7 +425,6 @@
 				OBJ_50 /* QueueTimer.swift */,
 				OBJ_52 /* UrlExtension.swift */,
 				BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */,
-				8EDEC54AB4DF9E1074C3D6A4 /* Weak.swift */,
 				D010435E2B6C59EE00F8173C /* SandboxHelper.swift */,
 				3E281B8B2B967F19009D913B /* Diagonostics.swift */,
 				3E281B902B9BCC14009D913B /* DispatchQueueHolder.swift */,
@@ -784,7 +781,6 @@
 				8EDEC3283B812D5D34DADF7B /* AnalyticsConnectorIdentityPlugin.swift in Sources */,
 				8EDEC4D0C0CE07BF211804CC /* DefaultTrackingOptions.swift in Sources */,
 				8EDEC30C0075E9D92B1B5210 /* UIKitScreenViews.swift in Sources */,
-				8EDEC94F3562C2FACAA58A3D /* Weak.swift in Sources */,
 				8EDEC43FB30802F70112E577 /* ScreenViewedEvent.swift in Sources */,
 				8EDEC51F746CC25D27E32F6A /* DeepLinkOpenedEvent.swift in Sources */,
 				8EDECF81C2B1B38D472FD7EF /* ObjCConfiguration.swift in Sources */,
