@@ -16,9 +16,9 @@ class UIKitUserInteractions {
     }()
 
     static func register(_ amplitude: Amplitude) {
-        lock.lock()
-        amplitudeInstances.add(amplitude)
-        lock.unlock()
+        lock.withLock {
+            amplitudeInstances.add(amplitude)
+        }
         initializeSwizzle
         initializeNotificationListeners
     }
@@ -107,8 +107,6 @@ extension UIView {
 
         if let button = self as? UIButton {
             targetText = button.currentTitle
-        } else if let textField = self as? UITextField {
-            targetText = String(textField.tag)
         } else if let segmentedControl = self as? UISegmentedControl {
             targetText = segmentedControl.titleForSegment(at: segmentedControl.selectedSegmentIndex)
         } else {
