@@ -55,7 +55,7 @@ class UIKitUserInteractionsTests: XCTestCase {
         XCTAssertNil(orphanData.targetText)
         XCTAssertEqual(orphanData.hierarchy, "UIView")
     }
-    
+
     func testDescriptiveTypeName() {
         let button = UIButton()
         XCTAssertEqual(button.descriptiveTypeName, "UIButton")

@@ -9,7 +9,7 @@ class UIKitUserInteractions {
     private static let initializeSwizzle: () = {
         swizzleSendAction()
     }()
-    
+
     private static let initializeNotificationListeners: () = {
         NotificationCenter.default.addObserver(UITextField.self, selector: #selector(UITextField.amp_textFieldBeganEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
         NotificationCenter.default.addObserver(UITextField.self, selector: #selector(UITextField.amp_textFieldEndedEditing), name: UITextField.textDidEndEditingNotification, object: nil)
@@ -89,7 +89,7 @@ extension UIView {
         let targetText: String?
         let hierarchy: String
     }
-    
+
     func eventFromData(with action: Selector) -> UserInteractionEvent {
         let viewData = extractData(with: action)
         return UserInteractionEvent(
@@ -162,7 +162,7 @@ extension UITextField: Trackable {
     func shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool {
         false
     }
-    
+
     @objc static func amp_textFieldBeganEditing(_ notification: NSNotification) {
         guard let textField = notification.object as? UITextField else { return }
         let userInteractionEvent = textField.eventFromData(with: #selector(UITextField.amp_textFieldBeganEditing))
@@ -170,7 +170,7 @@ extension UITextField: Trackable {
             $0.track(event: userInteractionEvent)
         }
     }
-    
+
     @objc static func amp_textFieldEndedEditing(_ notification: NSNotification) {
         guard let textField = notification.object as? UITextField else { return }
         let userInteractionEvent = textField.eventFromData(with: #selector(UITextField.amp_textFieldEndedEditing))
