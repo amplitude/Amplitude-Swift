@@ -94,7 +94,7 @@ public struct Constants {
     static let AMP_APP_LINK_URL_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Link URL"
     static let AMP_APP_LINK_REFERRER_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Link Referrer"
     static let AMP_APP_SCREEN_NAME_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Screen Name"
-    static let AMP_APP_VIEW_CONTROLLET = "\(AMP_AMPLITUDE_PREFIX)View Controller"
+    static let AMP_APP_VIEW_CONTROLLER = "\(AMP_AMPLITUDE_PREFIX)View Controller"
     static let AMP_APP_TITLE = "\(AMP_AMPLITUDE_PREFIX)Title"
     static let AMP_APP_TARGET_ACCESSIBILITY_LABEL = "\(AMP_AMPLITUDE_PREFIX)Target Accessibility Label"
     static let AMP_APP_ACTION_METHOD = "\(AMP_AMPLITUDE_PREFIX)Action Method"

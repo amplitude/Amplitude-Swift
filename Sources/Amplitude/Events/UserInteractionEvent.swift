@@ -11,7 +11,7 @@ public class UserInteractionEvent: BaseEvent {
         hierarchy: String
     ) {
         self.init(eventType: Constants.AMP_USER_INTERACTION_EVENT, eventProperties: [
-            Constants.AMP_APP_VIEW_CONTROLLET: viewController,
+            Constants.AMP_APP_VIEW_CONTROLLER: viewController,
             Constants.AMP_APP_TITLE: title,
             Constants.AMP_APP_TARGET_ACCESSIBILITY_LABEL: accessibilityLabel,
             Constants.AMP_APP_ACTION_METHOD: actionMethod,
