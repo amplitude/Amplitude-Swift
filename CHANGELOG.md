@@ -1,3 +1,16 @@
+# [1.7.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.6.2...v1.7.0) (2024-07-11)
+
+
+### Bug Fixes
+
+* add support for Decimal property values ([#187](https://github.com/amplitude/Amplitude-Swift/issues/187)) ([c838bd9](https://github.com/amplitude/Amplitude-Swift/commit/c838bd90a6da46337af5a5f6960fbca531994d2d))
+* fix indentation issue ([#188](https://github.com/amplitude/Amplitude-Swift/issues/188)) ([48b9a37](https://github.com/amplitude/Amplitude-Swift/commit/48b9a37ff77fbd4ae2381aa400ff65bf443869ee))
+
+
+### Features
+
+* Improve codable support ([#192](https://github.com/amplitude/Amplitude-Swift/issues/192)) ([1ad9796](https://github.com/amplitude/Amplitude-Swift/commit/1ad979673abaeabcd84afe6a495c01a169a43284))
+
 ## [1.6.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.6.1...v1.6.2) (2024-06-14)
 
 
