@@ -5,22 +5,57 @@ import XCTest
 #if os(iOS)
 
 class UIKitUserInteractionsTests: XCTestCase {
-    func testExtractData() {
-        let fakeWindow = FakeUIWindow()
-        let fakeVC = FakeUIViewController()
-        let fakeButton = FakeUIButton()
-        fakeButton.fakeTitleLabel?.text = "Button Text"
-        fakeWindow.fakeRootViewController = fakeVC
+    func testExtractDataForUIButton() {
+        let mockVC = UIViewController()
+        mockVC.title = "Mock VC Title"
 
-        let data = fakeButton.extractData(with: #selector(FakeUIButton.someAction), in: fakeWindow)
+        let button = UIButton(type: .system)
+        button.setTitle("Test Button", for: .normal)
+        button.accessibilityLabel = "Accessibility Button"
+        mockVC.view.addSubview(button)
 
-        XCTAssertEqual(data.viewController, "FakeUIViewController")
-        XCTAssertEqual(data.title, "TestVC")
-        XCTAssertEqual(data.actionMethod, "someAction")
-        XCTAssertEqual(data.targetViewClass, "FakeUIButton")
-        XCTAssertEqual(data.targetText, "Button Text")
+        let buttonData = button.extractData(with: #selector(UIButton.touchesEnded))
+
+        XCTAssertEqual(buttonData.viewController, "UIViewController")
+        XCTAssertEqual(buttonData.title, "Mock VC Title")
+        XCTAssertEqual(buttonData.accessibilityLabel, "Accessibility Button")
+        XCTAssertEqual(buttonData.actionMethod, "touchesEnded:withEvent:")
+        XCTAssertEqual(buttonData.targetViewClass, "UIButton")
+        XCTAssertEqual(buttonData.targetText, "Test Button")
+        XCTAssertTrue(buttonData.hierarchy.hasSuffix("UIButton -> UIView"))
     }
 
+    func testExtractDataForCustomView() {
+        let mockVC = UIViewController()
+        mockVC.title = "Mock VC Title"
+
+        class CustomView: UIView {}
+        let customView = CustomView()
+        mockVC.view.addSubview(customView)
+
+        let customViewData = customView.extractData(with: #selector(UIView.layoutSubviews))
+
+        XCTAssertEqual(customViewData.viewController, "UIViewController")
+        XCTAssertEqual(customViewData.title, "Mock VC Title")
+        XCTAssertNil(customViewData.accessibilityLabel)
+        XCTAssertEqual(customViewData.actionMethod, "layoutSubviews")
+        XCTAssertEqual(customViewData.targetViewClass, "CustomView")
+        XCTAssertTrue(customViewData.hierarchy.hasSuffix("CustomView -> UIView"))
+    }
+
+    func testExtractDataForOrphanView() {
+        let orphanView = UIView()
+        let orphanData = orphanView.extractData(with: #selector(UIView.removeFromSuperview))
+
+        XCTAssertNil(orphanData.viewController)
+        XCTAssertNil(orphanData.title)
+        XCTAssertNil(orphanData.accessibilityLabel)
+        XCTAssertEqual(orphanData.actionMethod, "removeFromSuperview")
+        XCTAssertEqual(orphanData.targetViewClass, "UIView")
+        XCTAssertNil(orphanData.targetText)
+        XCTAssertEqual(orphanData.hierarchy, "UIView")
+    }
+    
     func testDescriptiveTypeName() {
         let button = UIButton()
         XCTAssertEqual(button.descriptiveTypeName, "UIButton")
@@ -30,36 +65,6 @@ class UIKitUserInteractionsTests: XCTestCase {
 
         class ConstrainedGenericView<T: UIView>: UIView {}
         XCTAssertEqual(ConstrainedGenericView<UIButton>().descriptiveTypeName, "ConstrainedGenericView<UIButton>")
-    }
-}
-
-class FakeUIWindow: UIWindow {
-    var fakeRootViewController: UIViewController?
-
-    override var rootViewController: UIViewController? {
-        get { return fakeRootViewController }
-        set {}
-    }
-}
-
-class FakeUIViewController: UIViewController {
-    var fakeTitle: String? = "TestVC"
-
-    override var title: String? {
-        get { return fakeTitle }
-        set {}
-    }
-}
-
-class FakeUIButton: UIButton {
-    var fakeTitleLabel: UILabel? = UILabel()
-
-    override var titleLabel: UILabel? {
-        return fakeTitleLabel
-    }
-
-    @objc func someAction() {
-        // no-op
     }
 }
 

@@ -4,17 +4,23 @@ import UIKit
 class UIKitUserInteractions {
     fileprivate static let amplitudeInstances = NSHashTable<Amplitude>.weakObjects()
 
-    private static let queue = DispatchQueue(label: "com.amplitude.autocapture", target: .global(qos: .utility))
+    private static let lock = NSLock()
 
     private static let initializeSwizzle: () = {
         swizzleSendAction()
     }()
+    
+    private static let initializeNotificationListeners: () = {
+        NotificationCenter.default.addObserver(UITextField.self, selector: #selector(UITextField.amp_textFieldBeganEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UITextField.self, selector: #selector(UITextField.amp_textFieldEndedEditing), name: UITextField.textDidEndEditingNotification, object: nil)
+    }()
 
     static func register(_ amplitude: Amplitude) {
-        queue.sync {
-            amplitudeInstances.add(amplitude)
-        }
+        lock.lock()
+        amplitudeInstances.add(amplitude)
+        lock.unlock()
         initializeSwizzle
+        initializeNotificationListeners
     }
 
     private static func swizzleSendAction() {
@@ -43,19 +49,11 @@ class UIKitUserInteractions {
 }
 
 extension UIApplication {
-    private var keyWindow: UIWindow? {
-        connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap { $0.windows }
-            .first { $0.isKeyWindow }
-    }
-
-    @objc dynamic func amp_sendAction(_ action: Selector, to target: Any?, from sender: Any?, for event: UIEvent?) -> Bool {
+    @objc func amp_sendAction(_ action: Selector, to target: Any?, from sender: Any?, for event: UIEvent?) -> Bool {
         let sendActionResult = amp_sendAction(action, to: target, from: sender, for: event)
 
         guard
             sendActionResult,
-            let keyWindow = keyWindow,
             let view = sender as? UIView
         else { return sendActionResult }
 
@@ -69,17 +67,10 @@ extension UIApplication {
             #endif
         }
 
-        let viewData = view.extractData(with: action, in: keyWindow)
+        let userInteractionEvent = view.eventFromData(with: action)
 
         UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
-            $0.track(event: UserInteractionEvent(
-                viewController: viewData.viewController,
-                title: viewData.title,
-                accessibilityLabel: viewData.accessibilityLabel,
-                actionMethod: viewData.actionMethod,
-                targetViewClass: viewData.targetViewClass,
-                targetText: viewData.targetText,
-                hierarchy: viewData.hierarchy))
+            $0.track(event: userInteractionEvent)
         }
 
         return sendActionResult
@@ -98,17 +89,41 @@ extension UIView {
         let targetText: String?
         let hierarchy: String
     }
+    
+    func eventFromData(with action: Selector) -> UserInteractionEvent {
+        let viewData = extractData(with: action)
+        return UserInteractionEvent(
+            viewController: viewData.viewController,
+            title: viewData.title,
+            accessibilityLabel: viewData.accessibilityLabel,
+            actionMethod: viewData.actionMethod,
+            targetViewClass: viewData.targetViewClass,
+            targetText: viewData.targetText,
+            hierarchy: viewData.hierarchy)
+    }
 
-    func extractData(with action: Selector, in window: UIWindow) -> ViewData {
+    func extractData(with action: Selector) -> ViewData {
         var targetText: String?
 
         if let button = self as? UIButton {
-            targetText = button.titleLabel?.text
+            targetText = button.currentTitle
         } else if let textField = self as? UITextField {
-            targetText = textField.placeholder
+            targetText = String(textField.tag)
+        } else if let segmentedControl = self as? UISegmentedControl {
+            targetText = segmentedControl.titleForSegment(at: segmentedControl.selectedSegmentIndex)
+        } else {
+            #if !os(tvOS)
+            if #available(iOS 14.0, macCatalyst 14.0, *) {
+                if let colorWell = self as? UIColorWell {
+                    targetText = colorWell.title
+                } else if let `switch` = self as? UISwitch {
+                    targetText = `switch`.title
+                }
+            }
+            #endif
         }
 
-        let viewController = window.rootViewController
+        let viewController = owningViewController
         let viewControllerClassName = viewController?.descriptiveTypeName
         let viewControllerTitle = viewController?.title
         let targetAccessibilityLabel = self.accessibilityLabel
@@ -133,17 +148,40 @@ extension UIResponder {
     var descriptiveTypeName: String {
         String(describing: type(of: self))
     }
+
+    var owningViewController: UIViewController? {
+        return self as? UIViewController ?? next?.owningViewController
+    }
 }
 
-extension UITextField {
+protocol Trackable {
+    func shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool
+}
+
+extension UITextField: Trackable {
     func shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool {
-        // primaryActionTriggered: is triggered when the text field loses focus.
-        action == Selector(("primaryActionTriggered:"))
+        false
+    }
+    
+    @objc static func amp_textFieldBeganEditing(_ notification: NSNotification) {
+        guard let textField = notification.object as? UITextField else { return }
+        let userInteractionEvent = textField.eventFromData(with: #selector(UITextField.amp_textFieldBeganEditing))
+        UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
+            $0.track(event: userInteractionEvent)
+        }
+    }
+    
+    @objc static func amp_textFieldEndedEditing(_ notification: NSNotification) {
+        guard let textField = notification.object as? UITextField else { return }
+        let userInteractionEvent = textField.eventFromData(with: #selector(UITextField.amp_textFieldEndedEditing))
+        UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
+            $0.track(event: userInteractionEvent)
+        }
     }
 }
 
 #if !os(tvOS)
-extension UISlider {
+extension UISlider: Trackable {
     func shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool {
         event?.allTouches?.contains { $0.phase == .ended && $0.view == self } ?? false
     }
