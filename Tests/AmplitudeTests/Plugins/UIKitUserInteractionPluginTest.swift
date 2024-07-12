@@ -14,12 +14,12 @@ class UIKitUserInteractionsTests: XCTestCase {
         button.accessibilityLabel = "Accessibility Button"
         mockVC.view.addSubview(button)
 
-        let buttonData = button.extractData(with: #selector(UIButton.touchesEnded))
+        let buttonData = button.extractData(with: "action")
 
         XCTAssertEqual(buttonData.viewController, "UIViewController")
         XCTAssertEqual(buttonData.title, "Mock VC Title")
         XCTAssertEqual(buttonData.accessibilityLabel, "Accessibility Button")
-        XCTAssertEqual(buttonData.actionMethod, "touchesEnded:withEvent:")
+        XCTAssertEqual(buttonData.action, "action")
         XCTAssertEqual(buttonData.targetViewClass, "UIButton")
         XCTAssertEqual(buttonData.targetText, "Test Button")
         XCTAssertTrue(buttonData.hierarchy.hasSuffix("UIButton -> UIView"))
@@ -33,24 +33,24 @@ class UIKitUserInteractionsTests: XCTestCase {
         let customView = CustomView()
         mockVC.view.addSubview(customView)
 
-        let customViewData = customView.extractData(with: #selector(UIView.layoutSubviews))
+        let customViewData = customView.extractData(with: "action")
 
         XCTAssertEqual(customViewData.viewController, "UIViewController")
         XCTAssertEqual(customViewData.title, "Mock VC Title")
         XCTAssertNil(customViewData.accessibilityLabel)
-        XCTAssertEqual(customViewData.actionMethod, "layoutSubviews")
+        XCTAssertEqual(customViewData.action, "action")
         XCTAssertEqual(customViewData.targetViewClass, "CustomView")
         XCTAssertTrue(customViewData.hierarchy.hasSuffix("CustomView -> UIView"))
     }
 
     func testExtractDataForOrphanView() {
         let orphanView = UIView()
-        let orphanData = orphanView.extractData(with: #selector(UIView.removeFromSuperview))
+        let orphanData = orphanView.extractData(with: "action")
 
         XCTAssertNil(orphanData.viewController)
         XCTAssertNil(orphanData.title)
         XCTAssertNil(orphanData.accessibilityLabel)
-        XCTAssertEqual(orphanData.actionMethod, "removeFromSuperview")
+        XCTAssertEqual(orphanData.action, "action")
         XCTAssertEqual(orphanData.targetViewClass, "UIView")
         XCTAssertNil(orphanData.targetText)
         XCTAssertEqual(orphanData.hierarchy, "UIView")

@@ -97,7 +97,7 @@ public struct Constants {
     static let AMP_APP_VIEW_CONTROLLER = "\(AMP_AMPLITUDE_PREFIX)View Controller"
     static let AMP_APP_TITLE = "\(AMP_AMPLITUDE_PREFIX)Title"
     static let AMP_APP_TARGET_ACCESSIBILITY_LABEL = "\(AMP_AMPLITUDE_PREFIX)Target Accessibility Label"
-    static let AMP_APP_ACTION_METHOD = "\(AMP_AMPLITUDE_PREFIX)Action Method"
+    static let AMP_APP_ACTION = "\(AMP_AMPLITUDE_PREFIX)Action"
     static let AMP_APP_TARGET_VIEW_CLASS = "\(AMP_AMPLITUDE_PREFIX)Target View Class"
     static let AMP_APP_TARGET_TEXT = "\(AMP_AMPLITUDE_PREFIX)Target Text"
     static let AMP_APP_HIERARCHY = "\(AMP_AMPLITUDE_PREFIX)Hierarchy"
