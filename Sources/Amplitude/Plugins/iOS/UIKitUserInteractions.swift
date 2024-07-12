@@ -50,7 +50,7 @@ class UIKitUserInteractions {
     @objc static func amp_textFieldDidBeginEditing(_ notification: NSNotification) {
         guard let textField = notification.object as? UITextField else { return }
         let userInteractionEvent = textField.eventFromData(with: "didBeginEditing")
-        UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
+        amplitudeInstances.allObjects.forEach {
             $0.track(event: userInteractionEvent)
         }
     }
@@ -58,7 +58,7 @@ class UIKitUserInteractions {
     @objc static func amp_textFieldDidEndEditing(_ notification: NSNotification) {
         guard let textField = notification.object as? UITextField else { return }
         let userInteractionEvent = textField.eventFromData(with: "didEndEditing")
-        UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
+        amplitudeInstances.allObjects.forEach {
             $0.track(event: userInteractionEvent)
         }
     }
@@ -71,7 +71,7 @@ extension UIApplication {
         guard
             sendActionResult,
             let view = sender as? UIView,
-            view.shouldTrack(action, for: event)
+            view.amp_shouldTrack(action, for: event)
         else { return sendActionResult }
 
         let userInteractionEvent = view.eventFromData(with: NSStringFromSelector(action).components(separatedBy: ":").first ?? "")
@@ -117,8 +117,8 @@ extension UIView {
             accessibilityLabel: accessibilityLabel,
             action: action,
             targetViewClass: descriptiveTypeName,
-            targetText: title,
-            hierarchy: sequence(first: self, next: { $0.superview })
+            targetText: amp_title,
+            hierarchy: sequence(first: self, next: \.superview)
                 .map { $0.descriptiveTypeName }
                 .joined(separator: UIView.viewHierarchyDelimiter))
     }
@@ -134,30 +134,39 @@ extension UIResponder {
     }
 }
 
-extension UIView {
-    var title: String? {
-        switch self {
-        case let button as UIButton:
-            return button.currentTitle
-        case let segmentedControl as UISegmentedControl:
-            return segmentedControl.titleForSegment(at: segmentedControl.selectedSegmentIndex)
-        default:
-            return nil
-        }
-    }
+protocol ActionTrackable {
+    var amp_title: String? { get }
+    func amp_shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool
+}
 
-    func shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool {
-        switch self {
-        case is UITextField:
-            return false
-        #if !os(tvOS)
-        case is UISlider:
-            return event?.allTouches?.contains { $0.phase == .ended && $0.view == self } ?? false
-        #endif
-        default:
-            return true
-        }
+extension UIView: ActionTrackable {
+    @objc var amp_title: String? { nil }
+    @objc func amp_shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool { true }
+}
+
+extension UIButton {
+    override var amp_title: String? { currentTitle }
+}
+
+extension UISegmentedControl {
+    override var amp_title: String? { titleForSegment(at: selectedSegmentIndex) }
+}
+
+extension UITextField {
+    override func amp_shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool { false }
+}
+
+#if !os(tvOS)
+extension UISlider {
+    override func amp_shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool {
+        event?.allTouches?.contains { $0.phase == .ended && $0.view === self } ?? false
     }
 }
+
+@available(iOS 14.0, *)
+extension UIColorWell {
+    override var amp_title: String? { title }
+}
+#endif
 
 #endif
