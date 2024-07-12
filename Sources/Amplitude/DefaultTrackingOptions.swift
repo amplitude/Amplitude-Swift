@@ -11,14 +11,17 @@ public class DefaultTrackingOptions {
     public var sessions: Bool = true
     public var appLifecycles: Bool
     public var screenViews: Bool
+    public var userInteractions: Bool
 
     public init(
         sessions: Bool = true,
         appLifecycles: Bool = false,
-        screenViews: Bool = false
+        screenViews: Bool = false,
+        userInteractions: Bool = false
     ) {
         self.sessions = sessions
         self.appLifecycles = appLifecycles
         self.screenViews = screenViews
+        self.userInteractions = userInteractions
     }
 }
