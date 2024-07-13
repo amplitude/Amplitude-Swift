@@ -11,8 +11,8 @@ class UIKitUserInteractions {
     }()
 
     private static let initializeNotificationListeners: () = {
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(UIKitUserInteractions.amp_textFieldDidBeginEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(UIKitUserInteractions.amp_textFieldDidEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_textFieldDidBeginEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_textFieldDidEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
     }()
 
     static func register(_ amplitude: Amplitude) {
@@ -68,13 +68,15 @@ extension UIApplication {
     @objc func amp_sendAction(_ action: Selector, to target: Any?, from sender: Any?, for event: UIEvent?) -> Bool {
         let sendActionResult = amp_sendAction(action, to: target, from: sender, for: event)
 
-        guard
-            sendActionResult,
+        guard sendActionResult,
             let view = sender as? UIView,
-            view.amp_shouldTrack(action, for: event)
+            view.amp_shouldTrack(action, for: event),
+            let actionName = NSStringFromSelector(action)
+                .components(separatedBy: ":")
+                .first
         else { return sendActionResult }
 
-        let userInteractionEvent = view.eventFromData(with: NSStringFromSelector(action).components(separatedBy: ":").first ?? "")
+        let userInteractionEvent = view.eventFromData(with: actionName)
 
         UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
             $0.track(event: userInteractionEvent)
