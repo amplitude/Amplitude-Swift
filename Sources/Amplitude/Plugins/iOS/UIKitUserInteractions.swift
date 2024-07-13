@@ -6,24 +6,14 @@ class UIKitUserInteractions {
 
     private static let lock = NSLock()
 
-    private static let initializeSwizzle: () = {
-        swizzleSendAction()
+    private static let addNotificationObservers: () = {
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_didBeginEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_didBeginEditing), name: UITextView.textDidBeginEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
     }()
-
-    private static let initializeNotificationListeners: () = {
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_textFieldDidBeginEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_textFieldDidEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
-    }()
-
-    static func register(_ amplitude: Amplitude) {
-        lock.withLock {
-            amplitudeInstances.add(amplitude)
-        }
-        initializeSwizzle
-        initializeNotificationListeners
-    }
-
-    private static func swizzleSendAction() {
+    
+    private static let swizzleSendAction: () = {
         let applicationClass = UIApplication.self
 
         let originalSelector = #selector(UIApplication.sendAction)
@@ -45,19 +35,27 @@ class UIKitUserInteractions {
             originalSelector,
             swizzledImp,
             method_getTypeEncoding(swizzledMethod))
+    }()
+
+    static func register(_ amplitude: Amplitude) {
+        lock.withLock {
+            amplitudeInstances.add(amplitude)
+        }
+        swizzleSendAction
+        addNotificationObservers
     }
 
-    @objc static func amp_textFieldDidBeginEditing(_ notification: NSNotification) {
-        guard let textField = notification.object as? UITextField else { return }
-        let userInteractionEvent = textField.eventFromData(with: "didBeginEditing")
+    @objc static func amp_didBeginEditing(_ notification: NSNotification) {
+        guard let view = notification.object as? UIView else { return }
+        let userInteractionEvent = view.eventFromData(with: "didBeginEditing")
         amplitudeInstances.allObjects.forEach {
             $0.track(event: userInteractionEvent)
         }
     }
 
-    @objc static func amp_textFieldDidEndEditing(_ notification: NSNotification) {
-        guard let textField = notification.object as? UITextField else { return }
-        let userInteractionEvent = textField.eventFromData(with: "didEndEditing")
+    @objc static func amp_didEndEditing(_ notification: NSNotification) {
+        guard let view = notification.object as? UIView else { return }
+        let userInteractionEvent = view.eventFromData(with: "didEndEditing")
         amplitudeInstances.allObjects.forEach {
             $0.track(event: userInteractionEvent)
         }
