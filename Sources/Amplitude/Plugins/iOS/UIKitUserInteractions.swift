@@ -156,6 +156,10 @@ extension UITextField {
     override func amp_shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool { false }
 }
 
+extension UITextView {
+    override func amp_shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool { false }
+}
+
 #if !os(tvOS)
 extension UISlider {
     override func amp_shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool {
