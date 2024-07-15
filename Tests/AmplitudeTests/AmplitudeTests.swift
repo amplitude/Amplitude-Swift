@@ -294,6 +294,7 @@ final class AmplitudeTests: XCTestCase {
         let defaultTracking = amplitude.configuration.defaultTracking
         XCTAssertFalse(defaultTracking.appLifecycles)
         XCTAssertFalse(defaultTracking.screenViews)
+        XCTAssertFalse(defaultTracking.userInteractions)
         XCTAssertTrue(defaultTracking.sessions)
     }
 

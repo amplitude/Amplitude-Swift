@@ -83,6 +83,7 @@ public struct Constants {
     static let AMP_APPLICATION_BACKGROUNDED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Application Backgrounded"
     static let AMP_DEEP_LINK_OPENED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Deep Link Opened"
     static let AMP_SCREEN_VIEWED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Screen Viewed"
+    static let AMP_USER_INTERACTION_EVENT = "\(AMP_AMPLITUDE_PREFIX)User Interaction"
     static let AMP_REVENUE_EVENT = "revenue_amount"
 
     static let AMP_APP_VERSION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Version"
@@ -93,6 +94,13 @@ public struct Constants {
     static let AMP_APP_LINK_URL_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Link URL"
     static let AMP_APP_LINK_REFERRER_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Link Referrer"
     static let AMP_APP_SCREEN_NAME_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Screen Name"
+    static let AMP_APP_VIEW_CONTROLLER = "\(AMP_AMPLITUDE_PREFIX)View Controller"
+    static let AMP_APP_TITLE = "\(AMP_AMPLITUDE_PREFIX)Title"
+    static let AMP_APP_TARGET_ACCESSIBILITY_LABEL = "\(AMP_AMPLITUDE_PREFIX)Target Accessibility Label"
+    static let AMP_APP_ACTION = "\(AMP_AMPLITUDE_PREFIX)Action"
+    static let AMP_APP_TARGET_VIEW_CLASS = "\(AMP_AMPLITUDE_PREFIX)Target View Class"
+    static let AMP_APP_TARGET_TEXT = "\(AMP_AMPLITUDE_PREFIX)Target Text"
+    static let AMP_APP_HIERARCHY = "\(AMP_AMPLITUDE_PREFIX)Hierarchy"
 
     public struct Configuration {
         public static let FLUSH_QUEUE_SIZE = 30

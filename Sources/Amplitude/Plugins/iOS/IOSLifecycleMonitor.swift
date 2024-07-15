@@ -36,6 +36,9 @@ class IOSLifecycleMonitor: UtilityPlugin {
         if amplitude.configuration.defaultTracking.screenViews {
             UIKitScreenViews.register(amplitude)
         }
+        if amplitude.configuration.defaultTracking.userInteractions {
+            UIKitUserInteractions.register(amplitude)
+        }
     }
 
     @objc
