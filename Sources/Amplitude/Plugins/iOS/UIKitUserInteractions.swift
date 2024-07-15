@@ -12,7 +12,7 @@ class UIKitUserInteractions {
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_didBeginEditing), name: UITextView.textDidBeginEditingNotification, object: nil)
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
     }()
-    
+
     private static let swizzleSendAction: () = {
         let applicationClass = UIApplication.self
 
