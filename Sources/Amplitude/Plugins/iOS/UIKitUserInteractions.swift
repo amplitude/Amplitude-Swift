@@ -7,10 +7,10 @@ class UIKitUserInteractions {
     private static let lock = NSLock()
 
     private static let addNotificationObservers: () = {
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_didBeginEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_didBeginEditing), name: UITextView.textDidBeginEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(amp_didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextView.textDidBeginEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
     }()
 
     private static let swizzleSendAction: () = {
@@ -45,7 +45,7 @@ class UIKitUserInteractions {
         addNotificationObservers
     }
 
-    @objc static func amp_didBeginEditing(_ notification: NSNotification) {
+    @objc static func didBeginEditing(_ notification: NSNotification) {
         guard let view = notification.object as? UIView else { return }
         let userInteractionEvent = view.eventFromData(with: "didBeginEditing")
         amplitudeInstances.allObjects.forEach {
@@ -53,7 +53,7 @@ class UIKitUserInteractions {
         }
     }
 
-    @objc static func amp_didEndEditing(_ notification: NSNotification) {
+    @objc static func didEndEditing(_ notification: NSNotification) {
         guard let view = notification.object as? UIView else { return }
         let userInteractionEvent = view.eventFromData(with: "didEndEditing")
         amplitudeInstances.allObjects.forEach {
