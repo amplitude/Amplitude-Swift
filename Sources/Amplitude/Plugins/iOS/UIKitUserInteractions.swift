@@ -6,42 +6,23 @@ class UIKitUserInteractions {
 
     private static let lock = NSLock()
 
-    private static let addNotificationObservers: () = {
+    private static let addNotificationObservers: Void = {
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextView.textDidBeginEditingNotification, object: nil)
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
     }()
 
-    private static let swizzleSendAction: () = {
-        let applicationClass = UIApplication.self
-
-        let originalSelector = #selector(UIApplication.sendAction)
-        let swizzledSelector = #selector(UIApplication.amp_sendAction)
-
-        guard
-            let originalMethod = class_getInstanceMethod(applicationClass, originalSelector),
-            let swizzledMethod = class_getInstanceMethod(applicationClass, swizzledSelector)
-        else { return }
-
-        let originalImp = method_getImplementation(originalMethod)
-        let swizzledImp = method_getImplementation(swizzledMethod)
-
-        class_replaceMethod(applicationClass,
-            swizzledSelector,
-            originalImp,
-            method_getTypeEncoding(originalMethod))
-        class_replaceMethod(applicationClass,
-            originalSelector,
-            swizzledImp,
-            method_getTypeEncoding(swizzledMethod))
+    private static let setupMethodSwizzling: Void = {
+        swizzleMethod(UIApplication.self, from: #selector(UIApplication.sendAction), to: #selector(UIApplication.amp_sendAction))
+        swizzleMethod(UIGestureRecognizer.self, from: #selector(setter: UIGestureRecognizer.state), to: #selector(UIGestureRecognizer.amp_setState))
     }()
 
     static func register(_ amplitude: Amplitude) {
         lock.withLock {
             amplitudeInstances.add(amplitude)
         }
-        swizzleSendAction
+        setupMethodSwizzling
         addNotificationObservers
     }
 
@@ -59,6 +40,25 @@ class UIKitUserInteractions {
         amplitudeInstances.allObjects.forEach {
             $0.track(event: userInteractionEvent)
         }
+    }
+
+    private static func swizzleMethod(_ cls: AnyClass?, from original: Selector, to swizzled: Selector) {
+        guard
+            let originalMethod = class_getInstanceMethod(cls, original),
+            let swizzledMethod = class_getInstanceMethod(cls, swizzled)
+        else { return }
+
+        let originalImp = method_getImplementation(originalMethod)
+        let swizzledImp = method_getImplementation(swizzledMethod)
+
+        class_replaceMethod(cls,
+            swizzled,
+            originalImp,
+            method_getTypeEncoding(originalMethod))
+        class_replaceMethod(cls,
+            original,
+            swizzledImp,
+            method_getTypeEncoding(swizzledMethod))
     }
 }
 
@@ -81,6 +81,44 @@ extension UIApplication {
         }
 
         return sendActionResult
+    }
+}
+
+extension UIGestureRecognizer {
+    @objc func amp_setState(_ state: UIGestureRecognizer.State) {
+        amp_setState(state)
+
+        guard state == .ended, let view else { return }
+
+        let gestureType = switch self {
+            case is UITapGestureRecognizer: "Tap"
+            case is UIPinchGestureRecognizer: "Pinch"
+            case is UIRotationGestureRecognizer: "Rotation"
+            case is UISwipeGestureRecognizer: "Swipe"
+            case is UIPanGestureRecognizer: "Pan"
+            case is UIScreenEdgePanGestureRecognizer: "Screen Edge Pan"
+            case is UILongPressGestureRecognizer: "Long Press"
+            default: "Custom Gesture"
+        }
+
+        let userInteractionEvent = eventFromData(with: gestureType, from: view)
+
+        UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
+            $0.track(event: userInteractionEvent)
+        }
+    }
+
+    func eventFromData(with action: String, from view: UIView) -> UserInteractionEvent {
+        let viewData = view.extractData(with: action)
+        return UserInteractionEvent(
+            viewController: viewData.viewController,
+            title: viewData.title,
+            accessibilityLabel: viewData.accessibilityLabel,
+            action: viewData.action,
+            targetViewClass: viewData.targetViewClass,
+            targetText: viewData.targetText,
+            hierarchy: viewData.hierarchy,
+            gestureRecognizer: descriptiveTypeName)
     }
 }
 
@@ -125,12 +163,14 @@ extension UIView {
 }
 
 extension UIResponder {
-    var descriptiveTypeName: String {
-        String(describing: type(of: self))
-    }
-
     var owningViewController: UIViewController? {
         return self as? UIViewController ?? next?.owningViewController
+    }
+}
+
+extension NSObject {
+    var descriptiveTypeName: String {
+        String(describing: type(of: self))
     }
 }
 
