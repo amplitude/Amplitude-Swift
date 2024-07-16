@@ -92,12 +92,14 @@ extension UIGestureRecognizer {
 
         let gestureType = switch self {
         case is UITapGestureRecognizer: "Tap"
-        case is UIPinchGestureRecognizer: "Pinch"
-        case is UIRotationGestureRecognizer: "Rotation"
         case is UISwipeGestureRecognizer: "Swipe"
         case is UIPanGestureRecognizer: "Pan"
-        case is UIScreenEdgePanGestureRecognizer: "Screen Edge Pan"
         case is UILongPressGestureRecognizer: "Long Press"
+#if !os(tvOS)
+        case is UIPinchGestureRecognizer: "Pinch"
+        case is UIRotationGestureRecognizer: "Rotation"
+        case is UIScreenEdgePanGestureRecognizer: "Screen Edge Pan"
+#endif
         default: "Custom Gesture"
         }
 
