@@ -91,14 +91,14 @@ extension UIGestureRecognizer {
         guard state == .ended, let view else { return }
 
         let gestureType = switch self {
-            case is UITapGestureRecognizer: "Tap"
-            case is UIPinchGestureRecognizer: "Pinch"
-            case is UIRotationGestureRecognizer: "Rotation"
-            case is UISwipeGestureRecognizer: "Swipe"
-            case is UIPanGestureRecognizer: "Pan"
-            case is UIScreenEdgePanGestureRecognizer: "Screen Edge Pan"
-            case is UILongPressGestureRecognizer: "Long Press"
-            default: "Custom Gesture"
+        case is UITapGestureRecognizer: "Tap"
+        case is UIPinchGestureRecognizer: "Pinch"
+        case is UIRotationGestureRecognizer: "Rotation"
+        case is UISwipeGestureRecognizer: "Swipe"
+        case is UIPanGestureRecognizer: "Pan"
+        case is UIScreenEdgePanGestureRecognizer: "Screen Edge Pan"
+        case is UILongPressGestureRecognizer: "Long Press"
+        default: "Custom Gesture"
         }
 
         let userInteractionEvent = eventFromData(with: gestureType, from: view)
