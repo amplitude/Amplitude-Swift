@@ -25,15 +25,15 @@ class UIKitUserInteractions {
         }
         return true
     }()
-    
+
     private static let addNotificationObservers: Void = {
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextView.textDidBeginEditingNotification, object: nil)
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
-        
+
         guard setupAXBundle else { return }
-        
+
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(windowDidBecomeKey), name: UIWindow.didBecomeKeyNotification, object: nil)
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(windowDidResignKey), name: UIWindow.didResignKeyNotification, object: nil)
     }()
@@ -65,7 +65,7 @@ class UIKitUserInteractions {
     @objc static func windowDidBecomeKey(_ notification: NSNotification) {
         guard let window = notification.object as? UIWindow else { return }
 
-        if let windowGestureRecognizers = window.gestureRecognizers, 
+        if let windowGestureRecognizers = window.gestureRecognizers,
             windowGestureRecognizers.contains(where: { $0 is _AmplitudeSwiftUIGestureRecognizer })
         { return }
 
