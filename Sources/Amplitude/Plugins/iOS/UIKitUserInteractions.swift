@@ -296,7 +296,7 @@ extension UIAccessibilityTraits {
             break
         }
 
-        if #available(iOS 17.0, *), self == .toggleButton {
+        if #available(iOS 17.0, tvOS 17.0, macCatalyst 17.0, *), self == .toggleButton {
             return "Toggle Button"
         }
 
