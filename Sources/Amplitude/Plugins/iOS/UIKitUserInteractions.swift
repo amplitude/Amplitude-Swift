@@ -11,11 +11,28 @@ class UIKitUserInteractions {
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextView.textDidBeginEditingNotification, object: nil)
         NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(windowDidBecomeKey), name: UIWindow.didBecomeKeyNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(windowDidResignKey), name: UIWindow.didResignKeyNotification, object: nil)
     }()
 
     private static let setupMethodSwizzling: Void = {
         swizzleMethod(UIApplication.self, from: #selector(UIApplication.sendAction), to: #selector(UIApplication.amp_sendAction))
         swizzleMethod(UIGestureRecognizer.self, from: #selector(setter: UIGestureRecognizer.state), to: #selector(UIGestureRecognizer.amp_setState))
+    }()
+
+    private static let setupAXBundle: Bool = {
+        guard
+            let axBundleURL = Bundle(identifier: "com.apple.UIKit")?
+                .bundleURL
+                .deletingLastPathComponent() // Remove "UIKit.framework"
+                .deletingLastPathComponent() // Remove "Frameworks"
+                .appendingPathComponent("AccessibilityBundles/UIKit.axbundle"),
+            let axBundle = Bundle(url: axBundleURL),
+            axBundle.load()
+        else {
+            return false
+        }
+        return true
     }()
 
     static func register(_ amplitude: Amplitude) {
@@ -42,6 +59,36 @@ class UIKitUserInteractions {
         }
     }
 
+    @objc static func windowDidBecomeKey(_ notification: NSNotification) {
+        guard setupAXBundle, let window = notification.object as? UIWindow else { return }
+
+        let swiftUIGestureRecognizer = _AmplitudeSwiftUIGestureRecognizer(target: UIKitUserInteractions.self, action: #selector(handleTap))
+        swiftUIGestureRecognizer.cancelsTouchesInView = false
+        swiftUIGestureRecognizer.delaysTouchesEnded = false
+        swiftUIGestureRecognizer.delegate = window
+
+        window.addGestureRecognizer(swiftUIGestureRecognizer)
+    }
+
+    @objc static func windowDidResignKey(_ notification: NSNotification) {
+        guard setupAXBundle,
+            let window = notification.object as? UIWindow,
+            let swiftUIGestureRecognizer = window.gestureRecognizers?.first(where: { $0 is _AmplitudeSwiftUIGestureRecognizer })
+        else { return }
+
+        window.removeGestureRecognizer(swiftUIGestureRecognizer)
+    }
+
+    @objc static func handleTap(_ sender: UIGestureRecognizer) {
+        if let target = findTargetUnderTap(for: sender) {
+            let userInteractionEvent = target.eventFromData(with: "Tap")
+
+            UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
+                $0.track(event: userInteractionEvent)
+            }
+        }
+    }
+
     private static func swizzleMethod(_ cls: AnyClass?, from original: Selector, to swizzled: Selector) {
         guard
             let originalMethod = class_getInstanceMethod(cls, original),
@@ -60,7 +107,25 @@ class UIKitUserInteractions {
             swizzledImp,
             method_getTypeEncoding(swizzledMethod))
     }
+
+    private static let accessibilityHierarchyParser = UIKitAccessibilityHierarchyParser()
+
+    private static func findTargetUnderTap(for gestureRecognizer: UIGestureRecognizer) -> AccessibilityTarget? {
+        guard let view = gestureRecognizer.view else { return nil }
+
+        let tapLocation = gestureRecognizer.location(in: nil)
+
+        guard let target = accessibilityHierarchyParser.parseAccessibilityElement(on: tapLocation, in: view) else { return nil }
+
+        if let targetView = target.object as? UIView, let control = targetView.controlInHierarchy, !control.allControlEvents.isEmpty {
+            return nil
+        }
+
+        return target
+    }
 }
+
+private class _AmplitudeSwiftUIGestureRecognizer: UITapGestureRecognizer {}
 
 extension UIApplication {
     @objc func amp_sendAction(_ action: Selector, to target: Any?, from sender: Any?, for event: UIEvent?) -> Bool {
@@ -88,7 +153,7 @@ extension UIGestureRecognizer {
     @objc func amp_setState(_ state: UIGestureRecognizer.State) {
         amp_setState(state)
 
-        guard state == .ended, let view else { return }
+        guard state == .ended, let view, !(self is _AmplitudeSwiftUIGestureRecognizer) else { return }
 
         let gestureType = switch self {
         case is UITapGestureRecognizer: "Tap"
@@ -164,15 +229,78 @@ extension UIView {
     }
 }
 
+extension AccessibilityTarget {
+    func eventFromData(with action: String) -> UserInteractionEvent {
+        if let view = object as? UIView {
+            let viewData = view.extractData(with: action)
+            return UserInteractionEvent(
+                viewController: viewData.viewController,
+                title: viewData.title,
+                accessibilityLabel: label,
+                action: action,
+                targetViewClass: viewData.targetViewClass,
+                targetText: viewData.targetText,
+                hierarchy: viewData.hierarchy,
+                targetType: type.stringify())
+        } else {
+            return UserInteractionEvent(
+                accessibilityLabel: label,
+                action: action,
+                targetType: type.stringify())
+        }
+    }
+}
+
 extension UIResponder {
     var owningViewController: UIViewController? {
-        return self as? UIViewController ?? next?.owningViewController
+        self as? UIViewController ?? next?.owningViewController
     }
 }
 
 extension NSObject {
     var descriptiveTypeName: String {
         String(describing: type(of: self))
+    }
+}
+
+extension UIWindow: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool { true }
+}
+
+extension UIView {
+    var controlInHierarchy: UIControl? {
+        self as? UIControl ?? superview?.controlInHierarchy
+    }
+}
+
+extension UIAccessibilityTraits {
+    func stringify() -> String? {
+        switch self {
+        case .button:
+            return "Button"
+        case .link:
+            return "Link"
+        case .image:
+            return "Image"
+        case .searchField:
+            return "Search Field"
+        case .keyboardKey:
+            return "Keyboard Key"
+        case .staticText:
+            return "Static Text"
+        case .header:
+            return "Header"
+        case .tabBar:
+            return "Tab Bar"
+        default:
+            break
+        }
+
+        if #available(iOS 17.0, *), self == .toggleButton {
+            return "Toggle Button"
+        }
+
+        return nil
     }
 }
 

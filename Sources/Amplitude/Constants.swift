@@ -102,6 +102,7 @@ public struct Constants {
     static let AMP_APP_TARGET_TEXT = "\(AMP_AMPLITUDE_PREFIX)Target Text"
     static let AMP_APP_HIERARCHY = "\(AMP_AMPLITUDE_PREFIX)Hierarchy"
     static let AMP_APP_GESTURE_RECOGNIZER = "\(AMP_AMPLITUDE_PREFIX)Gesture Recognizer"
+    static let AMP_APP_TARGET_TYPE = "\(AMP_AMPLITUDE_PREFIX)Target Type"
 
     public struct Configuration {
         public static let FLUSH_QUEUE_SIZE = 30

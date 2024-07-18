@@ -30,6 +30,7 @@
 		6C23EF112C38AC19000DC8C8 /* UIKitUserInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C23EF102C38AC19000DC8C8 /* UIKitUserInteractions.swift */; };
 		6C23EF132C38AC24000DC8C8 /* UserInteractionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C23EF122C38AC24000DC8C8 /* UserInteractionEvent.swift */; };
 		6C23EF162C38AD31000DC8C8 /* UIKitUserInteractionPluginTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C23EF142C38AC32000DC8C8 /* UIKitUserInteractionPluginTest.swift */; };
+		6C8357C52C48C91700499AAE /* UIKitAccessibilityHierarchyParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8357C42C48C91700499AAE /* UIKitAccessibilityHierarchyParser.swift */; };
 		8EDEC02B99EE2092B567A61D /* ObjCIngestionMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC500EBDA8B813056E2DB /* ObjCIngestionMetadata.swift */; };
 		8EDEC1073A308B12B5CCD975 /* AnalyticsConnectorPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECD39BAA97DD4320C0AA5 /* AnalyticsConnectorPlugin.swift */; };
 		8EDEC10C56FA7F7DEEB48B6F /* ObjCBaseEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECCFD935A0C5A6FE85E87 /* ObjCBaseEvent.swift */; };
@@ -158,6 +159,7 @@
 		6C23EF102C38AC19000DC8C8 /* UIKitUserInteractions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitUserInteractions.swift; sourceTree = "<group>"; };
 		6C23EF122C38AC24000DC8C8 /* UserInteractionEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserInteractionEvent.swift; sourceTree = "<group>"; };
 		6C23EF142C38AC32000DC8C8 /* UIKitUserInteractionPluginTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitUserInteractionPluginTest.swift; sourceTree = "<group>"; };
+		6C8357C42C48C91700499AAE /* UIKitAccessibilityHierarchyParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitAccessibilityHierarchyParser.swift; sourceTree = "<group>"; };
 		8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeSessionTests.swift; sourceTree = "<group>"; };
 		8EDEC1160D95DC3F0E48DDF7 /* ObjCPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCPlugin.swift; sourceTree = "<group>"; };
 		8EDEC1576C95A2EB2FEF00A8 /* ObjCAmplitude.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCAmplitude.swift; sourceTree = "<group>"; };
@@ -425,6 +427,7 @@
 		OBJ_43 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				6C8357C42C48C91700499AAE /* UIKitAccessibilityHierarchyParser.swift */,
 				OBJ_44 /* Atomic.swift */,
 				OBJ_45 /* CodableExtension.swift */,
 				OBJ_46 /* EventPipeline.swift */,
@@ -799,6 +802,7 @@
 				8EDECB800546E37719391E65 /* ObjCPlan.swift in Sources */,
 				8EDEC02B99EE2092B567A61D /* ObjCIngestionMetadata.swift in Sources */,
 				8EDEC98799DCB6610B8DBA19 /* ObjCAmplitude.swift in Sources */,
+				6C8357C52C48C91700499AAE /* UIKitAccessibilityHierarchyParser.swift in Sources */,
 				8EDECD1E851511887BE000F9 /* ObjCEventOptions.swift in Sources */,
 				8EDEC10C56FA7F7DEEB48B6F /* ObjCBaseEvent.swift in Sources */,
 				8EDECDF8E188CD7F24EEB475 /* ObjCTrackingOptions.swift in Sources */,

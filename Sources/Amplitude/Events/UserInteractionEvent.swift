@@ -6,10 +6,11 @@ public class UserInteractionEvent: BaseEvent {
         title: String? = nil,
         accessibilityLabel: String? = nil,
         action: String,
-        targetViewClass: String,
+        targetViewClass: String? = nil,
         targetText: String? = nil,
-        hierarchy: String,
-        gestureRecognizer: String? = nil
+        hierarchy: String? = nil,
+        gestureRecognizer: String? = nil,
+        targetType: String? = nil
     ) {
         self.init(eventType: Constants.AMP_USER_INTERACTION_EVENT, eventProperties: [
             Constants.AMP_APP_VIEW_CONTROLLER: viewController,
@@ -19,7 +20,8 @@ public class UserInteractionEvent: BaseEvent {
             Constants.AMP_APP_TARGET_VIEW_CLASS: targetViewClass,
             Constants.AMP_APP_TARGET_TEXT: targetText,
             Constants.AMP_APP_HIERARCHY: hierarchy,
-            Constants.AMP_APP_GESTURE_RECOGNIZER: gestureRecognizer
+            Constants.AMP_APP_GESTURE_RECOGNIZER: gestureRecognizer,
+            Constants.AMP_APP_TARGET_TYPE: targetType
         ])
     }
 }
