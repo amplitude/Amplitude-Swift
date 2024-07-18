@@ -81,6 +81,8 @@ class UIKitUserInteractions {
 
     @objc static func handleTap(_ sender: UIGestureRecognizer) {
         if let target = findTargetUnderTap(for: sender) {
+            guard target.type.contains(.button) || target.type.contains(.link) else { return }
+            
             let userInteractionEvent = target.eventFromData(with: "Tap")
 
             UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
@@ -275,32 +277,22 @@ extension UIView {
 
 extension UIAccessibilityTraits {
     func stringify() -> String? {
-        switch self {
-        case .button:
-            return "Button"
-        case .link:
-            return "Link"
-        case .image:
-            return "Image"
-        case .searchField:
-            return "Search Field"
-        case .keyboardKey:
-            return "Keyboard Key"
-        case .staticText:
-            return "Static Text"
-        case .header:
-            return "Header"
-        case .tabBar:
-            return "Tab Bar"
-        default:
-            break
+        var strings = [String]()
+        
+        if contains(.button) { strings.append("Button") }
+        if contains(.header) { strings.append("Header") }
+        if contains(.image) { strings.append("Image") }
+        if contains(.keyboardKey) { strings.append("Keyboard Key") }
+        if contains(.link) { strings.append("Link") }
+        if contains(.searchField) { strings.append("Search Field") }
+        if contains(.staticText) { strings.append("Static Text") }
+        if contains(.tabBar) { strings.append("Tab Bar") }
+        
+        if #available(iOS 17.0, tvOS 17.0, macCatalyst 17.0, *), contains(.toggleButton) {
+            strings.append("Toggle Button")
         }
 
-        if #available(iOS 17.0, tvOS 17.0, macCatalyst 17.0, *), self == .toggleButton {
-            return "Toggle Button"
-        }
-
-        return nil
+        return strings.isEmpty ? nil : strings.joined(separator: ", ")
     }
 }
 
