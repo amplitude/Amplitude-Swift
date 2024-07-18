@@ -6,15 +6,6 @@ class UIKitUserInteractions {
 
     private static let lock = NSLock()
 
-    private static let addNotificationObservers: Void = {
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextView.textDidBeginEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(windowDidBecomeKey), name: UIWindow.didBecomeKeyNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(windowDidResignKey), name: UIWindow.didResignKeyNotification, object: nil)
-    }()
-
     private static let setupMethodSwizzling: Void = {
         swizzleMethod(UIApplication.self, from: #selector(UIApplication.sendAction), to: #selector(UIApplication.amp_sendAction))
         swizzleMethod(UIGestureRecognizer.self, from: #selector(setter: UIGestureRecognizer.state), to: #selector(UIGestureRecognizer.amp_setState))
@@ -33,6 +24,18 @@ class UIKitUserInteractions {
             return false
         }
         return true
+    }()
+    
+    private static let addNotificationObservers: Void = {
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextView.textDidBeginEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
+        
+        guard setupAXBundle else { return }
+        
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(windowDidBecomeKey), name: UIWindow.didBecomeKeyNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(windowDidResignKey), name: UIWindow.didResignKeyNotification, object: nil)
     }()
 
     static func register(_ amplitude: Amplitude) {
@@ -60,11 +63,11 @@ class UIKitUserInteractions {
     }
 
     @objc static func windowDidBecomeKey(_ notification: NSNotification) {
-        guard setupAXBundle, let window = notification.object as? UIWindow else { return }
+        guard let window = notification.object as? UIWindow else { return }
 
-        if let windowGestureRecognizers = window.gestureRecognizers, windowGestureRecognizers.contains(where: { $0 is _AmplitudeSwiftUIGestureRecognizer }) {
-            return
-        }
+        if let windowGestureRecognizers = window.gestureRecognizers, 
+            windowGestureRecognizers.contains(where: { $0 is _AmplitudeSwiftUIGestureRecognizer })
+        { return }
 
         let swiftUIGestureRecognizer = _AmplitudeSwiftUIGestureRecognizer(target: UIKitUserInteractions.self, action: #selector(handleTap))
         swiftUIGestureRecognizer.cancelsTouchesInView = false
@@ -75,7 +78,7 @@ class UIKitUserInteractions {
     }
 
     @objc static func windowDidResignKey(_ notification: NSNotification) {
-        guard setupAXBundle,
+        guard
             let window = notification.object as? UIWindow,
             let swiftUIGestureRecognizer = window.gestureRecognizers?.first(where: { $0 is _AmplitudeSwiftUIGestureRecognizer })
         else { return }
