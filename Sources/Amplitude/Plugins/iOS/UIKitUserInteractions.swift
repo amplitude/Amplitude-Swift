@@ -82,7 +82,7 @@ class UIKitUserInteractions {
     @objc static func handleTap(_ sender: UIGestureRecognizer) {
         if let target = findTargetUnderTap(for: sender) {
             guard target.type.contains(.button) || target.type.contains(.link) else { return }
-            
+
             let userInteractionEvent = target.eventFromData(with: "Tap")
 
             UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
@@ -278,7 +278,7 @@ extension UIView {
 extension UIAccessibilityTraits {
     func stringify() -> String? {
         var strings = [String]()
-        
+
         if contains(.button) { strings.append("Button") }
         if contains(.header) { strings.append("Header") }
         if contains(.image) { strings.append("Image") }
@@ -287,7 +287,7 @@ extension UIAccessibilityTraits {
         if contains(.searchField) { strings.append("Search Field") }
         if contains(.staticText) { strings.append("Static Text") }
         if contains(.tabBar) { strings.append("Tab Bar") }
-        
+
         if #available(iOS 17.0, tvOS 17.0, macCatalyst 17.0, *), contains(.toggleButton) {
             strings.append("Toggle Button")
         }
