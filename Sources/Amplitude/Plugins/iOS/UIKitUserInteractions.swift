@@ -61,6 +61,10 @@ class UIKitUserInteractions {
 
     @objc static func windowDidBecomeKey(_ notification: NSNotification) {
         guard setupAXBundle, let window = notification.object as? UIWindow else { return }
+        
+        if let windowGestureRecognizers = window.gestureRecognizers, windowGestureRecognizers.contains(where: { $0 is _AmplitudeSwiftUIGestureRecognizer }) {
+            return
+        }
 
         let swiftUIGestureRecognizer = _AmplitudeSwiftUIGestureRecognizer(target: UIKitUserInteractions.self, action: #selector(handleTap))
         swiftUIGestureRecognizer.cancelsTouchesInView = false
