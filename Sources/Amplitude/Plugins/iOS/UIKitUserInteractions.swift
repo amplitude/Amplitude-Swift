@@ -188,7 +188,7 @@ extension UIView: ActionTrackable {
 
 extension UIButton {
     override var amp_title: String? { currentTitle }
-    
+
     override func amp_shouldTrack(_ action: Selector, to target: Any?) -> Bool {
         actions(forTarget: target, forControlEvent: .touchUpInside)?.first == action.description
     }
