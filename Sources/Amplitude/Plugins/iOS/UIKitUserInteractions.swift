@@ -68,7 +68,7 @@ extension UIApplication {
 
         guard sendActionResult,
             let view = sender as? UIView,
-            view.amp_shouldTrack(action, for: event),
+            view.amp_shouldTrack(action, to: target),
             let actionName = NSStringFromSelector(action)
                 .components(separatedBy: ":")
                 .first
@@ -88,7 +88,7 @@ extension UIGestureRecognizer {
     @objc func amp_setState(_ state: UIGestureRecognizer.State) {
         amp_setState(state)
 
-        guard state == .ended, let view else { return }
+        guard state == .ended, let view, let name, !name.isEmpty else { return }
 
         let gestureType = switch self {
         case is UITapGestureRecognizer: "Tap"
@@ -178,37 +178,27 @@ extension NSObject {
 
 protocol ActionTrackable {
     var amp_title: String? { get }
-    func amp_shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool
+    func amp_shouldTrack(_ action: Selector, to target: Any?) -> Bool
 }
 
 extension UIView: ActionTrackable {
     @objc var amp_title: String? { nil }
-    @objc func amp_shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool { true }
+    @objc func amp_shouldTrack(_ action: Selector, to target: Any?) -> Bool { false }
 }
 
 extension UIButton {
     override var amp_title: String? { currentTitle }
+    
+    override func amp_shouldTrack(_ action: Selector, to target: Any?) -> Bool {
+        actions(forTarget: target, forControlEvent: .touchUpInside)?.first == action.description
+    }
 }
 
 extension UISegmentedControl {
     override var amp_title: String? { titleForSegment(at: selectedSegmentIndex) }
 }
 
-extension UITextField {
-    override func amp_shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool { false }
-}
-
-extension UITextView {
-    override func amp_shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool { false }
-}
-
 #if !os(tvOS)
-extension UISlider {
-    override func amp_shouldTrack(_ action: Selector, for event: UIEvent?) -> Bool {
-        event?.allTouches?.contains { $0.phase == .ended && $0.view === self } ?? false
-    }
-}
-
 @available(iOS 14.0, *)
 extension UIColorWell {
     override var amp_title: String? { title }
