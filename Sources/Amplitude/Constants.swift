@@ -83,7 +83,7 @@ public struct Constants {
     static let AMP_APPLICATION_BACKGROUNDED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Application Backgrounded"
     static let AMP_DEEP_LINK_OPENED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Deep Link Opened"
     static let AMP_SCREEN_VIEWED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Screen Viewed"
-    static let AMP_USER_INTERACTION_EVENT = "\(AMP_AMPLITUDE_PREFIX)User Interaction"
+    static let AMP_ELEMENT_INTERACTED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Element Interacted"
     static let AMP_REVENUE_EVENT = "revenue_amount"
 
     static let AMP_APP_VERSION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Version"
@@ -97,6 +97,7 @@ public struct Constants {
     static let AMP_APP_VIEW_CONTROLLER = "\(AMP_AMPLITUDE_PREFIX)View Controller"
     static let AMP_APP_TITLE = "\(AMP_AMPLITUDE_PREFIX)Title"
     static let AMP_APP_TARGET_ACCESSIBILITY_LABEL = "\(AMP_AMPLITUDE_PREFIX)Target Accessibility Label"
+    static let AMP_APP_TARGET_ACCESSIBILITY_IDENTIFIER = "\(AMP_AMPLITUDE_PREFIX)Target Accessibility Identifier"
     static let AMP_APP_ACTION = "\(AMP_AMPLITUDE_PREFIX)Action"
     static let AMP_APP_TARGET_VIEW_CLASS = "\(AMP_AMPLITUDE_PREFIX)Target View Class"
     static let AMP_APP_TARGET_TEXT = "\(AMP_AMPLITUDE_PREFIX)Target Text"

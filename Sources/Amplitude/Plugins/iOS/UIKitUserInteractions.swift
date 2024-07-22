@@ -2,16 +2,38 @@
 import UIKit
 
 class UIKitUserInteractions {
+    struct EventData {
+        let viewController: String?
+
+        let title: String?
+
+        let accessibilityLabel: String?
+
+        let accessibilityIdentifier: String?
+
+        let targetViewClass: String
+
+        let targetText: String?
+
+        let hierarchy: String
+
+        fileprivate func userInteractionEvent(for actionsRepresentation: String) -> UserInteractionEvent {
+            return UserInteractionEvent(
+                viewController: viewController,
+                title: title,
+                accessibilityLabel: accessibilityLabel,
+                accessibilityIdentifier: accessibilityIdentifier,
+                action: actionsRepresentation,
+                targetViewClass: targetViewClass,
+                targetText: targetText,
+                hierarchy: hierarchy
+            )
+        }
+    }
+
     fileprivate static let amplitudeInstances = NSHashTable<Amplitude>.weakObjects()
 
     private static let lock = NSLock()
-
-    private static let addNotificationObservers: Void = {
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextView.textDidBeginEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
-    }()
 
     private static let setupMethodSwizzling: Void = {
         swizzleMethod(UIApplication.self, from: #selector(UIApplication.sendAction), to: #selector(UIApplication.amp_sendAction))
@@ -23,23 +45,6 @@ class UIKitUserInteractions {
             amplitudeInstances.add(amplitude)
         }
         setupMethodSwizzling
-        addNotificationObservers
-    }
-
-    @objc static func didBeginEditing(_ notification: NSNotification) {
-        guard let view = notification.object as? UIView else { return }
-        let userInteractionEvent = view.eventFromData(with: "didBeginEditing")
-        amplitudeInstances.allObjects.forEach {
-            $0.track(event: userInteractionEvent)
-        }
-    }
-
-    @objc static func didEndEditing(_ notification: NSNotification) {
-        guard let view = notification.object as? UIView else { return }
-        let userInteractionEvent = view.eventFromData(with: "didEndEditing")
-        amplitudeInstances.allObjects.forEach {
-            $0.track(event: userInteractionEvent)
-        }
     }
 
     private static func swizzleMethod(_ cls: AnyClass?, from original: Selector, to swizzled: Selector) {
@@ -66,21 +71,77 @@ extension UIApplication {
     @objc func amp_sendAction(_ action: Selector, to target: Any?, from sender: Any?, for event: UIEvent?) -> Bool {
         let sendActionResult = amp_sendAction(action, to: target, from: sender, for: event)
 
-        guard sendActionResult,
-            let view = sender as? UIView,
-            view.amp_shouldTrack(action, to: target),
-            let actionName = NSStringFromSelector(action)
-                .components(separatedBy: ":")
-                .first
-        else { return sendActionResult }
+        guard sendActionResult, let control = sender as? UIControl else { return sendActionResult }
 
-        let userInteractionEvent = view.eventFromData(with: actionName)
-
-        UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
-            $0.track(event: userInteractionEvent)
-        }
+        coalesceAction(action, to: target, from: control)
 
         return sendActionResult
+    }
+
+    // MARK: Coalesce logically continuous events
+
+    private class CoalescedEvent {
+        let controlId: ObjectIdentifier
+
+        let eventData: UIKitUserInteractions.EventData
+
+        var terminated = false
+
+        private(set) var actions = [Selector]()
+
+        init(_ eventData: UIKitUserInteractions.EventData, to target: Any?, from control: UIControl, initial action: Selector) {
+            self.controlId = ObjectIdentifier(control)
+            self.eventData = eventData
+            addAction(action, to: target, from: control)
+        }
+
+        func addAction(_ action: Selector, to target: Any?, from control: UIControl) {
+            terminated = control.isActionTerminal(action, to: target)
+            actions.append(action)
+        }
+    }
+
+    private static let actionMethodsDelimiter = " "
+
+    private static var coalesceTask: DispatchWorkItem?
+
+    private static var coalescedEvents = [CoalescedEvent]()
+
+    private func coalesceAction(_ action: Selector, to target: Any?, from control: UIControl) {
+        let controlIdentifier = ObjectIdentifier(control)
+
+        if let prevEvent = UIApplication.coalescedEvents.last {
+            if prevEvent.controlId == controlIdentifier {
+                if !prevEvent.actions.contains(action) {
+                    prevEvent.addAction(action, to: target, from: control)
+                }
+            } else {
+                prevEvent.terminated = true
+                UIApplication.coalescedEvents.append(CoalescedEvent(control.eventData, to: target, from: control, initial: action))
+            }
+        } else {
+            UIApplication.coalescedEvents.append(CoalescedEvent(control.eventData, to: target, from: control, initial: action))
+        }
+
+        UIApplication.coalesceTask?.cancel()
+
+        let task = DispatchWorkItem {
+            while UIApplication.coalescedEvents.first?.terminated ?? false {
+                let coalescedEvent = UIApplication.coalescedEvents.removeFirst()
+
+                let actions = coalescedEvent.actions.map { $0.description }.joined(separator: UIApplication.actionMethodsDelimiter)
+
+                let userInteractionEvent = coalescedEvent.eventData.userInteractionEvent(for: actions)
+
+                UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
+                    $0.track(event: userInteractionEvent)
+                }
+            }
+        }
+
+        UIApplication.coalesceTask = task
+
+        DispatchQueue.main.async(execute: task)
     }
 }
 
@@ -88,7 +149,7 @@ extension UIGestureRecognizer {
     @objc func amp_setState(_ state: UIGestureRecognizer.State) {
         amp_setState(state)
 
-        guard state == .ended, let view, let name, !name.isEmpty else { return }
+        guard state == .ended, let view else { return }
 
         let gestureType = switch self {
         case is UITapGestureRecognizer: "Tap"
@@ -111,51 +172,21 @@ extension UIGestureRecognizer {
     }
 
     func eventFromData(with action: String, from view: UIView) -> UserInteractionEvent {
-        let viewData = view.extractData(with: action)
-        return UserInteractionEvent(
-            viewController: viewData.viewController,
-            title: viewData.title,
-            accessibilityLabel: viewData.accessibilityLabel,
-            action: viewData.action,
-            targetViewClass: viewData.targetViewClass,
-            targetText: viewData.targetText,
-            hierarchy: viewData.hierarchy,
-            gestureRecognizer: descriptiveTypeName)
+        return view.eventData.userInteractionEvent(for: action)
     }
 }
 
 extension UIView {
-    private static let viewHierarchyDelimiter = " -> "
+    private static let viewHierarchyDelimiter = " → "
 
-    struct ViewData {
-        let viewController: String?
-        let title: String?
-        let accessibilityLabel: String?
-        let action: String
-        let targetViewClass: String
-        let targetText: String?
-        let hierarchy: String
-    }
-
-    func eventFromData(with action: String) -> UserInteractionEvent {
-        let viewData = extractData(with: action)
-        return UserInteractionEvent(
-            viewController: viewData.viewController,
-            title: viewData.title,
-            accessibilityLabel: viewData.accessibilityLabel,
-            action: viewData.action,
-            targetViewClass: viewData.targetViewClass,
-            targetText: viewData.targetText,
-            hierarchy: viewData.hierarchy)
-    }
-
-    func extractData(with action: String) -> ViewData {
+    var eventData: UIKitUserInteractions.EventData {
         let viewController = owningViewController
-        return ViewData(
+
+        return UIKitUserInteractions.EventData(
             viewController: viewController?.descriptiveTypeName,
             title: viewController?.title,
             accessibilityLabel: accessibilityLabel,
-            action: action,
+            accessibilityIdentifier: accessibilityIdentifier,
             targetViewClass: descriptiveTypeName,
             targetText: amp_title,
             hierarchy: sequence(first: self, next: \.superview)
@@ -164,9 +195,40 @@ extension UIView {
     }
 }
 
+extension UIControl {
+    func isActionTerminal(_ action: Selector, to target: Any?) -> Bool {
+        var nonTerminalEvents: [UIControl.Event] = [
+            .touchDown,
+            .touchDownRepeat,
+            .touchDragInside,
+            .touchDragOutside,
+            .touchDragEnter,
+            .editingDidBegin,
+            .editingChanged,
+        ]
+
+        switch self {
+        case is UISlider, is UIStepper:
+            nonTerminalEvents.append(.valueChanged)
+        default:
+            break
+        }
+
+        for event in nonTerminalEvents {
+            if let actions = self.actions(forTarget: target, forControlEvent: event) {
+                if actions.contains(where: { $0 == action.description }) {
+                    return false
+                }
+            }
+        }
+
+        return true
+    }
+}
+
 extension UIResponder {
     var owningViewController: UIViewController? {
-        return self as? UIViewController ?? next?.owningViewController
+        self as? UIViewController ?? next?.owningViewController
     }
 }
 
@@ -176,22 +238,16 @@ extension NSObject {
     }
 }
 
-protocol ActionTrackable {
+protocol Titled {
     var amp_title: String? { get }
-    func amp_shouldTrack(_ action: Selector, to target: Any?) -> Bool
 }
 
-extension UIView: ActionTrackable {
+extension UIView: Titled {
     @objc var amp_title: String? { nil }
-    @objc func amp_shouldTrack(_ action: Selector, to target: Any?) -> Bool { false }
 }
 
 extension UIButton {
     override var amp_title: String? { currentTitle }
-
-    override func amp_shouldTrack(_ action: Selector, to target: Any?) -> Bool {
-        actions(forTarget: target, forControlEvent: .touchUpInside)?.first == action.description
-    }
 }
 
 extension UISegmentedControl {
