@@ -207,12 +207,14 @@ extension UIControl {
             .editingChanged,
         ]
 
+#if !os(tvOS)
         switch self {
         case is UISlider, is UIStepper:
             nonTerminalEvents.append(.valueChanged)
         default:
             break
         }
+#endif
 
         for event in nonTerminalEvents {
             if let actions = self.actions(forTarget: target, forControlEvent: event) {
