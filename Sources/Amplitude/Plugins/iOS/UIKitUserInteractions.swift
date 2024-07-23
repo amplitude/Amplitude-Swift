@@ -111,7 +111,7 @@ extension UIApplication {
     private func coalesceAction(_ action: Selector, to target: Any?, from control: UIControl) {
         let controlIdentifier = ObjectIdentifier(control)
         let controlEvent = control.event(for: action, to: target)
-        
+
         guard let controlEvent else { return }
 
         if let recentEvent = UIApplication.coalescedEvents.last {
@@ -133,9 +133,9 @@ extension UIApplication {
         let task = DispatchWorkItem {
             while UIApplication.coalescedEvents.first?.terminated ?? false {
                 let coalescedEvent = UIApplication.coalescedEvents.removeFirst()
-                
+
                 let action = coalescedEvent.actionMethod.event.description
-                
+
                 let actionMethod = coalescedEvent.actionMethod.name.description
 
                 let userInteractionEvent = coalescedEvent.eventData.userInteractionEvent(for: action, fromActionMethod: actionMethod)
@@ -218,7 +218,7 @@ extension UIControl {
             self.actions(forTarget: target, forControlEvent: event)?.contains(action.description) ?? false
         }
     }
-    
+
     func isActionTerminal(_ action: Selector, to target: Any?) -> Bool {
         var nonTerminalEvents: [UIControl.Event] = [
             .touchDown, .touchDownRepeat, .touchDragInside, .touchDragOutside,
