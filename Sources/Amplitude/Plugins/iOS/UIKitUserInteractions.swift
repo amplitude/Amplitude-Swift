@@ -17,16 +17,18 @@ class UIKitUserInteractions {
 
         let hierarchy: String
 
-        fileprivate func userInteractionEvent(for actionsRepresentation: String) -> UserInteractionEvent {
+        fileprivate func userInteractionEvent(for action: String, fromActionMethod actionMethod: String? = nil, fromGestureRecognizer gestureRecognizer: String? = nil) -> UserInteractionEvent {
             return UserInteractionEvent(
                 viewController: viewController,
                 title: title,
                 accessibilityLabel: accessibilityLabel,
                 accessibilityIdentifier: accessibilityIdentifier,
-                action: actionsRepresentation,
+                action: action,
                 targetViewClass: targetViewClass,
                 targetText: targetText,
-                hierarchy: hierarchy
+                hierarchy: hierarchy,
+                actionMethod: actionMethod,
+                gestureRecognizer: gestureRecognizer
             )
         }
     }
@@ -78,30 +80,29 @@ extension UIApplication {
         return sendActionResult
     }
 
-    // MARK: Coalesce logically continuous events
+    // MARK: Coalesce logically continuous events into a single event
 
     private class CoalescedEvent {
-        let controlId: ObjectIdentifier
+        let controlIdentifier: ObjectIdentifier
 
         let eventData: UIKitUserInteractions.EventData
 
         var terminated = false
 
-        private(set) var actions = [Selector]()
+        private(set) var actionMethod: (name: Selector, event: UIControl.Event)
 
-        init(_ eventData: UIKitUserInteractions.EventData, to target: Any?, from control: UIControl, initial action: Selector) {
-            self.controlId = ObjectIdentifier(control)
+        init(_ eventData: UIKitUserInteractions.EventData, for action: Selector, with contorlEvent: UIControl.Event, from control: UIControl) {
+            self.controlIdentifier = ObjectIdentifier(control)
             self.eventData = eventData
-            addAction(action, to: target, from: control)
+            self.actionMethod = (action, contorlEvent)
         }
 
-        func addAction(_ action: Selector, to target: Any?, from control: UIControl) {
-            terminated = control.isActionTerminal(action, to: target)
-            actions.append(action)
+        func changeAction(_ action: Selector, with contorlEvent: UIControl.Event) {
+            if !terminated {
+                actionMethod = (action, contorlEvent)
+            }
         }
     }
-
-    private static let actionMethodsDelimiter = " "
 
     private static var coalesceTask: DispatchWorkItem?
 
@@ -109,18 +110,22 @@ extension UIApplication {
 
     private func coalesceAction(_ action: Selector, to target: Any?, from control: UIControl) {
         let controlIdentifier = ObjectIdentifier(control)
+        let controlEvent = control.event(for: action, to: target)
+        
+        guard let controlEvent else { return }
 
-        if let prevEvent = UIApplication.coalescedEvents.last {
-            if prevEvent.controlId == controlIdentifier {
-                if !prevEvent.actions.contains(action) {
-                    prevEvent.addAction(action, to: target, from: control)
-                }
+        if let recentEvent = UIApplication.coalescedEvents.last {
+            if recentEvent.controlIdentifier == controlIdentifier {
+                recentEvent.terminated = control.isActionTerminal(action, to: target)
+                recentEvent.changeAction(action, with: controlEvent)
             } else {
-                prevEvent.terminated = true
-                UIApplication.coalescedEvents.append(CoalescedEvent(control.eventData, to: target, from: control, initial: action))
+                recentEvent.terminated = true
+                let newEvent = CoalescedEvent(control.eventData, for: action, with: controlEvent, from: control)
+                UIApplication.coalescedEvents.append(newEvent)
             }
         } else {
-            UIApplication.coalescedEvents.append(CoalescedEvent(control.eventData, to: target, from: control, initial: action))
+            let newEvent = CoalescedEvent(control.eventData, for: action, with: controlEvent, from: control)
+            UIApplication.coalescedEvents.append(newEvent)
         }
 
         UIApplication.coalesceTask?.cancel()
@@ -128,10 +133,12 @@ extension UIApplication {
         let task = DispatchWorkItem {
             while UIApplication.coalescedEvents.first?.terminated ?? false {
                 let coalescedEvent = UIApplication.coalescedEvents.removeFirst()
+                
+                let action = coalescedEvent.actionMethod.event.description
+                
+                let actionMethod = coalescedEvent.actionMethod.name.description
 
-                let actions = coalescedEvent.actions.map { $0.description }.joined(separator: UIApplication.actionMethodsDelimiter)
-
-                let userInteractionEvent = coalescedEvent.eventData.userInteractionEvent(for: actions)
+                let userInteractionEvent = coalescedEvent.eventData.userInteractionEvent(for: action, fromActionMethod: actionMethod)
 
                 UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
                     $0.track(event: userInteractionEvent)
@@ -172,7 +179,7 @@ extension UIGestureRecognizer {
     }
 
     func eventFromData(with action: String, from view: UIView) -> UserInteractionEvent {
-        return view.eventData.userInteractionEvent(for: action)
+        return view.eventData.userInteractionEvent(for: action, fromGestureRecognizer: self.descriptiveTypeName)
     }
 }
 
@@ -196,15 +203,26 @@ extension UIView {
 }
 
 extension UIControl {
+    func event(for action: Selector, to target: Any?) -> UIControl.Event? {
+        var events: [UIControl.Event] = [
+            .touchDown, .touchDownRepeat, .touchDragInside, .touchDragOutside,
+            .touchDragEnter, .touchDragExit, .touchUpInside, .touchUpOutside,
+            .touchCancel, .valueChanged, .editingDidBegin, .editingChanged,
+            .editingDidEnd, .editingDidEndOnExit, .primaryActionTriggered
+        ]
+        if #available(iOS 14.0, *) {
+            events.append(.menuActionTriggered)
+        }
+
+        return events.first { event in
+            self.actions(forTarget: target, forControlEvent: event)?.contains(action.description) ?? false
+        }
+    }
+    
     func isActionTerminal(_ action: Selector, to target: Any?) -> Bool {
         var nonTerminalEvents: [UIControl.Event] = [
-            .touchDown,
-            .touchDownRepeat,
-            .touchDragInside,
-            .touchDragOutside,
-            .touchDragEnter,
-            .editingDidBegin,
-            .editingChanged,
+            .touchDown, .touchDownRepeat, .touchDragInside, .touchDragOutside,
+            .touchDragEnter, .editingDidBegin, .editingChanged,
         ]
 
 #if !os(tvOS)
@@ -225,6 +243,23 @@ extension UIControl {
         }
 
         return true
+    }
+}
+
+extension UIControl.Event {
+    var description: String {
+        if UIControl.Event.allTouchEvents.contains(self) {
+            return "Touch"
+        } else if UIControl.Event.allEditingEvents.contains(self) {
+            return "Edit"
+        } else if self == .valueChanged {
+            return "Value Change"
+        } else if self == .primaryActionTriggered {
+            return "Primary Action"
+        } else if #available(iOS 14.0, *), self == .menuActionTriggered {
+            return "Menu Action"
+        }
+        return ""
     }
 }
 

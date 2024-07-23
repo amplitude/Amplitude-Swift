@@ -102,6 +102,7 @@ public struct Constants {
     static let AMP_APP_TARGET_VIEW_CLASS = "\(AMP_AMPLITUDE_PREFIX)Target View Class"
     static let AMP_APP_TARGET_TEXT = "\(AMP_AMPLITUDE_PREFIX)Target Text"
     static let AMP_APP_HIERARCHY = "\(AMP_AMPLITUDE_PREFIX)Hierarchy"
+    static let AMP_APP_ACTION_METHOD = "\(AMP_AMPLITUDE_PREFIX)Action Method"
     static let AMP_APP_GESTURE_RECOGNIZER = "\(AMP_AMPLITUDE_PREFIX)Gesture Recognizer"
 
     public struct Configuration {

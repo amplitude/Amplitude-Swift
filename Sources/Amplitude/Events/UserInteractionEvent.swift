@@ -10,6 +10,7 @@ public class UserInteractionEvent: BaseEvent {
         targetViewClass: String,
         targetText: String? = nil,
         hierarchy: String,
+        actionMethod: String? = nil,
         gestureRecognizer: String? = nil
     ) {
         self.init(eventType: Constants.AMP_ELEMENT_INTERACTED_EVENT, eventProperties: [
@@ -21,6 +22,7 @@ public class UserInteractionEvent: BaseEvent {
             Constants.AMP_APP_TARGET_VIEW_CLASS: targetViewClass,
             Constants.AMP_APP_TARGET_TEXT: targetText,
             Constants.AMP_APP_HIERARCHY: hierarchy,
+            Constants.AMP_APP_ACTION_METHOD: actionMethod,
             Constants.AMP_APP_GESTURE_RECOGNIZER: gestureRecognizer
         ])
     }
