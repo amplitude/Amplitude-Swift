@@ -116,8 +116,8 @@ extension UIApplication {
 
         if let recentEvent = UIApplication.coalescedEvents.last {
             if recentEvent.controlIdentifier == controlIdentifier {
-                recentEvent.terminated = control.isActionTerminal(action, to: target)
                 recentEvent.changeAction(action, with: controlEvent)
+                recentEvent.terminated = control.isActionTerminal(action, to: target)
             } else {
                 recentEvent.terminated = true
                 let newEvent = CoalescedEvent(control.eventData, for: action, with: controlEvent, from: control)
