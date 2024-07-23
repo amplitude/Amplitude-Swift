@@ -210,7 +210,7 @@ extension UIControl {
             .touchCancel, .valueChanged, .editingDidBegin, .editingChanged,
             .editingDidEnd, .editingDidEndOnExit, .primaryActionTriggered
         ]
-        if #available(iOS 14.0, *) {
+        if #available(iOS 14.0, tvOS 14.0, macCatalyst 14.0, *) {
             events.append(.menuActionTriggered)
         }
 
@@ -256,7 +256,7 @@ extension UIControl.Event {
             return "Value Change"
         } else if self == .primaryActionTriggered {
             return "Primary Action"
-        } else if #available(iOS 14.0, *), self == .menuActionTriggered {
+        } else if #available(iOS 14.0, tvOS 14.0, macCatalyst 14.0, *), self == .menuActionTriggered {
             return "Menu Action"
         }
         return ""
