@@ -200,13 +200,14 @@ extension UISegmentedControl {
     }
 }
 
-extension UIDatePicker {
+extension UIPageControl {
     override func amp_shouldTrack(_ action: Selector, for target: Any?) -> Bool {
         actions(forTarget: target, forControlEvent: .valueChanged)?.contains(action.description) ?? false
     }
 }
 
-extension UIPageControl {
+#if !os(tvOS)
+extension UIDatePicker {
     override func amp_shouldTrack(_ action: Selector, for target: Any?) -> Bool {
         actions(forTarget: target, forControlEvent: .valueChanged)?.contains(action.description) ?? false
     }
@@ -217,5 +218,6 @@ extension UISwitch {
         actions(forTarget: target, forControlEvent: .valueChanged)?.contains(action.description) ?? false
     }
 }
+#endif
 
 #endif
