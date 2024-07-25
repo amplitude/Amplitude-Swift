@@ -2,15 +2,51 @@
 import UIKit
 
 class UIKitUserInteractions {
+    struct EventData {
+        enum Source {
+            case actionMethod
+
+            case gestureRecognizer
+        }
+
+        let viewController: String?
+
+        let title: String?
+
+        let accessibilityLabel: String?
+
+        let accessibilityIdentifier: String?
+
+        let targetViewClass: String
+
+        let targetText: String?
+
+        let hierarchy: String
+
+        fileprivate func userInteractionEvent(for action: String, from source: Source? = nil, withName sourceName: String? = nil) -> UserInteractionEvent {
+            return UserInteractionEvent(
+                viewController: viewController,
+                title: title,
+                accessibilityLabel: accessibilityLabel,
+                accessibilityIdentifier: accessibilityIdentifier,
+                action: action,
+                targetViewClass: targetViewClass,
+                targetText: targetText,
+                hierarchy: hierarchy,
+                actionMethod: source == .actionMethod ? sourceName : nil,
+                gestureRecognizer: source == .gestureRecognizer ? sourceName : nil
+            )
+        }
+    }
+
     fileprivate static let amplitudeInstances = NSHashTable<Amplitude>.weakObjects()
 
     private static let lock = NSLock()
 
     private static let addNotificationObservers: Void = {
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextField.textDidBeginEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didBeginEditing), name: UITextView.textDidBeginEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEdit), name: UITextField.textDidEndEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEdit), name: UITextView.textDidEndEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didTouch), name: UITableView.selectionDidChangeNotification, object: nil)
     }()
 
     private static let setupMethodSwizzling: Void = {
@@ -26,17 +62,17 @@ class UIKitUserInteractions {
         addNotificationObservers
     }
 
-    @objc static func didBeginEditing(_ notification: NSNotification) {
+    @objc static func didEdit(_ notification: NSNotification) {
         guard let view = notification.object as? UIView else { return }
-        let userInteractionEvent = view.eventFromData(with: "didBeginEditing")
+        let userInteractionEvent = view.eventData.userInteractionEvent(for: "Edit")
         amplitudeInstances.allObjects.forEach {
             $0.track(event: userInteractionEvent)
         }
     }
 
-    @objc static func didEndEditing(_ notification: NSNotification) {
+    @objc static func didTouch(_ notification: NSNotification) {
         guard let view = notification.object as? UIView else { return }
-        let userInteractionEvent = view.eventFromData(with: "didEndEditing")
+        let userInteractionEvent = view.eventData.userInteractionEvent(for: "Touch")
         amplitudeInstances.allObjects.forEach {
             $0.track(event: userInteractionEvent)
         }
@@ -67,14 +103,12 @@ extension UIApplication {
         let sendActionResult = amp_sendAction(action, to: target, from: sender, for: event)
 
         guard sendActionResult,
-            let view = sender as? UIView,
-            view.amp_shouldTrack(action, for: target),
-            let actionName = NSStringFromSelector(action)
-                .components(separatedBy: ":")
-                .first
+              let control = sender as? UIControl,
+              control.amp_shouldTrack(action, for: target),
+              let actionEvent = control.event(for: action, to: target)?.description
         else { return sendActionResult }
 
-        let userInteractionEvent = view.eventFromData(with: actionName)
+        let userInteractionEvent = control.eventData.userInteractionEvent(for: actionEvent, from: .actionMethod, withName: NSStringFromSelector(action))
 
         UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
             $0.track(event: userInteractionEvent)
@@ -90,7 +124,7 @@ extension UIGestureRecognizer {
 
         guard state == .ended, let view else { return }
 
-        let gestureType = switch self {
+        let gestureAction: String? = switch self {
         case is UITapGestureRecognizer: "Tap"
         case is UISwipeGestureRecognizer: "Swipe"
         case is UIPanGestureRecognizer: "Pan"
@@ -100,62 +134,29 @@ extension UIGestureRecognizer {
         case is UIRotationGestureRecognizer: "Rotation"
         case is UIScreenEdgePanGestureRecognizer: "Screen Edge Pan"
 #endif
-        default: "Custom Gesture"
+        default: nil
         }
 
-        let userInteractionEvent = eventFromData(with: gestureType, from: view)
+        guard let gestureAction else { return }
+
+        let userInteractionEvent = view.eventData.userInteractionEvent(for: gestureAction, from: .gestureRecognizer, withName: descriptiveTypeName)
 
         UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
             $0.track(event: userInteractionEvent)
         }
     }
-
-    func eventFromData(with action: String, from view: UIView) -> UserInteractionEvent {
-        let viewData = view.extractData(with: action)
-        return UserInteractionEvent(
-            viewController: viewData.viewController,
-            title: viewData.title,
-            accessibilityLabel: viewData.accessibilityLabel,
-            action: viewData.action,
-            targetViewClass: viewData.targetViewClass,
-            targetText: viewData.targetText,
-            hierarchy: viewData.hierarchy,
-            gestureRecognizer: descriptiveTypeName)
-    }
 }
 
 extension UIView {
-    private static let viewHierarchyDelimiter = " -> "
+    private static let viewHierarchyDelimiter = " → "
 
-    struct ViewData {
-        let viewController: String?
-        let title: String?
-        let accessibilityLabel: String?
-        let action: String
-        let targetViewClass: String
-        let targetText: String?
-        let hierarchy: String
-    }
-
-    func eventFromData(with action: String) -> UserInteractionEvent {
-        let viewData = extractData(with: action)
-        return UserInteractionEvent(
-            viewController: viewData.viewController,
-            title: viewData.title,
-            accessibilityLabel: viewData.accessibilityLabel,
-            action: viewData.action,
-            targetViewClass: viewData.targetViewClass,
-            targetText: viewData.targetText,
-            hierarchy: viewData.hierarchy)
-    }
-
-    func extractData(with action: String) -> ViewData {
+    var eventData: UIKitUserInteractions.EventData {
         let viewController = owningViewController
-        return ViewData(
+        return UIKitUserInteractions.EventData(
             viewController: viewController?.descriptiveTypeName,
             title: viewController?.title,
             accessibilityLabel: accessibilityLabel,
-            action: action,
+            accessibilityIdentifier: accessibilityIdentifier,
             targetViewClass: descriptiveTypeName,
             targetText: amp_title,
             hierarchy: sequence(first: self, next: \.superview)
@@ -164,9 +165,44 @@ extension UIView {
     }
 }
 
+extension UIControl {
+    func event(for action: Selector, to target: Any?) -> UIControl.Event? {
+        var events: [UIControl.Event] = [
+            .touchDown, .touchDownRepeat, .touchDragInside, .touchDragOutside,
+            .touchDragEnter, .touchDragExit, .touchUpInside, .touchUpOutside,
+            .touchCancel, .valueChanged, .editingDidBegin, .editingChanged,
+            .editingDidEnd, .editingDidEndOnExit, .primaryActionTriggered
+        ]
+        if #available(iOS 14.0, tvOS 14.0, macCatalyst 14.0, *) {
+            events.append(.menuActionTriggered)
+        }
+
+        return events.first { event in
+            self.actions(forTarget: target, forControlEvent: event)?.contains(action.description) ?? false
+        }
+    }
+}
+
+extension UIControl.Event {
+    var description: String? {
+        if UIControl.Event.allTouchEvents.contains(self) {
+            return "Touch"
+        } else if UIControl.Event.allEditingEvents.contains(self) {
+            return "Edit"
+        } else if self == .valueChanged {
+            return "Value Change"
+        } else if self == .primaryActionTriggered {
+            return "Primary Action"
+        } else if #available(iOS 14.0, tvOS 14.0, macCatalyst 14.0, *), self == .menuActionTriggered {
+            return "Menu Action"
+        }
+        return nil
+    }
+}
+
 extension UIResponder {
     var owningViewController: UIViewController? {
-        return self as? UIViewController ?? next?.owningViewController
+        self as? UIViewController ?? next?.owningViewController
     }
 }
 

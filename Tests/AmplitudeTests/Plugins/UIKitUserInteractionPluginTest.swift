@@ -14,15 +14,14 @@ class UIKitUserInteractionsTests: XCTestCase {
         button.accessibilityLabel = "Accessibility Button"
         mockVC.view.addSubview(button)
 
-        let buttonData = button.extractData(with: "action")
+        let buttonData = button.eventData
 
         XCTAssertEqual(buttonData.viewController, "UIViewController")
         XCTAssertEqual(buttonData.title, "Mock VC Title")
         XCTAssertEqual(buttonData.accessibilityLabel, "Accessibility Button")
-        XCTAssertEqual(buttonData.action, "action")
         XCTAssertEqual(buttonData.targetViewClass, "UIButton")
         XCTAssertEqual(buttonData.targetText, "Test Button")
-        XCTAssertTrue(buttonData.hierarchy.hasSuffix("UIButton -> UIView"))
+        XCTAssertTrue(buttonData.hierarchy.hasSuffix("UIButton → UIView"))
     }
 
     func testExtractDataForCustomView() {
@@ -33,24 +32,22 @@ class UIKitUserInteractionsTests: XCTestCase {
         let customView = CustomView()
         mockVC.view.addSubview(customView)
 
-        let customViewData = customView.extractData(with: "action")
+        let customViewData = customView.eventData
 
         XCTAssertEqual(customViewData.viewController, "UIViewController")
         XCTAssertEqual(customViewData.title, "Mock VC Title")
         XCTAssertNil(customViewData.accessibilityLabel)
-        XCTAssertEqual(customViewData.action, "action")
         XCTAssertEqual(customViewData.targetViewClass, "CustomView")
-        XCTAssertTrue(customViewData.hierarchy.hasSuffix("CustomView -> UIView"))
+        XCTAssertTrue(customViewData.hierarchy.hasSuffix("CustomView → UIView"))
     }
 
     func testExtractDataForOrphanView() {
         let orphanView = UIView()
-        let orphanData = orphanView.extractData(with: "action")
+        let orphanData = orphanView.eventData
 
         XCTAssertNil(orphanData.viewController)
         XCTAssertNil(orphanData.title)
         XCTAssertNil(orphanData.accessibilityLabel)
-        XCTAssertEqual(orphanData.action, "action")
         XCTAssertEqual(orphanData.targetViewClass, "UIView")
         XCTAssertNil(orphanData.targetText)
         XCTAssertEqual(orphanData.hierarchy, "UIView")
