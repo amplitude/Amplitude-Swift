@@ -213,11 +213,14 @@ extension UIView: ActionTrackable {
     @objc func amp_shouldTrack(_ action: Selector, for target: Any?) -> Bool { false }
 }
 
-extension UIButton {
-    override var amp_title: String? { currentTitle }
+extension UIControl {
     override func amp_shouldTrack(_ action: Selector, for target: Any?) -> Bool {
         actions(forTarget: target, forControlEvent: .touchUpInside)?.contains(action.description) ?? false
     }
+}
+
+extension UIButton {
+    override var amp_title: String? { currentTitle }
 }
 
 extension UISegmentedControl {
