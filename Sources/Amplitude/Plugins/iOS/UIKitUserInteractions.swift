@@ -220,7 +220,7 @@ extension UIControl {
 }
 
 extension UIButton {
-    override var amp_title: String? { currentTitle }
+    override var amp_title: String? { currentTitle ?? currentImage?.accessibilityIdentifier }
 }
 
 extension UISegmentedControl {
