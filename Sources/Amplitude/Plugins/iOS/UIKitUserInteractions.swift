@@ -44,9 +44,8 @@ class UIKitUserInteractions {
     private static let lock = NSLock()
 
     private static let addNotificationObservers: Void = {
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEdit), name: UITextField.textDidEndEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEdit), name: UITextView.textDidEndEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didTouch), name: UITableView.selectionDidChangeNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
     }()
 
     private static let setupMethodSwizzling: Void = {
@@ -62,17 +61,9 @@ class UIKitUserInteractions {
         addNotificationObservers
     }
 
-    @objc static func didEdit(_ notification: NSNotification) {
+    @objc static func didEndEditing(_ notification: NSNotification) {
         guard let view = notification.object as? UIView else { return }
-        let userInteractionEvent = view.eventData.userInteractionEvent(for: "Edit")
-        amplitudeInstances.allObjects.forEach {
-            $0.track(event: userInteractionEvent)
-        }
-    }
-
-    @objc static func didTouch(_ notification: NSNotification) {
-        guard let view = notification.object as? UIView else { return }
-        let userInteractionEvent = view.eventData.userInteractionEvent(for: "Touch")
+        let userInteractionEvent = view.eventData.userInteractionEvent(for: "didEndEditing")
         amplitudeInstances.allObjects.forEach {
             $0.track(event: userInteractionEvent)
         }
