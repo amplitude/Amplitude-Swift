@@ -1,6 +1,6 @@
 import Foundation
 
-public class UserInteractionEvent: BaseEvent {
+public class ElementInteractionEvent: BaseEvent {
     convenience init(
         viewController: String? = nil,
         title: String? = nil,

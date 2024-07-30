@@ -27,8 +27,11 @@
 		4E05BB942BE41AEB009DE475 /* Amplitude+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E05BB932BE41AEB009DE475 /* Amplitude+Extensions.swift */; };
 		4E2B646B2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E2B646A2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift */; };
 		4E3871622BB34DBC002890AB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */; };
-		6C23EF112C38AC19000DC8C8 /* UIKitUserInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C23EF102C38AC19000DC8C8 /* UIKitUserInteractions.swift */; };
-		6C23EF132C38AC24000DC8C8 /* UserInteractionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C23EF122C38AC24000DC8C8 /* UserInteractionEvent.swift */; };
+		6C04FC3F2C58973C00EA8667 /* ElementInteractionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */; };
+		6C04FC412C58974A00EA8667 /* UIKitElementInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */; };
+		6C04FC432C58976800EA8667 /* ObjCAutocaptureOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC422C58976800EA8667 /* ObjCAutocaptureOptions.swift */; };
+		6C04FC452C58978900EA8667 /* AutocaptureOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC442C58978900EA8667 /* AutocaptureOptions.swift */; };
+		6C04FC472C5897AC00EA8667 /* AutocaptureOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC462C5897AC00EA8667 /* AutocaptureOptionsTests.swift */; };
 		6C23EF162C38AD31000DC8C8 /* UIKitUserInteractionPluginTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C23EF142C38AC32000DC8C8 /* UIKitUserInteractionPluginTest.swift */; };
 		8EDEC02B99EE2092B567A61D /* ObjCIngestionMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC500EBDA8B813056E2DB /* ObjCIngestionMetadata.swift */; };
 		8EDEC1073A308B12B5CCD975 /* AnalyticsConnectorPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECD39BAA97DD4320C0AA5 /* AnalyticsConnectorPlugin.swift */; };
@@ -66,7 +69,6 @@
 		B6F338A32B685793006179E2 /* NetworkConnectivityCheckerPluginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F338A22B685793006179E2 /* NetworkConnectivityCheckerPluginTests.swift */; };
 		BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA0359C92A51585D007C383B /* legacy_v3.sqlite */; };
 		BA0639F62A4DD491000F1CEE /* LegacyDatabaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */; };
-		BA1EC0F42A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1EC0F32A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift */; };
 		BA1EC0F62A9F63FD00C2D547 /* AmplitudeIOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1EC0F52A9F63FD00C2D547 /* AmplitudeIOSTests.swift */; };
 		BA34B23C2AA0723A00F88097 /* AnalyticsConnector in Frameworks */ = {isa = PBXBuildFile; productRef = BA34B23B2AA0723A00F88097 /* AnalyticsConnector */; };
 		BA994B9A2A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */; };
@@ -155,8 +157,11 @@
 		3E281B902B9BCC14009D913B /* DispatchQueueHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DispatchQueueHolder.swift; sourceTree = "<group>"; };
 		4E05BB932BE41AEB009DE475 /* Amplitude+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Amplitude+Extensions.swift"; sourceTree = "<group>"; };
 		4E2B646A2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitScreenViewsPluginTests.swift; sourceTree = "<group>"; };
-		6C23EF102C38AC19000DC8C8 /* UIKitUserInteractions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitUserInteractions.swift; sourceTree = "<group>"; };
-		6C23EF122C38AC24000DC8C8 /* UserInteractionEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserInteractionEvent.swift; sourceTree = "<group>"; };
+		6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElementInteractionEvent.swift; sourceTree = "<group>"; };
+		6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitElementInteractions.swift; sourceTree = "<group>"; };
+		6C04FC422C58976800EA8667 /* ObjCAutocaptureOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCAutocaptureOptions.swift; sourceTree = "<group>"; };
+		6C04FC442C58978900EA8667 /* AutocaptureOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutocaptureOptions.swift; sourceTree = "<group>"; };
+		6C04FC462C5897AC00EA8667 /* AutocaptureOptionsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutocaptureOptionsTests.swift; sourceTree = "<group>"; };
 		6C23EF142C38AC32000DC8C8 /* UIKitUserInteractionPluginTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitUserInteractionPluginTest.swift; sourceTree = "<group>"; };
 		8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeSessionTests.swift; sourceTree = "<group>"; };
 		8EDEC1160D95DC3F0E48DDF7 /* ObjCPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCPlugin.swift; sourceTree = "<group>"; };
@@ -195,7 +200,6 @@
 		B6F338A22B685793006179E2 /* NetworkConnectivityCheckerPluginTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConnectivityCheckerPluginTests.swift; sourceTree = "<group>"; };
 		BA0359C92A51585D007C383B /* legacy_v3.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v3.sqlite; sourceTree = "<group>"; };
 		BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorage.swift; sourceTree = "<group>"; };
-		BA1EC0F32A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultTrackingOptionsTests.swift; sourceTree = "<group>"; };
 		BA1EC0F52A9F63FD00C2D547 /* AmplitudeIOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmplitudeIOSTests.swift; sourceTree = "<group>"; };
 		BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyDatabaseStorageTests.swift; sourceTree = "<group>"; };
 		BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = legacy_v4.sqlite; sourceTree = "<group>"; };
@@ -299,6 +303,7 @@
 		8EDECAFD8271434E8DC7BA78 /* ObjC */ = {
 			isa = PBXGroup;
 			children = (
+				6C04FC422C58976800EA8667 /* ObjCAutocaptureOptions.swift */,
 				B6CCC6CC2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift */,
 				8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */,
 				8EDECB1FA2AFF022A19104EE /* ObjCPlan.swift */,
@@ -345,7 +350,7 @@
 		OBJ_13 /* Events */ = {
 			isa = PBXGroup;
 			children = (
-				6C23EF122C38AC24000DC8C8 /* UserInteractionEvent.swift */,
+				6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */,
 				OBJ_14 /* BaseEvent.swift */,
 				OBJ_15 /* EventOptions.swift */,
 				OBJ_16 /* GroupIdentifyEvent.swift */,
@@ -398,7 +403,7 @@
 		OBJ_32 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				6C23EF102C38AC19000DC8C8 /* UIKitUserInteractions.swift */,
+				6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */,
 				OBJ_33 /* IOSLifecycleMonitor.swift */,
 				8EDEC650EF79B104DC3C9F4C /* UIKitScreenViews.swift */,
 			);
@@ -460,6 +465,7 @@
 		OBJ_53 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				6C04FC462C5897AC00EA8667 /* AutocaptureOptionsTests.swift */,
 				B6F3389F2B6854A8006179E2 /* Plugins */,
 				OBJ_54 /* AmplitudeTests.swift */,
 				OBJ_55 /* ConfigurationTests.swift */,
@@ -472,7 +478,6 @@
 				OBJ_70 /* Utilities */,
 				8EDEC0630C3B587334275D9B /* AmplitudeSessionTests.swift */,
 				8EDECBC5925DC68913C7CB89 /* Migration */,
-				BA1EC0F32A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift */,
 				BA1EC0F52A9F63FD00C2D547 /* AmplitudeIOSTests.swift */,
 				4E05BB932BE41AEB009DE475 /* Amplitude+Extensions.swift */,
 			);
@@ -512,6 +517,7 @@
 		OBJ_7 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				6C04FC442C58978900EA8667 /* AutocaptureOptions.swift */,
 				B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */,
 				OBJ_8 /* Amplitude.swift */,
 				OBJ_9 /* Configuration.swift */,
@@ -703,7 +709,6 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_142 /* AmplitudeTests.swift in Sources */,
-				BA1EC0F42A9F2FC700C2D547 /* DefaultTrackingOptionsTests.swift in Sources */,
 				OBJ_143 /* ConfigurationTests.swift in Sources */,
 				OBJ_144 /* ConsoleLoggerTests.swift in Sources */,
 				OBJ_145 /* BaseEventTests.swift in Sources */,
@@ -776,11 +781,11 @@
 				OBJ_116 /* Atomic.swift in Sources */,
 				OBJ_117 /* CodableExtension.swift in Sources */,
 				OBJ_118 /* EventPipeline.swift in Sources */,
+				6C04FC412C58974A00EA8667 /* UIKitElementInteractions.swift in Sources */,
 				OBJ_119 /* HttpClient.swift in Sources */,
 				OBJ_120 /* OutputFileStream.swift in Sources */,
 				OBJ_121 /* PersistentStorageResponseHandler.swift in Sources */,
 				OBJ_122 /* QueueTimer.swift in Sources */,
-				6C23EF132C38AC24000DC8C8 /* UserInteractionEvent.swift in Sources */,
 				OBJ_124 /* UrlExtension.swift in Sources */,
 				8EDECFCCF4219767F26210D6 /* Sessions.swift in Sources */,
 				3E281B8C2B967F19009D913B /* Diagonostics.swift in Sources */,
@@ -792,9 +797,10 @@
 				8EDEC3283B812D5D34DADF7B /* AnalyticsConnectorIdentityPlugin.swift in Sources */,
 				8EDEC4D0C0CE07BF211804CC /* DefaultTrackingOptions.swift in Sources */,
 				8EDEC30C0075E9D92B1B5210 /* UIKitScreenViews.swift in Sources */,
+				6C04FC3F2C58973C00EA8667 /* ElementInteractionEvent.swift in Sources */,
+				6C04FC432C58976800EA8667 /* ObjCAutocaptureOptions.swift in Sources */,
 				8EDEC43FB30802F70112E577 /* ScreenViewedEvent.swift in Sources */,
 				8EDEC51F746CC25D27E32F6A /* DeepLinkOpenedEvent.swift in Sources */,
-				6C23EF112C38AC19000DC8C8 /* UIKitUserInteractions.swift in Sources */,
 				8EDECF81C2B1B38D472FD7EF /* ObjCConfiguration.swift in Sources */,
 				8EDECB800546E37719391E65 /* ObjCPlan.swift in Sources */,
 				8EDEC02B99EE2092B567A61D /* ObjCIngestionMetadata.swift in Sources */,
@@ -802,6 +808,7 @@
 				8EDECD1E851511887BE000F9 /* ObjCEventOptions.swift in Sources */,
 				8EDEC10C56FA7F7DEEB48B6F /* ObjCBaseEvent.swift in Sources */,
 				8EDECDF8E188CD7F24EEB475 /* ObjCTrackingOptions.swift in Sources */,
+				6C04FC472C5897AC00EA8667 /* AutocaptureOptionsTests.swift in Sources */,
 				8EDECEC5F98F9974DF3E576F /* ObjCIdentify.swift in Sources */,
 				8EDECBA91C61037025B85EFA /* ObjCRevenue.swift in Sources */,
 				8EDECE3AA54253BA167E89CB /* ObjCPlugin.swift in Sources */,
@@ -809,6 +816,7 @@
 				8EDEC74C71FEC9056DC7358F /* ObjCLoggerProvider.swift in Sources */,
 				8EDECA4DAFA67CD4785D0161 /* ObjCDefaultTrackingOptions.swift in Sources */,
 				8EDEC43520B2DCF584F1035D /* ObjCScreenViewedEvent.swift in Sources */,
+				6C04FC452C58978900EA8667 /* AutocaptureOptions.swift in Sources */,
 				8EDECC1FC97DDF0BEFAA96E7 /* ObjCDeepLinkOpenedEvent.swift in Sources */,
 				B6EDB4D02B643C8400454B90 /* NetworkConnectivityCheckerPlugin.swift in Sources */,
 				8EDEC5F7208B1C327C8703D7 /* ObjCStorage.swift in Sources */,

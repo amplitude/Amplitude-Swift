@@ -1,27 +1,16 @@
 import Foundation
 
-@objc(AMPDefaultTrackingOptions)
-@available(*, deprecated, renamed: "AutocaptureOptions", message: "Please use `AutocaptureOptions` instead")
-public class ObjCDefaultTrackingOptions: NSObject {
-    internal let options: DefaultTrackingOptions
+@objc(AMPAutocaptureOptions)
+public class ObjCAutocaptureOptions: NSObject {
+    internal let options: AutocaptureOptions
 
     @objc
     convenience public override init() {
-        self.init(DefaultTrackingOptions())
+        self.init(AutocaptureOptions())
     }
 
-    internal init(_ options: DefaultTrackingOptions) {
+    internal init(_ options: AutocaptureOptions) {
         self.options = options
-    }
-
-    @objc
-    public static var ALL: ObjCDefaultTrackingOptions {
-        ObjCDefaultTrackingOptions(DefaultTrackingOptions.ALL)
-    }
-
-    @objc
-    public static var NONE: ObjCDefaultTrackingOptions {
-        ObjCDefaultTrackingOptions(DefaultTrackingOptions.NONE)
     }
 
     @objc
@@ -51,6 +40,16 @@ public class ObjCDefaultTrackingOptions: NSObject {
         }
         set(value) {
             options.screenViews = value
+        }
+    }
+
+    @objc
+    public var elementInteractions: Bool {
+        get {
+            options.elementInteractions
+        }
+        set(value) {
+            options.elementInteractions = value
         }
     }
 }

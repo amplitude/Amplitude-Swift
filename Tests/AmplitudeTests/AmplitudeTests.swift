@@ -39,7 +39,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: apiKey,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTracking: DefaultTrackingOptions.NONE
+            autocapture: AutocaptureOptions(sessions: false)
         )
     }
 
@@ -205,7 +205,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: apiKey,
             storageProvider: storageTest,
             identifyStorageProvider: interceptStorageTest,
-            defaultTracking: DefaultTrackingOptions.NONE
+            autocapture: AutocaptureOptions(sessions: false)
         ))
 
         amplitude.setUserId(userId: "test-user")
@@ -288,14 +288,14 @@ final class AmplitudeTests: XCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
 
-    func testInit_defaultTracking() {
+    func testInit_autocapture() {
         let configuration = Configuration(apiKey: "api-key")
         let amplitude = Amplitude(configuration: configuration)
-        let defaultTracking = amplitude.configuration.defaultTracking
-        XCTAssertFalse(defaultTracking.appLifecycles)
-        XCTAssertFalse(defaultTracking.screenViews)
-        XCTAssertFalse(defaultTracking.userInteractions)
-        XCTAssertTrue(defaultTracking.sessions)
+        let autocapture = amplitude.configuration.autocapture
+        XCTAssertFalse(autocapture.appLifecycles)
+        XCTAssertFalse(autocapture.screenViews)
+        XCTAssertFalse(autocapture.elementInteractions)
+        XCTAssertTrue(autocapture.sessions)
     }
 
     func testTrackNSUserActivity() throws {
@@ -303,7 +303,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTracking: DefaultTrackingOptions(sessions: false)
+            autocapture: AutocaptureOptions(sessions: false)
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -331,7 +331,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTracking: DefaultTrackingOptions(sessions: false)
+            autocapture: AutocaptureOptions(sessions: false)
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -354,7 +354,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTracking: DefaultTrackingOptions(sessions: false)
+            autocapture: AutocaptureOptions(sessions: false)
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -377,7 +377,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTracking: DefaultTrackingOptions(sessions: false)
+            autocapture: AutocaptureOptions(sessions: false)
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -400,7 +400,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTracking: DefaultTrackingOptions(sessions: false)
+            autocapture: AutocaptureOptions(sessions: false)
         )
         let amplitude = Amplitude(configuration: configuration)
         let eventOptions = EventOptions(sessionId: -1)
@@ -418,7 +418,7 @@ final class AmplitudeTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            defaultTracking: DefaultTrackingOptions(sessions: false)
+            autocapture: AutocaptureOptions(sessions: false)
         )
         let amplitude = Amplitude(configuration: configuration)
         amplitude.sessions = SessionsWithDelayedEventStartProcessing(amplitude: amplitude)
@@ -458,7 +458,7 @@ final class AmplitudeTests: XCTestCase {
             flushQueueSize: 1000,
             flushIntervalMillis: 99999,
             logLevel: LogLevelEnum.DEBUG,
-            defaultTracking: DefaultTrackingOptions.NONE
+            autocapture: AutocaptureOptions(sessions: false)
         )
 
         // Create storages using instance name only
@@ -474,7 +474,7 @@ final class AmplitudeTests: XCTestCase {
                 storageProvider: legacyEventStorage,
                 identifyStorageProvider: legacyIdentityStorage,
                 logLevel: config.logLevel,
-                defaultTracking: config.defaultTracking
+                autocapture: config.autocapture
             ))
 
         let legacyDeviceId = legacyStorageAmplitude.getDeviceId()
@@ -542,7 +542,7 @@ final class AmplitudeTests: XCTestCase {
                 flushQueueSize: 1000,
                 flushIntervalMillis: 99999,
                 logLevel: LogLevelEnum.DEBUG,
-                defaultTracking: DefaultTrackingOptions.NONE
+                autocapture: AutocaptureOptions(sessions: false)
             )
 
         // Create storages using instance name only
@@ -558,7 +558,7 @@ final class AmplitudeTests: XCTestCase {
                     storageProvider: legacyEventStorage,
                     identifyStorageProvider: legacyIdentityStorage,
                     logLevel: config.logLevel,
-                    defaultTracking: config.defaultTracking
+                    autocapture: config.autocapture
                 ))
 
             let legacyDeviceId = legacyStorageAmplitude.getDeviceId()
@@ -705,7 +705,7 @@ final class AmplitudeTests: XCTestCase {
     func testConcurrentAccess() {
         let amplitude = Amplitude(configuration: Configuration(apiKey: "test-api-key",
                                                                storageProvider: InMemoryStorage(),
-                                                               defaultTracking: .init(sessions: true,
+                                                               autocapture: .init(sessions: true,
                                                                                       appLifecycles: true)))
         let eventCollector = EventCollectorPlugin()
         amplitude.add(plugin: eventCollector)

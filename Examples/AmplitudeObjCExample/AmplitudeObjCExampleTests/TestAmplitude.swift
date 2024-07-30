@@ -36,7 +36,7 @@ public class TestAmplitude: ObjCAmplitude {
                                           enableCoppaControl: config.enableCoppaControl,
                                           flushEventsOnClose: config.flushEventsOnClose,
                                           minTimeBetweenSessionsMillis: config.minTimeBetweenSessionsMillis,
-                                          defaultTracking: config.defaultTracking,
+                                          autocapture: config.autocapture,
                                           identifyBatchIntervalMillis: config.identifyBatchIntervalMillis,
                                           migrateLegacyData: config.migrateLegacyData,
                                           offline: NetworkConnectivityCheckerPlugin.Disabled)
