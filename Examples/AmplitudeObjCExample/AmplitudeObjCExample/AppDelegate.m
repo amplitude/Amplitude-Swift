@@ -18,7 +18,7 @@
     autocaptureOptions.appLifecycles = YES;
     autocaptureOptions.screenViews = YES;
     autocaptureOptions.elementInteractions = YES;
-    configuration.autocaptureOptions = autocaptureOptions;
+    configuration.autocapture = autocaptureOptions;
     configuration.loggerProvider = ^(NSInteger logLevel, NSString* _Nonnull message) {
         NSLog(@"%@", message);
     };

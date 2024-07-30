@@ -327,7 +327,7 @@
     AMPConfiguration* configuration = [AMPConfiguration initWithApiKey:@"API-KEY" instanceName:instanceName];
     AMPAutocaptureOptions* autocaptureOptions = [AMPAutocaptureOptions new];
     autocaptureOptions.sessions = NO;
-    configuration.autocaptureOptions = autocaptureOptions;
+    configuration.autocapture = autocaptureOptions;
     Amplitude *amplitude = [[TestAmplitude alloc] initWithConfiguration:configuration];
     return amplitude;
 }
