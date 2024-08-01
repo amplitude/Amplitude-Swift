@@ -14,7 +14,7 @@ public class DefaultEventUtils {
         let previousBuild: String? = amplitude?.storage.read(key: StorageKey.APP_BUILD)
         let previousVersion: String? = amplitude?.storage.read(key: StorageKey.APP_VERSION)
 
-        if amplitude?.configuration.autocapture.appLifecycles ?? false {
+        if amplitude?.configuration.autocapture.contains(.appLifecycles) ?? false {
             let lastEventTime: Int64? = amplitude?.storage.read(key: StorageKey.LAST_EVENT_TIME)
             if lastEventTime == nil {
                 self.amplitude?.track(eventType: Constants.AMP_APPLICATION_INSTALLED_EVENT, eventProperties: [

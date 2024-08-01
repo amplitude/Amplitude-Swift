@@ -13,12 +13,8 @@
     AMPConfiguration* configuration = [AMPConfiguration initWithApiKey:apiKey];
     configuration.logLevel = AMPLogLevelLOG;
     configuration.serverZone = AMPServerZoneUS;
-    AMPAutocaptureOptions* autocaptureOptions = [AMPAutocaptureOptions new];
-    autocaptureOptions.sessions = YES;
-    autocaptureOptions.appLifecycles = YES;
-    autocaptureOptions.screenViews = YES;
-    autocaptureOptions.elementInteractions = YES;
-    configuration.autocapture = autocaptureOptions;
+    NSArray *autocaptureOptions = @[[AMPAutocaptureOptions sessions], [AMPAutocaptureOptions appLifecycles], [AMPAutocaptureOptions screenViews]];
+    configuration.autocapture = [[AMPAutocaptureOptions alloc] initWithOptionsToUnion:autocaptureOptions];
     configuration.loggerProvider = ^(NSInteger logLevel, NSString* _Nonnull message) {
         NSLog(@"%@", message);
     };

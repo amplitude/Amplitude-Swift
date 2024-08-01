@@ -119,7 +119,7 @@ public class Sessions {
 
     public func startNewSession(timestamp: Int64) -> [BaseEvent] {
         var sessionEvents: [BaseEvent] = Array()
-        let trackingSessionEvents = configuration.autocapture.sessions
+        let trackingSessionEvents = configuration.autocapture.contains(.sessions)
 
         // end previous session
         if trackingSessionEvents && self.sessionId >= 0 {
@@ -148,7 +148,7 @@ public class Sessions {
 
     public func endCurrentSession() -> [BaseEvent] {
         var sessionEvents: [BaseEvent] = Array()
-        let trackingSessionEvents = configuration.autocapture.sessions
+        let trackingSessionEvents = configuration.autocapture.contains(.sessions)
 
         if trackingSessionEvents && self.sessionId >= 0 {
             let sessionEndEvent = BaseEvent(

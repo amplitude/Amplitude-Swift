@@ -41,9 +41,11 @@ public class Configuration {
         DefaultTrackingOptions().withAutocptureOptions(autocapture)
     }() {
         didSet {
-            autocapture.sessions = defaultTracking.sessions
-            autocapture.appLifecycles = defaultTracking.appLifecycles
-            autocapture.screenViews = defaultTracking.screenViews
+            autocapture = AutocaptureOptions([
+                (defaultTracking.sessions, AutocaptureOptions.sessions),
+                (defaultTracking.appLifecycles, .appLifecycles),
+                (defaultTracking.screenViews, .screenViews)
+            ].compactMap { $0.0 ? $0.1 : nil })
             _ = defaultTracking.withAutocptureOptions(autocapture)
         }
     }
@@ -78,10 +80,11 @@ public class Configuration {
         migrateLegacyData: Bool = true,
         offline: Bool? = false
     ) {
-        var autocapture = AutocaptureOptions(
-            sessions: defaultTracking.sessions,
-            appLifecycles: defaultTracking.appLifecycles,
-            screenViews: defaultTracking.screenViews)
+        let autocapture = AutocaptureOptions([
+            (defaultTracking.sessions, AutocaptureOptions.sessions),
+            (defaultTracking.appLifecycles, .appLifecycles),
+            (defaultTracking.screenViews, .screenViews)
+        ].compactMap { $0.0 ? $0.1 : nil })
         self.init(apiKey: apiKey,
             flushQueueSize: flushQueueSize,
             flushIntervalMillis: flushIntervalMillis,
@@ -135,7 +138,7 @@ public class Configuration {
         flushEventsOnClose: Bool = true,
         minTimeBetweenSessionsMillis: Int = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS,
         // `trackingSessionEvents` has been replaced by `defaultTracking.sessions`
-        autocapture: AutocaptureOptions = AutocaptureOptions(),
+        autocapture: AutocaptureOptions = .sessions,
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
         migrateLegacyData: Bool = true,
         offline: Bool? = false

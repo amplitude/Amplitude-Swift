@@ -11,19 +11,31 @@ public class DefaultTrackingOptions {
 
     public var sessions: Bool {
         didSet {
-            autocapture?.sessions = sessions
+            if sessions {
+                autocapture?.insert(.sessions)
+            } else {
+                autocapture?.remove(.sessions)
+            }
         }
     }
 
     public var appLifecycles: Bool {
         didSet {
-            autocapture?.sessions = appLifecycles
+            if appLifecycles {
+                autocapture?.insert(.appLifecycles)
+            } else {
+                autocapture?.remove(.appLifecycles)
+            }
         }
     }
 
     public var screenViews: Bool {
         didSet {
-            autocapture?.sessions = screenViews
+            if screenViews {
+                autocapture?.insert(.screenViews)
+            } else {
+                autocapture?.remove(.screenViews)
+            }
         }
     }
 

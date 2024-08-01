@@ -257,7 +257,7 @@ public class ObjCConfiguration: NSObject {
     @objc
     public var autocapture: ObjCAutocaptureOptions {
         get {
-            ObjCAutocaptureOptions(configuration.autocapture)
+            ObjCAutocaptureOptions(options: configuration.autocapture)
         }
         set(value) {
             configuration.autocapture = value.options

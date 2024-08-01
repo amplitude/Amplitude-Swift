@@ -33,10 +33,10 @@ class IOSLifecycleMonitor: UtilityPlugin {
     public override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
         utils = DefaultEventUtils(amplitude: amplitude)
-        if amplitude.configuration.autocapture.screenViews {
+        if amplitude.configuration.autocapture.contains(.screenViews) {
             UIKitScreenViews.register(amplitude)
         }
-        if amplitude.configuration.autocapture.elementInteractions {
+        if amplitude.configuration.autocapture.contains(.elementInteractions) {
             UIKitElementInteractions.register(amplitude)
         }
     }
@@ -95,7 +95,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
     func didEnterBackground(notification: Notification) {
         let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
         self.amplitude?.onExitForeground(timestamp: timestamp)
-        if amplitude?.configuration.autocapture.appLifecycles ?? false {
+        if amplitude?.configuration.autocapture.contains(.appLifecycles) ?? false {
             self.amplitude?.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
         }
     }
@@ -123,7 +123,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
     }
 
     private func sendApplicationOpened(fromBackground: Bool) {
-        guard amplitude?.configuration.autocapture.appLifecycles ?? false else {
+        guard amplitude?.configuration.autocapture.contains(.appLifecycles) ?? false else {
             return
         }
         let info = Bundle.main.infoDictionary

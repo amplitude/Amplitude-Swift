@@ -115,7 +115,7 @@ final class AmplitudeSessionTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             minTimeBetweenSessionsMillis: 100,
-            autocapture: AutocaptureOptions(sessions: false)
+            autocapture: []
         )
         let amplitude = Amplitude(configuration: customCongiguration)
         amplitude.setSessionId(timestamp: 800)
