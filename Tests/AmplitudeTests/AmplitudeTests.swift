@@ -542,7 +542,7 @@ final class AmplitudeTests: XCTestCase {
                 flushQueueSize: 1000,
                 flushIntervalMillis: 99999,
                 logLevel: LogLevelEnum.DEBUG,
-                autocapture: AutocaptureOptions(sessions: false)
+                autocapture: []
             )
 
         // Create storages using instance name only
