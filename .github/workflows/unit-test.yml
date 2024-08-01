@@ -10,6 +10,10 @@ on:
 jobs:
   test:
     runs-on: macos-13
+    strategy:
+      matrix:
+        platform: [iOS, macOS, tvOS, watchOS]
+      fail-fast: false
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -22,32 +26,44 @@ jobs:
       - name: List Project Configuration
         run: |
           xcodebuild -list
-      - name: iOS Tests
+      - name: ${{ matrix.platform }} Tests
         run: |
-          xcodebuild test \
-            -scheme Amplitude-Swift-Package \
-            -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 15'
-      - name: macOS Tests
+          case "${{ matrix.platform }}" in
+            iOS)
+              xcodebuild test \
+                -scheme Amplitude-Swift-Package \
+                -sdk iphonesimulator \
+                -destination 'platform=iOS Simulator,name=iPhone 15'
+              ;;
+            macOS)
+              xcodebuild test \
+                -scheme Amplitude-Swift-Package \
+                -sdk macosx \
+                -destination 'platform=macosx'
+              ;;
+            tvOS)
+              xcodebuild \
+                -scheme Amplitude-Swift-Package \
+                -sdk appletvsimulator \
+                -destination 'platform=tvOS Simulator,name=Apple TV' \
+                test
+              ;;
+            watchOS)
+              xcodebuild \
+                -scheme Amplitude-Swift-Package \
+                -sdk watchsimulator \
+                -destination 'platform=watchOS Simulator,name=Apple Watch Series 8 (41mm)' \
+                test
+              ;;
+          esac
+  objc-example-test:
+    runs-on: macos-13
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set Xcode 15
         run: |
-          xcodebuild test \
-            -scheme Amplitude-Swift-Package \
-            -sdk macosx \
-            -destination 'platform=macosx'
-      - name: tvOS Tests
-        run: |
-          xcodebuild \
-            -scheme Amplitude-Swift-Package \
-            -sdk appletvsimulator \
-            -destination 'platform=tvOS Simulator,name=Apple TV' \
-            test
-      - name: watchOS Tests
-        run: |
-          xcodebuild \
-            -scheme Amplitude-Swift-Package \
-            -sdk watchsimulator \
-            -destination 'platform=watchOS Simulator,name=Apple Watch Series 8 (41mm)' \
-            test
+          sudo xcode-select -switch /Applications/Xcode_15.2.app
       - name: Objective-C Example Tests (iOS)
         working-directory: Examples/AmplitudeObjCExample
         run: |
