@@ -4,11 +4,11 @@ import XCTest
 
 final class AutocaptureOptionsTests: XCTestCase {
     func testDefault() {
-        let options = AutocaptureOptions()
-        XCTAssertFalse(options.contains(.appLifecycles))
-        XCTAssertFalse(options.contains(.screenViews))
-        XCTAssertTrue(options.contains(.sessions))
-        XCTAssertFalse(options.contains(.elementInteractions))
+        let config = Configuration(apiKey: "TEST_KEY")
+        XCTAssertFalse(config.autocapture.contains(.appLifecycles))
+        XCTAssertFalse(config.autocapture.contains(.screenViews))
+        XCTAssertTrue(config.autocapture.contains(.sessions))
+        XCTAssertFalse(config.autocapture.contains(.elementInteractions))
     }
 
     func testCustom() {
