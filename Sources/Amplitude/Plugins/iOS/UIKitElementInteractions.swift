@@ -93,7 +93,7 @@ class UIKitElementInteractions {
 extension UIApplication {
     @objc func amp_sendAction(_ action: Selector, to target: Any?, from sender: Any?, for event: UIEvent?) -> Bool {
         let sendActionResult = amp_sendAction(action, to: target, from: sender, for: event)
-        
+
         // TODO: Reduce SwiftUI noise by finding the unique view that the action method is attached to.
         // Currently, the action methods pointing to a SwiftUI target are blocked.
         let targetClass = NSStringFromClass(type(of: target as AnyObject))
@@ -122,11 +122,11 @@ extension UIGestureRecognizer {
         amp_setState(state)
 
         guard state == .ended, let view else { return }
-        
+
         // TODO: Reduce SwiftUI noise by filtering out system gesture recognizers.
         // Currently, the gesture recognizers with a SwiftUI view are blocked.
-        let targetClass = NSStringFromClass(type(of: view as AnyObject))
-        if targetClass.contains("SwiftUI") {
+        let viewClass = NSStringFromClass(type(of: view as AnyObject))
+        if viewClass.contains("SwiftUI") {
             return
         }
 
