@@ -92,6 +92,13 @@ class UIKitElementInteractions {
 extension UIApplication {
     @objc func amp_sendAction(_ action: Selector, to target: Any?, from sender: Any?, for event: UIEvent?) -> Bool {
         let sendActionResult = amp_sendAction(action, to: target, from: sender, for: event)
+        
+        // TODO: Reduce SwiftUI noise by finding the unique view that the action method is attached to.
+        // Currently, the action methods pointing to a SwiftUI target are blocked.
+        let targetClass = NSStringFromClass(type(of: target as AnyObject))
+        if targetClass.contains("SwiftUI") {
+            return sendActionResult
+        }
 
         guard sendActionResult,
               let control = sender as? UIControl,
