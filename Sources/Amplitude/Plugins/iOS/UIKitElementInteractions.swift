@@ -63,6 +63,7 @@ class UIKitElementInteractions {
 
     @objc static func didEndEditing(_ notification: NSNotification) {
         guard let view = notification.object as? UIView else { return }
+        // Text fields in SwiftUI are identifiable only after the text field is edited.
         let elementInteractionEvent = view.eventData.elementInteractionEvent(for: "didEndEditing")
         amplitudeInstances.allObjects.forEach {
             $0.track(event: elementInteractionEvent)
@@ -121,6 +122,13 @@ extension UIGestureRecognizer {
         amp_setState(state)
 
         guard state == .ended, let view else { return }
+        
+        // TODO: Reduce SwiftUI noise by filtering out system gesture recognizers.
+        // Currently, the gesture recognizers with a SwiftUI view are blocked.
+        let targetClass = NSStringFromClass(type(of: view as AnyObject))
+        if targetClass.contains("SwiftUI") {
+            return
+        }
 
         let gestureAction: String? = switch self {
         case is UITapGestureRecognizer: "tap"
