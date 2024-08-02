@@ -32,24 +32,16 @@ public final class ObjCAutocaptureOptions: NSObject {
     }
 
     @objc
-    public static func sessions() -> ObjCAutocaptureOptions {
-        return ObjCAutocaptureOptions(options: .sessions)
-    }
+    public static let sessions = ObjCAutocaptureOptions(options: .sessions)
 
     @objc
-    public static func appLifecycles() -> ObjCAutocaptureOptions {
-        return ObjCAutocaptureOptions(options: .appLifecycles)
-    }
+    public static let appLifecycles = ObjCAutocaptureOptions(options: .appLifecycles)
 
     @objc
-    public static func screenViews() -> ObjCAutocaptureOptions {
-        return ObjCAutocaptureOptions(options: .screenViews)
-    }
+    public static let screenViews = ObjCAutocaptureOptions(options: .screenViews)
 
     @objc
-    public static func elementInteractions() -> ObjCAutocaptureOptions {
-        return ObjCAutocaptureOptions(options: .elementInteractions)
-    }
+    public static let elementInteractions = ObjCAutocaptureOptions(options: .elementInteractions)
 
     // MARK: NSObject
 
