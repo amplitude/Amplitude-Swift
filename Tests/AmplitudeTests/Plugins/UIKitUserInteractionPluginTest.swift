@@ -4,7 +4,7 @@ import XCTest
 
 #if os(iOS)
 
-class UIKitUserInteractionsTests: XCTestCase {
+class UIKitElementInteractionsTests: XCTestCase {
     func testExtractDataForUIButton() {
         let mockVC = UIViewController()
         mockVC.title = "Mock VC Title"

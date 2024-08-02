@@ -1,7 +1,7 @@
 #if os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)
 import UIKit
 
-class UIKitUserInteractions {
+class UIKitElementInteractions {
     struct EventData {
         enum Source {
             case actionMethod
@@ -23,8 +23,8 @@ class UIKitUserInteractions {
 
         let hierarchy: String
 
-        fileprivate func userInteractionEvent(for action: String, from source: Source? = nil, withName sourceName: String? = nil) -> UserInteractionEvent {
-            return UserInteractionEvent(
+        fileprivate func elementInteractionEvent(for action: String, from source: Source? = nil, withName sourceName: String? = nil) -> ElementInteractionEvent {
+            return ElementInteractionEvent(
                 viewController: viewController,
                 title: title,
                 accessibilityLabel: accessibilityLabel,
@@ -44,8 +44,8 @@ class UIKitUserInteractions {
     private static let lock = NSLock()
 
     private static let addNotificationObservers: Void = {
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
-        NotificationCenter.default.addObserver(UIKitUserInteractions.self, selector: #selector(didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitElementInteractions.self, selector: #selector(didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
+        NotificationCenter.default.addObserver(UIKitElementInteractions.self, selector: #selector(didEndEditing), name: UITextView.textDidEndEditingNotification, object: nil)
     }()
 
     private static let setupMethodSwizzling: Void = {
@@ -63,9 +63,9 @@ class UIKitUserInteractions {
 
     @objc static func didEndEditing(_ notification: NSNotification) {
         guard let view = notification.object as? UIView else { return }
-        let userInteractionEvent = view.eventData.userInteractionEvent(for: "didEndEditing")
+        let elementInteractionEvent = view.eventData.elementInteractionEvent(for: "didEndEditing")
         amplitudeInstances.allObjects.forEach {
-            $0.track(event: userInteractionEvent)
+            $0.track(event: elementInteractionEvent)
         }
     }
 
@@ -99,10 +99,10 @@ extension UIApplication {
               let actionEvent = control.event(for: action, to: target)?.description
         else { return sendActionResult }
 
-        let userInteractionEvent = control.eventData.userInteractionEvent(for: actionEvent, from: .actionMethod, withName: NSStringFromSelector(action))
+        let elementInteractionEvent = control.eventData.elementInteractionEvent(for: actionEvent, from: .actionMethod, withName: NSStringFromSelector(action))
 
-        UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
-            $0.track(event: userInteractionEvent)
+        UIKitElementInteractions.amplitudeInstances.allObjects.forEach {
+            $0.track(event: elementInteractionEvent)
         }
 
         return sendActionResult
@@ -116,24 +116,24 @@ extension UIGestureRecognizer {
         guard state == .ended, let view else { return }
 
         let gestureAction: String? = switch self {
-        case is UITapGestureRecognizer: "Tap"
-        case is UISwipeGestureRecognizer: "Swipe"
-        case is UIPanGestureRecognizer: "Pan"
-        case is UILongPressGestureRecognizer: "Long Press"
+        case is UITapGestureRecognizer: "tap"
+        case is UISwipeGestureRecognizer: "swipe"
+        case is UIPanGestureRecognizer: "pan"
+        case is UILongPressGestureRecognizer: "longPress"
 #if !os(tvOS)
-        case is UIPinchGestureRecognizer: "Pinch"
-        case is UIRotationGestureRecognizer: "Rotation"
-        case is UIScreenEdgePanGestureRecognizer: "Screen Edge Pan"
+        case is UIPinchGestureRecognizer: "pinch"
+        case is UIRotationGestureRecognizer: "rotation"
+        case is UIScreenEdgePanGestureRecognizer: "screenEdgePan"
 #endif
         default: nil
         }
 
         guard let gestureAction else { return }
 
-        let userInteractionEvent = view.eventData.userInteractionEvent(for: gestureAction, from: .gestureRecognizer, withName: descriptiveTypeName)
+        let elementInteractionEvent = view.eventData.elementInteractionEvent(for: gestureAction, from: .gestureRecognizer, withName: descriptiveTypeName)
 
-        UIKitUserInteractions.amplitudeInstances.allObjects.forEach {
-            $0.track(event: userInteractionEvent)
+        UIKitElementInteractions.amplitudeInstances.allObjects.forEach {
+            $0.track(event: elementInteractionEvent)
         }
     }
 }
@@ -141,9 +141,9 @@ extension UIGestureRecognizer {
 extension UIView {
     private static let viewHierarchyDelimiter = " → "
 
-    var eventData: UIKitUserInteractions.EventData {
+    var eventData: UIKitElementInteractions.EventData {
         let viewController = owningViewController
-        return UIKitUserInteractions.EventData(
+        return UIKitElementInteractions.EventData(
             viewController: viewController?.descriptiveTypeName,
             title: viewController?.title,
             accessibilityLabel: accessibilityLabel,
@@ -177,15 +177,15 @@ extension UIControl {
 extension UIControl.Event {
     var description: String? {
         if UIControl.Event.allTouchEvents.contains(self) {
-            return "Touch"
+            return "touch"
         } else if UIControl.Event.allEditingEvents.contains(self) {
-            return "Edit"
+            return "edit"
         } else if self == .valueChanged {
-            return "Value Change"
+            return "valueChange"
         } else if self == .primaryActionTriggered {
-            return "Primary Action"
+            return "primaryAction"
         } else if #available(iOS 14.0, tvOS 14.0, macCatalyst 14.0, *), self == .menuActionTriggered {
-            return "Menu Action"
+            return "menuAction"
         }
         return nil
     }

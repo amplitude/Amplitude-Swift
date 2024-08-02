@@ -1,6 +1,7 @@
 import Foundation
 
 @objc(AMPDefaultTrackingOptions)
+@available(*, deprecated, renamed: "AMPAutocaptureOptions", message: "Please use `AMPAutocaptureOptions` instead")
 public class ObjCDefaultTrackingOptions: NSObject {
     internal let options: DefaultTrackingOptions
 
@@ -50,16 +51,6 @@ public class ObjCDefaultTrackingOptions: NSObject {
         }
         set(value) {
             options.screenViews = value
-        }
-    }
-
-    @objc
-    public var userInteractions: Bool {
-        get {
-            options.userInteractions
-        }
-        set(value) {
-            options.userInteractions = value
         }
     }
 }

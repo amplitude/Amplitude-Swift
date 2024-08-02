@@ -32,9 +32,73 @@ public class Configuration {
     public var minTimeBetweenSessionsMillis: Int
     public var identifyBatchIntervalMillis: Int
     public internal(set) var migrateLegacyData: Bool
-    public var defaultTracking: DefaultTrackingOptions
+    @available(*, deprecated, renamed: "autocapture", message: "Please use `autocapture` instead.")
+    /// The SDK no longer tracks changes to the defaultTracking options after initialization.
+    public var defaultTracking: DefaultTrackingOptions = DefaultTrackingOptions() {
+        didSet { autocapture = defaultTracking.autocaptureOptions }
+    }
+    public internal(set) var autocapture: AutocaptureOptions
     public var offline: Bool?
     internal let diagonostics: Diagnostics
+
+    @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
+    public convenience init(
+        apiKey: String,
+        flushQueueSize: Int = Constants.Configuration.FLUSH_QUEUE_SIZE,
+        flushIntervalMillis: Int = Constants.Configuration.FLUSH_INTERVAL_MILLIS,
+        instanceName: String = "",
+        optOut: Bool = false,
+        storageProvider: (any Storage)? = nil,
+        identifyStorageProvider: (any Storage)? = nil,
+        logLevel: LogLevelEnum = LogLevelEnum.WARN,
+        loggerProvider: any Logger = ConsoleLogger(),
+        minIdLength: Int? = nil,
+        partnerId: String? = nil,
+        callback: EventCallback? = nil,
+        flushMaxRetries: Int = Constants.Configuration.FLUSH_MAX_RETRIES,
+        useBatch: Bool = false,
+        serverZone: ServerZone = ServerZone.US,
+        serverUrl: String? = nil,
+        plan: Plan? = nil,
+        ingestionMetadata: IngestionMetadata? = nil,
+        trackingOptions: TrackingOptions = TrackingOptions(),
+        enableCoppaControl: Bool = false,
+        flushEventsOnClose: Bool = true,
+        minTimeBetweenSessionsMillis: Int = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS,
+        // `trackingSessionEvents` has been replaced by `defaultTracking.sessions`
+        defaultTracking: DefaultTrackingOptions,
+        identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
+        migrateLegacyData: Bool = true,
+        offline: Bool? = false
+    ) {
+        self.init(apiKey: apiKey,
+            flushQueueSize: flushQueueSize,
+            flushIntervalMillis: flushIntervalMillis,
+            instanceName: instanceName,
+            optOut: optOut,
+            storageProvider: storageProvider,
+            identifyStorageProvider: identifyStorageProvider,
+            logLevel: logLevel,
+            loggerProvider: loggerProvider,
+            minIdLength: minIdLength,
+            partnerId: partnerId,
+            callback: callback,
+            flushMaxRetries: flushMaxRetries,
+            useBatch: useBatch,
+            serverZone: serverZone,
+            serverUrl: serverUrl,
+            plan: plan,
+            ingestionMetadata: ingestionMetadata,
+            trackingOptions: trackingOptions,
+            enableCoppaControl: enableCoppaControl,
+            flushEventsOnClose: flushEventsOnClose,
+            minTimeBetweenSessionsMillis: minTimeBetweenSessionsMillis,
+            autocapture: defaultTracking.autocaptureOptions,
+            identifyBatchIntervalMillis: identifyBatchIntervalMillis,
+            migrateLegacyData: migrateLegacyData,
+            offline: offline)
+        self.defaultTracking = defaultTracking
+    }
 
     public init(
         apiKey: String,
@@ -60,7 +124,7 @@ public class Configuration {
         flushEventsOnClose: Bool = true,
         minTimeBetweenSessionsMillis: Int = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS,
         // `trackingSessionEvents` has been replaced by `defaultTracking.sessions`
-        defaultTracking: DefaultTrackingOptions = DefaultTrackingOptions(),
+        autocapture: AutocaptureOptions = .sessions,
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
         migrateLegacyData: Bool = true,
         offline: Bool? = false
@@ -92,7 +156,7 @@ public class Configuration {
         self.enableCoppaControl = enableCoppaControl
         self.flushEventsOnClose = flushEventsOnClose
         self.minTimeBetweenSessionsMillis = minTimeBetweenSessionsMillis
-        self.defaultTracking = defaultTracking
+        self.autocapture = autocapture
         self.identifyBatchIntervalMillis = identifyBatchIntervalMillis
         self.migrateLegacyData = migrateLegacyData
         // Logging is OFF by default
