@@ -10,49 +10,54 @@ public class DefaultTrackingOptions {
     }
 
     public var sessions: Bool {
-        didSet {
-            if sessions {
-                autocapture?.insert(.sessions)
+        get {
+            autocaptureOptions.contains(.sessions)
+        }
+        set {
+            if newValue {
+                autocaptureOptions.insert(.sessions)
             } else {
-                autocapture?.remove(.sessions)
+                autocaptureOptions.remove(.sessions)
             }
         }
     }
 
     public var appLifecycles: Bool {
-        didSet {
-            if appLifecycles {
-                autocapture?.insert(.appLifecycles)
+        get {
+            autocaptureOptions.contains(.appLifecycles)
+        }
+        set {
+            if newValue {
+                autocaptureOptions.insert(.appLifecycles)
             } else {
-                autocapture?.remove(.appLifecycles)
+                autocaptureOptions.remove(.appLifecycles)
             }
         }
     }
 
     public var screenViews: Bool {
-        didSet {
-            if screenViews {
-                autocapture?.insert(.screenViews)
+        get {
+            autocaptureOptions.contains(.screenViews)
+        }
+        set {
+            if newValue {
+                autocaptureOptions.insert(.screenViews)
             } else {
-                autocapture?.remove(.screenViews)
+                autocaptureOptions.remove(.screenViews)
             }
         }
     }
+
+    var autocaptureOptions: AutocaptureOptions
 
     public init(
         sessions: Bool = true,
         appLifecycles: Bool = false,
         screenViews: Bool = false
     ) {
+        self.autocaptureOptions = []
         self.sessions = sessions
         self.appLifecycles = appLifecycles
         self.screenViews = screenViews
-    }
-
-    private var autocapture: AutocaptureOptions?
-
-    func withAutocptureOptions(_ autocapture: AutocaptureOptions) -> DefaultTrackingOptions {
-        self.autocapture = autocapture
-        return self
     }
 }

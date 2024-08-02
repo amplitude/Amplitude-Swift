@@ -1,25 +1,11 @@
 import Foundation
 
 @objc(AMPAutocaptureOptions)
-public final class ObjCAutocaptureOptions: NSObject, OptionSet {
+public final class ObjCAutocaptureOptions: NSObject {
     internal var _options: AutocaptureOptions
-
-    public var rawValue: Int {
-        get {
-            return _options.rawValue
-        }
-        set {
-            _options = AutocaptureOptions(rawValue: newValue)
-        }
-    }
 
     public override init() {
         _options = AutocaptureOptions()
-        super.init()
-    }
-
-    public init(rawValue: Int) {
-        _options = AutocaptureOptions(rawValue: rawValue)
         super.init()
     }
 
@@ -32,7 +18,8 @@ public final class ObjCAutocaptureOptions: NSObject, OptionSet {
     }
 
     internal convenience init(options: AutocaptureOptions) {
-        self.init(rawValue: options.rawValue)
+        self.init()
+        _options = options
     }
 
     internal var options: AutocaptureOptions {
@@ -46,22 +33,22 @@ public final class ObjCAutocaptureOptions: NSObject, OptionSet {
 
     @objc
     public static func sessions() -> ObjCAutocaptureOptions {
-        return ObjCAutocaptureOptions(rawValue: AutocaptureOptions.sessions.rawValue)
+        return ObjCAutocaptureOptions(options: .sessions)
     }
 
     @objc
     public static func appLifecycles() -> ObjCAutocaptureOptions {
-        return ObjCAutocaptureOptions(rawValue: AutocaptureOptions.appLifecycles.rawValue)
+        return ObjCAutocaptureOptions(options: .appLifecycles)
     }
 
     @objc
     public static func screenViews() -> ObjCAutocaptureOptions {
-        return ObjCAutocaptureOptions(rawValue: AutocaptureOptions.screenViews.rawValue)
+        return ObjCAutocaptureOptions(options: .screenViews)
     }
 
     @objc
     public static func elementInteractions() -> ObjCAutocaptureOptions {
-        return ObjCAutocaptureOptions(rawValue: AutocaptureOptions.elementInteractions.rawValue)
+        return ObjCAutocaptureOptions(options: .elementInteractions)
     }
 
     // MARK: NSObject
@@ -74,7 +61,7 @@ public final class ObjCAutocaptureOptions: NSObject, OptionSet {
         guard let that = object as? ObjCAutocaptureOptions else {
             return false
         }
-        return _options.rawValue == that._options.rawValue
+        return _options == that._options
     }
 
     // MARK: OptionSet-like behavior
@@ -103,15 +90,11 @@ public final class ObjCAutocaptureOptions: NSObject, OptionSet {
 
     @objc
     public func union(_ option: ObjCAutocaptureOptions) -> ObjCAutocaptureOptions {
-        let result = ObjCAutocaptureOptions()
-        result._options = self._options.union(option._options)
-        return result
+        return ObjCAutocaptureOptions(options: _options.union(option._options))
     }
 
     @objc
     public func intersect(_ option: ObjCAutocaptureOptions) -> ObjCAutocaptureOptions {
-        let result = ObjCAutocaptureOptions()
-        result._options = self._options.intersection(option._options)
-        return result
+        return ObjCAutocaptureOptions(options: _options.intersection(option._options))
     }
 }

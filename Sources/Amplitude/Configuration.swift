@@ -32,23 +32,14 @@ public class Configuration {
     public var minTimeBetweenSessionsMillis: Int
     public var identifyBatchIntervalMillis: Int
     public internal(set) var migrateLegacyData: Bool
-    public var autocapture: AutocaptureOptions
+    @available(*, deprecated, renamed: "autocapture", message: "Please use `autocapture` instead.")
+    /// The SDK no longer tracks changes to the defaultTracking options after initialization.
+    public var defaultTracking: DefaultTrackingOptions = DefaultTrackingOptions() {
+        didSet { autocapture = defaultTracking.autocaptureOptions }
+    }
+    public internal(set) var autocapture: AutocaptureOptions
     public var offline: Bool?
     internal let diagonostics: Diagnostics
-
-    @available(*, deprecated, renamed: "autocapture", message: "Please use `autocapture` instead.")
-    public lazy var defaultTracking: DefaultTrackingOptions = {
-        DefaultTrackingOptions().withAutocptureOptions(autocapture)
-    }() {
-        didSet {
-            autocapture = AutocaptureOptions([
-                (defaultTracking.sessions, AutocaptureOptions.sessions),
-                (defaultTracking.appLifecycles, .appLifecycles),
-                (defaultTracking.screenViews, .screenViews)
-            ].compactMap { $0.0 ? $0.1 : nil })
-            _ = defaultTracking.withAutocptureOptions(autocapture)
-        }
-    }
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
     public convenience init(
@@ -80,11 +71,6 @@ public class Configuration {
         migrateLegacyData: Bool = true,
         offline: Bool? = false
     ) {
-        let autocapture = AutocaptureOptions([
-            (defaultTracking.sessions, AutocaptureOptions.sessions),
-            (defaultTracking.appLifecycles, .appLifecycles),
-            (defaultTracking.screenViews, .screenViews)
-        ].compactMap { $0.0 ? $0.1 : nil })
         self.init(apiKey: apiKey,
             flushQueueSize: flushQueueSize,
             flushIntervalMillis: flushIntervalMillis,
@@ -107,7 +93,7 @@ public class Configuration {
             enableCoppaControl: enableCoppaControl,
             flushEventsOnClose: flushEventsOnClose,
             minTimeBetweenSessionsMillis: minTimeBetweenSessionsMillis,
-            autocapture: autocapture,
+            autocapture: defaultTracking.autocaptureOptions,
             identifyBatchIntervalMillis: identifyBatchIntervalMillis,
             migrateLegacyData: migrateLegacyData,
             offline: offline)
