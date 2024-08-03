@@ -123,10 +123,8 @@ extension UIGestureRecognizer {
 
         guard state == .ended, let view else { return }
 
-        // TODO: Reduce SwiftUI noise by filtering out system gesture recognizers.
-        // Currently, the gesture recognizers with a SwiftUI view are blocked.
-        let viewClass = NSStringFromClass(type(of: view as AnyObject))
-        if viewClass.contains("SwiftUI") {
+        // Block scroll events for `UIScrollView`.
+        if view is UIScrollView && self is UIPanGestureRecognizer {
             return
         }
 
