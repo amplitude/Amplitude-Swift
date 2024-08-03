@@ -96,7 +96,7 @@ extension UIApplication {
 
         // TODO: Reduce SwiftUI noise by finding the unique view that the action method is attached to.
         // Currently, the action methods pointing to a SwiftUI target are blocked.
-        let targetClass = NSStringFromClass(type(of: target as AnyObject))
+        let targetClass = String(cString: object_getClassName(target))
         if targetClass.contains("SwiftUI") {
             return sendActionResult
         }
@@ -123,8 +123,8 @@ extension UIGestureRecognizer {
 
         guard state == .ended, let view else { return }
 
-        // Block scroll events for `UIScrollView`.
-        if view is UIScrollView && self is UIPanGestureRecognizer {
+        // Block scroll and zoom events for `UIScrollView`.
+        if let scrollView = view as? UIScrollView, self === scrollView.panGestureRecognizer || self === scrollView.pinchGestureRecognizer {
             return
         }
 
