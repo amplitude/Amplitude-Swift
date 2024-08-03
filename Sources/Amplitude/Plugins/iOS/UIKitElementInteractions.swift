@@ -63,6 +63,7 @@ class UIKitElementInteractions {
 
     @objc static func didEndEditing(_ notification: NSNotification) {
         guard let view = notification.object as? UIView else { return }
+        // Text fields in SwiftUI are identifiable only after the text field is edited.
         let elementInteractionEvent = view.eventData.elementInteractionEvent(for: "didEndEditing")
         amplitudeInstances.allObjects.forEach {
             $0.track(event: elementInteractionEvent)
@@ -93,6 +94,13 @@ extension UIApplication {
     @objc func amp_sendAction(_ action: Selector, to target: Any?, from sender: Any?, for event: UIEvent?) -> Bool {
         let sendActionResult = amp_sendAction(action, to: target, from: sender, for: event)
 
+        // TODO: Reduce SwiftUI noise by finding the unique view that the action method is attached to.
+        // Currently, the action methods pointing to a SwiftUI target are blocked.
+        let targetClass = String(cString: object_getClassName(target))
+        if targetClass.contains("SwiftUI") {
+            return sendActionResult
+        }
+
         guard sendActionResult,
               let control = sender as? UIControl,
               control.amp_shouldTrack(action, for: target),
@@ -114,6 +122,11 @@ extension UIGestureRecognizer {
         amp_setState(state)
 
         guard state == .ended, let view else { return }
+
+        // Block scroll and zoom events for `UIScrollView`.
+        if let scrollView = view as? UIScrollView, self === scrollView.panGestureRecognizer || self === scrollView.pinchGestureRecognizer {
+            return
+        }
 
         let gestureAction: String? = switch self {
         case is UITapGestureRecognizer: "tap"
