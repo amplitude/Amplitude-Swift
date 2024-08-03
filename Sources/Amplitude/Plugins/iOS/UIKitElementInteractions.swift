@@ -11,8 +11,6 @@ class UIKitElementInteractions {
 
         let screenName: String?
 
-        let title: String?
-
         let accessibilityLabel: String?
 
         let accessibilityIdentifier: String?
@@ -26,7 +24,6 @@ class UIKitElementInteractions {
         fileprivate func elementInteractionEvent(for action: String, from source: Source? = nil, withName sourceName: String? = nil) -> ElementInteractionEvent {
             return ElementInteractionEvent(
                 screenName: screenName,
-                title: title,
                 accessibilityLabel: accessibilityLabel,
                 accessibilityIdentifier: accessibilityIdentifier,
                 action: action,
@@ -155,13 +152,10 @@ extension UIView {
     private static let viewHierarchyDelimiter = " → "
 
     var eventData: UIKitElementInteractions.EventData {
-        let topViewController = owningViewController.flatMap(UIViewController.amp_topViewController)
-
-        let screenName = topViewController.flatMap(UIKitScreenViews.screenName)
-
         return UIKitElementInteractions.EventData(
-            screenName: screenName,
-            title: topViewController?.title,
+            screenName: owningViewController
+                .flatMap(UIViewController.amp_topViewController)
+                .flatMap(UIKitScreenViews.screenName),
             accessibilityLabel: accessibilityLabel,
             accessibilityIdentifier: accessibilityIdentifier,
             targetViewClass: descriptiveTypeName,

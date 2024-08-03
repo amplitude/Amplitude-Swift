@@ -3,7 +3,6 @@ import Foundation
 public class ElementInteractionEvent: BaseEvent {
     convenience init(
         screenName: String? = nil,
-        title: String? = nil,
         accessibilityLabel: String? = nil,
         accessibilityIdentifier: String? = nil,
         action: String,
@@ -15,7 +14,6 @@ public class ElementInteractionEvent: BaseEvent {
     ) {
         self.init(eventType: Constants.AMP_ELEMENT_INTERACTED_EVENT, eventProperties: [
             Constants.AMP_APP_SCREEN_NAME_PROPERTY: screenName,
-            Constants.AMP_APP_TITLE_PROPERTY: title,
             Constants.AMP_APP_TARGET_AXLABEL_PROPERTY: accessibilityLabel,
             Constants.AMP_APP_TARGET_AXIDENTIFIER_PROPERTY: accessibilityIdentifier,
             Constants.AMP_APP_ACTION_PROPERTY: action,
