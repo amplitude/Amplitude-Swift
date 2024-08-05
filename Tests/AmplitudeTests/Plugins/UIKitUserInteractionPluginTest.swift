@@ -16,8 +16,7 @@ class UIKitElementInteractionsTests: XCTestCase {
 
         let buttonData = button.eventData
 
-        XCTAssertEqual(buttonData.viewController, "UIViewController")
-        XCTAssertEqual(buttonData.title, "Mock VC Title")
+        XCTAssertEqual(buttonData.screenName, "Mock VC Title")
         XCTAssertEqual(buttonData.accessibilityLabel, "Accessibility Button")
         XCTAssertEqual(buttonData.targetViewClass, "UIButton")
         XCTAssertEqual(buttonData.targetText, "Test Button")
@@ -34,8 +33,7 @@ class UIKitElementInteractionsTests: XCTestCase {
 
         let customViewData = customView.eventData
 
-        XCTAssertEqual(customViewData.viewController, "UIViewController")
-        XCTAssertEqual(customViewData.title, "Mock VC Title")
+        XCTAssertEqual(customViewData.screenName, "Mock VC Title")
         XCTAssertNil(customViewData.accessibilityLabel)
         XCTAssertEqual(customViewData.targetViewClass, "CustomView")
         XCTAssertTrue(customViewData.hierarchy.hasSuffix("CustomView → UIView"))
@@ -45,8 +43,7 @@ class UIKitElementInteractionsTests: XCTestCase {
         let orphanView = UIView()
         let orphanData = orphanView.eventData
 
-        XCTAssertNil(orphanData.viewController)
-        XCTAssertNil(orphanData.title)
+        XCTAssertNil(orphanData.screenName)
         XCTAssertNil(orphanData.accessibilityLabel)
         XCTAssertEqual(orphanData.targetViewClass, "UIView")
         XCTAssertNil(orphanData.targetText)

@@ -9,9 +9,7 @@ class UIKitElementInteractions {
             case gestureRecognizer
         }
 
-        let viewController: String?
-
-        let title: String?
+        let screenName: String?
 
         let accessibilityLabel: String?
 
@@ -25,8 +23,7 @@ class UIKitElementInteractions {
 
         fileprivate func elementInteractionEvent(for action: String, from source: Source? = nil, withName sourceName: String? = nil) -> ElementInteractionEvent {
             return ElementInteractionEvent(
-                viewController: viewController,
-                title: title,
+                screenName: screenName,
                 accessibilityLabel: accessibilityLabel,
                 accessibilityIdentifier: accessibilityIdentifier,
                 action: action,
@@ -155,10 +152,10 @@ extension UIView {
     private static let viewHierarchyDelimiter = " → "
 
     var eventData: UIKitElementInteractions.EventData {
-        let viewController = owningViewController
         return UIKitElementInteractions.EventData(
-            viewController: viewController?.descriptiveTypeName,
-            title: viewController?.title,
+            screenName: owningViewController
+                .flatMap(UIViewController.amp_topViewController)
+                .flatMap(UIKitScreenViews.screenName),
             accessibilityLabel: accessibilityLabel,
             accessibilityIdentifier: accessibilityIdentifier,
             targetViewClass: descriptiveTypeName,
