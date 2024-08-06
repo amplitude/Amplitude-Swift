@@ -11,19 +11,19 @@ public class DefaultTrackingOptions {
 
     public var sessions: Bool {
         didSet {
-            delegate?.didChangeSessions(to: sessions)
+            delegate?.didChangeOptions(options: self)
         }
     }
 
     public var appLifecycles: Bool {
         didSet {
-            delegate?.didChangeAppLifecycles(to: appLifecycles)
+            delegate?.didChangeOptions(options: self)
         }
     }
 
     public var screenViews: Bool {
         didSet {
-            delegate?.didChangeScreenViews(to: screenViews)
+            delegate?.didChangeOptions(options: self)
         }
     }
 
@@ -54,29 +54,13 @@ public class DefaultTrackingOptions {
 }
 
 protocol DefaultTrackingOptionsDelegate: AnyObject {
-    func didChangeSessions(to newValue: Bool)
-    func didChangeAppLifecycles(to newValue: Bool)
-    func didChangeScreenViews(to newValue: Bool)
+    @available(*, deprecated)
+    func didChangeOptions(options: DefaultTrackingOptions)
 }
 
 extension Configuration: DefaultTrackingOptionsDelegate {
-    func didChangeSessions(to newValue: Bool) {
-        updateAutocapture(option: .sessions, enabled: newValue)
-    }
-
-    func didChangeAppLifecycles(to newValue: Bool) {
-        updateAutocapture(option: .appLifecycles, enabled: newValue)
-    }
-
-    func didChangeScreenViews(to newValue: Bool) {
-        updateAutocapture(option: .screenViews, enabled: newValue)
-    }
-
-    private func updateAutocapture(option: AutocaptureOptions, enabled: Bool) {
-        if enabled {
-            autocapture.insert(option)
-        } else {
-            autocapture.remove(option)
-        }
+    @available(*, deprecated)
+    func didChangeOptions(options: DefaultTrackingOptions) {
+        autocapture = options.toAutocaptureOptions
     }
 }
