@@ -1,5 +1,10 @@
 import Foundation
 
+protocol DefaultTrackingOptionsDelegate: AnyObject {
+    @available(*, deprecated)
+    func didChangeOptions(options: DefaultTrackingOptions)
+}
+
 @available(*, deprecated, renamed: "AutocaptureOptions", message: "Please use `AutocaptureOptions` instead")
 public class DefaultTrackingOptions {
     public static var ALL: DefaultTrackingOptions {
@@ -29,7 +34,7 @@ public class DefaultTrackingOptions {
 
     weak var delegate: DefaultTrackingOptionsDelegate?
 
-    var toAutocaptureOptions: AutocaptureOptions {
+    var autocaptureOptions: AutocaptureOptions {
         return [
             sessions ? .sessions : [],
             appLifecycles ? .appLifecycles : [],
@@ -50,17 +55,5 @@ public class DefaultTrackingOptions {
     convenience init(with delegate: DefaultTrackingOptionsDelegate) {
         self.init()
         self.delegate = delegate
-    }
-}
-
-protocol DefaultTrackingOptionsDelegate: AnyObject {
-    @available(*, deprecated)
-    func didChangeOptions(options: DefaultTrackingOptions)
-}
-
-extension Configuration: DefaultTrackingOptionsDelegate {
-    @available(*, deprecated)
-    func didChangeOptions(options: DefaultTrackingOptions) {
-        autocapture = options.toAutocaptureOptions
     }
 }

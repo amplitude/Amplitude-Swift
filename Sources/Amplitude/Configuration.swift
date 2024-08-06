@@ -38,7 +38,7 @@ public class Configuration {
     }() {
         didSet {
             defaultTracking.delegate = self
-            autocapture = defaultTracking.toAutocaptureOptions
+            autocapture = defaultTracking.autocaptureOptions
         }
     }
     public internal(set) var autocapture: AutocaptureOptions
@@ -97,7 +97,7 @@ public class Configuration {
             enableCoppaControl: enableCoppaControl,
             flushEventsOnClose: flushEventsOnClose,
             minTimeBetweenSessionsMillis: minTimeBetweenSessionsMillis,
-            autocapture: defaultTracking.toAutocaptureOptions,
+            autocapture: defaultTracking.autocaptureOptions,
             identifyBatchIntervalMillis: identifyBatchIntervalMillis,
             migrateLegacyData: migrateLegacyData,
             offline: offline)
@@ -180,5 +180,12 @@ public class Configuration {
 
     internal func getNormalizeInstanceName() -> String {
         return Configuration.getNormalizeInstanceName(self.instanceName)
+    }
+}
+
+extension Configuration: DefaultTrackingOptionsDelegate {
+    @available(*, deprecated)
+    func didChangeOptions(options: DefaultTrackingOptions) {
+        autocapture = options.autocaptureOptions
     }
 }

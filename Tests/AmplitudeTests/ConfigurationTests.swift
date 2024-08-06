@@ -88,49 +88,4 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertTrue(eventStorageUrl?.contains(expectedStoragePostfix) ?? false)
         XCTAssertTrue(identifyStorageUrl?.contains(expectedStoragePostfix) ?? false)
     }
-
-    func testDefaultTrackingOptionChangesReflectInAutocapture() {
-        let configuration = Configuration(
-            apiKey: "test-api-key"
-        )
-
-        XCTAssertTrue(configuration.autocapture.contains(.sessions))
-
-        (configuration as DeprecationWarningDiscardable).setDefaulTrackingOptions(sessions: false, appLifecycles: true, screenViews: true)
-
-        XCTAssertFalse(configuration.autocapture.contains(.sessions))
-        XCTAssertTrue(configuration.autocapture.contains(.appLifecycles))
-        XCTAssertTrue(configuration.autocapture.contains(.screenViews))
-    }
-
-    func testDefaultTrackingInstanceChangeReflectInAutocapture() {
-        let configuration = Configuration(
-            apiKey: "test-api-key"
-        )
-
-        (configuration as DeprecationWarningDiscardable).setDefaulTracking(sessions: false, appLifecycles: true, screenViews: true)
-
-        XCTAssertFalse(configuration.autocapture.contains(.sessions))
-        XCTAssertTrue(configuration.autocapture.contains(.appLifecycles))
-        XCTAssertTrue(configuration.autocapture.contains(.screenViews))
-    }
-}
-
-private protocol DeprecationWarningDiscardable {
-    func setDefaulTracking(sessions: Bool, appLifecycles: Bool, screenViews: Bool)
-    func setDefaulTrackingOptions(sessions: Bool, appLifecycles: Bool, screenViews: Bool)
-}
-
-extension Configuration: DeprecationWarningDiscardable {
-    @available(*, deprecated)
-    func setDefaulTracking(sessions: Bool, appLifecycles: Bool, screenViews: Bool) {
-        defaultTracking = DefaultTrackingOptions(sessions: sessions, appLifecycles: appLifecycles, screenViews: screenViews)
-    }
-
-    @available(*, deprecated)
-    func setDefaulTrackingOptions(sessions: Bool, appLifecycles: Bool, screenViews: Bool) {
-        defaultTracking.sessions = sessions
-        defaultTracking.appLifecycles = appLifecycles
-        defaultTracking.screenViews = screenViews
-    }
 }
