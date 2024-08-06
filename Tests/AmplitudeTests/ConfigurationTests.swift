@@ -96,7 +96,7 @@ final class ConfigurationTests: XCTestCase {
 
         XCTAssertTrue(configuration.autocapture.contains(.sessions))
 
-        (configuration as DeprecationWarningDiscardable).setDefaulTracking(sessions: false, appLifecycles: true, screenViews: true)
+        (configuration as DeprecationWarningDiscardable).setDefaulTrackingOptions(sessions: false, appLifecycles: true, screenViews: true)
 
         XCTAssertFalse(configuration.autocapture.contains(.sessions))
         XCTAssertTrue(configuration.autocapture.contains(.appLifecycles))
