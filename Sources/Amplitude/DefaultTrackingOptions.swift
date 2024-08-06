@@ -10,54 +10,73 @@ public class DefaultTrackingOptions {
     }
 
     public var sessions: Bool {
-        get {
-            autocaptureOptions.contains(.sessions)
-        }
-        set {
-            if newValue {
-                autocaptureOptions.insert(.sessions)
-            } else {
-                autocaptureOptions.remove(.sessions)
-            }
+        didSet {
+            delegate?.didChangeSessions(to: sessions)
         }
     }
 
     public var appLifecycles: Bool {
-        get {
-            autocaptureOptions.contains(.appLifecycles)
-        }
-        set {
-            if newValue {
-                autocaptureOptions.insert(.appLifecycles)
-            } else {
-                autocaptureOptions.remove(.appLifecycles)
-            }
+        didSet {
+            delegate?.didChangeAppLifecycles(to: appLifecycles)
         }
     }
 
     public var screenViews: Bool {
-        get {
-            autocaptureOptions.contains(.screenViews)
-        }
-        set {
-            if newValue {
-                autocaptureOptions.insert(.screenViews)
-            } else {
-                autocaptureOptions.remove(.screenViews)
-            }
+        didSet {
+            delegate?.didChangeScreenViews(to: screenViews)
         }
     }
 
-    var autocaptureOptions: AutocaptureOptions
+    weak var delegate: DefaultTrackingOptionsDelegate?
+
+    var toAutocaptureOptions: AutocaptureOptions {
+        return [
+            sessions ? .sessions : [],
+            appLifecycles ? .appLifecycles : [],
+            screenViews ? .screenViews : []
+        ].reduce(into: []) { $0.formUnion($1) }
+    }
 
     public init(
         sessions: Bool = true,
         appLifecycles: Bool = false,
         screenViews: Bool = false
     ) {
-        self.autocaptureOptions = []
         self.sessions = sessions
         self.appLifecycles = appLifecycles
         self.screenViews = screenViews
+    }
+
+    convenience init(with delegate: DefaultTrackingOptionsDelegate) {
+        self.init()
+        self.delegate = delegate
+    }
+}
+
+protocol DefaultTrackingOptionsDelegate: AnyObject {
+    func didChangeSessions(to newValue: Bool)
+    func didChangeAppLifecycles(to newValue: Bool)
+    func didChangeScreenViews(to newValue: Bool)
+}
+
+extension Configuration: DefaultTrackingOptionsDelegate {
+    func didChangeSessions(to newValue: Bool) {
+        updateAutocapture(option: .sessions, enabled: newValue)
+    }
+
+    func didChangeAppLifecycles(to newValue: Bool) {
+        updateAutocapture(option: .appLifecycles, enabled: newValue)
+    }
+
+    func didChangeScreenViews(to newValue: Bool) {
+        updateAutocapture(option: .screenViews, enabled: newValue)
+    }
+
+    private func updateAutocapture(option: AutocaptureOptions, enabled: Bool) {
+        if enabled {
+            autocapture.insert(option)
+        } else {
+            autocapture.remove(option)
+        }
     }
 }

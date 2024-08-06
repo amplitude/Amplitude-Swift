@@ -33,9 +33,13 @@ public class Configuration {
     public var identifyBatchIntervalMillis: Int
     public internal(set) var migrateLegacyData: Bool
     @available(*, deprecated, renamed: "autocapture", message: "Please use `autocapture` instead.")
-    /// The SDK no longer tracks changes to the defaultTracking options after initialization.
-    public var defaultTracking: DefaultTrackingOptions = DefaultTrackingOptions() {
-        didSet { autocapture = defaultTracking.autocaptureOptions }
+    public lazy var defaultTracking: DefaultTrackingOptions = {
+        DefaultTrackingOptions(with: self)
+    }() {
+        didSet {
+            defaultTracking.delegate = self
+            autocapture = defaultTracking.toAutocaptureOptions
+        }
     }
     public internal(set) var autocapture: AutocaptureOptions
     public var offline: Bool?
@@ -93,7 +97,7 @@ public class Configuration {
             enableCoppaControl: enableCoppaControl,
             flushEventsOnClose: flushEventsOnClose,
             minTimeBetweenSessionsMillis: minTimeBetweenSessionsMillis,
-            autocapture: defaultTracking.autocaptureOptions,
+            autocapture: defaultTracking.toAutocaptureOptions,
             identifyBatchIntervalMillis: identifyBatchIntervalMillis,
             migrateLegacyData: migrateLegacyData,
             offline: offline)
