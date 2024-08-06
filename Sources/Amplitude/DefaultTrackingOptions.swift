@@ -52,7 +52,7 @@ public class DefaultTrackingOptions {
         self.screenViews = screenViews
     }
 
-    convenience init(with delegate: DefaultTrackingOptionsDelegate) {
+    convenience init(delegate: DefaultTrackingOptionsDelegate) {
         self.init()
         self.delegate = delegate
     }

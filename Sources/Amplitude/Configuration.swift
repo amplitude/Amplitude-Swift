@@ -34,7 +34,7 @@ public class Configuration {
     public internal(set) var migrateLegacyData: Bool
     @available(*, deprecated, renamed: "autocapture", message: "Please use `autocapture` instead.")
     public lazy var defaultTracking: DefaultTrackingOptions = {
-        DefaultTrackingOptions(with: self)
+        DefaultTrackingOptions(delegate: self)
     }() {
         didSet {
             defaultTracking.delegate = self
