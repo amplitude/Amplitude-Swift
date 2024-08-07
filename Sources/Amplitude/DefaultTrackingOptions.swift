@@ -1,5 +1,10 @@
 import Foundation
 
+protocol DefaultTrackingOptionsDelegate: AnyObject {
+    @available(*, deprecated)
+    func didChangeOptions(options: DefaultTrackingOptions)
+}
+
 @available(*, deprecated, renamed: "AutocaptureOptions", message: "Please use `AutocaptureOptions` instead")
 public class DefaultTrackingOptions {
     public static var ALL: DefaultTrackingOptions {
@@ -10,54 +15,45 @@ public class DefaultTrackingOptions {
     }
 
     public var sessions: Bool {
-        get {
-            autocaptureOptions.contains(.sessions)
-        }
-        set {
-            if newValue {
-                autocaptureOptions.insert(.sessions)
-            } else {
-                autocaptureOptions.remove(.sessions)
-            }
+        didSet {
+            delegate?.didChangeOptions(options: self)
         }
     }
 
     public var appLifecycles: Bool {
-        get {
-            autocaptureOptions.contains(.appLifecycles)
-        }
-        set {
-            if newValue {
-                autocaptureOptions.insert(.appLifecycles)
-            } else {
-                autocaptureOptions.remove(.appLifecycles)
-            }
+        didSet {
+            delegate?.didChangeOptions(options: self)
         }
     }
 
     public var screenViews: Bool {
-        get {
-            autocaptureOptions.contains(.screenViews)
-        }
-        set {
-            if newValue {
-                autocaptureOptions.insert(.screenViews)
-            } else {
-                autocaptureOptions.remove(.screenViews)
-            }
+        didSet {
+            delegate?.didChangeOptions(options: self)
         }
     }
 
-    var autocaptureOptions: AutocaptureOptions
+    weak var delegate: DefaultTrackingOptionsDelegate?
+
+    var autocaptureOptions: AutocaptureOptions {
+        return [
+            sessions ? .sessions : [],
+            appLifecycles ? .appLifecycles : [],
+            screenViews ? .screenViews : []
+        ].reduce(into: []) { $0.formUnion($1) }
+    }
 
     public init(
         sessions: Bool = true,
         appLifecycles: Bool = false,
         screenViews: Bool = false
     ) {
-        self.autocaptureOptions = []
         self.sessions = sessions
         self.appLifecycles = appLifecycles
         self.screenViews = screenViews
+    }
+
+    convenience init(delegate: DefaultTrackingOptionsDelegate) {
+        self.init()
+        self.delegate = delegate
     }
 }

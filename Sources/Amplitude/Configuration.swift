@@ -33,9 +33,13 @@ public class Configuration {
     public var identifyBatchIntervalMillis: Int
     public internal(set) var migrateLegacyData: Bool
     @available(*, deprecated, renamed: "autocapture", message: "Please use `autocapture` instead.")
-    /// The SDK no longer tracks changes to the defaultTracking options after initialization.
-    public var defaultTracking: DefaultTrackingOptions = DefaultTrackingOptions() {
-        didSet { autocapture = defaultTracking.autocaptureOptions }
+    public lazy var defaultTracking: DefaultTrackingOptions = {
+        DefaultTrackingOptions(delegate: self)
+    }() {
+        didSet {
+            defaultTracking.delegate = self
+            autocapture = defaultTracking.autocaptureOptions
+        }
     }
     public internal(set) var autocapture: AutocaptureOptions
     public var offline: Bool?
@@ -176,5 +180,12 @@ public class Configuration {
 
     internal func getNormalizeInstanceName() -> String {
         return Configuration.getNormalizeInstanceName(self.instanceName)
+    }
+}
+
+extension Configuration: DefaultTrackingOptionsDelegate {
+    @available(*, deprecated)
+    func didChangeOptions(options: DefaultTrackingOptions) {
+        autocapture = options.autocaptureOptions
     }
 }
