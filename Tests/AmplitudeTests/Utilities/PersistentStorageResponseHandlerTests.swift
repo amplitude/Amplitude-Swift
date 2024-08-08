@@ -129,4 +129,31 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             "removeEventCallback(insertId: e3e4488d-6877-4775-ae88-344df7ccd5d8)"
         )
     }
+
+    func testInvalidAPIKey() {
+        // 2 valid events
+        let eventsString = """
+            [
+              {"event_type":"valid-event","insert_id":"1621D025-A754-42EB-9305-307F36217C78","user_id":"test-user"},
+              {"event_type":"valid-event","insert_id":"AE7550E1-C8F0-4583-81D3-0561830A09DD","user_id":"test-user"},
+            ]
+            """
+
+        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage",
+                                                          logger: logger,
+                                                          diagonostics: diagonostics)
+        let handler = PersistentStorageResponseHandler(
+            configuration: configuration,
+            storage: fakePersistentStorage,
+            eventPipeline: eventPipeline,
+            eventBlock: eventBlock,
+            eventsString: eventsString
+        )
+
+        handler.handleBadRequestResponse(data: ["error": "Invalid API key: \(configuration.apiKey)"])
+        XCTAssertEqual(
+            fakePersistentStorage.haveBeenCalledWith[0],
+            "remove(eventBlock: \(eventBlock.absoluteURL))"
+        )
+    }
 }

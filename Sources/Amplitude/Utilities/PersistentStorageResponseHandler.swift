@@ -45,8 +45,10 @@ class PersistentStorageResponseHandler: ResponseHandler {
             return
         }
 
-        if events.count == 1 {
-            let error = data["error"] as? String ?? ""
+        let error = data["error"] as? String ?? ""
+
+        let isInvalidApiKey = error == "Invalid API key: \(configuration.apiKey)"
+        if events.count == 1 || isInvalidApiKey {
             triggerEventsCallback(
                 events: events,
                 code: HttpClient.HttpStatus.BAD_REQUEST.rawValue,
@@ -81,7 +83,6 @@ class PersistentStorageResponseHandler: ResponseHandler {
             }
         }
 
-        let error = data["error"] as? String ?? ""
         triggerEventsCallback(events: eventsToDrop, code: HttpClient.HttpStatus.BAD_REQUEST.rawValue, message: error)
 
         eventsToRetry.forEach { event in
