@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.7.0...v1.8.0) (2024-08-08)
+
+
+### Features
+
+* Feature Autocapture ([#209](https://github.com/amplitude/Amplitude-Swift/issues/209)) ([4ab5673](https://github.com/amplitude/Amplitude-Swift/commit/4ab5673bbd0ed45c11adec7b688d8ed38a291d77)), closes [#190](https://github.com/amplitude/Amplitude-Swift/issues/190) [#195](https://github.com/amplitude/Amplitude-Swift/issues/195) [#196](https://github.com/amplitude/Amplitude-Swift/issues/196) [#199](https://github.com/amplitude/Amplitude-Swift/issues/199) [#202](https://github.com/amplitude/Amplitude-Swift/issues/202) [#203](https://github.com/amplitude/Amplitude-Swift/issues/203) [#204](https://github.com/amplitude/Amplitude-Swift/issues/204) [#206](https://github.com/amplitude/Amplitude-Swift/issues/206) [#207](https://github.com/amplitude/Amplitude-Swift/issues/207) [#208](https://github.com/amplitude/Amplitude-Swift/issues/208)
+
 # [1.7.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.6.2...v1.7.0) (2024-07-11)
 
 
