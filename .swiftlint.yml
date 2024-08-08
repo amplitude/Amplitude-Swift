@@ -7,7 +7,6 @@ disabled_rules:
   - opening_brace
   - todo
   - cyclomatic_complexity
-  - non_optional_string_data_conversion
 identifier_name:
   allowed_symbols: "_"
   min_length: 1

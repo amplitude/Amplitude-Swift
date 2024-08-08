@@ -11,7 +11,7 @@ on:
 jobs:
   authorize:
     name: Authorize
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - name: ${{ github.actor }} permission check to do a release
         uses: octokit/request-action@v2.1.9
@@ -23,7 +23,7 @@ jobs:
 
   release:
     name: Release
-    runs-on: macos-13
+    runs-on: macos-14
     needs: [authorize]
     steps:
       - name: Checkout
