@@ -1,6 +1,7 @@
 import Foundation
 
 @objc(AMPDefaultTrackingOptions)
+@available(*, deprecated, renamed: "AMPAutocaptureOptions", message: "Please use `AMPAutocaptureOptions` instead")
 public class ObjCDefaultTrackingOptions: NSObject {
     internal let options: DefaultTrackingOptions
 

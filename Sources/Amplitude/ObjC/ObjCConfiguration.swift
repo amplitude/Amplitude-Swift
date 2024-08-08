@@ -244,12 +244,24 @@ public class ObjCConfiguration: NSObject {
     }
 
     @objc
+    @available(*, deprecated, renamed: "autocapture", message: "Please use `autocapture` instead.")
+    /// The SDK no longer tracks changes to the defaultTracking options after initialization.
     public var defaultTracking: ObjCDefaultTrackingOptions {
         get {
             ObjCDefaultTrackingOptions(configuration.defaultTracking)
         }
         set(value) {
             configuration.defaultTracking = value.options
+        }
+    }
+
+    @objc
+    public var autocapture: ObjCAutocaptureOptions {
+        get {
+            ObjCAutocaptureOptions(options: configuration.autocapture)
+        }
+        set(value) {
+            configuration.autocapture = value.options
         }
     }
 
