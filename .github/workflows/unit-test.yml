@@ -20,24 +20,29 @@ jobs:
             platform: iOS
             xcode: 15.2
             device: "iPhone 15"
+            test-destination-os: latest
 
           - runs-on: macos-12
             platform: iOS
             xcode: 14.1
+            test-destination-os: 16.4
             device: "iPhone 14"
           
           - runs-on: macos-13
             platform: macOS
             xcode: 15.2
+            test-destination-os: latest
 
           - runs-on: macos-13
             platform: tvOS
             xcode: 15.2
+            test-destination-os: latest
             device: "Apple TV"
 
           - runs-on: macos-13
             platform: watchOS
             xcode: 15.2
+            test-destination-os: latest
             device: "Apple Watch Series 8 (41mm)"
     steps:
       - name: Checkout
@@ -58,26 +63,26 @@ jobs:
               xcodebuild test \
                 -scheme Amplitude-Swift-Package \
                 -sdk iphonesimulator \
-                -destination 'platform=iOS Simulator,name=${{ matrix.device }}'
+                -destination 'platform=iOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}'
               ;;
             macOS)
               xcodebuild test \
                 -scheme Amplitude-Swift-Package \
                 -sdk macosx \
-                -destination 'platform=macosx'
+                -destination 'platform=macosx,OS=${{ matrix.test-destination-os }}'
               ;;
             tvOS)
               xcodebuild \
                 -scheme Amplitude-Swift-Package \
                 -sdk appletvsimulator \
-                -destination 'platform=tvOS Simulator,name=${{ matrix.device }}' \
+                -destination 'platform=tvOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
                 test
               ;;
             watchOS)
               xcodebuild \
                 -scheme Amplitude-Swift-Package \
                 -sdk watchsimulator \
-                -destination 'platform=watchOS Simulator,name=${{ matrix.device }}' \
+                -destination 'platform=watchOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
                 test
               ;;
           esac
