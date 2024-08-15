@@ -37,10 +37,19 @@ class HttpClient {
             let request = try getRequest()
             let requestData = getRequestData(events: events)
 
-            sessionTask = session.uploadTask(with: request, from: requestData) { [callbackQueue] data, response, error in
+            sessionTask = session.uploadTask(with: request, from: requestData) { [callbackQueue, configuration] data, response, error in
                 callbackQueue.async {
-                    if error != nil {
-                        completion(.failure(error!))
+                    if let error = error {
+                        let nsError = error as NSError
+                        if nsError.domain == NSURLErrorDomain {
+                            switch nsError.code {
+                            case NSURLErrorCannotConnectToHost, NSURLErrorNetworkConnectionLost, NSURLErrorCannotFindHost, NSURLErrorAppTransportSecurityRequiresSecureConnection:
+                                configuration.offline = true
+                            default:
+                                break
+                            }
+                        }
+                        completion(.failure(error))
                     } else if let httpResponse = response as? HTTPURLResponse {
                         switch httpResponse.statusCode {
                         case 1..<300:
