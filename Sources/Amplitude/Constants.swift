@@ -46,7 +46,7 @@ public enum ServerZone: Int {
 
 public struct Constants {
     static let SDK_LIBRARY = "amplitude-swift"
-    static let SDK_VERSION = "1.7.0"
+    static let SDK_VERSION = "1.8.0"
     public static let DEFAULT_API_HOST = "https://api2.amplitude.com/2/httpapi"
     public static let EU_DEFAULT_API_HOST = "https://api.eu.amplitude.com/2/httpapi"
     static let BATCH_API_HOST = "https://api2.amplitude.com/batch"
@@ -83,6 +83,8 @@ public struct Constants {
     static let AMP_APPLICATION_BACKGROUNDED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Application Backgrounded"
     static let AMP_DEEP_LINK_OPENED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Deep Link Opened"
     static let AMP_SCREEN_VIEWED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Screen Viewed"
+    static let AMP_ELEMENT_INTERACTED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Element Interacted"
+
     static let AMP_REVENUE_EVENT = "revenue_amount"
 
     static let AMP_APP_VERSION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Version"
@@ -93,6 +95,14 @@ public struct Constants {
     static let AMP_APP_LINK_URL_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Link URL"
     static let AMP_APP_LINK_REFERRER_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Link Referrer"
     static let AMP_APP_SCREEN_NAME_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Screen Name"
+    static let AMP_APP_TARGET_AXLABEL_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Target Accessibility Label"
+    static let AMP_APP_TARGET_AXIDENTIFIER_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Target Accessibility Identifier"
+    static let AMP_APP_ACTION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Action"
+    static let AMP_APP_TARGET_VIEW_CLASS_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Target View Class"
+    static let AMP_APP_TARGET_TEXT_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Target Text"
+    static let AMP_APP_HIERARCHY_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Hierarchy"
+    static let AMP_APP_ACTION_METHOD_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Action Method"
+    static let AMP_APP_GESTURE_RECOGNIZER_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Gesture Recognizer"
 
     public struct Configuration {
         public static let FLUSH_QUEUE_SIZE = 30

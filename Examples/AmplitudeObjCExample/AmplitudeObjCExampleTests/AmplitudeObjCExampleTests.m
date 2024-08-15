@@ -325,7 +325,7 @@
 - (Amplitude *)getAmplitude:(NSString *)instancePrefix {
     NSString* instanceName = [NSString stringWithFormat:@"%@-%f", instancePrefix, [[NSDate date] timeIntervalSince1970]];
     AMPConfiguration* configuration = [AMPConfiguration initWithApiKey:@"API-KEY" instanceName:instanceName];
-    configuration.defaultTracking = AMPDefaultTrackingOptions.NONE;
+    configuration.autocapture = [[AMPAutocaptureOptions alloc] init];
     Amplitude *amplitude = [[TestAmplitude alloc] initWithConfiguration:configuration];
     return amplitude;
 }
