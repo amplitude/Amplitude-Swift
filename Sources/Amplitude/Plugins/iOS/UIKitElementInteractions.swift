@@ -125,7 +125,7 @@ extension UIGestureRecognizer {
             return
         }
 
-        var gestureAction: String?
+        let gestureAction: String?
         switch self {
         case is UITapGestureRecognizer:
             gestureAction = "tap"
