@@ -18,6 +18,6 @@ extension Amplitude {
             waitForQueueExpectation.fulfill()
         }
 
-        XCTWaiter().wait(for: [waitForQueueExpectation])
+        XCTWaiter().wait(for: [waitForQueueExpectation], timeout: 10)
     }
 }
