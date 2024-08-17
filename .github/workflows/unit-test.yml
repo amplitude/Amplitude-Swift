@@ -6,9 +6,88 @@ on:
     branches:
       - main
       - 1.1.x
+  workflow_call:
 
 jobs:
-  test:
+  unit-test:
+    name: Unit ${{ matrix.platform }} - Xcode ${{ matrix.xcode }} - OS ${{ matrix.test-destination-os }}
+    runs-on: ${{ matrix.runs-on }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runs-on: macos-13
+            platform: iOS
+            xcode: 15.2
+            device: "iPhone 15"
+            test-destination-os: latest
+
+          - runs-on: macos-12
+            platform: iOS
+            xcode: 14.1
+            test-destination-os: 16.1
+            device: "iPhone 14"
+          
+          - runs-on: macos-13
+            platform: macOS
+            xcode: 15.2
+            test-destination-os: latest
+
+          - runs-on: macos-13
+            platform: tvOS
+            xcode: 15.2
+            test-destination-os: latest
+            device: "Apple TV"
+
+          - runs-on: macos-13
+            platform: watchOS
+            xcode: 15.2
+            test-destination-os: latest
+            device: "Apple Watch Series 8 (41mm)"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set Xcode ${{ matrix.xcode }}
+        run: |
+          sudo xcode-select -switch /Applications/Xcode_${{ matrix.xcode }}.app
+      - name: List Simulators
+        run: |
+          xcrun simctl list
+      - name: List Project Configuration
+        run: |
+          xcodebuild -list
+      - name: ${{ matrix.platform }} Tests
+        run: |
+          case "${{ matrix.platform }}" in
+            iOS)
+              xcodebuild test \
+                -scheme Amplitude-Swift-Package \
+                -sdk iphonesimulator \
+                -destination 'platform=iOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}'
+              ;;
+            macOS)
+              xcodebuild test \
+                -scheme Amplitude-Swift-Package \
+                -sdk macosx \
+                -destination 'platform=macosx,OS=${{ matrix.test-destination-os }}'
+              ;;
+            tvOS)
+              xcodebuild \
+                -scheme Amplitude-Swift-Package \
+                -sdk appletvsimulator \
+                -destination 'platform=tvOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
+                test
+              ;;
+            watchOS)
+              xcodebuild \
+                -scheme Amplitude-Swift-Package \
+                -sdk watchsimulator \
+                -destination 'platform=watchOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
+                test
+              ;;
+          esac
+  objc-example-test:
     runs-on: macos-13
     steps:
       - name: Checkout
@@ -16,38 +95,6 @@ jobs:
       - name: Set Xcode 15
         run: |
           sudo xcode-select -switch /Applications/Xcode_15.2.app
-      - name: List Simulators
-        run: |
-          xcrun simctl list
-      - name: List Project Configuration
-        run: |
-          xcodebuild -list
-      - name: iOS Tests
-        run: |
-          xcodebuild test \
-            -scheme Amplitude-Swift-Package \
-            -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 15'
-      - name: macOS Tests
-        run: |
-          xcodebuild test \
-            -scheme Amplitude-Swift-Package \
-            -sdk macosx \
-            -destination 'platform=macosx'
-      - name: tvOS Tests
-        run: |
-          xcodebuild \
-            -scheme Amplitude-Swift-Package \
-            -sdk appletvsimulator \
-            -destination 'platform=tvOS Simulator,name=Apple TV' \
-            test
-      - name: watchOS Tests
-        run: |
-          xcodebuild \
-            -scheme Amplitude-Swift-Package \
-            -sdk watchsimulator \
-            -destination 'platform=watchOS Simulator,name=Apple Watch Series 8 (41mm)' \
-            test
       - name: Objective-C Example Tests (iOS)
         working-directory: Examples/AmplitudeObjCExample
         run: |
