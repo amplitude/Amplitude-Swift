@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - 1.1.x
+  workflow_call:
 
 jobs:
   unit-test:
