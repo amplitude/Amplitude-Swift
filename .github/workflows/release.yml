@@ -21,49 +21,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  run-tests:
+    name: Run Tests
+    uses: ./.github/workflows/unit-test.yml
+
   release:
     name: Release
     runs-on: macos-13
-    needs: [authorize]
+    needs: [authorize, run-tests]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set Xcode 15
         run: |
           sudo xcode-select -switch /Applications/Xcode_15.2.app
-      - name: iOS Tests
-        run: |
-          xcodebuild test \
-            -scheme Amplitude-Swift-Package \
-            -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 15'
-      - name: macOS Tests
-        run: |
-          xcodebuild test \
-            -scheme Amplitude-Swift-Package \
-            -sdk macosx \
-            -destination 'platform=macosx'
-      - name: tvOS Tests
-        run: |
-          xcodebuild \
-            -scheme Amplitude-Swift-Package \
-            -sdk appletvsimulator \
-            -destination 'platform=tvOS Simulator,name=Apple TV' \
-            test
-      - name: watchOS Tests
-        run: |
-          xcodebuild \
-            -scheme Amplitude-Swift-Package \
-            -sdk watchsimulator \
-            -destination 'platform=watchOS Simulator,name=Apple Watch Series 8 (41mm)' \
-            test
-      - name: Objective-C Example Tests (iOS)
-        working-directory: Examples/AmplitudeObjCExample
-        run: |
-          xcodebuild test \
-            -scheme AmplitudeObjCExample \
-            -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 15'
 
       - name: Validate Podfile
         run: pod lib lint --allow-warnings
