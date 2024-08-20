@@ -122,7 +122,8 @@ class FakeInMemoryStorage: Storage {
         configuration: Configuration,
         eventPipeline: EventPipeline,
         eventBlock: EventBlock,
-        eventsString: String
+        eventsString: String,
+        logger: (any Logger)?
     ) -> ResponseHandler {
         FakeResponseHandler(
             configuration: configuration, storage: self, eventPipeline: eventPipeline, eventBlock: eventBlock,

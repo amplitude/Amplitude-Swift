@@ -35,7 +35,11 @@ class HttpClient {
         let backgroundTaskCompletion = VendorSystem.current.beginBackgroundTask()
         do {
             let request = try getRequest()
-            let requestData = getRequestData(events: events)
+            // Attempt to generate requestData without diagnostics in case diagnostics are causing a failure.
+            let requestData = getRequestData(events: events) ?? getRequestData(events: events, includeDiagnostics: false)
+            guard let requestData = requestData else {
+                throw Exception.invalidRequestData
+            }
 
             sessionTask = session.uploadTask(with: request, from: requestData) { [callbackQueue, configuration] data, response, error in
                 callbackQueue.async {
@@ -63,8 +67,10 @@ class HttpClient {
             }
             sessionTask!.resume()
         } catch {
-            completion(.failure(Exception.httpError(code: 500, data: nil)))
-            backgroundTaskCompletion?()
+            callbackQueue.async {
+                completion(.failure(Exception.httpError(code: 500, data: nil)))
+                backgroundTaskCompletion?()
+            }
         }
         return sessionTask
     }
@@ -103,7 +109,7 @@ class HttpClient {
         return request
     }
 
-    func getRequestData(events: String) -> Data? {
+    func getRequestData(events: String, includeDiagnostics: Bool = true) -> Data? {
         let apiKey = configuration.apiKey
         let clientUploadTime: String = dateFormatter.string(from: getDate())
         var requestPayload = """
@@ -114,7 +120,7 @@ class HttpClient {
                 ,"options":{"min_id_length":\(minIdLength)}
                 """
         }
-        if diagnostics.hasDiagnostics() {
+        if includeDiagnostics, diagnostics.hasDiagnostics() {
             let diagnosticsInfo = diagnostics.extractDiagonosticsToString()
             if !diagnosticsInfo.isEmpty {
                 requestPayload += """
@@ -144,5 +150,6 @@ extension HttpClient {
     enum Exception: Error {
         case invalidUrl(url: String)
         case httpError(code: Int, data: Data?)
+        case invalidRequestData
     }
 }

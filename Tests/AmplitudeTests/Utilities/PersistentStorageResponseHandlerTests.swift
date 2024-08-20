@@ -39,7 +39,8 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             storage: storage,
             eventPipeline: eventPipeline,
             eventBlock: eventBlock,
-            eventsString: eventsString
+            eventsString: eventsString,
+            logger: nil
         )
 
         XCTAssertEqual(handler.eventsString, eventsString)
@@ -58,7 +59,8 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             storage: fakePersistentStorage,
             eventPipeline: eventPipeline,
             eventBlock: eventBlock,
-            eventsString: eventsString
+            eventsString: eventsString,
+            logger: nil
         )
 
         handler.removeEventCallbackByEventsString(eventsString: eventsString)
@@ -91,7 +93,8 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             storage: fakePersistentStorage,
             eventPipeline: eventPipeline,
             eventBlock: eventBlock,
-            eventsString: eventsString
+            eventsString: eventsString,
+            logger: nil
         )
 
         handler.removeEventCallbackByEventsString(eventsString: eventsString)
@@ -116,7 +119,8 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             storage: fakePersistentStorage,
             eventPipeline: eventPipeline,
             eventBlock: eventBlock,
-            eventsString: eventsString
+            eventsString: eventsString,
+            logger: nil
         )
 
         handler.handleSuccessResponse(code: 200)
@@ -147,7 +151,8 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             storage: fakePersistentStorage,
             eventPipeline: eventPipeline,
             eventBlock: eventBlock,
-            eventsString: eventsString
+            eventsString: eventsString,
+            logger: nil
         )
 
         handler.handleBadRequestResponse(data: ["error": "Invalid API key: \(configuration.apiKey)"])

@@ -13,19 +13,22 @@ class PersistentStorageResponseHandler: ResponseHandler {
     var eventPipeline: EventPipeline
     var eventBlock: URL
     var eventsString: String
+    private let logger: (any Logger)?
 
     init(
         configuration: Configuration,
         storage: PersistentStorage,
         eventPipeline: EventPipeline,
         eventBlock: URL,
-        eventsString: String
+        eventsString: String,
+        logger: (any Logger)?
     ) {
         self.configuration = configuration
         self.storage = storage
         self.eventPipeline = eventPipeline
         self.eventBlock = eventBlock
         self.eventsString = eventsString
+        self.logger = logger
     }
 
     func handleSuccessResponse(code: Int) {
@@ -123,6 +126,11 @@ class PersistentStorageResponseHandler: ResponseHandler {
         // wait for next time to try again
     }
 
+    func handleInvalidDataResponse() {
+        logger?.error(message: "Unable to construct a request from block \(eventBlock), deleting...")
+        storage.remove(eventBlock: eventBlock)
+    }
+
     func handle(result: Result<Int, Error>) {
         switch result {
         case .success(let code):
@@ -149,6 +157,8 @@ class PersistentStorageResponseHandler: ResponseHandler {
                 default:
                     handleFailedResponse(data: json)
                 }
+            case HttpClient.Exception.invalidRequestData:
+                handleInvalidDataResponse()
             default:
                 break
             }

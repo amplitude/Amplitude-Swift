@@ -129,14 +129,16 @@ class PersistentStorage: Storage {
         configuration: Configuration,
         eventPipeline: EventPipeline,
         eventBlock: EventBlock,
-        eventsString: String
+        eventsString: String,
+        logger: (any Logger)?
     ) -> ResponseHandler {
         return PersistentStorageResponseHandler(
             configuration: configuration,
             storage: self,
             eventPipeline: eventPipeline,
             eventBlock: eventBlock,
-            eventsString: eventsString
+            eventsString: eventsString,
+            logger: logger
         )
     }
 

@@ -60,7 +60,8 @@ public protocol Storage {
         configuration: Configuration,
         eventPipeline: EventPipeline,
         eventBlock: URL,
-        eventsString: String
+        eventsString: String,
+        logger: (any Logger)?
     ) -> ResponseHandler
 }
 
