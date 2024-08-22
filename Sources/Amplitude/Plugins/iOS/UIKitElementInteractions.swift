@@ -121,8 +121,16 @@ extension UIGestureRecognizer {
         guard state == .ended, let view else { return }
 
         // Block scroll and zoom events for `UIScrollView`.
-        if let scrollView = view as? UIScrollView, self === scrollView.panGestureRecognizer || self === scrollView.pinchGestureRecognizer {
-            return
+        if let scrollView = view as? UIScrollView {
+            if self === scrollView.panGestureRecognizer {
+                return
+            }
+
+#if !os(tvOS)
+            if self === scrollView.pinchGestureRecognizer {
+                return
+            }
+#endif
         }
 
         let gestureAction: String?
