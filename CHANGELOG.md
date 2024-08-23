@@ -1,3 +1,13 @@
+## [1.8.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.8.0...v1.8.1) (2024-08-23)
+
+
+### Bug Fixes
+
+* Delete events on an invalid api key response. ([#211](https://github.com/amplitude/Amplitude-Swift/issues/211)) ([9329a26](https://github.com/amplitude/Amplitude-Swift/commit/9329a26e7ce29a7c5295f3adb9aa6c78619b9c14))
+* Fix code compatibility issues on Xcode 14.1 ([#213](https://github.com/amplitude/Amplitude-Swift/issues/213)) ([b2022b6](https://github.com/amplitude/Amplitude-Swift/commit/b2022b6e44ed9dced61244f5cc6f2c9fd03b899c))
+* fix pinchGestureRecognizer unavailability issue on tvos ([#217](https://github.com/amplitude/Amplitude-Swift/issues/217)) ([4c5ae67](https://github.com/amplitude/Amplitude-Swift/commit/4c5ae674631973c7ddadd3c891def11047a9d01b))
+* set offline when receiving certain error responses ([#212](https://github.com/amplitude/Amplitude-Swift/issues/212)) ([056ccbf](https://github.com/amplitude/Amplitude-Swift/commit/056ccbfe3d63e6df8b128e27a13eed7abed4ee9d))
+
 # [1.8.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.7.0...v1.8.0) (2024-08-08)
 
 
