@@ -121,6 +121,78 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(events.count, 1)
     }
 
+    func testPluginChangeNotifications() {
+        class TestPlugin: Plugin {
+            let type: PluginType = .enrichment
+
+            var deviceIdChanged: ((String?) -> Void)?
+            var sessionIdChanged: ((Int64?) -> Void)?
+            var userIdChanged: ((String?) -> Void)?
+            var optOutChanged: ((Bool) -> Void)?
+
+            func onDeviceIdChanged(_ deviceId: String?) {
+                deviceIdChanged?(deviceId)
+            }
+
+            func onSessionIdChanged(_ sessionId: Int64) {
+                sessionIdChanged?(sessionId)
+            }
+
+            func onUserIdChanged(_ userId: String?) {
+                userIdChanged?(userId)
+            }
+
+            func onOptOutChanged(_ optOut: Bool) {
+                optOutChanged?(optOut)
+            }
+        }
+
+        let testPlugin = TestPlugin()
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "testPluginChangeNotifications",
+                                                               flushIntervalMillis: 1000000,
+                                                               optOut: false,
+                                                               storageProvider: FakeInMemoryStorage()))
+        amplitude.add(plugin: testPlugin)
+        amplitude.waitForTrackingQueue()
+
+        let expectedDeviceId = "test_device_id"
+        let deviceIdExpectation = expectation(description: "Should receive deviceId changes")
+        testPlugin.deviceIdChanged = { deviceId in
+            XCTAssertEqual(deviceId, expectedDeviceId)
+            XCTAssertEqual(amplitude.getDeviceId(), expectedDeviceId)
+            deviceIdExpectation.fulfill()
+        }
+        amplitude.setDeviceId(deviceId: expectedDeviceId)
+
+        let expectedSessionId = Int64(Date().timeIntervalSince1970 * 1000)
+        let sessionIdExpectation = expectation(description: "Should receive sessionId changes")
+        testPlugin.sessionIdChanged = { sessionId in
+            XCTAssertEqual(sessionId, expectedSessionId)
+            XCTAssertEqual(amplitude.getSessionId(), expectedSessionId)
+            sessionIdExpectation.fulfill()
+        }
+        amplitude.setSessionId(timestamp: expectedSessionId)
+
+        let expectedUserId = "test_user_id"
+        let userIdExpectation = expectation(description: "Should receive userId changes")
+        testPlugin.userIdChanged = { userId in
+            XCTAssertEqual(userId, expectedUserId)
+            XCTAssertEqual(amplitude.getUserId(), expectedUserId)
+            userIdExpectation.fulfill()
+        }
+        amplitude.setUserId(userId: expectedUserId)
+
+        let optOutExpectation = expectation(description: "Should receive optOut changes")
+        testPlugin.optOutChanged = { optOut in
+            XCTAssertTrue(optOut)
+            XCTAssertTrue(amplitude.configuration.optOut)
+            optOutExpectation.fulfill()
+        }
+        amplitude.configuration.optOut = true
+
+        waitForExpectations(timeout: 10)
+    }
+
     func testContextWithDisableTrackingOptions() {
         let apiKey = "testApiKeyForDisableTrackingOptions"
         let trackingOptions = TrackingOptions()

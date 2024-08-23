@@ -67,6 +67,11 @@ public class Amplitude {
         _ = add(plugin: AnalyticsConnectorPlugin())
         _ = add(plugin: AnalyticsConnectorIdentityPlugin())
         _ = add(plugin: AmplitudeDestinationPlugin())
+
+        // Monitor changes to optOut to send to Timeline
+        configuration.optOutChanged = { [weak self] optOut in
+            self?.timeline.onOptOutChanged(optOut)
+        }
     }
 
     convenience init(apiKey: String, configuration: Configuration) {
@@ -262,6 +267,7 @@ public class Amplitude {
     public func setUserId(userId: String?) -> Amplitude {
         try? storage.write(key: .USER_ID, value: userId)
         state.userId = userId
+        timeline.onUserIdChanged(userId)
         return self
     }
 
@@ -269,6 +275,7 @@ public class Amplitude {
     public func setDeviceId(deviceId: String?) -> Amplitude {
         try? storage.write(key: .DEVICE_ID, value: deviceId)
         state.deviceId = deviceId
+        timeline.onDeviceIdChanged(deviceId)
         return self
     }
 
@@ -293,6 +300,7 @@ public class Amplitude {
             } else {
                 sessionEvents = self.sessions.endCurrentSession()
             }
+            self.timeline.onSessionIdChanged(sessionId)
             self.sessions.assignEventId(events: sessionEvents).forEach { e in
                 self.timeline.processEvent(event: e)
             }

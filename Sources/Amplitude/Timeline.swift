@@ -47,13 +47,6 @@ public class Timeline {
         }
     }
 
-    internal func applyClosure(_ closure: (Plugin) -> Void) {
-        for plugin in plugins {
-            let mediator = plugin.value
-            mediator.applyClosure(closure)
-        }
-    }
-
     internal func apply(_ closure: (Plugin) -> Void) {
         for type in PluginType.allCases {
             if let mediator = plugins[type] {
@@ -65,5 +58,21 @@ public class Timeline {
                 }
             }
         }
+    }
+
+    func onUserIdChanged(_ userId: String?) {
+        apply { $0.onUserIdChanged(userId) }
+    }
+
+    func onDeviceIdChanged(_ deviceId: String?) {
+        apply { $0.onDeviceIdChanged(deviceId) }
+    }
+
+    func onSessionIdChanged(_ sessionId: Int64) {
+        apply { $0.onSessionIdChanged(sessionId) }
+    }
+
+    func onOptOutChanged(_ optOut: Bool) {
+        apply { $0.onOptOutChanged(optOut) }
     }
 }

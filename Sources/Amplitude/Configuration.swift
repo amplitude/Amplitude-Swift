@@ -12,7 +12,11 @@ public class Configuration {
     public var flushQueueSize: Int
     public var flushIntervalMillis: Int
     public internal(set) var instanceName: String
-    public var optOut: Bool
+    public var optOut: Bool {
+        didSet {
+            optOutChanged?(optOut)
+        }
+    }
     public let storageProvider: any Storage
     public let identifyStorageProvider: any Storage
     public var logLevel: LogLevelEnum
@@ -44,6 +48,7 @@ public class Configuration {
     public internal(set) var autocapture: AutocaptureOptions
     public var offline: Bool?
     internal let diagonostics: Diagnostics
+    var optOutChanged: ((Bool) -> Void)?
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
     public convenience init(
