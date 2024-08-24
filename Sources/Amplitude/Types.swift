@@ -116,6 +116,10 @@ public protocol Plugin: AnyObject {
     func setup(amplitude: Amplitude)
     func execute(event: BaseEvent) -> BaseEvent?
     func teardown()
+    func onUserIdChanged(_ userId: String?)
+    func onDeviceIdChanged(_ deviceId: String?)
+    func onSessionIdChanged(_ sessionId: Int64)
+    func onOptOutChanged(_ optOut: Bool)
 }
 
 public protocol EventPlugin: Plugin {
@@ -138,6 +142,11 @@ extension Plugin {
     public func teardown(){
         // Clean up any resources from setup if necessary
     }
+
+    func onUserIdChanged(_ userId: String?) {}
+    func onDeviceIdChanged(_ deviceId: String?) {}
+    func onSessionIdChanged(_ sessionId: Int64) {}
+    func onOptOutChanged(_ optOut: Bool) {}
 }
 
 public protocol ResponseHandler {

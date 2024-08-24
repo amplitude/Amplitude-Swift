@@ -17,6 +17,11 @@ open class BasePlugin {
     public func teardown(){
         // Clean up any resources from setup if necessary
     }
+
+    open func onUserIdChanged(_ userId: String?) {}
+    open func onDeviceIdChanged(_ deviceId: String?) {}
+    open func onSessionIdChanged(_ sessionId: Int64) {}
+    open func onOptOutChanged(_ optOut: Bool) {}
 }
 
 open class BeforePlugin: BasePlugin, Plugin {
@@ -33,7 +38,4 @@ open class UtilityPlugin: BasePlugin, Plugin {
 
 open class ObservePlugin: BasePlugin, Plugin {
     public let type: PluginType = .observe
-
-    open func onUserIdChanged(_ userId: String?) {}
-    open func onDeviceIdChanged(_ deviceId: String?) {}
 }
