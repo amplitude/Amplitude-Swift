@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.8.1...v1.9.0) (2024-08-24)
+
+
+### Features
+
+* Enhancements to Plugin interface ([#218](https://github.com/amplitude/Amplitude-Swift/issues/218)) ([254e03a](https://github.com/amplitude/Amplitude-Swift/commit/254e03a0034b40ca10873c1defd547c206cd70a9))
+
 ## [1.8.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.8.0...v1.8.1) (2024-08-23)
 
 
