@@ -42,7 +42,8 @@ class InMemoryStorage: Storage {
         configuration: Configuration,
         eventPipeline: EventPipeline,
         eventBlock: EventBlock,
-        eventsString: String
+        eventsString: String,
+        logger: (any Logger)?
     ) -> ResponseHandler {
         abort()
     }

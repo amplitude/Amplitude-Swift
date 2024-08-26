@@ -76,7 +76,8 @@ public class EventPipeline {
                         configuration: self.configuration,
                         eventPipeline: self,
                         eventBlock: eventFile,
-                        eventsString: eventsString
+                        eventsString: eventsString,
+                        logger: logger
                     )
                     responseHandler.handle(result: result)
                     self.completeUpload(for: eventFile)
