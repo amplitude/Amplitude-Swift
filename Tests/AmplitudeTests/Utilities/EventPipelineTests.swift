@@ -116,6 +116,35 @@ final class EventPipelineTests: XCTestCase {
         XCTAssertEqual(uploadedEvents![0].eventType, "testEvent")
     }
 
+    func testOneUploadAtATime() {
+        let testEvent = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
+        try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
+        pipeline?.storage?.rollover()
+
+        let testEvent2 = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent2")
+        try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
+        pipeline.storage?.rollover()
+
+        let httpResponseExpectation1 = expectation(description: "httpresponse1")
+        let httpResponseExpectation2 = expectation(description: "httpresponse2")
+        httpClient.uploadExpectations = [httpResponseExpectation1, httpResponseExpectation2]
+
+        httpResponseExpectation2.isInverted = true
+
+        let flushExpectation = expectation(description: "flush")
+        pipeline.flush {
+            flushExpectation.fulfill()
+        }
+
+        wait(for: [httpResponseExpectation1], timeout: 1)
+
+        httpResponseExpectation2.isInverted = false
+
+        wait(for: [httpResponseExpectation2, flushExpectation], timeout: 1)
+
+        XCTAssertEqual(httpClient.uploadCount, 2)
+    }
+
     func testInvalidEventUpload() {
         let invalidResponseData = "{\"events_with_invalid_fields\": {\"user_id\": [0]}}".data(using: .utf8)!
 
