@@ -843,6 +843,77 @@ final class AmplitudeTests: XCTestCase {
         wait(for: [deallocExpectation], timeout: 10.0)
     }
 
+    func testTrimQueuedEvents() {
+        class TrimTestStorage: Storage {
+
+            private var events: [URL: Int] = [:]
+
+            func addEventFile(url: URL, eventCount: Int) {
+                events[url] = eventCount
+            }
+
+            func write(key: StorageKey, value: Any?) throws {}
+
+            func read<T>(key: StorageKey) -> T? {
+                switch key {
+                case .EVENTS:
+                    return events.keys.sorted(by: {$0.absoluteString < $1.absoluteString}) as? T
+                default:
+                    return nil
+                }
+            }
+
+            func getEventsString(eventBlock: URL) -> String? {
+                guard let eventCount = events[eventBlock] else {
+                    return nil
+                }
+
+                let events = (0..<eventCount).map { BaseEvent(eventType: "Event \($0)") }
+
+                guard let jsonData = try? JSONEncoder().encode(events) else {
+                    return nil
+                }
+
+                return String(data: jsonData, encoding: .utf8)
+            }
+
+            func remove(eventBlock: URL) {
+                events[eventBlock] = nil
+            }
+
+            func splitBlock(eventBlock: URL, events: [BaseEvent]) {}
+
+            func rollover() {}
+
+            func reset() {}
+
+            func getResponseHandler(configuration: Configuration,
+                                    eventPipeline: EventPipeline,
+                                    eventBlock: URL,
+                                    eventsString: String) -> ResponseHandler {
+                abort()
+            }
+        }
+
+        let storage = TrimTestStorage()
+        storage.addEventFile(url: URL(string: "file://test/0")!, eventCount: 10)
+        storage.addEventFile(url: URL(string: "file://test/1")!, eventCount: 10)
+        storage.addEventFile(url: URL(string: "file://test/2")!, eventCount: 10)
+        storage.addEventFile(url: URL(string: "file://test/3")!, eventCount: 10)
+
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "test-api-key",
+                                                               storageProvider: storage,
+                                                               maxQueuedEventCount: 15))
+        amplitude.waitForTrackingQueue()
+
+        let allEventBlocks: [URL] = storage.read(key: .EVENTS) ?? []
+
+        XCTAssert(!allEventBlocks.contains(URL(string: "file://test/0")!))
+        XCTAssert(!allEventBlocks.contains(URL(string: "file://test/1")!))
+        XCTAssert(allEventBlocks.contains(URL(string: "file://test/2")!))
+        XCTAssert(allEventBlocks.contains(URL(string: "file://test/3")!))
+    }
+
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
         return NSDictionary(dictionary: props as [AnyHashable: Any])
     }

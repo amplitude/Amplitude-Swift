@@ -48,6 +48,7 @@ public class Configuration {
     public internal(set) var autocapture: AutocaptureOptions
     public var offline: Bool?
     internal let diagonostics: Diagnostics
+    public var maxQueuedEventCount = -1
     var optOutChanged: ((Bool) -> Void)?
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
@@ -135,6 +136,7 @@ public class Configuration {
         // `trackingSessionEvents` has been replaced by `defaultTracking.sessions`
         autocapture: AutocaptureOptions = .sessions,
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
+        maxQueuedEventCount: Int = -1,
         migrateLegacyData: Bool = true,
         offline: Bool? = false
     ) {
@@ -167,6 +169,7 @@ public class Configuration {
         self.minTimeBetweenSessionsMillis = minTimeBetweenSessionsMillis
         self.autocapture = autocapture
         self.identifyBatchIntervalMillis = identifyBatchIntervalMillis
+        self.maxQueuedEventCount = maxQueuedEventCount
         self.migrateLegacyData = migrateLegacyData
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue

@@ -72,6 +72,10 @@ public class Amplitude {
         configuration.optOutChanged = { [weak self] optOut in
             self?.timeline.onOptOutChanged(optOut)
         }
+
+        trackingQueue.async { [self] in
+            self.trimQueuedEvents()
+        }
     }
 
     convenience init(apiKey: String, configuration: Configuration) {
@@ -449,5 +453,31 @@ public class Amplitude {
 
     internal func isSandboxEnabled() -> Bool {
         return SandboxHelper().isSandboxEnabled()
+    }
+
+    func trimQueuedEvents() {
+        logger?.debug(message: "Trimming queued events..")
+        guard configuration.maxQueuedEventCount > 0,
+              let eventBlocks: [URL] = storage.read(key: .EVENTS),
+              !eventBlocks.isEmpty else {
+            return
+        }
+
+        var eventCount = 0
+        // Blocks are returned in sorted order, oldest -> newest. Reverse to count newest blocks first.
+        // Only whole blocks are deleted, meaning up to maxQueuedEventCount + flushQueueSize - 1
+        // events may be left on device.
+        for eventBlock in eventBlocks.reversed() {
+            if eventCount < configuration.maxQueuedEventCount {
+                if let eventString = storage.getEventsString(eventBlock: eventBlock),
+                   let eventArray =  BaseEvent.fromArrayString(jsonString: eventString) {
+                    eventCount += eventArray.count
+                }
+            } else {
+                logger?.debug(message: "Trimming \(eventBlock)")
+                storage.remove(eventBlock: eventBlock)
+            }
+        }
+        logger?.debug(message: "Completed trimming events, kept \(eventCount) most recent events")
     }
 }

@@ -122,7 +122,7 @@ final class EventPipelineTests: XCTestCase {
         pipeline?.storage?.rollover()
 
         let testEvent2 = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent2")
-        try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
+        try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent2)
         pipeline.storage?.rollover()
 
         let httpResponseExpectation1 = expectation(description: "httpresponse1")
