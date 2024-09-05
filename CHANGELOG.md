@@ -1,3 +1,11 @@
+## [1.9.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.9.0...v1.9.1) (2024-09-05)
+
+
+### Bug Fixes
+
+* Add maxQueuedEventCount parameter to trim events in storage if over a limit ([#222](https://github.com/amplitude/Amplitude-Swift/issues/222)) ([0134383](https://github.com/amplitude/Amplitude-Swift/commit/0134383b76890bba7cc05d4cc8656b234f052189))
+* Send a max of one upload at a time ([#221](https://github.com/amplitude/Amplitude-Swift/issues/221)) ([63e76d9](https://github.com/amplitude/Amplitude-Swift/commit/63e76d9e3b28ce491880665eb2ca778c85aea47a))
+
 # [1.9.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.8.1...v1.9.0) (2024-08-24)
 
 
