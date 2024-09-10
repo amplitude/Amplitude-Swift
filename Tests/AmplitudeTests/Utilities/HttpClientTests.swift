@@ -81,7 +81,7 @@ final class HttpClientTests: XCTestCase {
                 return XCTFail("not getting httpError error")
             }
             XCTAssertEqual(code, 400)
-            XCTAssertTrue(String(decoding: data!, as: UTF8.self).contains("Invalid API key: testApiKey"))
+            XCTAssertTrue(String(data: data!, encoding: .utf8)!.contains("Invalid API key: testApiKey"))
             asyncExpectation.fulfill()
         }
         _ = XCTWaiter.wait(for: [asyncExpectation], timeout: 5)
