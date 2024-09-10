@@ -304,7 +304,6 @@ public class Amplitude {
             } else {
                 sessionEvents = self.sessions.endCurrentSession()
             }
-            self.timeline.onSessionIdChanged(sessionId)
             self.sessions.assignEventId(events: sessionEvents).forEach { e in
                 self.timeline.processEvent(event: e)
             }

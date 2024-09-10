@@ -4,6 +4,7 @@ public class Sessions {
     private let configuration: Configuration
     private let storage: Storage
     private let logger: (any Logger)?
+    private let timeline: Timeline
     private var _sessionId: Int64 = -1
     private(set) var sessionId: Int64 {
         get { _sessionId }
@@ -14,6 +15,7 @@ public class Sessions {
             } catch {
                 logger?.warn(message: "Can't write PREVIOUS_SESSION_ID to storage: \(error)")
             }
+            timeline.onSessionIdChanged(_sessionId)
         }
     }
 
@@ -47,6 +49,7 @@ public class Sessions {
         configuration = amplitude.configuration
         storage = amplitude.storage
         logger = amplitude.logger
+        timeline = amplitude.timeline
         self._sessionId = amplitude.storage.read(key: .PREVIOUS_SESSION_ID) ?? -1
         self._lastEventId = amplitude.storage.read(key: .LAST_EVENT_ID) ?? 0
         self._lastEventTime = amplitude.storage.read(key: .LAST_EVENT_TIME) ?? -1
