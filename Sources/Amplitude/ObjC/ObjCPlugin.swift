@@ -80,7 +80,7 @@ public class ObjCPlugin: NSObject {
     public init(
         type: PluginType,
         execute: @escaping (ObjCBaseEvent) -> ObjCBaseEvent?,
-        flush: @escaping() -> Void)
+        flush: @escaping () -> Void)
     {
         self.type = type
         self.setup = nil
