@@ -1,3 +1,10 @@
+## [1.9.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.9.1...v1.9.2) (2024-09-10)
+
+
+### Bug Fixes
+
+* notify plugins of internal sessionId changes ([#224](https://github.com/amplitude/Amplitude-Swift/issues/224)) ([61d43cf](https://github.com/amplitude/Amplitude-Swift/commit/61d43cff8dc7b15208076b6e3dbeb25eee9df646))
+
 ## [1.9.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.9.0...v1.9.1) (2024-09-05)
 
 
