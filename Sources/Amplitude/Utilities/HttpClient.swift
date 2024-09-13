@@ -10,6 +10,7 @@ import Foundation
 class HttpClient {
     let configuration: Configuration
     let session: URLSession
+    let logger: (any Logger)?
     let diagnostics: Diagnostics
     let callbackQueue: DispatchQueue
 
@@ -22,6 +23,7 @@ class HttpClient {
     init(configuration: Configuration, diagnostics: Diagnostics, callbackQueue: DispatchQueue? = nil) {
         self.configuration = configuration
         self.diagnostics = diagnostics
+        self.logger = configuration.loggerProvider
         self.callbackQueue = callbackQueue ?? .global()
 
         let sessionConfiguration = URLSessionConfiguration.default
@@ -37,16 +39,17 @@ class HttpClient {
             let request = try getRequest()
             let requestData = getRequestData(events: events)
 
-            sessionTask = session.uploadTask(with: request, from: requestData) { [callbackQueue, configuration] data, response, error in
+            sessionTask = session.uploadTask(with: request, from: requestData) { [callbackQueue, configuration, logger] data, response, error in
                 callbackQueue.async {
                     if let error = error {
                         let nsError = error as NSError
                         if nsError.domain == NSURLErrorDomain {
                             switch nsError.code {
                             case NSURLErrorCannotConnectToHost, NSURLErrorNetworkConnectionLost, NSURLErrorCannotFindHost, NSURLErrorAppTransportSecurityRequiresSecureConnection:
+                                logger?.error(message: "Conection failed with error: \(error.localizedDescription), marking offline")
                                 configuration.offline = true
                             default:
-                                break
+                                logger?.error(message: "Request failed with error: \(error.localizedDescription)")
                             }
                         }
                         completion(.failure(error))
@@ -54,7 +57,10 @@ class HttpClient {
                         switch httpResponse.statusCode {
                         case 1..<300:
                             completion(.success(httpResponse.statusCode))
+                            logger?.debug(message: "Successfully completed request")
                         default:
+                            let response = String(data: data ?? Data(), encoding: .utf8) ?? ""
+                            logger?.error(message: "Response failed with code\(httpResponse.statusCode): \(response)")
                             completion(.failure(Exception.httpError(code: httpResponse.statusCode, data: data)))
                         }
                     }
@@ -63,6 +69,7 @@ class HttpClient {
             }
             sessionTask!.resume()
         } catch {
+            logger?.debug(message: "Failed to construct request")
             completion(.failure(Exception.httpError(code: 500, data: nil)))
             backgroundTaskCompletion?()
         }
