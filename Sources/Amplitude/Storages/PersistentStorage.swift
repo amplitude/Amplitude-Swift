@@ -82,7 +82,15 @@ class PersistentStorage: Storage {
     func getEventsString(eventBlock: EventBlock) -> String? {
         var content: String?
         do {
-            content = try String(contentsOf: eventBlock, encoding: .utf8)
+            if #available(iOS 13.4, *) {
+                let fileHandle = try FileHandle(forReadingFrom: eventBlock)
+                if let data = try fileHandle.readToEnd() {
+                    content = String(data: data, encoding: .utf8)
+                }
+            } else {
+                content = try String(contentsOf: eventBlock, encoding: .utf8)
+            }
+
             if eventBlock.hasPrefix(PersistentStorage.STORAGE_V2_PREFIX) {
                 // v2 file
                 return readV2File(content: content!)
