@@ -67,46 +67,48 @@ public class EventPipeline {
     }
 
     private func sendNextEventFile() {
-        guard currentUpload == nil else {
-            logger?.log(message: "Existing upload in progress, skipping...")
-            return
-        }
+        autoreleasepool {
+            guard currentUpload == nil else {
+                logger?.log(message: "Existing upload in progress, skipping...")
+                return
+            }
 
-        guard let storage = storage,
-              let eventFiles: [URL] = storage.read(key: StorageKey.EVENTS),
-              let nextEventFile = eventFiles.first else {
-            flushCompletions.forEach { $0() }
-            flushCompletions.removeAll()
-            logger?.debug(message: "No event files to upload")
-            return
-        }
+            guard let storage = storage,
+                  let eventFiles: [URL] = storage.read(key: StorageKey.EVENTS),
+                  let nextEventFile = eventFiles.first else {
+                flushCompletions.forEach { $0() }
+                flushCompletions.removeAll()
+                logger?.debug(message: "No event files to upload")
+                return
+            }
 
-        guard configuration.offline != true else {
-            logger?.debug(message: "Skipping flush while offline.")
-            return
-        }
+            guard configuration.offline != true else {
+                logger?.debug(message: "Skipping flush while offline.")
+                return
+            }
 
-        guard let eventsString = storage.getEventsString(eventBlock: nextEventFile),
-              !eventsString.isEmpty else {
-            logger?.log(message: "Could not read events file: \(nextEventFile)")
-            return
-        }
+            guard let eventsString = storage.getEventsString(eventBlock: nextEventFile),
+                  !eventsString.isEmpty else {
+                logger?.log(message: "Could not read events file: \(nextEventFile)")
+                return
+            }
 
-        currentUpload = httpClient.upload(events: eventsString) { [self] result in
-            let responseHandler = storage.getResponseHandler(
-                configuration: self.configuration,
-                eventPipeline: self,
-                eventBlock: nextEventFile,
-                eventsString: eventsString
-            )
-            responseHandler.handle(result: result)
-            // Don't send the next event file if we're being deallocated
-            self.uploadsQueue.async { [weak self] in
-                guard let self = self else {
-                    return
+            currentUpload = httpClient.upload(events: eventsString) { [self] result in
+                let responseHandler = storage.getResponseHandler(
+                    configuration: self.configuration,
+                    eventPipeline: self,
+                    eventBlock: nextEventFile,
+                    eventsString: eventsString
+                )
+                responseHandler.handle(result: result)
+                // Don't send the next event file if we're being deallocated
+                self.uploadsQueue.async { [weak self] in
+                    guard let self = self else {
+                        return
+                    }
+                    self.currentUpload = nil
+                    self.sendNextEventFile()
                 }
-                self.currentUpload = nil
-                self.sendNextEventFile()
             }
         }
     }
