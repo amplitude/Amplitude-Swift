@@ -25,7 +25,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
         // TODO: Check if lifecycle plugin works for app extension
         // App extensions can't use UIApplication.shared, so
         // funnel it through something to check; Could be nil.
-        application = UIApplication.value(forKeyPath: "sharedApplication") as? UIApplication
+        application = IOSVendorSystem.sharedApplication
         super.init()
         setupListeners()
     }

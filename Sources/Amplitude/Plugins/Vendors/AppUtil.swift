@@ -65,7 +65,15 @@ import Foundation
         }
 
         override func beginBackgroundTask() -> BackgroundTaskCompletionCallback? {
-            if isRunningInAppExtension {
+            if !isRunningInAppExtension, let application = IOSVendorSystem.sharedApplication {
+                var id: UIBackgroundTaskIdentifier = .invalid
+                let callback = { () in
+                    application.endBackgroundTask(id)
+                    id = .invalid
+                }
+                id = application.beginBackgroundTask(withName: "amplitude", expirationHandler: callback)
+                return callback
+            } else {
                 let semaphore = DispatchSemaphore(value: 0)
                 ProcessInfo.processInfo.performExpiringActivity(withReason: "Amplitude") { expired in
                     guard !expired else {
@@ -77,19 +85,16 @@ import Foundation
                 return {
                     semaphore.signal()
                 }
-            } else {
-                var id: UIBackgroundTaskIdentifier = .invalid
-                let callback = { () in
-                    UIApplication.shared.endBackgroundTask(id)
-                    id = .invalid
-                }
-                id = UIApplication.shared.beginBackgroundTask(withName: "amplitude", expirationHandler: callback)
-                return callback
             }
         }
 
         private var isRunningInAppExtension: Bool {
             return Bundle.main.bundlePath.hasSuffix(".appex")
+        }
+
+        // Extension-safe accessor for sharedApplication. Will return nil if run in an extension.
+        static var sharedApplication: UIApplication? {
+            return UIApplication.value(forKeyPath: "sharedApplication") as? UIApplication
         }
     }
 #endif
