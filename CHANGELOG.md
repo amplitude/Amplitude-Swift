@@ -1,3 +1,12 @@
+## [1.9.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.9.2...v1.9.3) (2024-10-01)
+
+
+### Bug Fixes
+
+* add autoreleasepool around sendNextEventFile ([#232](https://github.com/amplitude/Amplitude-Swift/issues/232)) ([0ec1187](https://github.com/amplitude/Amplitude-Swift/commit/0ec1187a218c5b90cd1b8a9024ceabb55af6a092))
+* improve logging in httpclient ([#228](https://github.com/amplitude/Amplitude-Swift/issues/228)) ([633deb5](https://github.com/amplitude/Amplitude-Swift/commit/633deb5bd793c487ef2063877016d61abc0bb5d2))
+* Use extension safe APIs ([#231](https://github.com/amplitude/Amplitude-Swift/issues/231)) ([4794f4e](https://github.com/amplitude/Amplitude-Swift/commit/4794f4e0cdbccc7d1a663247879fefe74438d810))
+
 ## [1.9.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.9.1...v1.9.2) (2024-09-10)
 
 
