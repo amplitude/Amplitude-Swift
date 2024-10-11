@@ -1,3 +1,10 @@
+## [1.9.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.9.3...v1.9.4) (2024-10-11)
+
+
+### Bug Fixes
+
+* Empty Commit to Trigger a Build ([19ffa87](https://github.com/amplitude/Amplitude-Swift/commit/19ffa87f0ea6621e458c76be8c00c3443e8fe08c))
+
 ## [1.9.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.9.2...v1.9.3) (2024-10-01)
 
 
