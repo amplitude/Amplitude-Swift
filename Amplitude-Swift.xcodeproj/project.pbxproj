@@ -6,20 +6,6 @@
 	objectVersion = 54;
 	objects = {
 
-/* Begin PBXAggregateTarget section */
-		"amplitude-swift::Amplitude-SwiftPackageTests::ProductTarget" /* Amplitude-SwiftPackageTests */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = OBJ_133 /* Build configuration list for PBXAggregateTarget "Amplitude-SwiftPackageTests" */;
-			buildPhases = (
-			);
-			dependencies = (
-				OBJ_136 /* PBXTargetDependency */,
-			);
-			name = "Amplitude-SwiftPackageTests";
-			productName = "Amplitude-SwiftPackageTests";
-		};
-/* End PBXAggregateTarget section */
-
 /* Begin PBXBuildFile section */
 		3E281B8C2B967F19009D913B /* Diagonostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E281B8B2B967F19009D913B /* Diagonostics.swift */; };
 		3E281B8E2B96833D009D913B /* DiagnosticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E281B8D2B96833D009D913B /* DiagnosticsTests.swift */; };
@@ -27,6 +13,7 @@
 		4E05BB942BE41AEB009DE475 /* Amplitude+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E05BB932BE41AEB009DE475 /* Amplitude+Extensions.swift */; };
 		4E2B646B2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E2B646A2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift */; };
 		4E3871622BB34DBC002890AB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */; };
+		4EB530752CD2E46A00E961F4 /* AnalyticsConnectorFramework in Frameworks */ = {isa = PBXBuildFile; productRef = 4EB530742CD2E46A00E961F4 /* AnalyticsConnectorFramework */; };
 		6C04FC3F2C58973C00EA8667 /* ElementInteractionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */; };
 		6C04FC412C58974A00EA8667 /* UIKitElementInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */; };
 		6C04FC432C58976800EA8667 /* ObjCAutocaptureOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC422C58976800EA8667 /* ObjCAutocaptureOptions.swift */; };
@@ -70,7 +57,6 @@
 		BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA0359C92A51585D007C383B /* legacy_v3.sqlite */; };
 		BA0639F62A4DD491000F1CEE /* LegacyDatabaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */; };
 		BA1EC0F62A9F63FD00C2D547 /* AmplitudeIOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1EC0F52A9F63FD00C2D547 /* AmplitudeIOSTests.swift */; };
-		BA34B23C2AA0723A00F88097 /* AnalyticsConnector in Frameworks */ = {isa = PBXBuildFile; productRef = BA34B23B2AA0723A00F88097 /* AnalyticsConnector */; };
 		BA994B9A2A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA994B992A4F48DE00D0913F /* LegacyDatabaseStorageTests.swift */; };
 		BA994B9D2A4F4FCB00D0913F /* legacy_v4.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = BA994B9B2A4F4B7500D0913F /* legacy_v4.sqlite */; };
 		BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */; };
@@ -101,7 +87,6 @@
 		OBJ_121 /* PersistentStorageResponseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* PersistentStorageResponseHandler.swift */; };
 		OBJ_122 /* QueueTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* QueueTimer.swift */; };
 		OBJ_124 /* UrlExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_52 /* UrlExtension.swift */; };
-		OBJ_131 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_142 /* AmplitudeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_54 /* AmplitudeTests.swift */; };
 		OBJ_143 /* ConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_55 /* ConfigurationTests.swift */; };
 		OBJ_144 /* ConsoleLoggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_56 /* ConsoleLoggerTests.swift */; };
@@ -141,13 +126,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = "amplitude-swift::Amplitude-Swift";
 			remoteInfo = "Amplitude-Swift";
-		};
-		580FD1F1294A56F60036777B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "amplitude-swift::Amplitude-SwiftTests";
-			remoteInfo = "Amplitude-SwiftTests";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -275,7 +253,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				BA34B23C2AA0723A00F88097 /* AnalyticsConnector in Frameworks */,
+				4EB530752CD2E46A00E961F4 /* AnalyticsConnectorFramework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -290,6 +268,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4EB530702CD2E05000E961F4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		8EDEC33A32439724A363C433 /* Migration */ = {
 			isa = PBXGroup;
 			children = (
@@ -459,6 +444,7 @@
 				OBJ_80 /* README.md */,
 				OBJ_81 /* CONTRIBUTING.md */,
 				OBJ_82 /* AmplitudeSwift.podspec */,
+				4EB530702CD2E05000E961F4 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -577,6 +563,7 @@
 				OBJ_125 /* Frameworks */,
 				3E281B8F2B98EC92009D913B /* ShellScript */,
 				4E3871612BB34DB1002890AB /* Resources */,
+				4EA4AEBE2CC1A0CD008741ED /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -584,7 +571,7 @@
 			);
 			name = "Amplitude-Swift";
 			packageProductDependencies = (
-				BA34B23B2AA0723A00F88097 /* AnalyticsConnector */,
+				4EB530742CD2E46A00E961F4 /* AnalyticsConnectorFramework */,
 			);
 			productName = Amplitude_Swift;
 			productReference = "amplitude-swift::Amplitude-Swift::Product" /* AmplitudeSwift.framework */;
@@ -608,20 +595,6 @@
 			productReference = "amplitude-swift::Amplitude-SwiftTests::Product" /* Amplitude_SwiftTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		"amplitude-swift::SwiftPMPackageDescription" /* Amplitude-SwiftPackageDescription */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_127 /* Build configuration list for PBXNativeTarget "Amplitude-SwiftPackageDescription" */;
-			buildPhases = (
-				OBJ_130 /* Sources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "Amplitude-SwiftPackageDescription";
-			productName = "Amplitude-SwiftPackageDescription";
-			productType = "com.apple.product-type.framework";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -640,15 +613,13 @@
 			);
 			mainGroup = OBJ_5;
 			packageReferences = (
-				BA34B23A2AA0723900F88097 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */,
+				4EB530762CD2EB9700E961F4 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */,
 			);
 			productRefGroup = OBJ_75 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				"amplitude-swift::Amplitude-Swift" /* Amplitude-Swift */,
-				"amplitude-swift::SwiftPMPackageDescription" /* Amplitude-SwiftPackageDescription */,
-				"amplitude-swift::Amplitude-SwiftPackageTests::ProductTarget" /* Amplitude-SwiftPackageTests */,
 				"amplitude-swift::Amplitude-SwiftTests" /* Amplitude-SwiftTests */,
 			);
 		};
@@ -693,17 +664,27 @@
 			shellPath = /bin/sh;
 			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
+		4EA4AEBE2CC1A0CD008741ED /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "SHOULD_LINK_UIKIT=$(echo \"$TARGET_NAME\" | grep -v UIKitDisabled)\nHAS_UIKIT=$(otool -L \"$TARGET_BUILD_DIR/$EXECUTABLE_PATH\" | tail -n +3 | grep UIKit)\n\nif [ ! \"$SHOULD_LINK_UIKIT\" ] && [ -n \"$HAS_UIKIT\" ]; then\n  echo \"error: AmplitudeSwift was built with AMPLITUDE_DISABLE_UIKIT, but UIKit is still linked. Check any added UIKit imports and surround with conditional compilation flags.\"\n  exit 1\nfi\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		OBJ_130 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_131 /* Package.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		OBJ_141 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
@@ -826,11 +807,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		OBJ_136 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "amplitude-swift::Amplitude-SwiftTests" /* Amplitude-SwiftTests */;
-			targetProxy = 580FD1F1294A56F60036777B /* PBXContainerItemProxy */;
-		};
 		OBJ_161 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "amplitude-swift::Amplitude-Swift" /* Amplitude-Swift */;
@@ -839,37 +815,197 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		OBJ_128 /* Debug */ = {
+		4EA4AEB42CC189DC008741ED /* ReleaseDisableUIKit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"SWIFT_PACKAGE=1",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				OTHER_SWIFT_FLAGS = "$(inherited) -DXcode";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "$(AVAILABLE_PLATFORMS)";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) SWIFT_PACKAGE";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				USE_HEADERMAP = NO;
+			};
+			name = ReleaseDisableUIKit;
+		};
+		4EA4AEB52CC189DC008741ED /* ReleaseDisableUIKit */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/ManifestAPI -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk -package-description-version 5.7.0";
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CLANG_MODULES_AUTOLINK = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = "Amplitude-Swift.xcodeproj/Amplitude_Swift_Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(TOOLCHAIN_DIR)/usr/lib/swift/macosx",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = "Amplitude-Swift";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)NoUIKit";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)NoUIKit";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx watchos watchsimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) AMPLITUDE_DISABLE_UIKIT";
 				SWIFT_VERSION = 5.0;
+				TARGET_NAME = AmplitudeSwift;
+				TVOS_DEPLOYMENT_TARGET = 13.0;
+				WATCHOS_DEPLOYMENT_TARGET = 7.0;
 			};
-			name = Debug;
+			name = ReleaseDisableUIKit;
 		};
-		OBJ_129 /* Release */ = {
+		4EA4AEB82CC189DC008741ED /* ReleaseDisableUIKit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = "Amplitude-Swift.xcodeproj/Amplitude_SwiftTests_Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_VERSION = 5.0;
+				TARGET_NAME = "Amplitude-SwiftTests";
+				TVOS_DEPLOYMENT_TARGET = 14.0;
+				WATCHOS_DEPLOYMENT_TARGET = 7.0;
+			};
+			name = ReleaseDisableUIKit;
+		};
+		4EA4AEB92CC189EF008741ED /* DebugDisableUIKiit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_NS_ASSERTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"SWIFT_PACKAGE=1",
+					"DEBUG=1",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -DXcode";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "$(AVAILABLE_PLATFORMS)";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) SWIFT_PACKAGE DEBUG";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				USE_HEADERMAP = NO;
+			};
+			name = DebugDisableUIKiit;
+		};
+		4EA4AEBA2CC189EF008741ED /* DebugDisableUIKiit */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/ManifestAPI -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk -package-description-version 5.7.0";
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CLANG_MODULES_AUTOLINK = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = "Amplitude-Swift.xcodeproj/Amplitude_Swift_Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(TOOLCHAIN_DIR)/usr/lib/swift/macosx",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = "Amplitude-Swift";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)NoUIKit";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)NoUIKit";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx watchos watchsimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) AMPLITUDE_DISABLE_UIKIT";
 				SWIFT_VERSION = 5.0;
+				TARGET_NAME = AmplitudeSwift;
+				TVOS_DEPLOYMENT_TARGET = 13.0;
+				WATCHOS_DEPLOYMENT_TARGET = 7.0;
 			};
-			name = Release;
+			name = DebugDisableUIKiit;
 		};
-		OBJ_134 /* Debug */ = {
+		4EA4AEBD2CC189EF008741ED /* DebugDisableUIKiit */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = "Amplitude-Swift.xcodeproj/Amplitude_SwiftTests_Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_VERSION = 5.0;
+				TARGET_NAME = "Amplitude-SwiftTests";
+				TVOS_DEPLOYMENT_TARGET = 14.0;
+				WATCHOS_DEPLOYMENT_TARGET = 7.0;
 			};
-			name = Debug;
-		};
-		OBJ_135 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-			};
-			name = Release;
+			name = DebugDisableUIKiit;
 		};
 		OBJ_139 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -991,6 +1127,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
@@ -1015,11 +1152,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx watchos watchsimulator";
-				SUPPORTS_MACCATALYST = YES;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,3,4";
 				TARGET_NAME = AmplitudeSwift;
 				TVOS_DEPLOYMENT_TARGET = 13.0;
 				WATCHOS_DEPLOYMENT_TARGET = 7.0;
@@ -1030,6 +1164,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
@@ -1054,11 +1189,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx watchos watchsimulator";
-				SUPPORTS_MACCATALYST = YES;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,3,4";
 				TARGET_NAME = AmplitudeSwift;
 				TVOS_DEPLOYMENT_TARGET = 13.0;
 				WATCHOS_DEPLOYMENT_TARGET = 7.0;
@@ -1068,29 +1200,13 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		OBJ_127 /* Build configuration list for PBXNativeTarget "Amplitude-SwiftPackageDescription" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_128 /* Debug */,
-				OBJ_129 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		OBJ_133 /* Build configuration list for PBXAggregateTarget "Amplitude-SwiftPackageTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_134 /* Debug */,
-				OBJ_135 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		OBJ_138 /* Build configuration list for PBXNativeTarget "Amplitude-SwiftTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				OBJ_139 /* Debug */,
+				4EA4AEBD2CC189EF008741ED /* DebugDisableUIKiit */,
 				OBJ_140 /* Release */,
+				4EA4AEB82CC189DC008741ED /* ReleaseDisableUIKit */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1099,7 +1215,9 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				OBJ_3 /* Debug */,
+				4EA4AEB92CC189EF008741ED /* DebugDisableUIKiit */,
 				OBJ_4 /* Release */,
+				4EA4AEB42CC189DC008741ED /* ReleaseDisableUIKit */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1108,7 +1226,9 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				OBJ_85 /* Debug */,
+				4EA4AEBA2CC189EF008741ED /* DebugDisableUIKiit */,
 				OBJ_86 /* Release */,
+				4EA4AEB52CC189DC008741ED /* ReleaseDisableUIKit */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1116,21 +1236,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		BA34B23A2AA0723900F88097 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */ = {
+		4EB530762CD2EB9700E961F4 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/amplitude/analytics-connector-ios.git";
+			repositoryURL = "https://github.com/amplitude/analytics-connector-ios";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.1;
+				minimumVersion = 1.2.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		BA34B23B2AA0723A00F88097 /* AnalyticsConnector */ = {
+		4EB530742CD2E46A00E961F4 /* AnalyticsConnectorFramework */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = BA34B23A2AA0723900F88097 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */;
-			productName = AnalyticsConnector;
+			productName = AnalyticsConnectorFramework;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

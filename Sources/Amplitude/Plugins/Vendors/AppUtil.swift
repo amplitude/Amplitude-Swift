@@ -6,12 +6,9 @@
 
 import Foundation
 
-#if os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)
+#if (os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
     import SystemConfiguration
     import UIKit
-    #if !os(tvOS)
-        import WebKit
-    #endif
 
     internal class IOSVendorSystem: VendorSystem {
         private let device = UIDevice.current
@@ -100,9 +97,7 @@ import Foundation
 #endif
 
 #if os(macOS)
-
     import Cocoa
-    import WebKit
 
     internal class MacOSVendorSystem: VendorSystem {
         private let device = ProcessInfo.processInfo

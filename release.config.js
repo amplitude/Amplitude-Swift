@@ -13,7 +13,13 @@ module.exports = {
     ["@semantic-release/changelog", {
       "changelogFile": "CHANGELOG.md"
     }],
-    "@semantic-release/github",
+    [
+      "@semantic-release/github", {
+        "assets": [
+          { "path": ".build/artifacts/AmplitudeSwift.xcframework.zip" },
+          { "path": ".build/artifacts/AmplitudeSwiftNoUIKit.xcframework.zip" },
+        ]
+    }],
     [
       "@google/semantic-release-replace-plugin",
       {

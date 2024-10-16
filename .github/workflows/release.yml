@@ -39,6 +39,17 @@ jobs:
       - name: Validate Podfile
         run: pod lib lint --allow-warnings
 
+      - name: Build xcframework
+        run: scripts/build_framework.sh
+      
+      - name: Zip xcframework
+        working-directory: .build/artifacts
+        run: zip -r AmplitudeSwift.xcframework.zip AmplitudeSwift.xcframework
+
+      - name: Zip xcframework
+        working-directory: .build/artifacts
+        run: zip -r AmplitudeSwiftNoUIKit.xcframework.zip AmplitudeSwiftNoUIKit.xcframework
+
       - name: Semantic Release --dry-run
         if: ${{ github.event.inputs.dryRun == 'true'}}
         env:

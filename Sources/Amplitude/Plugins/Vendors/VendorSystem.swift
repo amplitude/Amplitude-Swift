@@ -33,7 +33,7 @@ internal class VendorSystem {
     }
 
     static var current: VendorSystem = {
-        #if os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)
+        #if (os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
             return IOSVendorSystem()
         #elseif os(macOS)
             return MacOSVendorSystem()
