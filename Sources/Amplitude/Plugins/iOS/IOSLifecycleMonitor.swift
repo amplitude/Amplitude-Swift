@@ -5,7 +5,7 @@
 //  Created by Hao Yu on 11/15/22.
 //
 
-#if os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)
+#if (os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
 
 import Foundation
 import SwiftUI
