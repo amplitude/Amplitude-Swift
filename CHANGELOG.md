@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.9.4...v1.10.0) (2024-10-31)
+
+
+### Features
+
+* support building without UIKit ([#235](https://github.com/amplitude/Amplitude-Swift/issues/235)) ([61e77a1](https://github.com/amplitude/Amplitude-Swift/commit/61e77a16bc164f7eba86db35de2dcd308f828d9f))
+
 ## [1.9.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.9.3...v1.9.4) (2024-10-11)
 
 
