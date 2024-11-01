@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.10.0...v1.10.1) (2024-11-01)
+
+
+### Bug Fixes
+
+* preserve symlinks when zipping xcframeworks ([#237](https://github.com/amplitude/Amplitude-Swift/issues/237)) ([0b01833](https://github.com/amplitude/Amplitude-Swift/commit/0b018330464248d3a6f26e133503db88159b254d))
+
 # [1.10.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.9.4...v1.10.0) (2024-10-31)
 
 
