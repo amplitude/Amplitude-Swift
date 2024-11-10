@@ -105,6 +105,8 @@ extension UnkeyedDecodingContainer {
                 array.append(nestedDictionary)
             } else if let nestedArray = try? decode(Array<Any>.self) {
                 array.append(nestedArray)
+            } else {
+                throw DecodingError.dataCorruptedError(in: self, debugDescription: "Encountered an unexpected type.")
             }
         }
         return array
