@@ -66,7 +66,8 @@ struct ContentView: View {
                             TextField("Event Name", text: $eventType)
                             Button(action: {
                                 print("Send event")
-                                Amplitude.testInstance.track(eventType: eventType)
+                                // This is test event, should revert afterwards
+                                Amplitude.testInstance.track(eventType: eventType, eventProperties: ["test": [1]])
                             }) {
                                 Text("Send Event")
                             }.buttonStyle(AmplitudeButton())

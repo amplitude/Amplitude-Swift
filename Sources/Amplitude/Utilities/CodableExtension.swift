@@ -103,7 +103,11 @@ extension UnkeyedDecodingContainer {
                 array.append(value)
             } else if let nestedDictionary = try? decode(Dictionary<String, Any>.self) {
                 array.append(nestedDictionary)
-            } else if let nestedArray = try? decode(Array<Any>.self) {
+            } else if var nestedContainer = try? nestedUnkeyedContainer() {
+                var nestedArray: [Any] = []
+                while !nestedContainer.isAtEnd {
+                    nestedArray.append(try nestedContainer.decodeSingleElement())
+                }
                 array.append(nestedArray)
             } else {
                 throw DecodingError.dataCorruptedError(in: self, debugDescription: "Encountered an unexpected type.")
@@ -115,6 +119,31 @@ extension UnkeyedDecodingContainer {
     mutating func decode(_ type: [String: Any].Type) throws -> [String: Any] {
         let nestedContainer = try self.nestedContainer(keyedBy: JSONCodingKeys.self)
         return try nestedContainer.decode(type)
+    }
+}
+
+extension UnkeyedDecodingContainer {
+    mutating func decodeSingleElement() throws -> Any {
+        if try decodeNil() {
+            return NSNull()
+        } else if let boolValue = try? decode(Bool.self) {
+            return boolValue
+        } else if let doubleValue = try? decode(Double.self) {
+            return doubleValue
+        } else if let stringValue = try? decode(String.self) {
+            return stringValue
+        } else if let nestedDictionary = try? decode([String: Any].self) {
+            return nestedDictionary
+        } else if var nestedArrayContainer = try? nestedUnkeyedContainer() {
+            // Recursively decode each element within the nested array
+            var nestedArray: [Any] = []
+            while !nestedArrayContainer.isAtEnd {
+                nestedArray.append(try nestedArrayContainer.decodeSingleElement())
+            }
+            return nestedArray
+        } else {
+            throw DecodingError.dataCorruptedError(in: self, debugDescription: "Encountered an unexpected type.")
+        }
     }
 }
 
