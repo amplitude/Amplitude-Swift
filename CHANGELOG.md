@@ -1,3 +1,11 @@
+## [1.10.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.10.1...v1.10.2) (2024-11-12)
+
+
+### Bug Fixes
+
+* properly decode embedded arrays ([#242](https://github.com/amplitude/Amplitude-Swift/issues/242)) ([c5b4d2b](https://github.com/amplitude/Amplitude-Swift/commit/c5b4d2bf1fd002340300e427cedbc75113560fc8))
+* restore Analytics-Connector to built from source version when distributing as a swift package ([#241](https://github.com/amplitude/Amplitude-Swift/issues/241)) ([31133ac](https://github.com/amplitude/Amplitude-Swift/commit/31133ac2d342f175fab55a1a114a6b7868de86f5))
+
 ## [1.10.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.10.0...v1.10.1) (2024-11-01)
 
 
