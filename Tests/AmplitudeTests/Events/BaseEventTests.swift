@@ -27,7 +27,9 @@ final class BaseEventTests: XCTestCase {
             "dict": ["a": 1, "b": 2, "c": "d"],
             "embeddedArray": ["a": [1, 2, 3]],
             "embeddedDict": [1, 2, ["a": 3]],
-            "array2": ["a", 1, 2, "b"]
+            "array2": ["a", 1, 2, "b"],
+            "nestedarray": [[["a": ["b": 1]]]],
+            "nesteddictionary": ["a": ["b": [[1]]]],
         ]
         let baseEvent = BaseEvent(
             plan: Plan(
@@ -111,6 +113,10 @@ final class BaseEventTests: XCTestCase {
             baseEventDict!["ingestion_metadata"]!["source_version" as NSString] as! String,
             "test-source-version"
         )
+        XCTAssertEqual((baseEventDict!["event_properties"]!["nestedarray" as NSString] as! NSArray),
+                       [[["a": ["b": 1]]]])
+        XCTAssertEqual((baseEventDict!["event_properties"]!["nesteddictionary" as NSString] as! NSDictionary),
+                       ["a": ["b": [[1]]]])
     }
 
     func testToString_withNilValues() {
@@ -159,7 +165,9 @@ final class BaseEventTests: XCTestCase {
                 "event_properties": {
                     "integer": 1,
                     "string": "stringValue",
-                    "array": [1, 2, 3]
+                    "array": [1, 2, 3],
+                    "nestedarray": [[{"a": {"b": 1}}]],
+                    "nesteddictionary": {"a": {"b": [[1]]}},
                 },
                 "plan": {
                     "branch": "test-branch",
@@ -191,6 +199,15 @@ final class BaseEventTests: XCTestCase {
             event?.eventProperties!["array"] as! [Double],
             [1, 2, 3]
         )
+        XCTAssertEqual(
+            event?.eventProperties!["nestedarray"] as! NSArray,
+            [[["a": ["b": 1]]]]
+        )
+        XCTAssertEqual(
+            event?.eventProperties!["nesteddictionary"] as! NSDictionary,
+            ["a": ["b": [[1]]]]
+        )
+
         XCTAssertEqual(
             event?.plan?.branch,
             "test-branch"
