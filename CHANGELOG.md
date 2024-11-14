@@ -1,3 +1,10 @@
+## [1.10.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.10.3...v1.10.4) (2024-11-14)
+
+
+### Bug Fixes
+
+* improvements to app lifecycle monitoring ([#243](https://github.com/amplitude/Amplitude-Swift/issues/243)) ([8098782](https://github.com/amplitude/Amplitude-Swift/commit/809878222577da3e1a177452305b190c99631757))
+
 ## [1.10.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.10.2...v1.10.3) (2024-11-13)
 
 
