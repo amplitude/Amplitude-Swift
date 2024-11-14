@@ -58,7 +58,7 @@ import Foundation
             let platform = getPlatformString()
             return getDeviceModel(platform: platform)
         }
-        
+
         #if !os(visionOS)
         override var requiredPlugin: Plugin {
             return IOSLifecycleMonitor()
