@@ -11,28 +11,42 @@ import Foundation
 import SwiftUI
 
 class IOSLifecycleMonitor: UtilityPlugin {
-    private var application: UIApplication?
-    private var appNotifications: [NSNotification.Name] = [
-        UIApplication.didEnterBackgroundNotification,
-        UIApplication.willEnterForegroundNotification,
-        UIApplication.didFinishLaunchingNotification,
-        UIApplication.didBecomeActiveNotification,
-    ]
+
     private var utils: DefaultEventUtils?
     private var sendApplicationOpenedOnDidBecomeActive = false
 
     override init() {
-        // TODO: Check if lifecycle plugin works for app extension
-        // App extensions can't use UIApplication.shared, so
-        // funnel it through something to check; Could be nil.
-        application = IOSVendorSystem.sharedApplication
         super.init()
-        setupListeners()
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(applicationDidFinishLaunchingNotification(notification:)),
+                                               name: UIApplication.didFinishLaunchingNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(applicationDidBecomeActive(notification:)),
+                                               name: UIApplication.didBecomeActiveNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(applicationWillEnterForeground(notification:)),
+                                               name: UIApplication.willEnterForegroundNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(applicationDidEnterBackground(notification:)),
+                                               name: UIApplication.didEnterBackgroundNotification,
+                                               object: nil)
     }
 
     public override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
         utils = DefaultEventUtils(amplitude: amplitude)
+
+        // If we are already in the foreground, dispatch installed / opened events now
+        if IOSVendorSystem.sharedApplication?.applicationState == .active {
+            utils?.trackAppUpdatedInstalledEvent()
+            amplitude.onEnterForeground(timestamp: currentTimestamp)
+            utils?.trackAppOpenedEvent()
+        }
+
         if amplitude.configuration.autocapture.contains(.screenViews) {
             UIKitScreenViews.register(amplitude)
         }
@@ -42,40 +56,39 @@ class IOSLifecycleMonitor: UtilityPlugin {
     }
 
     @objc
-    func notificationResponse(notification: Notification) {
-        switch notification.name {
-        case UIApplication.didEnterBackgroundNotification:
-            didEnterBackground(notification: notification)
-        case UIApplication.willEnterForegroundNotification:
-            applicationWillEnterForeground(notification: notification)
-        case UIApplication.didFinishLaunchingNotification:
-            applicationDidFinishLaunchingNotification(notification: notification)
-        case UIApplication.didBecomeActiveNotification:
-            applicationDidBecomeActive(notification: notification)
-        default:
-            break
+    func applicationDidFinishLaunchingNotification(notification: Notification) {
+        utils?.trackAppUpdatedInstalledEvent()
+
+        // Pre SceneDelegate apps wil not fire a willEnterForeground notification on app launch.
+        // Instead, use the initial applicationDidBecomeActive
+        let sceneManifest = Bundle.main.infoDictionary?["UIApplicationSceneManifest"] as? [String: Any]
+        let sceneConfigurations = sceneManifest?["UISceneConfigurations"] as? [String: Any] ?? [:]
+        let hasSceneConfigurations = !sceneConfigurations.isEmpty
+
+        let appDelegate = IOSVendorSystem.sharedApplication?.delegate
+        let selector = #selector(UIApplicationDelegate.application(_:configurationForConnecting:options:))
+        let usesSceneDelegate = appDelegate?.responds(to: selector) ?? false
+
+        if !(hasSceneConfigurations || usesSceneDelegate) {
+            sendApplicationOpenedOnDidBecomeActive = true
         }
     }
 
-    func setupListeners() {
-        // Configure the current life cycle events
-        let notificationCenter = NotificationCenter.default
-        for notification in appNotifications {
-            notificationCenter.addObserver(
-                self,
-                selector: #selector(notificationResponse(notification:)),
-                name: notification,
-                object: application
-            )
+    @objc
+    func applicationDidBecomeActive(notification: Notification) {
+        guard sendApplicationOpenedOnDidBecomeActive else {
+            return
         }
+        sendApplicationOpenedOnDidBecomeActive = false
 
+        amplitude?.onEnterForeground(timestamp: currentTimestamp)
+        utils?.trackAppOpenedEvent()
     }
 
+    @objc
     func applicationWillEnterForeground(notification: Notification) {
-        let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
-
         let fromBackground: Bool
-        if let sharedApplication = application {
+        if let sharedApplication = IOSVendorSystem.sharedApplication {
             switch sharedApplication.applicationState {
             case .active, .inactive:
                 fromBackground = false
@@ -88,52 +101,23 @@ class IOSLifecycleMonitor: UtilityPlugin {
             fromBackground = false
         }
 
-        amplitude?.onEnterForeground(timestamp: timestamp)
-        sendApplicationOpened(fromBackground: fromBackground)
+        amplitude?.onEnterForeground(timestamp: currentTimestamp)
+        utils?.trackAppOpenedEvent(fromBackground: fromBackground)
     }
 
-    func didEnterBackground(notification: Notification) {
-        let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
-        self.amplitude?.onExitForeground(timestamp: timestamp)
-        if amplitude?.configuration.autocapture.contains(.appLifecycles) ?? false {
-            self.amplitude?.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
-        }
-    }
-
-    func applicationDidFinishLaunchingNotification(notification: Notification) {
-        utils?.trackAppUpdatedInstalledEvent()
-
-        // Pre SceneDelegate apps wil not fire a willEnterForeground notification on app launch.
-        // Instead, use the initial applicationDidBecomeActive
-        let usesSceneDelegate = application?.delegate?.responds(to: #selector(UIApplicationDelegate.application(_:configurationForConnecting:options:))) ?? false
-        if !usesSceneDelegate {
-            sendApplicationOpenedOnDidBecomeActive = true
-        }
-    }
-
-    func applicationDidBecomeActive(notification: Notification) {
-        guard sendApplicationOpenedOnDidBecomeActive else {
+    @objc
+    func applicationDidEnterBackground(notification: Notification) {
+        guard let amplitude = amplitude else {
             return
         }
-        sendApplicationOpenedOnDidBecomeActive = false
-
-        let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
-        amplitude?.onEnterForeground(timestamp: timestamp)
-        sendApplicationOpened(fromBackground: false)
+        amplitude.onExitForeground(timestamp: currentTimestamp)
+        if amplitude.configuration.autocapture.contains(.appLifecycles) {
+            amplitude.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
+        }
     }
 
-    private func sendApplicationOpened(fromBackground: Bool) {
-        guard amplitude?.configuration.autocapture.contains(.appLifecycles) ?? false else {
-            return
-        }
-        let info = Bundle.main.infoDictionary
-        let currentBuild = info?["CFBundleVersion"] as? String
-        let currentVersion = info?["CFBundleShortVersionString"] as? String
-        self.amplitude?.track(eventType: Constants.AMP_APPLICATION_OPENED_EVENT, eventProperties: [
-            Constants.AMP_APP_BUILD_PROPERTY: currentBuild ?? "",
-            Constants.AMP_APP_VERSION_PROPERTY: currentVersion ?? "",
-            Constants.AMP_APP_FROM_BACKGROUND_PROPERTY: fromBackground,
-        ])
+    private var currentTimestamp: Int64 {
+        return Int64(NSDate().timeIntervalSince1970 * 1000)
     }
 }
 
