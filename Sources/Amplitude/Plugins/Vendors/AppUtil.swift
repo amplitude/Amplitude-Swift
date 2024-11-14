@@ -6,7 +6,7 @@
 
 import Foundation
 
-#if (os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
+#if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
     import SystemConfiguration
     import UIKit
 
@@ -35,6 +35,8 @@ import Foundation
         override var platform: String {
             #if os(tvOS)
                 return "tvOS"
+            #elseif os(visionOS)
+                return "visionOS"
             #elseif targetEnvironment(macCatalyst)
                 return "macOS"
             #else
@@ -56,10 +58,12 @@ import Foundation
             let platform = getPlatformString()
             return getDeviceModel(platform: platform)
         }
-
+        
+        #if !os(visionOS)
         override var requiredPlugin: Plugin {
             return IOSLifecycleMonitor()
         }
+        #endif
 
         override func beginBackgroundTask() -> BackgroundTaskCompletionCallback? {
             if !isRunningInAppExtension, let application = IOSVendorSystem.sharedApplication {
