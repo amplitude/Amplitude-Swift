@@ -1,4 +1,4 @@
-#if (os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
+#if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
 import UIKit
 
 class UIKitElementInteractions {
@@ -148,6 +148,10 @@ extension UIGestureRecognizer {
             gestureAction = "pinch"
         case is UIRotationGestureRecognizer:
             gestureAction = "rotation"
+        case is UIHoverGestureRecognizer:
+            gestureAction = "hover"
+#endif
+#if !os(tvOS) && !os(visionOS)
         case is UIScreenEdgePanGestureRecognizer:
             gestureAction = "screenEdgePan"
 #endif

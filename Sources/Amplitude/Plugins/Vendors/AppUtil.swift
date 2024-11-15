@@ -59,11 +59,9 @@ import Foundation
             return getDeviceModel(platform: platform)
         }
 
-        #if !os(visionOS)
         override var requiredPlugin: Plugin {
             return IOSLifecycleMonitor()
         }
-        #endif
 
         override func beginBackgroundTask() -> BackgroundTaskCompletionCallback? {
             if !isRunningInAppExtension, let application = IOSVendorSystem.sharedApplication {
