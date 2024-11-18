@@ -41,7 +41,12 @@ class IOSLifecycleMonitor: UtilityPlugin {
         utils = DefaultEventUtils(amplitude: amplitude)
 
         // If we are already in the foreground, dispatch installed / opened events now
-        if IOSVendorSystem.sharedApplication?.applicationState == .active {
+        // Use keypath vs applicationState property to avoid main thread checker warning,
+        // we want to dispatch this from the initiating thread to maintain event ordering.
+        if let application = IOSVendorSystem.sharedApplication,
+           let rawState = application.value(forKey: #keyPath(UIApplication.applicationState)) as? Int,
+           let applicationState = UIApplication.State(rawValue: rawState),
+           applicationState == .active {
             utils?.trackAppUpdatedInstalledEvent()
             amplitude.onEnterForeground(timestamp: currentTimestamp)
             utils?.trackAppOpenedEvent()
