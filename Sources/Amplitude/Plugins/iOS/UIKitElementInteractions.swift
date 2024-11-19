@@ -148,8 +148,6 @@ extension UIGestureRecognizer {
             gestureAction = "pinch"
         case is UIRotationGestureRecognizer:
             gestureAction = "rotation"
-        case is UIHoverGestureRecognizer:
-            gestureAction = "hover"
 #endif
 #if !os(tvOS) && !os(visionOS)
         case is UIScreenEdgePanGestureRecognizer:
