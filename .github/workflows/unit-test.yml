@@ -45,6 +45,12 @@ jobs:
             xcode: 15.2
             test-destination-os: latest
             device: "Apple Watch Series 8 (41mm)"
+          
+          - runs-on: macos-13
+            platform: visionOS
+            xcode: 15.2
+            test-destination-os: latest
+            device: "Apple Vision Pro"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -84,6 +90,13 @@ jobs:
                 -scheme Amplitude-Swift-Package \
                 -sdk watchsimulator \
                 -destination 'platform=watchOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
+                test
+              ;;
+            visionOS)
+              xcodebuild \
+                -scheme Amplitude-Swift-Package \
+                -sdk xrsimulator \
+                -destination 'platform=visionOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
                 test
               ;;
           esac
