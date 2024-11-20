@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.10.6...v1.11.0) (2024-11-20)
+
+
+### Features
+
+* add visionOS support ([#244](https://github.com/amplitude/Amplitude-Swift/issues/244)) ([cd25c07](https://github.com/amplitude/Amplitude-Swift/commit/cd25c0737b39a749716ae9b9c3ec2036a4871ba7))
+
 ## [1.10.6](https://github.com/amplitude/Amplitude-Swift/compare/v1.10.5...v1.10.6) (2024-11-19)
 
 
