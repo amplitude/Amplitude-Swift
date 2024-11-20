@@ -1,3 +1,17 @@
+## [1.10.6](https://github.com/amplitude/Amplitude-Swift/compare/v1.10.5...v1.10.6) (2024-11-19)
+
+
+### Bug Fixes
+
+* empty commit to trigger a build ([dc00739](https://github.com/amplitude/Amplitude-Swift/commit/dc00739f79a56ef2605ce8ae72d3c83f565c26d9))
+
+## [1.10.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.10.4...v1.10.5) (2024-11-18)
+
+
+### Bug Fixes
+
+* prevent main thread checker warning ([#248](https://github.com/amplitude/Amplitude-Swift/issues/248)) ([7b71d12](https://github.com/amplitude/Amplitude-Swift/commit/7b71d129f6b71e6a7978c934cda60f8190316674))
+
 ## [1.10.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.10.3...v1.10.4) (2024-11-14)
 
 
