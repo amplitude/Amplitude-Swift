@@ -11,7 +11,7 @@ on:
 jobs:
   authorize:
     name: Authorize
-    runs-on: macos-13
+    runs-on: macos-13-xlarge
     steps:
       - name: ${{ github.actor }} permission check to do a release
         uses: octokit/request-action@v2.1.9
@@ -27,7 +27,7 @@ jobs:
 
   release:
     name: Release
-    runs-on: macos-13
+    runs-on: macos-13-xlarge
     needs: [authorize, run-tests]
     steps:
       - name: Checkout
@@ -35,6 +35,11 @@ jobs:
       - name: Set Xcode 15
         run: |
           sudo xcode-select -switch /Applications/Xcode_15.2.app
+
+      # Install missing sdk for pod lint
+      # Remove this step after the runner upgraded to macos-15
+      - name: Install visionOS simulator
+        run: xcodebuild -downloadPlatform visionOS -quiet
 
       - name: Validate Podfile
         run: pod lib lint --allow-warnings

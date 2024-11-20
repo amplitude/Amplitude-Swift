@@ -1,5 +1,5 @@
 import Foundation
-#if (os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
+#if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
 import UIKit
 
 class UIKitScreenViews {

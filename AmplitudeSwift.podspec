@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.author                 = { "Amplitude" => "dev@amplitude.com" }
   s.source                 = { :git => "https://github.com/amplitude/Amplitude-Swift.git", :tag => "v#{s.version}" }
 
-  s.swift_version = '5.7'
+  s.swift_version = '5.9'
 
   s.ios.deployment_target  = '13.0'
   s.ios.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
@@ -29,7 +29,11 @@ Pod::Spec.new do |s|
   # s.watchos.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
   # s.watchos.resource_bundle    = { 'Amplitude': ['Sources/Amplitude/PrivacyInfo.xcprivacy'] }
 
-  s.dependency 'AnalyticsConnector', '~> 1.0.1'
+  s.visionos.deployment_target = '1.0'
+  s.visionos.source_files      = 'Sources/Amplitude/**/*.{h,swift}'
+  s.visionos.resource_bundle    = { 'Amplitude': ['Sources/Amplitude/PrivacyInfo.xcprivacy'] }
+
+  s.dependency 'AnalyticsConnector', '~> 1.3.0'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
 end
