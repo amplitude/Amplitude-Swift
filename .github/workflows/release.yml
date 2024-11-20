@@ -36,6 +36,11 @@ jobs:
         run: |
           sudo xcode-select -switch /Applications/Xcode_15.2.app
 
+      # Install missing sdk for pod lint
+      # Remove this step after the runner upgraded to macos-15
+      - name: Install visionOS simulator
+        run: xcodebuild -downloadPlatform visionOS -quiet
+
       - name: Validate Podfile
         run: pod lib lint --allow-warnings
 
