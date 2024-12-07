@@ -45,7 +45,7 @@ class HttpClient {
                         let nsError = error as NSError
                         if nsError.domain == NSURLErrorDomain {
                             switch nsError.code {
-                            case NSURLErrorCannotConnectToHost, NSURLErrorNetworkConnectionLost, NSURLErrorCannotFindHost, NSURLErrorAppTransportSecurityRequiresSecureConnection:
+                            case NSURLErrorCannotConnectToHost, NSURLErrorNetworkConnectionLost, NSURLErrorCannotFindHost, NSURLErrorAppTransportSecurityRequiresSecureConnection, NSURLErrorNotConnectedToInternet:
                                 logger?.error(message: "Conection failed with error: \(error.localizedDescription), marking offline")
                                 configuration.offline = true
                             default:
