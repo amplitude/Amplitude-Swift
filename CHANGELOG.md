@@ -1,3 +1,10 @@
+## [1.11.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.0...v1.11.1) (2024-12-09)
+
+
+### Bug Fixes
+
+* also include NSURLErrorNotConnectedToInternet when setting configuration to offline ([#249](https://github.com/amplitude/Amplitude-Swift/issues/249)) ([4efb6f4](https://github.com/amplitude/Amplitude-Swift/commit/4efb6f45343593eae4551a48e7cb62a9d50cf923))
+
 # [1.11.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.10.6...v1.11.0) (2024-11-20)
 
 
