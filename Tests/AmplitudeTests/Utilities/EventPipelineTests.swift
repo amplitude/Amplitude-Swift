@@ -183,4 +183,84 @@ final class EventPipelineTests: XCTestCase {
         XCTAssertEqual(uploadedEvents1?.count, 1)
         XCTAssertEqual(uploadedEvents1?[0].eventType, "testEvent-1")
     }
+
+    // test continues to fail until the event is uploaded
+    func testContinuousFailure() {
+        pipeline.configuration.offline = false
+        pipeline.maxRetryCount = 2
+
+        let testEvent = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
+        try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
+
+        let uploadExpectations = (0..<4).map { i in expectation(description: "httpresponse-\(i)") }
+        httpClient.uploadExpectations = uploadExpectations
+
+        httpClient.uploadResults = [
+            .failure(NSError(domain: "unknown", code: 0, userInfo: nil)), // instant failure
+            .failure(NSError(domain: "unknown", code: 0, userInfo: nil)), // +1s failure
+            .failure(NSError(domain: "unknown", code: 0, userInfo: nil)), // +2s failure, go offline
+            .success(200)
+        ]
+
+        pipeline.flush()
+        wait(for: [uploadExpectations[0], uploadExpectations[1]], timeout: 2)
+
+        XCTAssertEqual(httpClient.uploadCount, 2)
+        XCTAssertEqual(pipeline.continuousFailure, 2)
+        XCTAssertEqual(pipeline.configuration.offline, false)
+
+        wait(for: [uploadExpectations[2]], timeout: 3)
+
+        XCTAssertEqual(httpClient.uploadCount, 3)
+        XCTAssertEqual(pipeline.continuousFailure, 3)
+        XCTAssertEqual(pipeline.configuration.offline, true)
+
+        pipeline.configuration.offline = false
+        let flushExpectation = expectation(description: "flush")
+        pipeline.flush {
+            flushExpectation.fulfill()
+        }
+        wait(for: [uploadExpectations[3], flushExpectation], timeout: 1)
+
+        XCTAssertEqual(httpClient.uploadCount, 4)
+        XCTAssertEqual(pipeline.continuousFailure, 0)
+    }
+
+    func testContinuesHandledFailure() {
+        pipeline.configuration.offline = false
+        pipeline.maxRetryCount = 1
+
+        let testEvent1 = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
+        try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent1)
+        pipeline.storage?.rollover()
+
+        let testEvent2 = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
+        try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent2)
+        pipeline.storage?.rollover()
+
+        let testEvent3 = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
+        try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent3)
+        pipeline.storage?.rollover()
+
+        let uploadExpectations = (0..<3).map { i in expectation(description: "httpresponse-\(i)") }
+        httpClient.uploadExpectations = uploadExpectations
+
+        httpClient.uploadResults = [
+            .failure(HttpClient.Exception.httpError(code: HttpClient.HttpStatus.BAD_REQUEST.rawValue, data: nil)),
+            .failure(HttpClient.Exception.httpError(code: HttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue, data: nil)),
+            .success(200),
+        ]
+
+        let flushExpectation = expectation(description: "flush")
+        pipeline.flush {
+            flushExpectation.fulfill()
+        }
+        wait(for: [uploadExpectations[0], uploadExpectations[1]], timeout: 1)
+        XCTAssertEqual(httpClient.uploadCount, 2)
+        XCTAssertEqual(pipeline.continuousFailure, 0)
+
+        wait(for: [uploadExpectations[2], flushExpectation], timeout: 1)
+        XCTAssertEqual(httpClient.uploadCount, 3)
+        XCTAssertEqual(pipeline.continuousFailure, 0)
+    }
 }

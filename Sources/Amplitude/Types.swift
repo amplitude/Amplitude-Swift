@@ -150,13 +150,14 @@ extension Plugin {
 }
 
 public protocol ResponseHandler {
-    func handle(result: Result<Int, Error>)
-    func handleSuccessResponse(code: Int)
-    func handleBadRequestResponse(data: [String: Any])
-    func handlePayloadTooLargeResponse(data: [String: Any])
-    func handleTooManyRequestsResponse(data: [String: Any])
-    func handleTimeoutResponse(data: [String: Any])
-    func handleFailedResponse(data: [String: Any])
+    // return true if some attempts to recover are implemented
+    func handle(result: Result<Int, Error>) -> Bool
+    func handleSuccessResponse(code: Int) -> Bool
+    func handleBadRequestResponse(data: [String: Any]) -> Bool
+    func handlePayloadTooLargeResponse(data: [String: Any]) -> Bool
+    func handleTooManyRequestsResponse(data: [String: Any]) -> Bool
+    func handleTimeoutResponse(data: [String: Any]) -> Bool
+    func handleFailedResponse(data: [String: Any]) -> Bool
 }
 
 extension ResponseHandler {

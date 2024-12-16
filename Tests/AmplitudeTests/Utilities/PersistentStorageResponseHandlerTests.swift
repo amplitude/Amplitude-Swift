@@ -119,7 +119,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             eventsString: eventsString
         )
 
-        handler.handleSuccessResponse(code: 200)
+        _ = handler.handleSuccessResponse(code: 200)
         XCTAssertEqual(
             fakePersistentStorage.haveBeenCalledWith[0],
             "remove(eventBlock: \(eventBlock.absoluteURL))"
@@ -150,7 +150,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             eventsString: eventsString
         )
 
-        handler.handleBadRequestResponse(data: ["error": "Invalid API key: \(configuration.apiKey)"])
+        _ = handler.handleBadRequestResponse(data: ["error": "Invalid API key: \(configuration.apiKey)"])
         XCTAssertEqual(
             fakePersistentStorage.haveBeenCalledWith[0],
             "remove(eventBlock: \(eventBlock.absoluteURL))"
