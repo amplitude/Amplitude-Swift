@@ -1,3 +1,11 @@
+## [1.11.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.1...v1.11.2) (2024-12-17)
+
+
+### Bug Fixes
+
+* add repeat interval on EventPipeline to prevent high frequency requests on continuing failing ([#250](https://github.com/amplitude/Amplitude-Swift/issues/250)) ([8af9acf](https://github.com/amplitude/Amplitude-Swift/commit/8af9acf3ccd666111f03040467d9891fc0c3b76a))
+* fix likely-to-fail test case ([#251](https://github.com/amplitude/Amplitude-Swift/issues/251)) ([94e5e11](https://github.com/amplitude/Amplitude-Swift/commit/94e5e11f722dcb5fe8e62f1104de5a2a33465e97))
+
 ## [1.11.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.0...v1.11.1) (2024-12-09)
 
 
