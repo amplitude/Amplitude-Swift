@@ -186,6 +186,20 @@ class FakeResponseHandler: ResponseHandler {
         self.eventsString = eventsString
     }
 
+    func handle(result: Result<Int, Error>) -> Bool {
+        switch result {
+        case .success(let code):
+            return handleSuccessResponse(code: code)
+        default:
+            return false
+        }
+    }
+
+    func handleSuccessResponse(code: Int) -> Bool {
+        storage.remove(eventBlock: eventBlock)
+        return true
+    }
+
     func handle(result: Result<Int, any Error>) {
         let _: Bool = handle(result: result)
     }
@@ -207,20 +221,6 @@ class FakeResponseHandler: ResponseHandler {
     }
 
     func handleFailedResponse(data: [String: Any]) {
-    }
-
-    func handle(result: Result<Int, Error>) -> Bool {
-        switch result {
-        case .success(let code):
-            return handleSuccessResponse(code: code)
-        default:
-            return false
-        }
-    }
-
-    func handleSuccessResponse(code: Int) -> Bool {
-        storage.remove(eventBlock: eventBlock)
-        return true
     }
 }
 

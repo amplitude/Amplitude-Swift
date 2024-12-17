@@ -149,7 +149,7 @@ extension Plugin {
     func onOptOutChanged(_ optOut: Bool) {}
 }
 
-public protocol ResponseHandler: ResponseHandlerV2 {
+public protocol ResponseHandler {
     func handle(result: Result<Int, Error>)
     func handleSuccessResponse(code: Int)
     func handleBadRequestResponse(data: [String: Any])
@@ -157,17 +157,11 @@ public protocol ResponseHandler: ResponseHandlerV2 {
     func handleTooManyRequestsResponse(data: [String: Any])
     func handleTimeoutResponse(data: [String: Any])
     func handleFailedResponse(data: [String: Any])
-}
 
-public protocol ResponseHandlerV2 {
-    // return true if some attempts to recover are implemented
+    // Added on v1.11.2.
+    // A replacement for handle(result: Result<Int, Error>) -> Void
+    // Return true if some attempts to recover are implemented
     func handle(result: Result<Int, Error>) -> Bool
-    func handleSuccessResponse(code: Int) -> Bool
-    func handleBadRequestResponse(data: [String: Any]) -> Bool
-    func handlePayloadTooLargeResponse(data: [String: Any]) -> Bool
-    func handleTooManyRequestsResponse(data: [String: Any]) -> Bool
-    func handleTimeoutResponse(data: [String: Any]) -> Bool
-    func handleFailedResponse(data: [String: Any]) -> Bool
 }
 
 extension ResponseHandler {
@@ -182,39 +176,10 @@ extension ResponseHandler {
     }
 }
 
+// Provide compatibility for new `handle` function added on v1.11.2.
 extension ResponseHandler {
     public func handle(result: Result<Int, any Error>) -> Bool {
-        handle(result: result)
-        return false
-    }
-
-    public func handleSuccessResponse(code: Int) -> Bool {
-        handleSuccessResponse(code: code)
-        return false
-    }
-
-    public func handleBadRequestResponse(data: [String: Any]) -> Bool {
-        handleBadRequestResponse(data: data)
-        return false
-    }
-
-    public func handlePayloadTooLargeResponse(data: [String: Any]) -> Bool {
-        handlePayloadTooLargeResponse(data: data)
-        return false
-    }
-
-    public func handleTooManyRequestsResponse(data: [String: Any]) -> Bool {
-        handleTooManyRequestsResponse(data: data)
-        return false
-    }
-
-    public func handleTimeoutResponse(data: [String: Any]) -> Bool {
-        handleTimeoutResponse(data: data)
-        return false
-    }
-
-    public func handleFailedResponse(data: [String: Any]) -> Bool {
-        handleFailedResponse(data: data)
+        let _: Void = handle(result: result)
         return false
     }
 }
