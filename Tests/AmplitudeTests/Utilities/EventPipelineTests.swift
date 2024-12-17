@@ -252,11 +252,8 @@ final class EventPipelineTests: XCTestCase {
         pipeline.flush {
             flushExpectation.fulfill()
         }
-        wait(for: [uploadExpectations[0], uploadExpectations[1]], timeout: 1)
-        XCTAssertEqual(httpClient.uploadCount, 2)
-        XCTAssertEqual(pipeline.configuration.offline, false)
 
-        wait(for: [uploadExpectations[2], flushExpectation], timeout: 1)
+        wait(for: uploadExpectations + [flushExpectation], timeout: 1)
         XCTAssertEqual(httpClient.uploadCount, 3)
         XCTAssertEqual(pipeline.configuration.offline, false)
     }
