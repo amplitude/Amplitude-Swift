@@ -149,7 +149,17 @@ extension Plugin {
     func onOptOutChanged(_ optOut: Bool) {}
 }
 
-public protocol ResponseHandler {
+public protocol ResponseHandler: ResponseHandlerV2 {
+    func handle(result: Result<Int, Error>)
+    func handleSuccessResponse(code: Int)
+    func handleBadRequestResponse(data: [String: Any])
+    func handlePayloadTooLargeResponse(data: [String: Any])
+    func handleTooManyRequestsResponse(data: [String: Any])
+    func handleTimeoutResponse(data: [String: Any])
+    func handleFailedResponse(data: [String: Any])
+}
+
+public protocol ResponseHandlerV2 {
     // return true if some attempts to recover are implemented
     func handle(result: Result<Int, Error>) -> Bool
     func handleSuccessResponse(code: Int) -> Bool
@@ -169,5 +179,42 @@ extension ResponseHandler {
             }
         }
         return indices
+    }
+}
+
+extension ResponseHandler {
+    public func handle(result: Result<Int, any Error>) -> Bool {
+        handle(result: result)
+        return false
+    }
+
+    public func handleSuccessResponse(code: Int) -> Bool {
+        handleSuccessResponse(code: code)
+        return false
+    }
+
+    public func handleBadRequestResponse(data: [String: Any]) -> Bool {
+        handleBadRequestResponse(data: data)
+        return false
+    }
+
+    public func handlePayloadTooLargeResponse(data: [String: Any]) -> Bool {
+        handlePayloadTooLargeResponse(data: data)
+        return false
+    }
+
+    public func handleTooManyRequestsResponse(data: [String: Any]) -> Bool {
+        handleTooManyRequestsResponse(data: data)
+        return false
+    }
+
+    public func handleTimeoutResponse(data: [String: Any]) -> Bool {
+        handleTimeoutResponse(data: data)
+        return false
+    }
+
+    public func handleFailedResponse(data: [String: Any]) -> Bool {
+        handleFailedResponse(data: data)
+        return false
     }
 }

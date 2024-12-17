@@ -21,7 +21,6 @@ public class EventPipeline {
 
     private var flushCompletions: [() -> Void] = []
     private var currentUpload: URLSessionTask?
-    private(set) var continuousFailure: Int = 0
 
     init(amplitude: Amplitude) {
         storage = amplitude.storage
@@ -69,7 +68,7 @@ public class EventPipeline {
         }
     }
 
-    private func sendNextEventFile() {
+    private func sendNextEventFile(failures: Int = 0) {
         autoreleasepool {
             guard currentUpload == nil else {
                 logger?.log(message: "Existing upload in progress, skipping...")
@@ -103,18 +102,19 @@ public class EventPipeline {
                     eventBlock: nextEventFile,
                     eventsString: eventsString
                 )
-                let handled = responseHandler.handle(result: result)
+                let handled: Bool = responseHandler.handle(result: result)
+                var failures = failures
 
                 switch result {
                 case .success:
-                    self.continuousFailure = 0
+                    failures = 0
                 case .failure:
                     if !handled {
-                        self.continuousFailure += 1
+                        failures += 1
                     }
                 }
 
-                if self.continuousFailure > self.maxRetryCount {
+                if failures > self.maxRetryCount {
                     self.uploadsQueue.async {
                         self.currentUpload = nil
                     }
@@ -127,15 +127,15 @@ public class EventPipeline {
                             return
                         }
                         self.currentUpload = nil
-                        self.sendNextEventFile()
+                        self.sendNextEventFile(failures: failures)
                     }
 
-                    if self.continuousFailure == 0 || handled {
+                    if failures == 0 || handled {
                         self.uploadsQueue.async(execute: nextFileBlock)
                     } else {
-                        let sendingInterval = min(self.maxRetryInterval, pow(2, Double(self.continuousFailure - 1)))
+                        let sendingInterval = min(self.maxRetryInterval, pow(2, Double(failures - 1)))
                         self.uploadsQueue.asyncAfter(deadline: .now() + sendingInterval, execute: nextFileBlock)
-                        self.logger?.debug(message: "Request failed \(self.continuousFailure) times, send next event file in \(sendingInterval) seconds")
+                        self.logger?.debug(message: "Request failed \(failures) times, send next event file in \(sendingInterval) seconds")
                     }
                 }
             }

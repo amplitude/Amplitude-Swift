@@ -102,39 +102,32 @@ class TestStorage: Storage {
     ) -> ResponseHandler {
         class TestResponseHandler: ResponseHandler {
 
-            func handle(result: Result<Int, Error>) -> Bool {
+            func handle(result: Result<Int, Error>) {
                 // no-op
-                return false
             }
 
-            func handleSuccessResponse(code: Int) -> Bool {
+            func handleSuccessResponse(code: Int) {
                 // no-op
-                return false
             }
 
-            func handleBadRequestResponse(data: [String: Any]) -> Bool {
+            func handleBadRequestResponse(data: [String: Any]) {
                 // no-op
-                return false
             }
 
-            func handlePayloadTooLargeResponse(data: [String: Any]) -> Bool {
+            func handlePayloadTooLargeResponse(data: [String: Any]) {
                 // no-op
-                return false
             }
 
-            func handleTooManyRequestsResponse(data: [String: Any]) -> Bool {
+            func handleTooManyRequestsResponse(data: [String: Any]) {
                 // no-op
-                return false
             }
 
-            func handleTimeoutResponse(data: [String: Any]) -> Bool {
+            func handleTimeoutResponse(data: [String: Any]) {
                 // no-op
-                return false
             }
 
-            func handleFailedResponse(data: [String: Any]) -> Bool {
+            func handleFailedResponse(data: [String: Any]) {
                 // no-op
-                return false
             }
         }
         return TestResponseHandler()

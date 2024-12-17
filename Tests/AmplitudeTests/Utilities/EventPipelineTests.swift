@@ -206,13 +206,11 @@ final class EventPipelineTests: XCTestCase {
         wait(for: [uploadExpectations[0], uploadExpectations[1]], timeout: 2)
 
         XCTAssertEqual(httpClient.uploadCount, 2)
-        XCTAssertEqual(pipeline.continuousFailure, 2)
         XCTAssertEqual(pipeline.configuration.offline, false)
 
         wait(for: [uploadExpectations[2]], timeout: 3)
 
         XCTAssertEqual(httpClient.uploadCount, 3)
-        XCTAssertEqual(pipeline.continuousFailure, 3)
         XCTAssertEqual(pipeline.configuration.offline, true)
 
         pipeline.configuration.offline = false
@@ -223,7 +221,6 @@ final class EventPipelineTests: XCTestCase {
         wait(for: [uploadExpectations[3], flushExpectation], timeout: 1)
 
         XCTAssertEqual(httpClient.uploadCount, 4)
-        XCTAssertEqual(pipeline.continuousFailure, 0)
     }
 
     func testContinuesHandledFailure() {
@@ -257,10 +254,10 @@ final class EventPipelineTests: XCTestCase {
         }
         wait(for: [uploadExpectations[0], uploadExpectations[1]], timeout: 1)
         XCTAssertEqual(httpClient.uploadCount, 2)
-        XCTAssertEqual(pipeline.continuousFailure, 0)
+        XCTAssertEqual(pipeline.configuration.offline, false)
 
         wait(for: [uploadExpectations[2], flushExpectation], timeout: 1)
         XCTAssertEqual(httpClient.uploadCount, 3)
-        XCTAssertEqual(pipeline.continuousFailure, 0)
+        XCTAssertEqual(pipeline.configuration.offline, false)
     }
 }

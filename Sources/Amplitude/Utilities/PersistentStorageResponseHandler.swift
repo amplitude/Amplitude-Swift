@@ -190,3 +190,33 @@ extension PersistentStorageResponseHandler {
         }
     }
 }
+
+extension PersistentStorageResponseHandler {
+    func handle(result: Result<Int, any Error>) {
+        let _: Bool = handle(result: result)
+    }
+
+    func handleSuccessResponse(code: Int) {
+        let _: Bool = handleSuccessResponse(code: code)
+    }
+
+    func handleBadRequestResponse(data: [String: Any]) {
+        let _: Bool = handleBadRequestResponse(data: data)
+    }
+
+    func handlePayloadTooLargeResponse(data: [String: Any]) {
+        let _: Bool = handlePayloadTooLargeResponse(data: data)
+    }
+
+    func handleTooManyRequestsResponse(data: [String: Any]) {
+        let _: Bool = handleTooManyRequestsResponse(data: data)
+    }
+
+    func handleTimeoutResponse(data: [String: Any]) {
+        let _: Bool = handleTimeoutResponse(data: data)
+    }
+
+    func handleFailedResponse(data: [String: Any]) {
+        let _: Bool = handleFailedResponse(data: data)
+    }
+}

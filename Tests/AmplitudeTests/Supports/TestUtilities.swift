@@ -186,6 +186,29 @@ class FakeResponseHandler: ResponseHandler {
         self.eventsString = eventsString
     }
 
+    func handle(result: Result<Int, any Error>) {
+        let _: Bool = handle(result: result)
+    }
+
+    func handleSuccessResponse(code: Int) {
+        let _: Bool = handleSuccessResponse(code: code)
+    }
+
+    func handleBadRequestResponse(data: [String: Any]) {
+    }
+
+    func handlePayloadTooLargeResponse(data: [String: Any]) {
+    }
+
+    func handleTooManyRequestsResponse(data: [String: Any]) {
+    }
+
+    func handleTimeoutResponse(data: [String: Any]) {
+    }
+
+    func handleFailedResponse(data: [String: Any]) {
+    }
+
     func handle(result: Result<Int, Error>) -> Bool {
         switch result {
         case .success(let code):
@@ -198,26 +221,6 @@ class FakeResponseHandler: ResponseHandler {
     func handleSuccessResponse(code: Int) -> Bool {
         storage.remove(eventBlock: eventBlock)
         return true
-    }
-
-    func handleBadRequestResponse(data: [String: Any]) -> Bool {
-        return true
-    }
-
-    func handlePayloadTooLargeResponse(data: [String: Any]) -> Bool {
-        return true
-    }
-
-    func handleTooManyRequestsResponse(data: [String: Any]) -> Bool {
-        return false
-    }
-
-    func handleTimeoutResponse(data: [String: Any]) -> Bool {
-        return false
-    }
-
-    func handleFailedResponse(data: [String: Any]) -> Bool {
-        return false
     }
 }
 
