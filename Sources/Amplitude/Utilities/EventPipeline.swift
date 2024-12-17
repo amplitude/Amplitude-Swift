@@ -12,6 +12,8 @@ public class EventPipeline {
     let storage: Storage?
     let logger: (any Logger)?
     let configuration: Configuration
+    var maxRetryInterval: TimeInterval = 60
+    var maxRetryCount: Int = 6
 
     @Atomic internal var eventCount: Int = 0
     internal var flushTimer: QueueTimer?
@@ -66,7 +68,7 @@ public class EventPipeline {
         }
     }
 
-    private func sendNextEventFile() {
+    private func sendNextEventFile(failures: Int = 0) {
         autoreleasepool {
             guard currentUpload == nil else {
                 logger?.log(message: "Existing upload in progress, skipping...")
@@ -100,14 +102,41 @@ public class EventPipeline {
                     eventBlock: nextEventFile,
                     eventsString: eventsString
                 )
-                responseHandler.handle(result: result)
-                // Don't send the next event file if we're being deallocated
-                self.uploadsQueue.async { [weak self] in
-                    guard let self = self else {
-                        return
+                let handled: Bool = responseHandler.handle(result: result)
+                var failures = failures
+
+                switch result {
+                case .success:
+                    failures = 0
+                case .failure:
+                    if !handled {
+                        failures += 1
                     }
-                    self.currentUpload = nil
-                    self.sendNextEventFile()
+                }
+
+                if failures > self.maxRetryCount {
+                    self.uploadsQueue.async {
+                        self.currentUpload = nil
+                    }
+                    self.configuration.offline = true
+                    self.logger?.log(message: "Request failed more than \(self.maxRetryCount) times, marking offline")
+                } else {
+                    // Don't send the next event file if we're being deallocated
+                    let nextFileBlock: () -> Void = { [weak self] in
+                        guard let self = self else {
+                            return
+                        }
+                        self.currentUpload = nil
+                        self.sendNextEventFile(failures: failures)
+                    }
+
+                    if failures == 0 || handled {
+                        self.uploadsQueue.async(execute: nextFileBlock)
+                    } else {
+                        let sendingInterval = min(self.maxRetryInterval, pow(2, Double(failures - 1)))
+                        self.uploadsQueue.asyncAfter(deadline: .now() + sendingInterval, execute: nextFileBlock)
+                        self.logger?.debug(message: "Request failed \(failures) times, send next event file in \(sendingInterval) seconds")
+                    }
                 }
             }
         }

@@ -157,6 +157,11 @@ public protocol ResponseHandler {
     func handleTooManyRequestsResponse(data: [String: Any])
     func handleTimeoutResponse(data: [String: Any])
     func handleFailedResponse(data: [String: Any])
+
+    // Added on v1.11.2.
+    // A replacement for handle(result: Result<Int, Error>) -> Void
+    // Return true if some attempts to recover are implemented
+    func handle(result: Result<Int, Error>) -> Bool
 }
 
 extension ResponseHandler {
@@ -168,5 +173,13 @@ extension ResponseHandler {
             }
         }
         return indices
+    }
+}
+
+// Provide compatibility for new `handle` function added on v1.11.2.
+extension ResponseHandler {
+    public func handle(result: Result<Int, any Error>) -> Bool {
+        let _: Void = handle(result: result)
+        return false
     }
 }

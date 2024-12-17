@@ -186,17 +186,26 @@ class FakeResponseHandler: ResponseHandler {
         self.eventsString = eventsString
     }
 
-    func handle(result: Result<Int, Error>) {
+    func handle(result: Result<Int, Error>) -> Bool {
         switch result {
         case .success(let code):
-            handleSuccessResponse(code: code)
+            return handleSuccessResponse(code: code)
         default:
-            break
+            return false
         }
     }
 
-    func handleSuccessResponse(code: Int) {
+    func handleSuccessResponse(code: Int) -> Bool {
         storage.remove(eventBlock: eventBlock)
+        return true
+    }
+
+    func handle(result: Result<Int, any Error>) {
+        let _: Bool = handle(result: result)
+    }
+
+    func handleSuccessResponse(code: Int) {
+        let _: Bool = handleSuccessResponse(code: code)
     }
 
     func handleBadRequestResponse(data: [String: Any]) {
