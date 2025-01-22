@@ -19,13 +19,28 @@ public class Amplitude {
         return self.configuration.identifyStorageProvider
     }()
 
-    lazy var timeline: Timeline = {
-        return Timeline()
-    }()
+    private let timelineLock = NSLock()
+    private var _timeline: Timeline?
+    var timeline: Timeline {
+        timelineLock.synchronizedLazy(&_timeline) {
+            Timeline()
+        }
+    }
 
-    lazy var sessions: Sessions = {
-        return Sessions(amplitude: self)
-    }()
+    private var sessionsLock = NSLock()
+    private var _sessions: Sessions?
+    var sessions: Sessions {
+        get {
+            sessionsLock.synchronizedLazy(&_sessions) {
+                Sessions(amplitude: self)
+            }
+        }
+        set {
+            sessionsLock.withLock {
+                _sessions = newValue
+            }
+        }
+    }
 
     public lazy var logger: (any Logger)? = {
         return self.configuration.loggerProvider

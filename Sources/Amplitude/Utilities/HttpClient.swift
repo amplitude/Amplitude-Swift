@@ -121,13 +121,10 @@ class HttpClient {
                 ,"options":{"min_id_length":\(minIdLength)}
                 """
         }
-        if diagnostics.hasDiagnostics() {
-            let diagnosticsInfo = diagnostics.extractDiagonosticsToString()
-            if !diagnosticsInfo.isEmpty {
-                requestPayload += """
+        if let diagnosticsInfo = diagnostics.extractDiagnosticsToString(), !diagnosticsInfo.isEmpty {
+            requestPayload += """
                 ,"request_metadata":{"sdk":\(diagnosticsInfo)}
                 """
-            }
         }
         requestPayload += "}"
         return requestPayload.data(using: .utf8)

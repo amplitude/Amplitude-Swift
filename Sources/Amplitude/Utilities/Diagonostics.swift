@@ -8,22 +8,24 @@
 import Foundation
 
 public class Diagnostics {
-
     private static let MAX_ERROR_LOGS = 10
 
-    private var malformedEvents: [String]?
+    private var malformedEvents: [String] = []
     private var errorLogs = NSMutableOrderedSet(capacity: 10)
 
-    init(){}
+    private let lock = NSLock()
 
     func addMalformedEvent(_ event: String) {
-        if malformedEvents == nil {
-            malformedEvents = [String]()
-        }
-        malformedEvents?.append(event)
+        lock.lock()
+        defer { lock.unlock() }
+
+        malformedEvents.append(event)
     }
 
     func addErrorLog(_ log: String) {
+        lock.lock()
+        defer { lock.unlock() }
+
         errorLogs.add(log)
 
         // trim to MAX_ERROR_LOGS elements
@@ -32,33 +34,31 @@ public class Diagnostics {
         }
     }
 
-    func hasDiagnostics() -> Bool {
-        return (malformedEvents != nil && malformedEvents!.count > 0) || errorLogs.count > 0
-    }
-
     /**
      * Extracts the diagnostics as a JSON string.
      * Warning: This will clear stored diagnostics.
      * @return JSON string of diagnostics or empty if no diagnostics are present.
      */
-     func extractDiagonosticsToString() -> String {
-        if !hasDiagnostics() {
-            return ""
-        }
+    func extractDiagnosticsToString() -> String? {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard !malformedEvents.isEmpty || errorLogs.count > 0 else { return nil }
+
         var diagnostics = [String: [String]]()
-        if malformedEvents != nil && malformedEvents!.count > 0 {
+        if !malformedEvents.isEmpty {
             diagnostics["malformed_events"] = malformedEvents
         }
-         if errorLogs.count > 0, let errorStrings = errorLogs.array as? [String] {
-             diagnostics["error_logs"] = errorStrings
+        if errorLogs.count > 0, let errorStrings = errorLogs.array as? [String] {
+            diagnostics["error_logs"] = errorStrings
         }
         do {
             let data = try JSONSerialization.data(withJSONObject: diagnostics, options: [])
-            malformedEvents?.removeAll()
+            malformedEvents.removeAll()
             errorLogs.removeAllObjects()
-            return String(data: data, encoding: .utf8) ?? ""
+            return String(data: data, encoding: .utf8)
         } catch {
-            return ""
+            return nil
         }
-     }
+    }
 }
