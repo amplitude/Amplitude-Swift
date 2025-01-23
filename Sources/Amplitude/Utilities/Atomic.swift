@@ -33,3 +33,16 @@ public struct Atomic<T> {
         value = newValue
     }
 }
+
+extension NSLock {
+    func synchronizedLazy<T>(_ storage: inout T?, initializer: () -> T) -> T {
+        lock()
+        defer { unlock() }
+        if let existing = storage {
+            return existing
+        }
+        let newValue = initializer()
+        storage = newValue
+        return newValue
+    }
+}

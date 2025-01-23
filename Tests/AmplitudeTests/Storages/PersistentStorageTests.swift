@@ -183,8 +183,7 @@ final class PersistentStorageTests: XCTestCase {
         let data = try? JSONSerialization.data(withJSONObject: malformedArr, options: [])
         let expectedPartial = String(data: data!, encoding: .utf8) ?? ""
         XCTAssertEqual(decodedEvents!.count, 1)
-        XCTAssertTrue(self.diagonostics.hasDiagnostics() == true)
-        XCTAssertEqual(self.diagonostics.extractDiagonosticsToString(), "{\"malformed_events\":\(expectedPartial)}")
+        XCTAssertEqual(self.diagonostics.extractDiagnosticsToString(), "{\"malformed_events\":\(expectedPartial)}")
         persistentStorage.reset()
    }
 

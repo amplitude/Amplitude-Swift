@@ -14,41 +14,40 @@ final class DiagnosticsTests: XCTestCase {
     func testAddMalformedEvent() {
         let diagnostics = Diagnostics()
         diagnostics.addMalformedEvent("event")
-        XCTAssertTrue(diagnostics.hasDiagnostics())
-        XCTAssertEqual(diagnostics.extractDiagonosticsToString(), "{\"malformed_events\":[\"event\"]}")
+        XCTAssertEqual(diagnostics.extractDiagnosticsToString(), "{\"malformed_events\":[\"event\"]}")
     }
 
     func testAddErrorLog() {
         let diagnostics = Diagnostics()
         diagnostics.addErrorLog("log")
-        XCTAssertTrue(diagnostics.hasDiagnostics())
-        XCTAssertEqual(diagnostics.extractDiagonosticsToString(), "{\"error_logs\":[\"log\"]}")
+        XCTAssertEqual(diagnostics.extractDiagnosticsToString(), "{\"error_logs\":[\"log\"]}")
     }
 
     func testHasDiagonostics() {
         let diagnostics = Diagnostics()
-        XCTAssertFalse(diagnostics.hasDiagnostics())
+        XCTAssertNil(diagnostics.extractDiagnosticsToString())
         diagnostics.addMalformedEvent("event")
-        XCTAssertTrue(diagnostics.hasDiagnostics())
+        XCTAssertNotNil(diagnostics.extractDiagnosticsToString())
         diagnostics.addErrorLog("log")
-        XCTAssertTrue(diagnostics.hasDiagnostics())
+        XCTAssertNotNil(diagnostics.extractDiagnosticsToString())
     }
 
     func testExtractDiagnostic() {
         let diagnostics = Diagnostics()
-        XCTAssertEqual(diagnostics.extractDiagonosticsToString(), "")
+        XCTAssertNil(diagnostics.extractDiagnosticsToString())
         diagnostics.addMalformedEvent("event")
         diagnostics.addErrorLog("log")
-        let result = convertToDictionary(text: diagnostics.extractDiagonosticsToString())
+        let result = convertToDictionary(text: diagnostics.extractDiagnosticsToString()!)
         XCTAssertEqual((result?["malformed_events"] as? [String]) ?? [], ["event"])
         XCTAssertEqual((result?["error_logs"] as? [String]) ?? [], ["log"])
+        XCTAssertNil(diagnostics.extractDiagnosticsToString())
     }
 
     func testDedupsErrorLogs() {
         let diagnostics = Diagnostics()
         diagnostics.addErrorLog("dup")
         diagnostics.addErrorLog("dup")
-        let result = convertToDictionary(text: diagnostics.extractDiagonosticsToString())
+        let result = convertToDictionary(text: diagnostics.extractDiagnosticsToString()!)
         XCTAssertEqual(result?["error_logs"] as? [String], ["dup"])
     }
 
@@ -58,7 +57,7 @@ final class DiagnosticsTests: XCTestCase {
         (0..<maxErrorLogs + 1).forEach {
             diagnostics.addErrorLog("\($0)")
         }
-        let result = convertToDictionary(text: diagnostics.extractDiagonosticsToString())
+        let result = convertToDictionary(text: diagnostics.extractDiagnosticsToString()!)
         guard let errorLogs = result?["error_logs"] as? [String] else {
             XCTFail("Unable to extract error logs")
             return

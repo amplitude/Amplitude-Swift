@@ -10,6 +10,7 @@ public class Amplitude {
 
     var state: State = State()
     var contextPlugin: ContextPlugin
+    let timeline = Timeline()
 
     lazy var storage: any Storage = {
         return self.configuration.storageProvider
@@ -19,13 +20,20 @@ public class Amplitude {
         return self.configuration.identifyStorageProvider
     }()
 
-    lazy var timeline: Timeline = {
-        return Timeline()
-    }()
-
-    lazy var sessions: Sessions = {
-        return Sessions(amplitude: self)
-    }()
+    private var sessionsLock = NSLock()
+    private var _sessions: Sessions?
+    var sessions: Sessions {
+        get {
+            sessionsLock.synchronizedLazy(&_sessions) {
+                Sessions(amplitude: self)
+            }
+        }
+        set {
+            sessionsLock.withLock {
+                _sessions = newValue
+            }
+        }
+    }
 
     public lazy var logger: (any Logger)? = {
         return self.configuration.loggerProvider
