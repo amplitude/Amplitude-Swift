@@ -1,3 +1,10 @@
+## [1.11.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.2...v1.11.3) (2025-01-23)
+
+
+### Bug Fixes
+
+* enhance thread safety of properties ([#257](https://github.com/amplitude/Amplitude-Swift/issues/257)) ([8ffcc65](https://github.com/amplitude/Amplitude-Swift/commit/8ffcc657efb02f42dd7a3f8603c6e0f3511247a0))
+
 ## [1.11.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.1...v1.11.2) (2024-12-17)
 
 
