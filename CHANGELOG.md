@@ -1,3 +1,10 @@
+## [1.11.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.3...v1.11.4) (2025-01-31)
+
+
+### Bug Fixes
+
+* offline directly after receive bad url error ([#258](https://github.com/amplitude/Amplitude-Swift/issues/258)) ([fb00966](https://github.com/amplitude/Amplitude-Swift/commit/fb009665b3408df35a6e47a2e5833b91353d21ea))
+
 ## [1.11.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.2...v1.11.3) (2025-01-23)
 
 
