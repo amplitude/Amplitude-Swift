@@ -119,7 +119,7 @@ public class EventPipeline {
                         self.currentUpload = nil
                     }
                     self.configuration.offline = true
-                    self.logger?.log(message: "Request failed more than \(self.maxRetryCount) times, marking offline")
+                    self.logger?.error(message: "Request failed more than \(self.maxRetryCount) times, marking offline")
                 } else {
                     // Don't send the next event file if we're being deallocated
                     let nextFileBlock: () -> Void = { [weak self] in
@@ -135,7 +135,7 @@ public class EventPipeline {
                     } else {
                         let sendingInterval = min(self.maxRetryInterval, pow(2, Double(failures - 1)))
                         self.uploadsQueue.asyncAfter(deadline: .now() + sendingInterval, execute: nextFileBlock)
-                        self.logger?.debug(message: "Request failed \(failures) times, send next event file in \(sendingInterval) seconds")
+                        self.logger?.error(message: "Request failed \(failures) times, send next event file in \(sendingInterval) seconds")
                     }
                 }
             }
