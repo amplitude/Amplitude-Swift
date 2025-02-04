@@ -1,3 +1,10 @@
+## [1.11.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.4...v1.11.5) (2025-02-04)
+
+
+### Bug Fixes
+
+* improve multi-thread safety to prevent crash ([#259](https://github.com/amplitude/Amplitude-Swift/issues/259)) ([25bde46](https://github.com/amplitude/Amplitude-Swift/commit/25bde46429910d2969494a116f03edf4c706f4f9))
+
 ## [1.11.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.3...v1.11.4) (2025-01-31)
 
 
