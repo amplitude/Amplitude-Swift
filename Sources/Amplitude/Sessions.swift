@@ -7,9 +7,15 @@ public class Sessions {
     private let timeline: Timeline
     private var _sessionId: Int64 = -1
     private(set) var sessionId: Int64 {
-        get { _sessionId }
+        get {
+            sessionIdLock.withLock {
+                _sessionId
+            }
+        }
         set {
-            _sessionId = newValue
+            sessionIdLock.withLock {
+                _sessionId = newValue
+            }
             do {
                 try storage.write(key: StorageKey.PREVIOUS_SESSION_ID, value: _sessionId)
             } catch {
@@ -18,6 +24,7 @@ public class Sessions {
             timeline.onSessionIdChanged(_sessionId)
         }
     }
+    private let sessionIdLock = NSLock()
 
     private var _lastEventId: Int64 = 0
     private(set) var lastEventId: Int64 {

@@ -5,15 +5,24 @@
 //  Created by Hao Yu on 11/9/22.
 //
 
+import Foundation
+
 internal class Mediator {
     // create an array with certain type.
     internal var plugins = [Plugin]()
+    private let lock = NSLock()
 
     internal func add(plugin: Plugin) {
+        lock.lock()
+        defer { lock.unlock() }
+
         plugins.append(plugin)
     }
 
     internal func remove(plugin: Plugin) {
+        lock.lock()
+        defer { lock.unlock() }
+
         plugins.removeAll { (storedPlugin) -> Bool in
             if storedPlugin === plugin {
                 storedPlugin.teardown()
@@ -24,6 +33,9 @@ internal class Mediator {
     }
 
     internal func execute(event: BaseEvent?) -> BaseEvent? {
+        lock.lock()
+        defer { lock.unlock() }
+
         var result: BaseEvent? = event
         plugins.forEach { plugin in
             if let r = result {
@@ -50,6 +62,9 @@ internal class Mediator {
     }
 
     internal func applyClosure(_ closure: (Plugin) -> Void) {
+        lock.lock()
+        defer { lock.unlock() }
+
         plugins.forEach { plugin in
             closure(plugin)
         }
