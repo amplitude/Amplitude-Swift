@@ -54,6 +54,7 @@ open class BaseEvent: EventOptions, Codable {
         case quantity
         case productId = "product_id"
         case revenueType = "revenue_type"
+        case currency = "currency"
         case partnerId = "partner_id"
     }
 
@@ -92,6 +93,7 @@ open class BaseEvent: EventOptions, Codable {
         quantity: Int? = nil,
         productId: String? = nil,
         revenueType: String? = nil,
+        currency: String? = nil,
         extra: [String: Any]? = nil,
         callback: EventCallback? = nil,
         partnerId: String? = nil,
@@ -141,6 +143,7 @@ open class BaseEvent: EventOptions, Codable {
             quantity: quantity,
             productId: productId,
             revenueType: revenueType,
+            currency: currency,
             extra: extra,
             callback: callback,
             partnerId: partnerId
@@ -193,6 +196,7 @@ open class BaseEvent: EventOptions, Codable {
         quantity = try values.decodeIfPresent(Int.self, forKey: .quantity)
         productId = try values.decodeIfPresent(String.self, forKey: .productId)
         revenueType = try values.decodeIfPresent(String.self, forKey: .revenueType)
+        currency = try values.decodeIfPresent(String.self, forKey: .currency)
         partnerId = try values.decodeIfPresent(String.self, forKey: .partnerId)
     }
 
@@ -237,6 +241,7 @@ open class BaseEvent: EventOptions, Codable {
         try container.encode(quantity, forKey: .quantity)
         try container.encode(productId, forKey: .productId)
         try container.encode(revenueType, forKey: .revenueType)
+        try container.encode(currency, forKey: .currency)
         try container.encode(partnerId, forKey: .partnerId)
     }
 }

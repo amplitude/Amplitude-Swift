@@ -83,6 +83,7 @@ struct ContentView: View {
                             revenue.price = price
                             revenue.quantity = quantity
                             revenue.productId = productId
+                            revenue.currency = "CAD"
                             Amplitude.testInstance.revenue(revenue: revenue)
                         }) {
                             Text("Send Revenue Event")

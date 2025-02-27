@@ -6,6 +6,18 @@ import CoreLocation
 /// This plugin example currently supports iOS 14+ only.
 /// Don't forget to add "NSLocationWhenInUseUsageDescription" with a description to your Info.plist.
 class LocationPlugin: NSObject, Plugin, CLLocationManagerDelegate {
+    func onUserIdChanged(_ userId: String?) {
+    }
+    
+    func onDeviceIdChanged(_ deviceId: String?) {
+    }
+    
+    func onSessionIdChanged(_ sessionId: Int64) {
+    }
+    
+    func onOptOutChanged(_ optOut: Bool) {
+    }
+    
     let type = PluginType.enrichment
     weak var amplitude: Amplitude? = nil
     private var locationManager: CLLocationManager? = nil

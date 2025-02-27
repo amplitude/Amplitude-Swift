@@ -13,6 +13,7 @@ public class Revenue {
         case REVENUE_QUANTITY = "$quantity"
         case REVENUE_PRICE = "$price"
         case REVENUE_TYPE = "$revenueType"
+        case REVENUE_CURRENCY = "$currency"
         case REVENUE_RECEIPT = "$receipt"
         case REVENUE_RECEIPT_SIG = "$receiptSig"
         case REVENUE = "$revenue"
@@ -70,6 +71,8 @@ public class Revenue {
 
     public var revenueType: String?
 
+    public var currency: String?
+
     public var receipt: String?
 
     public var receiptSig: String?
@@ -99,6 +102,9 @@ public class Revenue {
         }
         if revenueType != nil {
             eventProperties[Property.REVENUE_TYPE.rawValue] = revenueType
+        }
+        if currency != nil {
+            eventProperties[Property.REVENUE_CURRENCY.rawValue] = currency
         }
         if receipt != nil {
             eventProperties[Property.REVENUE_RECEIPT.rawValue] = receipt
