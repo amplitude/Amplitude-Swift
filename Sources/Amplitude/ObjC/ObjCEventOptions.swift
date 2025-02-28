@@ -353,6 +353,16 @@ public class ObjCEventOptions: NSObject {
     }
 
     @objc
+    public var currency: String? {
+        get {
+            options.currency
+        }
+        set(value) {
+            options.currency = value
+        }
+    }
+
+    @objc
     public var extra: ObjCProperties {
         ObjCProperties(getter: { key in
             guard let extra = self.options.extra else { return nil }

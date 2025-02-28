@@ -91,6 +91,7 @@ final class RevenueTests: XCTestCase {
         revenue.quantity = 100
         revenue.price = 50.5
         revenue.revenueType = "test-type"
+        revenue.currency = "USD"
         revenue.receipt = "test-receipt"
         revenue.receiptSig = "test-receipt-sig"
         revenue.revenue = 5050
@@ -123,6 +124,10 @@ final class RevenueTests: XCTestCase {
         XCTAssertEqual(
             revenueEvent.eventProperties?[Revenue.Property.REVENUE.rawValue] as! Double,
             5050
+        )
+        XCTAssertEqual(
+            revenueEvent.eventProperties?[Revenue.Property.REVENUE_CURRENCY.rawValue] as! String,
+            "USD"
         )
     }
 }

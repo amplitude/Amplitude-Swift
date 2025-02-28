@@ -42,6 +42,7 @@ open class EventOptions {
     public var quantity: Int?
     public var productId: String?
     public var revenueType: String?
+    public var currency: String?
     public var extra: [String: Any]?
     public var callback: EventCallback?
     public var partnerId: String?
@@ -82,6 +83,7 @@ open class EventOptions {
         quantity: Int? = nil,
         productId: String? = nil,
         revenueType: String? = nil,
+        currency: String? = nil,
         extra: [String: Any]? = nil,
         callback: EventCallback? = nil,
         partnerId: String? = nil,
@@ -121,6 +123,7 @@ open class EventOptions {
         self.quantity = quantity
         self.productId = productId
         self.revenueType = revenueType
+        self.currency = currency
         self.extra = extra
         self.callback = callback
         self.partnerId = partnerId
@@ -162,6 +165,7 @@ open class EventOptions {
         quantity = eventOptions.quantity ?? quantity
         productId = eventOptions.productId ?? productId
         revenueType = eventOptions.revenueType ?? revenueType
+        currency = eventOptions.currency ?? currency
         extra = eventOptions.extra ?? extra
         callback = eventOptions.callback ?? callback
         partnerId = eventOptions.partnerId ?? partnerId

@@ -55,6 +55,16 @@ public class ObjCRevenue: NSObject {
     }
 
     @objc
+    public var currency: String? {
+        get {
+            instance.currency
+        }
+        set(value) {
+            instance.currency = value
+        }
+    }
+
+    @objc
     public var receipt: String? {
         get {
             instance.receipt
