@@ -53,7 +53,7 @@ public class ObjCRevenue: NSObject {
             instance.revenueType = value
         }
     }
-    
+
     @objc
     public var currency: String? {
         get {
