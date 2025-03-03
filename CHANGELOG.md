@@ -1,3 +1,11 @@
+## [1.11.6](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.5...v1.11.6) (2025-03-03)
+
+
+### Bug Fixes
+
+* add watchos support back to CocoaPods ([#263](https://github.com/amplitude/Amplitude-Swift/issues/263)) ([d9dd73e](https://github.com/amplitude/Amplitude-Swift/commit/d9dd73ef3b8c4f5384373015574b991794903eb7))
+* adding ability to send revenue currency ([#262](https://github.com/amplitude/Amplitude-Swift/issues/262)) ([c34a138](https://github.com/amplitude/Amplitude-Swift/commit/c34a1382f0a4b277b14ff40b57fe045da389ef48))
+
 ## [1.11.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.4...v1.11.5) (2025-02-04)
 
 
