@@ -23,11 +23,9 @@ Pod::Spec.new do |s|
   s.osx.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
   s.osx.resource_bundle    = { 'Amplitude': ['Sources/Amplitude/PrivacyInfo.xcprivacy'] }
 
-  # temporary disable watchos support due to: https://github.com/CocoaPods/CocoaPods/issues/11558
-  # unpaired watchos will cause failure, the fix of the above issue is merged but not released
-  # s.watchos.deployment_target  = '7.0'
-  # s.watchos.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
-  # s.watchos.resource_bundle    = { 'Amplitude': ['Sources/Amplitude/PrivacyInfo.xcprivacy'] }
+  s.watchos.deployment_target  = '7.0'
+  s.watchos.source_files       = 'Sources/Amplitude/**/*.{h,swift}'
+  s.watchos.resource_bundle    = { 'Amplitude': ['Sources/Amplitude/PrivacyInfo.xcprivacy'] }
 
   s.visionos.deployment_target = '1.0'
   s.visionos.source_files      = 'Sources/Amplitude/**/*.{h,swift}'
