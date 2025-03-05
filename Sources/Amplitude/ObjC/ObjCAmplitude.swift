@@ -147,10 +147,17 @@ public class ObjCAmplitude: NSObject {
 
     @objc(add:)
     @discardableResult
-    public func add(plugin: ObjCPlugin) -> ObjCAmplitude {
-        let wrapper = ObjCPluginWrapper(amplitude: self, wrapped: plugin)
-        plugins.append(wrapper)
-        amplitude.add(plugin: wrapper)
+    public func add(plugin: AnyObject) -> ObjCAmplitude {
+        switch plugin {
+        case let swiftPlugin as Plugin:
+            amplitude.add(plugin: swiftPlugin)
+        case let objcPlugin as ObjCPlugin:
+            let wrapper = ObjCPluginWrapper(amplitude: self, wrapped: objcPlugin)
+            plugins.append(wrapper)
+            amplitude.add(plugin: wrapper)
+        default:
+            fatalError("Attempted to add a plugin that is not an instance of Plugin or ObjCPlugin")
+        }
         return self
     }
 
