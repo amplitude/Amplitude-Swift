@@ -1,3 +1,10 @@
+## [1.11.7](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.6...v1.11.7) (2025-03-05)
+
+
+### Bug Fixes
+
+* allow adding Swift Plugins to ObjC Amplitude ([#264](https://github.com/amplitude/Amplitude-Swift/issues/264)) ([d916d93](https://github.com/amplitude/Amplitude-Swift/commit/d916d93d0e5edc9a02249072df58cea1e06eb8ae))
+
 ## [1.11.6](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.5...v1.11.6) (2025-03-03)
 
 
