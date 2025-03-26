@@ -84,6 +84,12 @@ class PersistentStorageResponseHandler: ResponseHandler {
             }
         }
 
+        // if nothing should be drop, drop all to prevent MITM
+        if eventsToDrop.isEmpty {
+            eventsToDrop = events
+            eventsToRetry.removeAll()
+        }
+
         triggerEventsCallback(events: eventsToDrop, code: HttpClient.HttpStatus.BAD_REQUEST.rawValue, message: error)
 
         eventsToRetry.forEach { event in
