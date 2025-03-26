@@ -1,3 +1,10 @@
+## [1.11.8](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.7...v1.11.8) (2025-03-26)
+
+
+### Bug Fixes
+
+* error handling for 400 request ([#266](https://github.com/amplitude/Amplitude-Swift/issues/266)) ([33fd10c](https://github.com/amplitude/Amplitude-Swift/commit/33fd10c832c7315710958b9f657dfd1383474fb3))
+
 ## [1.11.7](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.6...v1.11.7) (2025-03-05)
 
 
