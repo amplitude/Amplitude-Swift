@@ -7,13 +7,14 @@
 
 import Foundation
 
+/// Retry interval capped at 1 minutes
+private let MAX_RETRY_INTERVAL: Double = 60
+
 public class EventPipeline {
     var httpClient: HttpClient
     let storage: Storage?
     let logger: (any Logger)?
     let configuration: Configuration
-    var maxRetryInterval: TimeInterval = 60
-    var maxRetryCount: Int = 6
 
     @Atomic internal var eventCount: Int = 0
     internal var flushTimer: QueueTimer?
@@ -114,12 +115,12 @@ public class EventPipeline {
                     }
                 }
 
-                if failures > self.maxRetryCount {
+                if failures > self.configuration.flushMaxRetries {
                     self.uploadsQueue.async {
                         self.currentUpload = nil
                     }
                     self.configuration.offline = true
-                    self.logger?.error(message: "Request failed more than \(self.maxRetryCount) times, marking offline")
+                    self.logger?.error(message: "Request failed more than \(self.configuration.flushMaxRetries) times, marking offline")
                 } else {
                     // Don't send the next event file if we're being deallocated
                     let nextFileBlock: () -> Void = { [weak self] in
@@ -133,7 +134,7 @@ public class EventPipeline {
                     if failures == 0 || handled {
                         self.uploadsQueue.async(execute: nextFileBlock)
                     } else {
-                        let sendingInterval = min(self.maxRetryInterval, pow(2, Double(failures - 1)))
+                        let sendingInterval = min(MAX_RETRY_INTERVAL, pow(2, Double(failures - 1)))
                         self.uploadsQueue.asyncAfter(deadline: .now() + sendingInterval, execute: nextFileBlock)
                         self.logger?.error(message: "Request failed \(failures) times, send next event file in \(sendingInterval) seconds")
                     }

@@ -39,6 +39,7 @@ final class EventPipelineTests: XCTestCase {
 
     override func tearDown() {
         super.tearDown()
+        configuration.flushMaxRetries = Constants.Configuration.FLUSH_MAX_RETRIES
         storage.reset()
     }
 
@@ -187,7 +188,7 @@ final class EventPipelineTests: XCTestCase {
     // test continues to fail until the event is uploaded
     func testContinuousFailure() {
         pipeline.configuration.offline = false
-        pipeline.maxRetryCount = 2
+        pipeline.configuration.flushMaxRetries = 2
 
         let testEvent = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
         try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
@@ -225,7 +226,7 @@ final class EventPipelineTests: XCTestCase {
 
     func testContinuesHandledFailure() {
         pipeline.configuration.offline = false
-        pipeline.maxRetryCount = 1
+        pipeline.configuration.flushMaxRetries = 1
 
         let testEvent1 = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
         try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent1)
