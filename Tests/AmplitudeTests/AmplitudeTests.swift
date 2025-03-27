@@ -43,6 +43,11 @@ final class AmplitudeTests: XCTestCase {
         )
     }
 
+    override func tearDown() {
+        super.tearDown()
+        storage.reset()
+    }
+
     func testInit_defaultInstanceName() {
         let configuration = Configuration(apiKey: "api-key")
         XCTAssertEqual(

@@ -108,7 +108,7 @@ public struct Constants {
         public static let FLUSH_QUEUE_SIZE = 30
         public static let FLUSH_INTERVAL_MILLIS = 30 * 1000  // 30s
         public static let DEFAULT_INSTANCE = "$default_instance"
-        public static let FLUSH_MAX_RETRIES = 5
+        public static let FLUSH_MAX_RETRIES = 6
         public static let MIN_TIME_BETWEEN_SESSIONS_MILLIS = 300000
         public static let IDENTIFY_BATCH_INTERVAL_MILLIS = 30 * 1000  // 30s
     }

@@ -187,7 +187,7 @@ final class EventPipelineTests: XCTestCase {
     // test continues to fail until the event is uploaded
     func testContinuousFailure() {
         pipeline.configuration.offline = false
-        pipeline.maxRetryCount = 2
+        pipeline.configuration.flushMaxRetries = 2
 
         let testEvent = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
         try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
@@ -225,7 +225,7 @@ final class EventPipelineTests: XCTestCase {
 
     func testContinuesHandledFailure() {
         pipeline.configuration.offline = false
-        pipeline.maxRetryCount = 1
+        pipeline.configuration.flushMaxRetries = 1
 
         let testEvent1 = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
         try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent1)
@@ -242,8 +242,9 @@ final class EventPipelineTests: XCTestCase {
         let uploadExpectations = (0..<3).map { i in expectation(description: "httpresponse-\(i)") }
         httpClient.uploadExpectations = uploadExpectations
 
+        let invalidResponseData = "{\"events_with_invalid_fields\": {\"user_id\": [0]}}".data(using: .utf8)!
         httpClient.uploadResults = [
-            .failure(HttpClient.Exception.httpError(code: HttpClient.HttpStatus.BAD_REQUEST.rawValue, data: nil)),
+            .failure(HttpClient.Exception.httpError(code: HttpClient.HttpStatus.BAD_REQUEST.rawValue, data: invalidResponseData)),
             .failure(HttpClient.Exception.httpError(code: HttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue, data: nil)),
             .success(200),
         ]
