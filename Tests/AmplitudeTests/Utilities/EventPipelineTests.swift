@@ -243,8 +243,9 @@ final class EventPipelineTests: XCTestCase {
         let uploadExpectations = (0..<3).map { i in expectation(description: "httpresponse-\(i)") }
         httpClient.uploadExpectations = uploadExpectations
 
+        let invalidResponseData = "{\"events_with_invalid_fields\": {\"user_id\": [0]}}".data(using: .utf8)!
         httpClient.uploadResults = [
-            .failure(HttpClient.Exception.httpError(code: HttpClient.HttpStatus.BAD_REQUEST.rawValue, data: nil)),
+            .failure(HttpClient.Exception.httpError(code: HttpClient.HttpStatus.BAD_REQUEST.rawValue, data: invalidResponseData)),
             .failure(HttpClient.Exception.httpError(code: HttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue, data: nil)),
             .success(200),
         ]
