@@ -39,7 +39,6 @@ final class EventPipelineTests: XCTestCase {
 
     override func tearDown() {
         super.tearDown()
-        configuration.flushMaxRetries = Constants.Configuration.FLUSH_MAX_RETRIES
         storage.reset()
     }
 
