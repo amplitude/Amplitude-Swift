@@ -1,3 +1,10 @@
+## [1.11.9](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.8...v1.11.9) (2025-03-27)
+
+
+### Bug Fixes
+
+* port Configuration.flushMaxRetries as pipeline retry cap ([#267](https://github.com/amplitude/Amplitude-Swift/issues/267)) ([d4960b7](https://github.com/amplitude/Amplitude-Swift/commit/d4960b78f4c06e1bdc37a58fcc14f85431fd115e))
+
 ## [1.11.8](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.7...v1.11.8) (2025-03-26)
 
 
