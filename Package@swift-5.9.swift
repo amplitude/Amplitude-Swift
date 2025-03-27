@@ -31,13 +31,17 @@ let package = Package(
                 .product(name: "AnalyticsConnector", package: "analytics-connector-ios")
             ],
             path: "Sources/Amplitude",
-            exclude: ["../../Examples/", "../../Tests/"],
             resources: [.copy("PrivacyInfo.xcprivacy")]
         ),
         .testTarget(
             name: "Amplitude-SwiftTests",
-            dependencies: ["AmplitudeSwift"],
-            path: "Tests/AmplitudeTests"
-        ),
+            dependencies: [
+                .target(name: "AmplitudeSwift"),
+            ],
+            path: "Tests/AmplitudeTests",
+            resources: [
+                .process("Migration/legacy_v3.sqlite"),
+                .process("Migration/legacy_v4.sqlite"),
+            ])
     ]
 )

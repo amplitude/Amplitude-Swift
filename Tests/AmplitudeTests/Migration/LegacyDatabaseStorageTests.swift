@@ -6,7 +6,11 @@ final class LegacyDatabaseStorageTests: XCTestCase {
     var storage: LegacyDatabaseStorage?
 
     override func setUpWithError() throws {
+#if SWIFT_PACKAGE
+        let bundle = Bundle.module
+#else
         let bundle = Bundle(for: type(of: self))
+#endif
         let legacyDbUrl = bundle.url(forResource: "legacy_v4", withExtension: "sqlite")
         let tempDirectory = NSTemporaryDirectory()
         let tempDbName = UUID().uuidString
