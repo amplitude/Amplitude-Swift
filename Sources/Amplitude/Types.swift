@@ -74,6 +74,7 @@ public enum StorageKey: String, CaseIterable {
     case DEVICE_ID = "device_id"
     case APP_BUILD = "app_build"
     case APP_VERSION = "app_version"
+    case USER_PROPERTIES = "user_properties"
     // The version of PersistentStorage, used for data migrations
     // Value should be a PersistentStorageVersion value
     // Note the first version is 2, which corresponds to apiKey-instanceName based storage
@@ -120,6 +121,7 @@ public protocol Plugin: AnyObject {
     func onDeviceIdChanged(_ deviceId: String?)
     func onSessionIdChanged(_ sessionId: Int64)
     func onOptOutChanged(_ optOut: Bool)
+    func onIdentityChanged(_ identity: Identity)
 }
 
 public protocol EventPlugin: Plugin {
@@ -130,16 +132,16 @@ public protocol EventPlugin: Plugin {
     func flush()
 }
 
-extension Plugin {
+public extension Plugin {
     // default behavior
-    public func execute(event: BaseEvent) -> BaseEvent? {
+    func execute(event: BaseEvent) -> BaseEvent? {
         return event
     }
 
-    public func setup(amplitude: Amplitude) {
+    func setup(amplitude: Amplitude) {
     }
 
-    public func teardown(){
+    func teardown(){
         // Clean up any resources from setup if necessary
     }
 
@@ -147,6 +149,7 @@ extension Plugin {
     func onDeviceIdChanged(_ deviceId: String?) {}
     func onSessionIdChanged(_ sessionId: Int64) {}
     func onOptOutChanged(_ optOut: Bool) {}
+    func onIdentityChanged(_ identity: Identity) {}
 }
 
 public protocol ResponseHandler {
