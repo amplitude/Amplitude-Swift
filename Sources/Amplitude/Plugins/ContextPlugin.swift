@@ -89,12 +89,6 @@ class ContextPlugin: BeforePlugin {
         if event.library == nil {
             event.library = context["library"] as? String
         }
-        if event.userId == nil {
-            event.userId = self.amplitude?.state.userId
-        }
-        if event.deviceId == nil {
-            event.deviceId = self.amplitude?.state.deviceId
-        }
         if event.partnerId == nil {
             if let pId = self.amplitude?.configuration.partnerId {
                 event.partnerId = pId
@@ -156,7 +150,7 @@ class ContextPlugin: BeforePlugin {
     }
 
     func initializeDeviceId(forceReset: Bool = false) {
-        var deviceId = forceReset ? nil : amplitude?.state.deviceId
+        var deviceId = forceReset ? nil : amplitude?.identity.deviceId
         if isValidDeviceId(deviceId) {
             return
         }

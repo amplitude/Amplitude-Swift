@@ -8,7 +8,69 @@ public class Amplitude {
         sessions.sessionId
     }
 
-    var state: State = State()
+    private let identityLock = NSLock()
+    private var _identity = Identity()
+    public var identity: Identity {
+        get {
+            identityLock.withLock {
+                return _identity
+            }
+        }
+        set {
+            applyIdentityUpdate(newValue)
+        }
+    }
+
+    private func applyIdentityUpdate(_ identity: Identity, sendIdentifyIfNeeded: Bool = true) {
+        var deviceIdChanged = false
+        var userIdChanged = false
+        var userPropertiesChanged = false
+        identityLock.withLock {
+            let oldValue = _identity
+            _identity = identity
+
+            if identity.deviceId != oldValue.deviceId {
+                deviceIdChanged = true
+                try? storage.write(key: .DEVICE_ID, value: identity.deviceId)
+            }
+
+            if identity.userId != oldValue.userId {
+                userIdChanged = true
+                try? storage.write(key: .USER_ID, value: identity.userId)
+            }
+
+            // Convert to NSDictionary to allow comparison
+            let oldUserProperties = oldValue.userProperties as NSDictionary
+            let newUserProperties = identity.userProperties as NSDictionary
+            if oldUserProperties != newUserProperties {
+                userPropertiesChanged = true
+            }
+        }
+
+        // Inform plugins after we've relinquished the lock
+        if userIdChanged {
+            timeline.apply { plugin in
+                plugin.onUserIdChanged(identity.userId)
+            }
+        }
+
+        if deviceIdChanged {
+            timeline.apply { plugin in
+                plugin.onDeviceIdChanged(identity.deviceId)
+            }
+        }
+
+        if userIdChanged || deviceIdChanged || userPropertiesChanged {
+            timeline.apply { plugin in
+                plugin.onIdentityChanged(identity)
+            }
+        }
+
+        if sendIdentifyIfNeeded, userPropertiesChanged {
+            identify(userProperties: identity.userProperties)
+        }
+    }
+
     var contextPlugin: ContextPlugin
     let timeline = Timeline()
 
@@ -56,12 +118,9 @@ public class Amplitude {
         }
         migrateInstanceOnlyStorages()
 
-        if let deviceId: String? = configuration.storageProvider.read(key: .DEVICE_ID) {
-            state.deviceId = deviceId
-        }
-        if let userId: String? = configuration.storageProvider.read(key: .USER_ID) {
-            state.userId = userId
-        }
+        _identity = Identity(userId: configuration.storageProvider.read(key: .USER_ID),
+                             deviceId: configuration.storageProvider.read(key: .DEVICE_ID),
+                             userProperties: [:])
 
         if configuration.offline != NetworkConnectivityCheckerPlugin.Disabled,
            VendorSystem.current.networkConnectivityCheckingEnabled {
@@ -78,7 +137,9 @@ public class Amplitude {
 
         // Monitor changes to optOut to send to Timeline
         configuration.optOutChanged = { [weak self] optOut in
-            self?.timeline.onOptOutChanged(optOut)
+            self?.timeline.apply {
+                $0.onOptOutChanged(optOut)
+            }
         }
 
         trackingQueue.async { [self] in
@@ -131,11 +192,19 @@ public class Amplitude {
         event.userProperties = identify.properties as [String: Any]
         if let eventOptions = options {
             event.mergeEventOptions(eventOptions: eventOptions)
-            if eventOptions.userId != nil {
-                setUserId(userId: eventOptions.userId)
+
+            var identity = self.identity
+            var identityChanged = false
+            if let userId = eventOptions.userId {
+                identityChanged = true
+                identity.userId = userId
             }
-            if eventOptions.deviceId != nil {
-                setDeviceId(deviceId: eventOptions.deviceId)
+            if let deviceId = eventOptions.deviceId {
+                identityChanged = true
+                identity.deviceId = deviceId
+            }
+            if identityChanged {
+                self.identity = identity
             }
         }
         process(event: event)
@@ -245,21 +314,13 @@ public class Amplitude {
     @discardableResult
     public func add(plugin: Plugin) -> Amplitude {
         plugin.setup(amplitude: self)
-        if let _plugin = plugin as? ObservePlugin {
-            state.add(plugin: _plugin)
-        } else {
-            timeline.add(plugin: plugin)
-        }
+        timeline.add(plugin: plugin)
         return self
     }
 
     @discardableResult
     public func remove(plugin: Plugin) -> Amplitude {
-        if let _plugin = plugin as? ObservePlugin {
-            state.remove(plugin: _plugin)
-        } else {
-            timeline.remove(plugin: plugin)
-        }
+        timeline.remove(plugin: plugin)
         return self
     }
 
@@ -277,26 +338,22 @@ public class Amplitude {
 
     @discardableResult
     public func setUserId(userId: String?) -> Amplitude {
-        try? storage.write(key: .USER_ID, value: userId)
-        state.userId = userId
-        timeline.onUserIdChanged(userId)
+        identity.userId = userId
         return self
     }
 
     @discardableResult
     public func setDeviceId(deviceId: String?) -> Amplitude {
-        try? storage.write(key: .DEVICE_ID, value: deviceId)
-        state.deviceId = deviceId
-        timeline.onDeviceIdChanged(deviceId)
+        identity.deviceId = deviceId
         return self
     }
 
     public func getUserId() -> String? {
-        return state.userId
+        return identity.userId
     }
 
     public func getDeviceId() -> String? {
-        return state.deviceId
+        return identity.deviceId
     }
 
     public func getSessionId() -> Int64 {
@@ -329,6 +386,7 @@ public class Amplitude {
     @discardableResult
     public func reset() -> Amplitude {
         setUserId(userId: nil)
+        identity.userProperties.removeAll()
         contextPlugin.initializeDeviceId(forceReset: true)
         return self
     }
@@ -342,6 +400,17 @@ public class Amplitude {
             logger?.log(message: "Skip event based on opt out configuration")
             return
         }
+
+        if event.eventType == Constants.IDENTIFY_EVENT, let userProperties = event.userProperties {
+            var updatedIdentity = identity
+            updatedIdentity.apply(identify: userProperties as [String: Any])
+            applyIdentityUpdate(updatedIdentity, sendIdentifyIfNeeded: false)
+        }
+
+        let identity = self.identity
+        event.userId = event.userId ?? identity.userId
+        event.deviceId = event.deviceId ?? identity.deviceId
+
         let inForeground = inForeground
         trackingQueue.async { [self] in
             let events = self.sessions.processEvent(event: event, inForeground: inForeground)

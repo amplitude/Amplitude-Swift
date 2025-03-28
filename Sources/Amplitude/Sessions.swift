@@ -21,7 +21,9 @@ public class Sessions {
             } catch {
                 logger?.warn(message: "Can't write PREVIOUS_SESSION_ID to storage: \(error)")
             }
-            timeline.onSessionIdChanged(_sessionId)
+            timeline.apply {
+                $0.onSessionIdChanged(_sessionId)
+            }
         }
     }
     private let sessionIdLock = NSLock()
