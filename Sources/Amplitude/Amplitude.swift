@@ -39,7 +39,7 @@ public class Amplitude {
         return self.configuration.loggerProvider
     }()
 
-    let trackingQueue = DispatchQueue(label: "com.amplitude.analytics", target: .global(qos: .utility))
+    let trackingQueue = DispatchQueue(label: "com.amplitude.analytics")
 
     public init(
         configuration: Configuration
