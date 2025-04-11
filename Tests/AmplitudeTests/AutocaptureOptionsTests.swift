@@ -9,6 +9,9 @@ final class AutocaptureOptionsTests: XCTestCase {
         XCTAssertFalse(config.autocapture.contains(.screenViews))
         XCTAssertTrue(config.autocapture.contains(.sessions))
         XCTAssertFalse(config.autocapture.contains(.elementInteractions))
+#if !os(watchOS)
+        XCTAssertFalse(config.autocapture.contains(.networkTracking))
+#endif
     }
 
     func testCustom() {
@@ -17,6 +20,9 @@ final class AutocaptureOptionsTests: XCTestCase {
         XCTAssertTrue(options.contains(.screenViews))
         XCTAssertFalse(options.contains(.sessions))
         XCTAssertTrue(options.contains(.elementInteractions))
+#if !os(watchOS)
+        XCTAssertFalse(options.contains(.networkTracking))
+#endif
     }
 
     func testDefaultTrackingOptionChangesReflectInAutocapture() {

@@ -46,10 +46,14 @@ public class Configuration {
         }
     }
     public internal(set) var autocapture: AutocaptureOptions
+    public internal(set) var networkTrackingOptions: NetworkTrackingOptions
     public var offline: Bool?
     internal let diagonostics: Diagnostics
     public var maxQueuedEventCount = -1
     var optOutChanged: ((Bool) -> Void)?
+
+    // For Unit Test
+    var urlProtocolClass: URLProtocol.Type?
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
     public convenience init(
@@ -79,7 +83,8 @@ public class Configuration {
         defaultTracking: DefaultTrackingOptions,
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
         migrateLegacyData: Bool = true,
-        offline: Bool? = false
+        offline: Bool? = false,
+        networkTrackingOptions: NetworkTrackingOptions = .defaultOptions()
     ) {
         self.init(apiKey: apiKey,
             flushQueueSize: flushQueueSize,
@@ -106,7 +111,8 @@ public class Configuration {
             autocapture: defaultTracking.autocaptureOptions,
             identifyBatchIntervalMillis: identifyBatchIntervalMillis,
             migrateLegacyData: migrateLegacyData,
-            offline: offline)
+            offline: offline,
+            networkTrackingOptions: networkTrackingOptions)
         self.defaultTracking = defaultTracking
     }
 
@@ -138,7 +144,8 @@ public class Configuration {
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
         maxQueuedEventCount: Int = -1,
         migrateLegacyData: Bool = true,
-        offline: Bool? = false
+        offline: Bool? = false,
+        networkTrackingOptions: NetworkTrackingOptions = .defaultOptions()
     ) {
         let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
@@ -174,6 +181,7 @@ public class Configuration {
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
         self.offline = offline
+        self.networkTrackingOptions = networkTrackingOptions
     }
 
     func isValid() -> Bool {
