@@ -29,6 +29,9 @@ class HttpClient {
         let sessionConfiguration = URLSessionConfiguration.default
         sessionConfiguration.httpMaximumConnectionsPerHost = 2
         sessionConfiguration.urlCache = nil
+        if let urlProtocolClass = configuration.urlProtocolClass {
+            sessionConfiguration.protocolClasses = [urlProtocolClass]
+        }
         self.session = URLSession(configuration: sessionConfiguration, delegate: nil, delegateQueue: nil)
     }
 

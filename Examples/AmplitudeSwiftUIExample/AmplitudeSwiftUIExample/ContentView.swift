@@ -27,6 +27,8 @@ struct ContentView: View {
     @State var groupProperty = ""
     @State var groupUserPropertyKey = ""
     @State var groupUserPropertyValue = ""
+    @State var responseCode = "500"
+    @State var responseDelay = "0"
 
     var body: some View {
         VStack {
@@ -132,6 +134,19 @@ struct ContentView: View {
                             Text("Send Group Identify Event")
                         }.buttonStyle(AmplitudeButton())
                     }
+                    Section(header: Text("NETWORK TRACKING TEST")) {
+                        HStack {
+                            TextField("Response Code", text: $responseCode)
+                                .keyboardType(.numberPad)
+                            TextField("Delay in ms", text: $responseDelay)
+                                .keyboardType(.numberPad)
+                        }
+                        Button(action: {
+                            requestNetwork(responseCode: responseCode, responseDelay: responseDelay)
+                        }) {
+                            Text("Request Network")
+                        }.buttonStyle(AmplitudeButton())
+                    }
                     Button(action: {
                         Amplitude.testInstance.flush()
                     }) {
@@ -164,4 +179,18 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }
+}
+
+func requestNetwork(responseCode: String, responseDelay: String) {
+    let url = URL(string: "https://httpstat.us/\(responseCode)?sleep=\(responseDelay)#test")
+    let request = URLRequest(url: url!)
+    let session = URLSession.shared
+    let task = session.dataTask(with: request) { data, response, error in
+        print("Response: \(response)")
+        if let error = error {
+            print("Error: \(error)")
+        }
+    }
+    task.resume()
+    print("Request sent: \(url)")
 }
