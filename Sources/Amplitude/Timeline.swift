@@ -16,6 +16,7 @@ public class Timeline {
             PluginType.enrichment: Mediator(),
             PluginType.destination: Mediator(),
             PluginType.utility: Mediator(),
+            PluginType.observe: Mediator(),
         ]
     }
 
@@ -49,8 +50,8 @@ public class Timeline {
 
     internal func apply(_ closure: (Plugin) -> Void) {
         for type in PluginType.allCases {
-            if let mediator = plugins[type] {
-                mediator.plugins.forEach { (plugin) in
+            if let plugins = plugins[type]?.plugins {
+                plugins.forEach { (plugin) in
                     closure(plugin)
                     if let destPlugin = plugin as? DestinationPlugin {
                         destPlugin.apply(closure: closure)
@@ -58,21 +59,5 @@ public class Timeline {
                 }
             }
         }
-    }
-
-    func onUserIdChanged(_ userId: String?) {
-        apply { $0.onUserIdChanged(userId) }
-    }
-
-    func onDeviceIdChanged(_ deviceId: String?) {
-        apply { $0.onDeviceIdChanged(deviceId) }
-    }
-
-    func onSessionIdChanged(_ sessionId: Int64) {
-        apply { $0.onSessionIdChanged(sessionId) }
-    }
-
-    func onOptOutChanged(_ optOut: Bool) {
-        apply { $0.onOptOutChanged(optOut) }
     }
 }
