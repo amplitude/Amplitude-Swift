@@ -1,3 +1,10 @@
+## [1.11.10](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.9...v1.11.10) (2025-04-14)
+
+
+### Bug Fixes
+
+* potential deadlock on storagequeue access ([#269](https://github.com/amplitude/Amplitude-Swift/issues/269)) ([4091bd1](https://github.com/amplitude/Amplitude-Swift/commit/4091bd12eb5447e2b00b07f0449106e9921122f5))
+
 ## [1.11.9](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.8...v1.11.9) (2025-03-27)
 
 
