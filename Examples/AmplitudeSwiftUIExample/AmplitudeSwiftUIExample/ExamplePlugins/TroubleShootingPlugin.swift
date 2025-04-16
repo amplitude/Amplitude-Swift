@@ -20,10 +20,11 @@ class TroubleShootingPlugin: DestinationPlugin {
 
     open override func track(event: BaseEvent) -> BaseEvent? {
         let jsonEncoder = JSONEncoder()
+        jsonEncoder.outputFormatting = .prettyPrinted
         let eventJsonData = try! jsonEncoder.encode(event)
         let eventJson = String(data: eventJsonData, encoding: String.Encoding.utf8)
 
-        self.amplitude?.logger?.debug(message: "Processed event: \(String(describing: eventJson))")
+        self.amplitude?.logger?.debug(message: "Processed event: \(eventJson ?? "")")
         return event
     }
 }

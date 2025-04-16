@@ -84,6 +84,7 @@ public struct Constants {
     static let AMP_DEEP_LINK_OPENED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Deep Link Opened"
     static let AMP_SCREEN_VIEWED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Screen Viewed"
     static let AMP_ELEMENT_INTERACTED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Element Interacted"
+    static let AMP_NETWORK_TRACKING_EVENT = "\(AMP_AMPLITUDE_PREFIX)Network Tracking"
 
     static let AMP_REVENUE_EVENT = "revenue_amount"
 
@@ -103,6 +104,19 @@ public struct Constants {
     static let AMP_APP_HIERARCHY_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Hierarchy"
     static let AMP_APP_ACTION_METHOD_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Action Method"
     static let AMP_APP_GESTURE_RECOGNIZER_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Gesture Recognizer"
+
+    static let AMP_NETWORK_URL_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)URL"
+    static let AMP_NETWORK_URL_QUERY_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)URL Query"
+    static let AMP_NETWORK_URL_FRAGMENT_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)URL Fragment"
+    static let AMP_NETWORK_REQUEST_METHOD_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Request Method"
+    static let AMP_NETWORK_STATUS_CODE_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Status Code"
+    static let AMP_NETWORK_ERROR_CODE_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Error Code"
+    static let AMP_NETWORK_ERROR_MESSAGE_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Error Message"
+    static let AMP_NETWORK_START_TIME_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Start Time"
+    static let AMP_NETWORK_COMPLETION_TIME_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Completion Time"
+    static let AMP_NETWORK_DURATION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Duration"
+    static let AMP_NETWORK_REQUEST_BODY_SIZE_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Request Body Size"
+    static let AMP_NETWORK_RESPONSE_BODY_SIZE_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Response Body Size"
 
     public struct Configuration {
         public static let FLUSH_QUEUE_SIZE = 30
