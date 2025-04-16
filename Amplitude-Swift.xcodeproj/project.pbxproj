@@ -15,6 +15,7 @@
 		4E3871622BB34DBC002890AB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */; };
 		4E654D682D97454900BCAA85 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E654D672D97454900BCAA85 /* Identity.swift */; };
 		4E654DE12D9B60E700BCAA85 /* IdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E654DE02D9B60E300BCAA85 /* IdentityTests.swift */; };
+		4E65A53A2DA88C98004ED163 /* AmplitudeCoreFramework in Frameworks */ = {isa = PBXBuildFile; productRef = 4E65A5392DA88C98004ED163 /* AmplitudeCoreFramework */; };
 		4EB530752CD2E46A00E961F4 /* AnalyticsConnectorFramework in Frameworks */ = {isa = PBXBuildFile; productRef = 4EB530742CD2E46A00E961F4 /* AnalyticsConnectorFramework */; };
 		6C04FC3F2C58973C00EA8667 /* ElementInteractionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */; };
 		6C04FC412C58974A00EA8667 /* UIKitElementInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */; };
@@ -143,6 +144,7 @@
 		3E281B902B9BCC14009D913B /* DispatchQueueHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DispatchQueueHolder.swift; sourceTree = "<group>"; };
 		4E05BB932BE41AEB009DE475 /* Amplitude+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Amplitude+Extensions.swift"; sourceTree = "<group>"; };
 		4E2B646A2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitScreenViewsPluginTests.swift; sourceTree = "<group>"; };
+		4E44BA012DB06D200048796B /* Package@swift-5.9.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Package@swift-5.9.swift"; sourceTree = "<group>"; };
 		4E654D672D97454900BCAA85 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
 		4E654DE02D9B60E300BCAA85 /* IdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityTests.swift; sourceTree = "<group>"; };
 		6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElementInteractionEvent.swift; sourceTree = "<group>"; };
@@ -269,6 +271,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
+				4E65A53A2DA88C98004ED163 /* AmplitudeCoreFramework in Frameworks */,
 				4EB530752CD2E46A00E961F4 /* AnalyticsConnectorFramework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -457,6 +460,7 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
+				4E44BA012DB06D200048796B /* Package@swift-5.9.swift */,
 				OBJ_7 /* Sources */,
 				OBJ_53 /* Tests */,
 				OBJ_75 /* Products */,
@@ -596,6 +600,7 @@
 			name = "Amplitude-Swift";
 			packageProductDependencies = (
 				4EB530742CD2E46A00E961F4 /* AnalyticsConnectorFramework */,
+				4E65A5392DA88C98004ED163 /* AmplitudeCoreFramework */,
 			);
 			productName = Amplitude_Swift;
 			productReference = "amplitude-swift::Amplitude-Swift::Product" /* AmplitudeSwift.framework */;
@@ -638,6 +643,7 @@
 			mainGroup = OBJ_5;
 			packageReferences = (
 				4EB530762CD2EB9700E961F4 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */,
+				4E65A5382DA88C98004ED163 /* XCRemoteSwiftPackageReference "AmplitudeCore-Swift" */,
 			);
 			productRefGroup = OBJ_75 /* Products */;
 			projectDirPath = "";
@@ -686,7 +692,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint Sources\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 		4EA4AEBE2CC1A0CD008741ED /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -901,7 +907,7 @@
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) AMPLITUDE_DISABLE_UIKIT";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 7;
+				TARGETED_DEVICE_FAMILY = "1,2,3,4,6,7";
 				TARGET_NAME = AmplitudeSwift;
 				TVOS_DEPLOYMENT_TARGET = 13.0;
 				WATCHOS_DEPLOYMENT_TARGET = 7.0;
@@ -999,7 +1005,7 @@
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) AMPLITUDE_DISABLE_UIKIT";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 7;
+				TARGETED_DEVICE_FAMILY = "1,2,3,4,6,7";
 				TARGET_NAME = AmplitudeSwift;
 				TVOS_DEPLOYMENT_TARGET = 13.0;
 				WATCHOS_DEPLOYMENT_TARGET = 7.0;
@@ -1187,7 +1193,7 @@
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 7;
+				TARGETED_DEVICE_FAMILY = "1,2,3,4,6,7";
 				TARGET_NAME = AmplitudeSwift;
 				TVOS_DEPLOYMENT_TARGET = 13.0;
 				WATCHOS_DEPLOYMENT_TARGET = 7.0;
@@ -1227,7 +1233,7 @@
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 7;
+				TARGETED_DEVICE_FAMILY = "1,2,3,4,6,7";
 				TARGET_NAME = AmplitudeSwift;
 				TVOS_DEPLOYMENT_TARGET = 13.0;
 				WATCHOS_DEPLOYMENT_TARGET = 7.0;
@@ -1274,6 +1280,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		4E65A5382DA88C98004ED163 /* XCRemoteSwiftPackageReference "AmplitudeCore-Swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/amplitude/AmplitudeCore-Swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.9;
+			};
+		};
 		4EB530762CD2EB9700E961F4 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/amplitude/analytics-connector-ios";
@@ -1285,6 +1299,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4E65A5392DA88C98004ED163 /* AmplitudeCoreFramework */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4E65A5382DA88C98004ED163 /* XCRemoteSwiftPackageReference "AmplitudeCore-Swift" */;
+			productName = AmplitudeCoreFramework;
+		};
 		4EB530742CD2E46A00E961F4 /* AnalyticsConnectorFramework */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AnalyticsConnectorFramework;
