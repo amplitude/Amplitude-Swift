@@ -5,21 +5,22 @@
 //  Created by Hao Yu on 11/9/22.
 //
 
+import AmplitudeCore
 import Foundation
 
 internal class Mediator {
     // create an array with certain type.
-    internal var plugins = [Plugin]()
+    internal var plugins = [UniversalPlugin]()
     private let lock = NSLock()
 
-    internal func add(plugin: Plugin) {
+    internal func add(plugin: UniversalPlugin) {
         lock.lock()
         defer { lock.unlock() }
 
         plugins.append(plugin)
     }
 
-    internal func remove(plugin: Plugin) {
+    internal func remove(plugin: UniversalPlugin) {
         lock.lock()
         defer { lock.unlock() }
 
@@ -38,7 +39,7 @@ internal class Mediator {
 
         var result: BaseEvent? = event
         plugins.forEach { plugin in
-            if let r = result {
+            if var r = result {
                 if let p = plugin as? DestinationPlugin {
                     _ = p.execute(event: r)
                 } else if let p = plugin as? EventPlugin {
@@ -53,15 +54,17 @@ internal class Mediator {
                             result = p.track(event: rr)
                         }
                     }
-                } else {
+                } else if let plugin = plugin as? Plugin {
                     result = plugin.execute(event: r)
+                } else {
+                    plugin.execute(&r)
                 }
             }
         }
         return result
     }
 
-    internal func applyClosure(_ closure: (Plugin) -> Void) {
+    internal func applyClosure(_ closure: (UniversalPlugin) -> Void) {
         lock.lock()
         defer { lock.unlock() }
 

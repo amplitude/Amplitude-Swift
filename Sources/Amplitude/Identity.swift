@@ -5,10 +5,12 @@
 //  Created by Chris Leonavicius on 3/28/25.
 //
 
-public struct Identity {
-    var userId: String?
-    var deviceId: String?
-    var userProperties: [String: Any] = [:]
+import AmplitudeCore
+
+public struct Identity: AnalyticsIdentity {
+    public var userId: String?
+    public var deviceId: String?
+    public var userProperties: [String: Any] = [:]
 }
 
 extension Identity {

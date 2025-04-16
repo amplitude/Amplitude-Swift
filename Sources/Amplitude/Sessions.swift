@@ -1,3 +1,4 @@
+import AmplitudeCore
 import Foundation
 
 public class Sessions {
@@ -5,6 +6,7 @@ public class Sessions {
     private let storage: Storage
     private let logger: (any Logger)?
     private let timeline: Timeline
+    private let context: AmplitudeContext
     private var _sessionId: Int64 = -1
     private(set) var sessionId: Int64 {
         get {
@@ -24,6 +26,7 @@ public class Sessions {
             timeline.apply {
                 $0.onSessionIdChanged(_sessionId)
             }
+            context.remoteConfigClient.updateConfigs()
         }
     }
     private let sessionIdLock = NSLock()
@@ -56,6 +59,7 @@ public class Sessions {
 
     init(amplitude: Amplitude) {
         configuration = amplitude.configuration
+        context = amplitude.amplitudeContext
         storage = amplitude.storage
         logger = amplitude.logger
         timeline = amplitude.timeline

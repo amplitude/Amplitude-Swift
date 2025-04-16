@@ -5,10 +5,12 @@
 //  Created by Marvin Liu on 10/27/22.
 //
 
+import AmplitudeCore
 import Foundation
 
 public class Timeline {
     internal let plugins: [PluginType: Mediator]
+    private var pluginsByName: [String: UniversalPlugin] = [:]
 
     init() {
         self.plugins = [
@@ -34,21 +36,38 @@ public class Timeline {
         return result
     }
 
-    internal func add(plugin: Plugin) {
-        if let mediator = plugins[plugin.type] {
+    internal func add(plugin: UniversalPlugin) {
+        if let name = plugin.name {
+            if pluginsByName[name] != nil {
+                return
+            }
+            pluginsByName[name] = plugin
+        }
+        let pluginType: PluginType
+        switch plugin {
+        case let plugin as Plugin:
+            pluginType = plugin.type
+        default:
+            pluginType = .enrichment
+        }
+        if let mediator = plugins[pluginType] {
             mediator.add(plugin: plugin)
         }
     }
 
-    internal func remove(plugin: Plugin) {
+    internal func remove(plugin: UniversalPlugin) {
         // remove all plugins with this name in every category
         for _plugin in plugins {
             let list = _plugin.value
             list.remove(plugin: plugin)
         }
+
+        if let name = plugin.name {
+            pluginsByName[name] = nil
+        }
     }
 
-    internal func apply(_ closure: (Plugin) -> Void) {
+    internal func apply(_ closure: (UniversalPlugin) -> Void) {
         for type in PluginType.allCases {
             if let plugins = plugins[type]?.plugins {
                 plugins.forEach { (plugin) in
@@ -59,5 +78,9 @@ public class Timeline {
                 }
             }
         }
+    }
+
+    func plugin(name: String) -> UniversalPlugin? {
+        return pluginsByName[name]
     }
 }

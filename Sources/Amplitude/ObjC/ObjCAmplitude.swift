@@ -149,7 +149,7 @@ public class ObjCAmplitude: NSObject {
     @discardableResult
     public func add(plugin: AnyObject) -> ObjCAmplitude {
         switch plugin {
-        case let swiftPlugin as Plugin:
+        case let swiftPlugin as UniversalPlugin:
             amplitude.add(plugin: swiftPlugin)
         case let objcPlugin as ObjCPlugin:
             let wrapper = ObjCPluginWrapper(amplitude: self, wrapped: objcPlugin)

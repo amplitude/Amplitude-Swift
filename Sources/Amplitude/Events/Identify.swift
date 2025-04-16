@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 open class Identify {
     static let UNSET_VALUE = "-"
@@ -40,7 +41,6 @@ open class Identify {
 
     var propertySet = Set<String>()
     var properties = [String: Any]()
-    var logger = ConsoleLogger(logLevel: LogLevelEnum.WARN.rawValue)
 
     // $set operation
     @discardableResult
@@ -719,33 +719,37 @@ open class Identify {
         return self
     }
 
+    private static let logger = OSLog(subsystem: "Amplitude", category: "Logging")
+
     func setUserProperty(operation: Operation, property: String, value: Any?) {
         guard !property.isEmpty else {
-            logger.warn(
-                message:
-                    "Attempting to perform operation \(operation.rawValue) with a null or empty string property, ignoring"
-            )
+            os_log(.default,
+                   log: Self.logger,
+                   "Warn: Attempting to perform operation %@ with a null or empty string property, ignoring",
+                   operation.rawValue)
             return
         }
         guard value != nil else {
-            logger.warn(
-                message:
-                    "Attempting to perform operation \(operation.rawValue) with null value for property \(property), ignoring"
-            )
+            os_log(.default,
+                   log: Self.logger,
+                   "Warn: Attempting to perform operation %@ with null value for property %@, ignoring",
+                   operation.rawValue,
+                   property)
             return
         }
         guard properties[Operation.CLEAR_ALL.rawValue] == nil else {
-            logger.warn(
-                message:
-                    "This Identify already contains a $clearAll operation, ignoring operation \(operation.rawValue)"
-            )
+            os_log(.default,
+                   log: Self.logger,
+                   "Warn: This Identify already contains a $clearAll operation, ignoring operation %@",
+                   operation.rawValue)
             return
         }
-        guard !propertySet.contains(property) else {
-            logger.warn(
-                message:
-                    "Already used property \(property) in previous operation, ignoring operation \(operation.rawValue)"
-            )
+        guard properties[property] == nil else {
+            os_log(.default,
+                   log: Self.logger,
+                   "Warn: Already used property %@ in previous operation, ignoring operation %@",
+                   property,
+                   operation.rawValue)
             return
         }
         if properties[operation.rawValue] == nil {

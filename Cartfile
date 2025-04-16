@@ -1,1 +1,2 @@
 github "amplitude/analytics-connector-ios" ~> 1.2.3
+github "amplitude/AmplitudeCore-Swift" ~> 1.0.6

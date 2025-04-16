@@ -5,9 +5,10 @@
 //  Created by Marvin Liu on 11/3/22.
 //
 
+import AmplitudeCore
 import Foundation
 
-open class BaseEvent: EventOptions, Codable {
+open class BaseEvent: EventOptions, AnalyticsEvent, Codable {
     public var eventType: String
     public var eventProperties: [String: Any]?
     public var userProperties: [String: Any]?

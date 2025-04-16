@@ -5,8 +5,9 @@
 //  Created by Marvin Liu on 10/28/22.
 //
 
+import AmplitudeCore
 import Foundation
-import os.log
+import OSLog
 
 public class ConsoleLogger: Logger {
     public typealias LogLevel = LogLevelEnum
