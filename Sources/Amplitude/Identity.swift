@@ -16,12 +16,12 @@ extension Identity {
     mutating func apply(identify: [String: Any]) {
         var updatedProperties = userProperties
 
-        for property in identify {
-            guard let op = Identify.Operation(rawValue: property.key) else {
+        for op in Identify.Operation.orderedCases {
+            guard let properties = identify[op.rawValue] else {
                 continue
             }
 
-            let opProperties = property.value as? [String: Any] ?? [:]
+            let opProperties = properties as? [String: Any] ?? [:]
 
             switch op {
             case .SET:

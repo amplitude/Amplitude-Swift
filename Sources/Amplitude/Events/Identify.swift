@@ -21,6 +21,19 @@ open class Identify {
         case PRE_INSERT = "$preInsert"
         case POST_INSERT = "$postInsert"
         case REMOVE = "$remove"
+
+        static let orderedCases: [Operation] = [
+            .CLEAR_ALL,
+            .UNSET,
+            .SET,
+            .SET_ONCE,
+            .ADD,
+            .APPEND,
+            .PREPEND,
+            .PRE_INSERT,
+            .POST_INSERT,
+            .REMOVE,
+        ]
     }
 
     public init() {}
