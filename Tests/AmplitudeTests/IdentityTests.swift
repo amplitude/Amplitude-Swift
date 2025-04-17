@@ -263,6 +263,41 @@ class IdentityTests: XCTestCase {
         XCTAssertEqual(amplitude.identity.userProperties as NSDictionary, storedIdentity.userProperties as NSDictionary)
     }
 
+    func testIdentifyOrder() throws {
+        let storage = try makeStorage()
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in }))
+
+        let existingProperties = ["foo": 1, "bar": 2]
+        amplitude.identity.userProperties = existingProperties
+
+        let identify = IdentifyEvent()
+        identify.userProperties = [
+            Identify.Operation.CLEAR_ALL.rawValue: Identify.UNSET_VALUE,
+            Identify.Operation.SET.rawValue: ["foo": "bar"],
+            Identify.Operation.UNSET.rawValue: ["foo": Identify.UNSET_VALUE],
+        ]
+        amplitude.track(event: identify)
+
+        let updatedUserProperties = ["foo": "bar"]
+        XCTAssertEqual(amplitude.identity.userProperties as NSDictionary, updatedUserProperties as NSDictionary)
+    }
+
+    func testIdentifyNonOpProperties() throws {
+        let storage = try makeStorage()
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in }))
+
+        let identify = IdentifyEvent()
+        identify.userProperties = ["a": 1]
+        amplitude.track(event: identify)
+
+        var updatedUserProperties = storedIdentity.userProperties
+        updatedUserProperties["a"] = 1
+
+        XCTAssertEqual(amplitude.identity.userProperties as NSDictionary, updatedUserProperties as NSDictionary)
+    }
+
     func testIdentifyEventOptionsSetsUserAndDeviceId() throws {
         let storage = try makeStorage()
         let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
