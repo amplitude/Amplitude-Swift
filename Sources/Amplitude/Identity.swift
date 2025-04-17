@@ -38,6 +38,12 @@ extension Identity {
             }
         }
 
+        // Transfer properties that are not explicit operations as SETs
+        let allOpStrings = Set(Identify.Operation.orderedCases.map(\.rawValue))
+        for (key, value) in identify where !allOpStrings.contains(key) {
+            updatedProperties[key] = value
+        }
+
         userProperties = updatedProperties
     }
 }
