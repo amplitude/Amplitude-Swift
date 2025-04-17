@@ -692,7 +692,11 @@ final class AmplitudeTests: XCTestCase {
 
     func testRemnantDataNotMigratedInNonSandboxedApps() throws {
         let instanceName = "legacy_v3_\(UUID().uuidString)".lowercased()
+#if SWIFT_PACKAGE
+        let bundle = Bundle.module
+#else
         let bundle = Bundle(for: type(of: self))
+#endif
         let legacyDbUrl = bundle.url(forResource: "legacy_v3", withExtension: "sqlite")
         let dbUrl = LegacyDatabaseStorage.getDatabasePath(instanceName)
         let fileManager = FileManager.default
@@ -733,7 +737,11 @@ final class AmplitudeTests: XCTestCase {
     #if os(macOS)
     func testRemnantDataNotMigratedInSandboxedMacApps() throws {
         let instanceName = "legacy_v3_\(UUID().uuidString)".lowercased()
+#if SWIFT_PACKAGE
+        let bundle = Bundle.module
+#else
         let bundle = Bundle(for: type(of: self))
+#endif
         let legacyDbUrl = bundle.url(forResource: "legacy_v3", withExtension: "sqlite")
         let dbUrl = LegacyDatabaseStorage.getDatabasePath(instanceName)
         let fileManager = FileManager.default
