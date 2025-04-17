@@ -73,31 +73,31 @@ final class IdentifyInterceptorTests: XCTestCase {
             interceptor.isInterceptEvent(BaseEvent(userId: "user-1", eventType: "$identify"))
         )
         XCTAssertFalse(
-            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", groups: [String: Any?]()))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", groups: [String: Any]()))
         )
         XCTAssertFalse(
             interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", groups: ["key-1": "value-1"]))
         )
         XCTAssertFalse(
-            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: [String: Any?]()))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: [String: Any]()))
         )
         XCTAssertTrue(
-            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?]()]))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any]()]))
         )
         XCTAssertFalse(
             interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-"]))
         )
         XCTAssertFalse(
-            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$add": [String: Any?]()]))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$add": [String: Any]()]))
         )
         XCTAssertFalse(
-            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$add": [String: Any?]()]))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any](), "$add": [String: Any?]()]))
         )
         XCTAssertFalse(
-            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-", "$add": [String: Any?]()]))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$clearAll": "-", "$add": [String: Any]()]))
         )
         XCTAssertFalse(
-            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any?](), "$clearAll": "-", "$add": [String: Any?]()]))
+            interceptor.isInterceptEvent(BaseEvent(eventType: "$identify", userProperties: ["$set": [String: Any](), "$clearAll": "-", "$add": [String: Any]()]))
         )
     }
 

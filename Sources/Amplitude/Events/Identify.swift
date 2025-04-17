@@ -39,7 +39,7 @@ open class Identify {
     public init() {}
 
     var propertySet = Set<String>()
-    var properties = [String: Any?]()
+    var properties = [String: Any]()
     var logger = ConsoleLogger(logLevel: LogLevelEnum.WARN.rawValue)
 
     // $set operation
