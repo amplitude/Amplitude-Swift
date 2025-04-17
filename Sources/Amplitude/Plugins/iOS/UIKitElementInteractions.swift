@@ -58,6 +58,12 @@ class UIKitElementInteractions {
         addNotificationObservers
     }
 
+    static func unregister(_ amplitude: Amplitude) {
+        lock.withLock {
+            amplitudeInstances.remove(amplitude)
+        }
+    }
+
     @objc static func didEndEditing(_ notification: NSNotification) {
         guard let view = notification.object as? UIView else { return }
         // Text fields in SwiftUI are identifiable only after the text field is edited.
