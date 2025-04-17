@@ -15,6 +15,12 @@ class UIKitScreenViews {
         swizzleViewDidAppear
     }
 
+    static func unregister(_ amplitude: Amplitude) {
+        lock.withLock {
+            amplitudes.remove(amplitude)
+        }
+    }
+
     private static let swizzleViewDidAppear: Void = {
         let controllerClass = UIViewController.self
         let originalSelector = #selector(UIViewController.viewDidAppear(_:))

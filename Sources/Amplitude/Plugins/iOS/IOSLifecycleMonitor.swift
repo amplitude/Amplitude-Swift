@@ -124,6 +124,15 @@ class IOSLifecycleMonitor: UtilityPlugin {
     private var currentTimestamp: Int64 {
         return Int64(NSDate().timeIntervalSince1970 * 1000)
     }
+
+    override func teardown() {
+        super.teardown()
+
+        if let amplitude {
+            UIKitScreenViews.unregister(amplitude)
+            UIKitElementInteractions.unregister(amplitude)
+        }
+    }
 }
 
 #endif
