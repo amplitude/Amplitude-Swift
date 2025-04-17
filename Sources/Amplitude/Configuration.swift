@@ -8,6 +8,27 @@
 import Foundation
 
 public class Configuration {
+
+    public struct Defaults {
+        public static let instanceName = Constants.Configuration.DEFAULT_INSTANCE
+        public static let flushQueueSize = Constants.Configuration.FLUSH_QUEUE_SIZE
+        public static let flushIntervalMillis = Constants.Configuration.FLUSH_INTERVAL_MILLIS
+        public static let flushMaxRetries = Constants.Configuration.FLUSH_MAX_RETRIES
+        public static let logLevel = LogLevelEnum.WARN
+        public static let minTimeBetweenSessionsMillis = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS
+        public static let identifyBatchIntervalMillis = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS
+        public static let serverZone = ServerZone.US
+        public static let optOut = false
+        public static let useBatch = false
+        public static let enableCoppaControl = false
+        public static let flushEventsOnClose = true
+        public static let maxQueuedEventCount = -1
+        public static let autocaptureOptions: AutocaptureOptions = .sessions
+        public static let migrateLegacyData = true
+        public static let enableRemoteConfig = false
+        public static let trackingOptions = TrackingOptions()
+    }
+
     public internal(set) var apiKey: String
     public var flushQueueSize: Int
     public var flushIntervalMillis: Int
@@ -50,35 +71,36 @@ public class Configuration {
     internal let diagonostics: Diagnostics
     public var maxQueuedEventCount = -1
     var optOutChanged: ((Bool) -> Void)?
+    public let enableRemoteConfig: Bool
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
     public convenience init(
         apiKey: String,
-        flushQueueSize: Int = Constants.Configuration.FLUSH_QUEUE_SIZE,
-        flushIntervalMillis: Int = Constants.Configuration.FLUSH_INTERVAL_MILLIS,
-        instanceName: String = "",
-        optOut: Bool = false,
+        flushQueueSize: Int = Defaults.flushQueueSize,
+        flushIntervalMillis: Int = Defaults.flushIntervalMillis,
+        instanceName: String = Defaults.instanceName,
+        optOut: Bool = Defaults.optOut,
         storageProvider: (any Storage)? = nil,
         identifyStorageProvider: (any Storage)? = nil,
-        logLevel: LogLevelEnum = LogLevelEnum.WARN,
+        logLevel: LogLevelEnum = Defaults.logLevel,
         loggerProvider: any Logger = ConsoleLogger(),
         minIdLength: Int? = nil,
         partnerId: String? = nil,
         callback: EventCallback? = nil,
-        flushMaxRetries: Int = Constants.Configuration.FLUSH_MAX_RETRIES,
-        useBatch: Bool = false,
-        serverZone: ServerZone = ServerZone.US,
+        flushMaxRetries: Int = Defaults.flushMaxRetries,
+        useBatch: Bool = Defaults.useBatch,
+        serverZone: ServerZone = Defaults.serverZone,
         serverUrl: String? = nil,
         plan: Plan? = nil,
         ingestionMetadata: IngestionMetadata? = nil,
-        trackingOptions: TrackingOptions = TrackingOptions(),
-        enableCoppaControl: Bool = false,
-        flushEventsOnClose: Bool = true,
-        minTimeBetweenSessionsMillis: Int = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS,
+        trackingOptions: TrackingOptions = Defaults.trackingOptions,
+        enableCoppaControl: Bool = Defaults.enableCoppaControl,
+        flushEventsOnClose: Bool = Defaults.flushEventsOnClose,
+        minTimeBetweenSessionsMillis: Int = Defaults.minTimeBetweenSessionsMillis,
         // `trackingSessionEvents` has been replaced by `defaultTracking.sessions`
         defaultTracking: DefaultTrackingOptions,
-        identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
-        migrateLegacyData: Bool = true,
+        identifyBatchIntervalMillis: Int = Defaults.identifyBatchIntervalMillis,
+        migrateLegacyData: Bool = Defaults.migrateLegacyData,
         offline: Bool? = false
     ) {
         self.init(apiKey: apiKey,
@@ -112,33 +134,34 @@ public class Configuration {
 
     public init(
         apiKey: String,
-        flushQueueSize: Int = Constants.Configuration.FLUSH_QUEUE_SIZE,
-        flushIntervalMillis: Int = Constants.Configuration.FLUSH_INTERVAL_MILLIS,
-        instanceName: String = "",
-        optOut: Bool = false,
+        flushQueueSize: Int = Defaults.flushQueueSize,
+        flushIntervalMillis: Int = Defaults.flushIntervalMillis,
+        instanceName: String = Defaults.instanceName,
+        optOut: Bool = Defaults.optOut,
         storageProvider: (any Storage)? = nil,
         identifyStorageProvider: (any Storage)? = nil,
-        logLevel: LogLevelEnum = LogLevelEnum.WARN,
+        logLevel: LogLevelEnum = Defaults.logLevel,
         loggerProvider: any Logger = ConsoleLogger(),
         minIdLength: Int? = nil,
         partnerId: String? = nil,
         callback: EventCallback? = nil,
-        flushMaxRetries: Int = Constants.Configuration.FLUSH_MAX_RETRIES,
-        useBatch: Bool = false,
-        serverZone: ServerZone = ServerZone.US,
+        flushMaxRetries: Int = Defaults.flushMaxRetries,
+        useBatch: Bool = Defaults.useBatch,
+        serverZone: ServerZone = Defaults.serverZone,
         serverUrl: String? = nil,
         plan: Plan? = nil,
         ingestionMetadata: IngestionMetadata? = nil,
-        trackingOptions: TrackingOptions = TrackingOptions(),
-        enableCoppaControl: Bool = false,
-        flushEventsOnClose: Bool = true,
-        minTimeBetweenSessionsMillis: Int = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS,
+        trackingOptions: TrackingOptions = Defaults.trackingOptions,
+        enableCoppaControl: Bool = Defaults.enableCoppaControl,
+        flushEventsOnClose: Bool = Defaults.flushEventsOnClose,
+        minTimeBetweenSessionsMillis: Int = Defaults.minTimeBetweenSessionsMillis,
         // `trackingSessionEvents` has been replaced by `defaultTracking.sessions`
-        autocapture: AutocaptureOptions = .sessions,
-        identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS,
-        maxQueuedEventCount: Int = -1,
-        migrateLegacyData: Bool = true,
-        offline: Bool? = false
+        autocapture: AutocaptureOptions = Defaults.autocaptureOptions,
+        identifyBatchIntervalMillis: Int = Defaults.identifyBatchIntervalMillis,
+        maxQueuedEventCount: Int = Defaults.maxQueuedEventCount,
+        migrateLegacyData: Bool = Defaults.migrateLegacyData,
+        offline: Bool? = false,
+        enableRemoteConfig: Bool = Defaults.enableRemoteConfig
     ) {
         let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
@@ -174,6 +197,7 @@ public class Configuration {
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
         self.offline = offline
+        self.enableRemoteConfig = enableRemoteConfig
     }
 
     func isValid() -> Bool {
