@@ -12,7 +12,7 @@ import XCTest
 // swiftlint:disable force_cast
 final class BaseEventTests: XCTestCase {
     func testToString() {
-        let eventProperties: [String: Any?] = [
+        let eventProperties: [String: Any] = [
             "integer": 1,
             "string": "stringValue",
             "array": [1, 2, 3],
@@ -43,7 +43,7 @@ final class BaseEventTests: XCTestCase {
                 sourceVersion: "test-source-version"
             ),
             eventType: "test",
-            eventProperties: eventProperties)
+            eventProperties: eventProperties as [String: Any])
 
         let baseEventData = baseEvent.toString().data(using: .utf8)!
         let baseEventDict =
@@ -127,7 +127,7 @@ final class BaseEventTests: XCTestCase {
                 "integer": 1,
                 "string": nil,
                 "array": nil,
-            ]
+            ] as [String: Any?] as [String: Any]
         )
 
         let baseEventData = baseEvent.toString().data(using: .utf8)!
@@ -261,11 +261,11 @@ final class BaseEventTests: XCTestCase {
             1
         )
         XCTAssertEqual(
-            event?.eventProperties!["string"] as? String?,
+            event?.eventProperties!["string"] as? String,
             nil
         )
         XCTAssertEqual(
-            event?.eventProperties!["array"] as? [Double]?,
+            event?.eventProperties!["array"] as? [Double],
             nil
         )
     }

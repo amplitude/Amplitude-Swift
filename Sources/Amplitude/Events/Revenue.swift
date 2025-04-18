@@ -77,7 +77,7 @@ public class Revenue {
 
     public var receiptSig: String?
 
-    public var properties: [String: Any?]?
+    public var properties: [String: Any]?
 
     @discardableResult
     public func setReceipt(receipt: String, receiptSignature: String) -> Revenue {
@@ -92,7 +92,7 @@ public class Revenue {
 
     func toRevenueEvent() -> RevenueEvent {
         let event = RevenueEvent()
-        var eventProperties = properties ?? [String: Any?]()
+        var eventProperties = properties ?? [String: Any]()
         if productId != nil {
             eventProperties[Property.REVENUE_PRODUCT_ID.rawValue] = productId
         }
