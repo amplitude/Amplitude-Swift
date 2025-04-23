@@ -9,7 +9,6 @@ import XCTest
 
 @testable import AmplitudeSwift
 
-#if !os(watchOS)
 // swiftlint:disable force_cast
 final class NetworkTrackingPluginTest: XCTestCase {
 
@@ -66,6 +65,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         return try await session.data(for: request)
     }
 
+#if !os(watchOS)
     func testDefaultNetworkTrackingOptionsShouldCapture500() {
         setupAmplitude()
         FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
@@ -402,6 +402,17 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertEqual(event2.eventProperties?[Constants.AMP_NETWORK_URL_PROPERTY] as! String, url[2])
         XCTAssertEqual(event2.eventProperties?[Constants.AMP_NETWORK_STATUS_CODE_PROPERTY] as! Int, 500)
     }
+#else
+    func testShouldOptOutOnWatchOS() {
+        setupAmplitude()
+
+        let plugin = amplitude.timeline.plugins[PluginType.utility]?.plugins.first {
+            $0 is NetworkTrackingPlugin
+        } as! NetworkTrackingPlugin
+
+        XCTAssertTrue(plugin.optOut, "Should opt out on watchOS")
+    }
+#endif
 
     func wait(for interval: TimeInterval = 0.1) {
         let expectation = XCTestExpectation(description: "Wait for time interval")
@@ -414,7 +425,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
 final class NetworkTrackingOptionsInternalTest: XCTestCase {
     func testInitWithDefaultOptions() throws {
         let options = NetworkTrackingOptions.defaultOptions()
-        let internalOptions = try NetworkTrackingOptionsInternal(options: options)
+        let internalOptions = try CompiledNetworkTrackingOptions(options: options)
 
         XCTAssertEqual(internalOptions.captureRules.count, 1)
         XCTAssertEqual(internalOptions.ignoreHosts.hostSet.count, 0)
@@ -427,7 +438,7 @@ final class NetworkTrackingOptionsInternalTest: XCTestCase {
     func testHostWithPort() throws {
         let options = NetworkTrackingOptions(captureRules: [.init(hosts: ["*.example.com:8080"])])
 
-        let internalOptions = try NetworkTrackingOptionsInternal(options: options)
+        let internalOptions = try CompiledNetworkTrackingOptions(options: options)
         XCTAssertEqual(internalOptions.captureRules[0].hosts.hostPatterns.count, 1)
         XCTAssertEqual(internalOptions.captureRules[0].hosts.hostPatterns,
                        [try! NSRegularExpression(pattern: "^.*\\.example\\.com:8080$", options: [.caseInsensitive])])
@@ -445,7 +456,7 @@ final class NetworkTrackingOptionsInternalTest: XCTestCase {
             .init(hosts: ["*.test.com"], statusCodeRange: "500-599")
         ]
 
-        let internalOptions = try NetworkTrackingOptionsInternal(options: options)
+        let internalOptions = try CompiledNetworkTrackingOptions(options: options)
 
         XCTAssertEqual(internalOptions.ignoreHosts.hostSet.count, 1) // example.com
         XCTAssertEqual(internalOptions.ignoreHosts.hostSet, ["example.com"])
@@ -473,7 +484,7 @@ final class NetworkTrackingOptionsInternalTest: XCTestCase {
             .init(hosts: ["*.test.com"], statusCodeRange: "500-599")
         ]
 
-        let internalOptions = try NetworkTrackingOptionsInternal(options: options)
+        let internalOptions = try CompiledNetworkTrackingOptions(options: options)
 
         // Test exact host matching
         XCTAssertTrue(internalOptions.ignoreHosts.matches("example.com"))
@@ -497,7 +508,7 @@ final class NetworkTrackingOptionsInternalTest: XCTestCase {
             .init(hosts: ["*"], statusCodeRange: "0,400-499,500-599")
         ]
 
-        let internalOptions = try NetworkTrackingOptionsInternal(options: options)
+        let internalOptions = try CompiledNetworkTrackingOptions(options: options)
         let rule = internalOptions.captureRules[0]
 
         let expectedIndexSet = IndexSet(integer: 0).union(IndexSet(400...499)).union(IndexSet(500...599))
@@ -510,7 +521,7 @@ final class NetworkTrackingOptionsInternalTest: XCTestCase {
             .init(hosts: ["*"], statusCodeRange: "invalid")
         ]
 
-        XCTAssertThrowsError(try NetworkTrackingOptionsInternal(options: options)) { error in
+        XCTAssertThrowsError(try CompiledNetworkTrackingOptions(options: options)) { error in
             XCTAssertTrue(error is IndexSet.ParseError)
         }
     }
@@ -584,4 +595,3 @@ final class IndexSetExtensionTest: XCTestCase {
         }
     }
 }
-#endif

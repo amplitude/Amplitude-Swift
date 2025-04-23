@@ -36,9 +36,9 @@ public struct NetworkTrackingOptions {
 
 class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
 
-    var options: NetworkTrackingOptionsInternal?
-    var ruleCache: [String: NetworkTrackingOptionsInternal.CaptureRule?] = [:]
-    var optOut = false
+    var options: CompiledNetworkTrackingOptions?
+    var ruleCache: [String: CompiledNetworkTrackingOptions.CaptureRule?] = [:]
+    var optOut = true
 
     private let ruleCacheLock: NSLock = NSLock()
 
@@ -49,16 +49,21 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
     override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
 
-        NetworkSwizzler.shared.addListener(listener: self)
+#if os(watchOS)
+        logger?.warn(message: "NetworkTrackingPlugin is not supported on watchOS yet.")
+        optOut = true
+#else
         let originalOptions = amplitude.configuration.networkTrackingOptions
 
         do {
-            options = try NetworkTrackingOptionsInternal(options: originalOptions)
+            options = try CompiledNetworkTrackingOptions(options: originalOptions)
+            NetworkSwizzler.shared.addListener(listener: self)
             optOut = false
         } catch {
             logger?.error(message: "NetworkTrackingPlugin: Failed to parse options: \(originalOptions), error: \(error.localizedDescription)")
             optOut = true
         }
+#endif
     }
 
     override func teardown() {
@@ -67,7 +72,7 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
         NetworkSwizzler.shared.removeListener(listener: self)
     }
 
-    func ruleForHost(_ host: String) -> NetworkTrackingOptionsInternal.CaptureRule? {
+    func ruleForHost(_ host: String) -> CompiledNetworkTrackingOptions.CaptureRule? {
         guard let options = options else { return nil }
 
         ruleCacheLock.lock()
@@ -77,7 +82,7 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
             return rule
         }
 
-        let rule: NetworkTrackingOptionsInternal.CaptureRule? = if options.ignoreHosts.matches(host) {
+        let rule: CompiledNetworkTrackingOptions.CaptureRule? = if options.ignoreHosts.matches(host) {
             nil
         } else {
             options.captureRules.last { rule in
@@ -156,7 +161,7 @@ extension URLSessionTask {
     }
 }
 
-class NetworkTrackingOptionsInternal {
+class CompiledNetworkTrackingOptions {
 
     class WildcardHosts {
         let hostSet: Set<String>

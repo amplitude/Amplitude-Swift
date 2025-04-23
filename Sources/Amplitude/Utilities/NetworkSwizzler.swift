@@ -31,17 +31,15 @@ class NetworkSwizzler {
     }
 
     func addListener(listener: NetworkTaskListener) {
-        listenerLock.lock()
-        defer { listenerLock.unlock() }
-
-        listeners.append(listener)
+        listenerLock.withLock {
+            listeners.append(listener)
+        }
     }
 
     func removeListener(listener: NetworkTaskListener) {
-        listenerLock.lock()
-        defer { listenerLock.unlock() }
-
-        listeners.removeAll { $0 === listener }
+        listenerLock.withLock {
+            listeners.removeAll { $0 === listener }
+        }
     }
 
     fileprivate func onTaskResume(task: URLSessionTask) {

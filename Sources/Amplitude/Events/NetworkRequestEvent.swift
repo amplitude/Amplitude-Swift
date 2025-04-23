@@ -33,37 +33,20 @@ public class NetworkRequestEvent: BaseEvent {
 
         var eventProperties: [String: Any] = [Constants.AMP_NETWORK_URL_PROPERTY: url.absoluteString,
                                               Constants.AMP_NETWORK_REQUEST_METHOD_PROPERTY: method]
-        if let statusCode = statusCode {
-            eventProperties[Constants.AMP_NETWORK_STATUS_CODE_PROPERTY] = statusCode
-        }
-        if let query = query {
-            eventProperties[Constants.AMP_NETWORK_URL_QUERY_PROPERTY] = query
-        }
-        if let fragment = fragment {
-            eventProperties[Constants.AMP_NETWORK_URL_FRAGMENT_PROPERTY] = fragment
-        }
+        eventProperties[Constants.AMP_NETWORK_STATUS_CODE_PROPERTY] = statusCode
+        eventProperties[Constants.AMP_NETWORK_URL_QUERY_PROPERTY] = query
+        eventProperties[Constants.AMP_NETWORK_URL_FRAGMENT_PROPERTY] = fragment
         if let error = error as? NSError {
             eventProperties[Constants.AMP_NETWORK_ERROR_CODE_PROPERTY] = error.code
             eventProperties[Constants.AMP_NETWORK_ERROR_MESSAGE_PROPERTY] = error.localizedDescription
         }
-        if let startTime = startTime {
-            eventProperties[Constants.AMP_NETWORK_START_TIME_PROPERTY] = startTime
+        eventProperties[Constants.AMP_NETWORK_START_TIME_PROPERTY] = startTime
+        eventProperties[Constants.AMP_NETWORK_COMPLETION_TIME_PROPERTY] = completionTime
+        if let completionTime = completionTime, let startTime = startTime {
+            eventProperties[Constants.AMP_NETWORK_DURATION_PROPERTY] = completionTime - startTime
         }
-        if let completionTime = completionTime {
-            eventProperties[Constants.AMP_NETWORK_COMPLETION_TIME_PROPERTY] = completionTime
-
-            if let startTime = startTime {
-                eventProperties[Constants.AMP_NETWORK_DURATION_PROPERTY] = completionTime - startTime
-            }
-        }
-
-        if let requestBodySize = requestBodySize {
-            eventProperties[Constants.AMP_NETWORK_REQUEST_BODY_SIZE_PROPERTY] = requestBodySize
-        }
-        if let responseBodySize = responseBodySize {
-            eventProperties[Constants.AMP_NETWORK_RESPONSE_BODY_SIZE_PROPERTY] = responseBodySize
-        }
-
+        eventProperties[Constants.AMP_NETWORK_REQUEST_BODY_SIZE_PROPERTY] = requestBodySize
+        eventProperties[Constants.AMP_NETWORK_RESPONSE_BODY_SIZE_PROPERTY] = responseBodySize
         self.init(eventType: Constants.AMP_NETWORK_TRACKING_EVENT, eventProperties: eventProperties)
     }
 }

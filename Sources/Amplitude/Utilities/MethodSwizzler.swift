@@ -20,7 +20,7 @@ final class MethodSwizzler {
     private static let lock = NSLock()
 
     @discardableResult
-    static func swizzleInstanceMethod(for cls: AnyClass, originalSelector: Selector, swizzledSelector: Selector) -> Bool {
+    static func swizzleInstanceMethod(for cls: AnyClass, originalSelector: Selector, swizzledSelector: Selector, logger: (any Logger)? = nil) -> Bool {
         lock.lock()
         defer { lock.unlock() }
 
@@ -29,12 +29,12 @@ final class MethodSwizzler {
         let swizzledSelName = NSStringFromSelector(swizzledSelector)
 
         guard let originalMethod = class_getInstanceMethod(cls, originalSelector) else {
-            print("Failed to swizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the original method was not found")
+            logger?.error(message: "Failed to swizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the original method was not found")
             return false
         }
 
         guard let swizzledMethod = class_getInstanceMethod(cls, swizzledSelector) else {
-            print("Failed to swizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the swizzled method was not found")
+            logger?.error(message: "Failed to swizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the swizzled method was not found")
             return false
         }
 
@@ -46,7 +46,7 @@ final class MethodSwizzler {
             methodChain = MethodChain(originalIMP: originalIMP, swizzledSelectors: [])
         } else {
             guard methodChain?.swizzledSelectors.contains(swizzledSelector) != true else {
-                print("Failed to swizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the method has already been swizzled")
+                logger?.error(message: "Failed to swizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the method has already been swizzled")
                 return false
             }
         }
@@ -77,7 +77,7 @@ final class MethodSwizzler {
     }
 
     @discardableResult
-    static func unswizzleInstanceMethod(for cls: AnyClass, originalSelector: Selector, swizzledSelector: Selector) -> Bool {
+    static func unswizzleInstanceMethod(for cls: AnyClass, originalSelector: Selector, swizzledSelector: Selector, logger: (any Logger)? = nil) -> Bool {
         lock.lock()
         defer { lock.unlock() }
 
@@ -87,18 +87,18 @@ final class MethodSwizzler {
 
         guard var classSwizzles = swizzleChains[classKey],
               var methodChain = classSwizzles[originalSelName] else {
-            print("Failed to unswizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the method was not swizzled")
+            logger?.error(message: "Failed to unswizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the method was not swizzled")
             return false
         }
 
         guard let index = methodChain.swizzledSelectors.firstIndex(of: swizzledSelector) else {
-            print("Failed to unswizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the method was not swizzled")
+            logger?.error(message: "Failed to unswizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the method was not swizzled")
             return false
         }
 
         guard let originalMethod = class_getInstanceMethod(cls, originalSelector),
               let swizzledMethod = class_getInstanceMethod(cls, swizzledSelector) else {
-            print("Failed to unswizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the method was not found")
+            logger?.error(message: "Failed to unswizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the method was not found")
             return false
         }
 
@@ -108,7 +108,7 @@ final class MethodSwizzler {
         } else {
             let nextSwizzledSelector = methodChain.swizzledSelectors[index + 1]
             guard let nextSwizzledMethod = class_getInstanceMethod(cls, nextSwizzledSelector) else {
-                print("Failed to unswizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the next swizzled method was not found")
+                logger?.error(message: "Failed to unswizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the next swizzled method was not found")
                 return false
             }
             method_exchangeImplementations(swizzledMethod, nextSwizzledMethod)
