@@ -16,6 +16,16 @@ final class NetworkTrackingPluginTest: XCTestCase {
     private var storageMem: FakeInMemoryStorage!
     private var eventCollector = EventCollectorPlugin()
 
+    static override func setUp() {
+        super.setUp()
+        URLSessionConfiguration.enableMockDefault()
+    }
+
+    static override func tearDown() {
+        URLSessionConfiguration.disableMockDefault()
+        super.tearDown()
+    }
+
     override func setUp() {
         super.setUp()
         storageMem = FakeInMemoryStorage()
@@ -26,13 +36,12 @@ final class NetworkTrackingPluginTest: XCTestCase {
         eventCollector.events.removeAll()
     }
 
-    func setupAmplitude(with options: NetworkTrackingOptions = NetworkTrackingOptions.defaultOptions()) {
+    func setupAmplitude(with options: NetworkTrackingOptions = NetworkTrackingOptions.default) {
         let configuration = Configuration(apiKey: "test-api-key",
                                           storageProvider: storageMem,
                                           flushMaxRetries: 0,
                                           autocapture: .networkTracking,
                                           networkTrackingOptions: options)
-        configuration.urlProtocolClass = FakeURLProtocol.self
         amplitude = Amplitude(configuration: configuration)
         amplitude.add(plugin: eventCollector)
     }
@@ -128,7 +137,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
     }
 
     func testNetworkTrackingOptionsIgnoreAmplitudeRequestsFalse() {
-        var options = NetworkTrackingOptions.defaultOptions()
+        var options = NetworkTrackingOptions.default
         options.ignoreAmplitudeRequests = false
         setupAmplitude(with: options)
 
@@ -138,7 +147,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         amplitude.flush()
 
         amplitude.waitForTrackingQueue()
-        wait(for: 0.1)
+        wait()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2)
@@ -147,7 +156,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
     }
 
     func testNetworkTrackingOptionsIgnoreHosts() {
-        var options = NetworkTrackingOptions.defaultOptions()
+        var options = NetworkTrackingOptions.default
         options.ignoreHosts = ["*.example.com", "example2.com"]
         setupAmplitude(with: options)
 
@@ -170,7 +179,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
     }
 
     func testNetworkTrackingOptionsCaptureHosts() {
-        var options = NetworkTrackingOptions.defaultOptions()
+        var options = NetworkTrackingOptions.default
         options.captureRules = [.init(hosts: ["*.example.com", "example2.com"])]
         setupAmplitude(with: options)
 
@@ -204,7 +213,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
     }
 
     func testNetworkTrackingOptionsCaptureStatusCode() {
-        var options = NetworkTrackingOptions.defaultOptions()
+        var options = NetworkTrackingOptions.default
         options.captureRules = [.init(hosts: ["*"], statusCodeRange: "413,500-599")]
         setupAmplitude(with: options)
 
@@ -238,7 +247,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
     }
 
     func testNetworkTrackingOptionsCaptureLocalError() {
-        var options = NetworkTrackingOptions.defaultOptions()
+        var options = NetworkTrackingOptions.default
         options.captureRules = [.init(hosts: ["*"], statusCodeRange: "0")]
         setupAmplitude(with: options)
 
@@ -424,7 +433,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
 // swiftlint:disable force_try
 final class NetworkTrackingOptionsInternalTest: XCTestCase {
     func testInitWithDefaultOptions() throws {
-        let options = NetworkTrackingOptions.defaultOptions()
+        let options = NetworkTrackingOptions.default
         let internalOptions = try CompiledNetworkTrackingOptions(options: options)
 
         XCTAssertEqual(internalOptions.captureRules.count, 1)
@@ -448,7 +457,7 @@ final class NetworkTrackingOptionsInternalTest: XCTestCase {
     }
 
     func testInitWithCustomOptions() throws {
-        var options = NetworkTrackingOptions.defaultOptions()
+        var options = NetworkTrackingOptions.default
         options.ignoreHosts = ["example.com", "*.test.com"]
         options.ignoreAmplitudeRequests = false
         options.captureRules = [
@@ -477,7 +486,7 @@ final class NetworkTrackingOptionsInternalTest: XCTestCase {
     }
 
     func testHostMatching() throws {
-        var options = NetworkTrackingOptions.defaultOptions()
+        var options = NetworkTrackingOptions.default
         options.ignoreHosts = ["example.com", "*.test.com"]
         options.captureRules = [
             .init(hosts: ["api.example.com"], statusCodeRange: "400-499"),
@@ -503,7 +512,7 @@ final class NetworkTrackingOptionsInternalTest: XCTestCase {
     }
 
     func testStatusCodeRangeParsing() throws {
-        var options = NetworkTrackingOptions.defaultOptions()
+        var options = NetworkTrackingOptions.default
         options.captureRules = [
             .init(hosts: ["*"], statusCodeRange: "0,400-499,500-599")
         ]
@@ -516,7 +525,7 @@ final class NetworkTrackingOptionsInternalTest: XCTestCase {
     }
 
     func testInvalidStatusCodeRange() {
-        var options = NetworkTrackingOptions.defaultOptions()
+        var options = NetworkTrackingOptions.default
         options.captureRules = [
             .init(hosts: ["*"], statusCodeRange: "invalid")
         ]

@@ -29,7 +29,7 @@ public struct NetworkTrackingOptions {
         self.ignoreAmplitudeRequests = ignoreAmplitudeRequests
     }
 
-    public static func defaultOptions() -> NetworkTrackingOptions {
+    public static var `default`: NetworkTrackingOptions {
         return NetworkTrackingOptions(captureRules: [CaptureRule(hosts: ["*"])])
     }
 }

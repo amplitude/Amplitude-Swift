@@ -26,7 +26,7 @@ public class Configuration {
         public static let autocaptureOptions: AutocaptureOptions = .sessions
         public static let migrateLegacyData = true
         public static let trackingOptions = TrackingOptions()
-        public static let networkTrackingOptions = NetworkTrackingOptions.defaultOptions()
+        public static let networkTrackingOptions = NetworkTrackingOptions.default
     }
 
     public internal(set) var apiKey: String
@@ -72,9 +72,6 @@ public class Configuration {
     internal let diagonostics: Diagnostics
     public var maxQueuedEventCount = -1
     var optOutChanged: ((Bool) -> Void)?
-
-    // For Unit Test
-    var urlProtocolClass: URLProtocol.Type?
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
     public convenience init(

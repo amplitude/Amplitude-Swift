@@ -85,3 +85,46 @@ class FakeURLProtocol: URLProtocol {
         mockResponses.removeAll()
     }
 }
+
+extension URLSessionConfiguration {
+
+    static func enableMockDefault() {
+        guard !_isSwizzled else { return }
+
+        let metaClass: AnyClass = object_getClass(URLSessionConfiguration.self)!
+        let originalSel = #selector(getter: URLSessionConfiguration.default)
+        let swizzledSel = #selector(URLSessionConfiguration._mock_default)
+
+        guard let original = class_getClassMethod(metaClass, originalSel),
+              let swizzled = class_getClassMethod(metaClass, swizzledSel) else {
+            preconditionFailure("Unable to locate methods for swizzling")
+        }
+
+        method_exchangeImplementations(original, swizzled)
+        _original = original
+        _swizzled = swizzled
+        _isSwizzled = true
+    }
+
+    static func disableMockDefault() {
+        guard _isSwizzled,
+              let original = _original,
+              let swizzled = _swizzled else { return }
+
+        method_exchangeImplementations(swizzled, original)
+        _original = nil
+        _swizzled = nil
+        _isSwizzled = false
+    }
+
+    private static var _isSwizzled = false
+    private static var _original: Method?
+    private static var _swizzled: Method?
+
+    /// The swapped-in implementation.
+    @objc class func _mock_default() -> URLSessionConfiguration {
+        let cfg = _mock_default()
+        cfg.protocolClasses = [FakeURLProtocol.self]
+        return cfg
+    }
+}
