@@ -10,21 +10,10 @@ import ObjectiveC.runtime
 
 final class MethodSwizzler {
 
-    private struct MethodChain {
-        var originalIMP: IMP
-        var swizzledSelectors: [Selector]
-    }
-
-    private static var swizzleChains: [ObjectIdentifier: [String: MethodChain]] = [:]
-
     private static let lock = NSLock()
 
     @discardableResult
     static func swizzleInstanceMethod(for cls: AnyClass, originalSelector: Selector, swizzledSelector: Selector, logger: (any Logger)? = nil) -> Bool {
-        lock.lock()
-        defer { lock.unlock() }
-
-        let classKey = ObjectIdentifier(cls)
         let originalSelName = NSStringFromSelector(originalSelector)
         let swizzledSelName = NSStringFromSelector(swizzledSelector)
 
@@ -38,18 +27,7 @@ final class MethodSwizzler {
             return false
         }
 
-        var classSwizzles = swizzleChains[classKey] ?? [:]
-        var methodChain = classSwizzles[originalSelName]
         let originalIMP = method_getImplementation(originalMethod)
-
-        if methodChain == nil {
-            methodChain = MethodChain(originalIMP: originalIMP, swizzledSelectors: [])
-        } else {
-            guard methodChain?.swizzledSelectors.contains(swizzledSelector) != true else {
-                logger?.error(message: "Failed to swizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the method has already been swizzled")
-                return false
-            }
-        }
 
         let methodAdded = class_addMethod(
             cls,
@@ -69,32 +47,13 @@ final class MethodSwizzler {
             method_exchangeImplementations(originalMethod, swizzledMethod)
         }
 
-        methodChain?.swizzledSelectors.append(swizzledSelector)
-        classSwizzles[originalSelName] = methodChain
-        swizzleChains[classKey] = classSwizzles
-
         return true
     }
 
     @discardableResult
     static func unswizzleInstanceMethod(for cls: AnyClass, originalSelector: Selector, swizzledSelector: Selector, logger: (any Logger)? = nil) -> Bool {
-        lock.lock()
-        defer { lock.unlock() }
-
-        let classKey = ObjectIdentifier(cls)
         let originalSelName = NSStringFromSelector(originalSelector)
         let swizzledSelName = NSStringFromSelector(swizzledSelector)
-
-        guard var classSwizzles = swizzleChains[classKey],
-              var methodChain = classSwizzles[originalSelName] else {
-            logger?.error(message: "Failed to unswizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the method was not swizzled")
-            return false
-        }
-
-        guard let index = methodChain.swizzledSelectors.firstIndex(of: swizzledSelector) else {
-            logger?.error(message: "Failed to unswizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the method was not swizzled")
-            return false
-        }
 
         guard let originalMethod = class_getInstanceMethod(cls, originalSelector),
               let swizzledMethod = class_getInstanceMethod(cls, swizzledSelector) else {
@@ -102,21 +61,7 @@ final class MethodSwizzler {
             return false
         }
 
-        let isLastSwizzle = index == methodChain.swizzledSelectors.count - 1
-        if isLastSwizzle {
-            method_exchangeImplementations(originalMethod, swizzledMethod)
-        } else {
-            let nextSwizzledSelector = methodChain.swizzledSelectors[index + 1]
-            guard let nextSwizzledMethod = class_getInstanceMethod(cls, nextSwizzledSelector) else {
-                logger?.error(message: "Failed to unswizzle \(originalSelName) with \(swizzledSelName) on \(cls) because the next swizzled method was not found")
-                return false
-            }
-            method_exchangeImplementations(swizzledMethod, nextSwizzledMethod)
-        }
-
-        methodChain.swizzledSelectors.remove(at: index)
-        classSwizzles[originalSelName] = methodChain
-        swizzleChains[classKey] = classSwizzles
+        method_exchangeImplementations(originalMethod, swizzledMethod)
 
         return true
     }

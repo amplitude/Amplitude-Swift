@@ -17,40 +17,52 @@ class NetworkSwizzler {
     static let shared = NetworkSwizzler()
 
     private var listeners: [NetworkTaskListener] = []
-
-    private let listenerLock = NSLock()
+    private var swizzled: Bool = false
+    private let lock = NSLock()
 
     func swizzle() {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard !swizzled else { return }
+
+        swizzled = true
         MethodSwizzler.swizzleInstanceMethod(for: URLSessionTask.self, originalSelector: #selector(URLSessionTask.resume), swizzledSelector: #selector(URLSessionTask.amp_resume))
         MethodSwizzler.swizzleInstanceMethod(for: URLSessionTask.self, originalSelector: NSSelectorFromString("setState:"), swizzledSelector: #selector(URLSessionTask.amp_setState))
     }
 
     func unswizzle() {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard !swizzled else { return }
+        swizzled = false
+
         MethodSwizzler.unswizzleInstanceMethod(for: URLSessionTask.self, originalSelector: #selector(URLSessionTask.resume), swizzledSelector: #selector(URLSessionTask.amp_resume))
         MethodSwizzler.unswizzleInstanceMethod(for: URLSessionTask.self, originalSelector: NSSelectorFromString("setState:"), swizzledSelector: #selector(URLSessionTask.amp_setState))
     }
 
     func addListener(listener: NetworkTaskListener) {
-        listenerLock.withLock {
+        lock.withLock {
             listeners.append(listener)
         }
     }
 
     func removeListener(listener: NetworkTaskListener) {
-        listenerLock.withLock {
+        lock.withLock {
             listeners.removeAll { $0 === listener }
         }
     }
 
     fileprivate func onTaskResume(task: URLSessionTask) {
-        let listeners = listenerLock.withLock { return self.listeners }
+        let listeners = lock.withLock { return self.listeners }
         for listener in listeners {
             listener.onTaskResume(task)
         }
     }
 
     fileprivate func onTaskSetState(task: URLSessionTask, state: URLSessionTask.State) {
-        let listeners = listenerLock.withLock { return self.listeners }
+        let listeners = lock.withLock { return self.listeners }
         for listener in listeners {
             listener.onTask(task, setState: state)
         }

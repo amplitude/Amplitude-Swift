@@ -382,7 +382,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         let rule3 = plugin.ruleForHost("example.com")
         XCTAssertNil(rule3)
 
-        FakeURLProtocol.mockResponses = [.init(statusCode: 400), .init(statusCode: 500), .init(statusCode: 500)]
+        FakeURLProtocol.mockResponses = [.init(statusCode: 400), .init(statusCode: 500), .init(statusCode: 500, delay: 0.1)]
 
         let url = ["https://api.example.com", "https://api.example.com", "https://api2.example.com"]
         let expectations = (0..<3).map { _ in XCTestExpectation(description: "Network request finished") }
