@@ -25,6 +25,7 @@ public class Configuration {
         public static let maxQueuedEventCount = -1
         public static let autocaptureOptions: AutocaptureOptions = .sessions
         public static let migrateLegacyData = true
+        public static let enableAutoCaptureRemoteConfig = true
         public static let trackingOptions = TrackingOptions()
         public static let networkTrackingOptions = NetworkTrackingOptions.default
     }
@@ -72,6 +73,7 @@ public class Configuration {
     internal let diagonostics: Diagnostics
     public var maxQueuedEventCount = -1
     var optOutChanged: ((Bool) -> Void)?
+    public let enableAutoCaptureRemoteConfig: Bool
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
     public convenience init(
@@ -163,7 +165,8 @@ public class Configuration {
         maxQueuedEventCount: Int = Defaults.maxQueuedEventCount,
         migrateLegacyData: Bool = Defaults.migrateLegacyData,
         offline: Bool? = false,
-        networkTrackingOptions: NetworkTrackingOptions = Defaults.networkTrackingOptions
+        networkTrackingOptions: NetworkTrackingOptions = Defaults.networkTrackingOptions,
+        enableAutoCaptureRemoteConfig: Bool = Defaults.enableAutoCaptureRemoteConfig
     ) {
         let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
@@ -200,6 +203,7 @@ public class Configuration {
         self.loggerProvider.logLevel = logLevel.rawValue
         self.offline = offline
         self.networkTrackingOptions = networkTrackingOptions
+        self.enableAutoCaptureRemoteConfig = enableAutoCaptureRemoteConfig
     }
 
     func isValid() -> Bool {

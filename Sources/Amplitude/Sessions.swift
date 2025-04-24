@@ -4,10 +4,11 @@ import Foundation
 public class Sessions {
     private let configuration: Configuration
     private let storage: Storage
-    private let logger: (any Logger)?
     private let timeline: Timeline
     private let context: AmplitudeContext
     private var _sessionId: Int64 = -1
+    private(set) var trackSessionEvents: Bool
+    private var remoteConfigSubscription: Any?
     private(set) var sessionId: Int64 {
         get {
             sessionIdLock.withLock {
@@ -21,7 +22,7 @@ public class Sessions {
             do {
                 try storage.write(key: StorageKey.PREVIOUS_SESSION_ID, value: _sessionId)
             } catch {
-                logger?.warn(message: "Can't write PREVIOUS_SESSION_ID to storage: \(error)")
+                context.logger.warn(message: "Can't write PREVIOUS_SESSION_ID to storage: \(error)")
             }
             timeline.apply {
                 $0.onSessionIdChanged(_sessionId)
@@ -39,7 +40,7 @@ public class Sessions {
             do {
                 try storage.write(key: StorageKey.LAST_EVENT_ID, value: _lastEventId)
             } catch {
-                logger?.warn(message: "Can't write LAST_EVENT_ID to storage: \(error)")
+                context.logger.warn(message: "Can't write LAST_EVENT_ID to storage: \(error)")
             }
         }
     }
@@ -52,7 +53,7 @@ public class Sessions {
             do {
                 try storage.write(key: StorageKey.LAST_EVENT_TIME, value: _lastEventTime)
             } catch {
-                logger?.warn(message: "Can't write LAST_EVENT_TIME to storage: \(error)")
+                context.logger.warn(message: "Can't write LAST_EVENT_TIME to storage: \(error)")
             }
         }
     }
@@ -61,11 +62,20 @@ public class Sessions {
         configuration = amplitude.configuration
         context = amplitude.amplitudeContext
         storage = amplitude.storage
-        logger = amplitude.logger
         timeline = amplitude.timeline
         self._sessionId = amplitude.storage.read(key: .PREVIOUS_SESSION_ID) ?? -1
         self._lastEventId = amplitude.storage.read(key: .LAST_EVENT_ID) ?? 0
         self._lastEventTime = amplitude.storage.read(key: .LAST_EVENT_TIME) ?? -1
+        trackSessionEvents = configuration.autocapture.contains(.sessions)
+        if configuration.enableAutoCaptureRemoteConfig {
+            remoteConfigSubscription = context
+                .remoteConfigClient
+                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self] config, _, _ in
+                    if let self, let sessions = config?["sessions"] as? Bool {
+                        trackSessionEvents = sessions
+                    }
+                }
+        }
     }
 
     func processEvent(event: BaseEvent, inForeground: Bool) -> [BaseEvent] {
@@ -135,22 +145,21 @@ public class Sessions {
 
     public func startNewSession(timestamp: Int64) -> [BaseEvent] {
         var sessionEvents: [BaseEvent] = Array()
-        let trackingSessionEvents = configuration.autocapture.contains(.sessions)
 
         // end previous session
-        if trackingSessionEvents && self.sessionId >= 0 {
+        if trackSessionEvents, sessionId >= 0 {
             let sessionEndEvent = BaseEvent(
-                timestamp: self.lastEventTime > 0 ? self.lastEventTime : nil,
-                sessionId: self.sessionId,
+                timestamp: lastEventTime > 0 ? lastEventTime : nil,
+                sessionId: sessionId,
                 eventType: Constants.AMP_SESSION_END_EVENT
             )
             sessionEvents.append(sessionEndEvent)
         }
 
         // start new session
-        self.sessionId = timestamp
-        self.lastEventTime = timestamp
-        if trackingSessionEvents {
+        sessionId = timestamp
+        lastEventTime = timestamp
+        if trackSessionEvents {
             let sessionStartEvent = BaseEvent(
                 timestamp: timestamp,
                 sessionId: timestamp,
@@ -164,18 +173,23 @@ public class Sessions {
 
     public func endCurrentSession() -> [BaseEvent] {
         var sessionEvents: [BaseEvent] = Array()
-        let trackingSessionEvents = configuration.autocapture.contains(.sessions)
 
-        if trackingSessionEvents && self.sessionId >= 0 {
+        if trackSessionEvents, sessionId >= 0 {
             let sessionEndEvent = BaseEvent(
-                timestamp: self.lastEventTime > 0 ? self.lastEventTime : nil,
-                sessionId: self.sessionId,
+                timestamp: lastEventTime > 0 ? lastEventTime : nil,
+                sessionId: sessionId,
                 eventType: Constants.AMP_SESSION_END_EVENT
             )
             sessionEvents.append(sessionEndEvent)
         }
 
-        self.sessionId = -1
+        sessionId = -1
         return sessionEvents
+    }
+
+    deinit {
+        if let remoteConfigSubscription {
+            context.remoteConfigClient.unsubscribe(remoteConfigSubscription)
+        }
     }
 }
