@@ -11,4 +11,14 @@ public struct AutocaptureOptions: OptionSet {
     public static let appLifecycles       = AutocaptureOptions(rawValue: 1 << 1)
     public static let screenViews         = AutocaptureOptions(rawValue: 1 << 2)
     public static let elementInteractions = AutocaptureOptions(rawValue: 1 << 3)
+    /// Won't work on watchOS
+    public static let networkTracking     = AutocaptureOptions(rawValue: 1 << 4)
+
+    public static let all: AutocaptureOptions = [
+        .sessions,
+        .appLifecycles,
+        .screenViews,
+        .elementInteractions,
+        .networkTracking
+    ]
 }

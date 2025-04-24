@@ -134,12 +134,17 @@ public class Amplitude {
         _ = add(plugin: AnalyticsConnectorPlugin())
         _ = add(plugin: AnalyticsConnectorIdentityPlugin())
         _ = add(plugin: AmplitudeDestinationPlugin())
+        _ = add(plugin: NetworkTrackingPlugin())
 
         // Monitor changes to optOut to send to Timeline
         configuration.optOutChanged = { [weak self] optOut in
             self?.timeline.apply {
                 $0.onOptOutChanged(optOut)
             }
+        }
+
+        if configuration.autocapture.contains(.networkTracking) {
+            NetworkSwizzler.shared.swizzle()
         }
 
         trackingQueue.async { [self] in

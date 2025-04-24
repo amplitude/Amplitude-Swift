@@ -26,6 +26,7 @@ public class Configuration {
         public static let autocaptureOptions: AutocaptureOptions = .sessions
         public static let migrateLegacyData = true
         public static let trackingOptions = TrackingOptions()
+        public static let networkTrackingOptions = NetworkTrackingOptions.default
     }
 
     public internal(set) var apiKey: String
@@ -66,6 +67,7 @@ public class Configuration {
         }
     }
     public internal(set) var autocapture: AutocaptureOptions
+    public internal(set) var networkTrackingOptions: NetworkTrackingOptions
     public var offline: Bool?
     internal let diagonostics: Diagnostics
     public var maxQueuedEventCount = -1
@@ -99,7 +101,8 @@ public class Configuration {
         defaultTracking: DefaultTrackingOptions,
         identifyBatchIntervalMillis: Int = Defaults.identifyBatchIntervalMillis,
         migrateLegacyData: Bool = Defaults.migrateLegacyData,
-        offline: Bool? = false
+        offline: Bool? = false,
+        networkTrackingOptions: NetworkTrackingOptions = Defaults.networkTrackingOptions
     ) {
         self.init(apiKey: apiKey,
             flushQueueSize: flushQueueSize,
@@ -126,7 +129,8 @@ public class Configuration {
             autocapture: defaultTracking.autocaptureOptions,
             identifyBatchIntervalMillis: identifyBatchIntervalMillis,
             migrateLegacyData: migrateLegacyData,
-            offline: offline)
+            offline: offline,
+            networkTrackingOptions: networkTrackingOptions)
         self.defaultTracking = defaultTracking
     }
 
@@ -158,7 +162,8 @@ public class Configuration {
         identifyBatchIntervalMillis: Int = Defaults.identifyBatchIntervalMillis,
         maxQueuedEventCount: Int = Defaults.maxQueuedEventCount,
         migrateLegacyData: Bool = Defaults.migrateLegacyData,
-        offline: Bool? = false
+        offline: Bool? = false,
+        networkTrackingOptions: NetworkTrackingOptions = Defaults.networkTrackingOptions
     ) {
         let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
@@ -194,6 +199,7 @@ public class Configuration {
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
         self.offline = offline
+        self.networkTrackingOptions = networkTrackingOptions
     }
 
     func isValid() -> Bool {
