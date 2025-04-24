@@ -1,7 +1,7 @@
 import Foundation
 
 @objc(AMPAutocaptureOptions)
-public final class ObjCAutocaptureOptions: NSObject {
+public final class ObjCAutocaptureOptions: NSObject, @unchecked Sendable {
     internal var _options: AutocaptureOptions
 
     public override init() {

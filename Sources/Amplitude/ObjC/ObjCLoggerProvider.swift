@@ -2,7 +2,8 @@ import Foundation
 
 public typealias ObjCLoggerProvider = (Int, String) -> Void
 
-class ObjCLoggerProviderWrapper: Logger {
+@preconcurrency
+class ObjCLoggerProviderWrapper: Logger, @unchecked Sendable {
     public typealias LogLevel = LogLevelEnum
     public var logLevel: Int
 

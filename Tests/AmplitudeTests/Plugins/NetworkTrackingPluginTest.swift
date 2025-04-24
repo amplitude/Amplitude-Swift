@@ -41,7 +41,8 @@ final class NetworkTrackingPluginTest: XCTestCase {
                                           storageProvider: storageMem,
                                           flushMaxRetries: 0,
                                           autocapture: .networkTracking,
-                                          networkTrackingOptions: options)
+                                          networkTrackingOptions: options,
+                                          enableAutoCaptureRemoteConfig: false)
         amplitude = Amplitude(configuration: configuration)
         amplitude.add(plugin: eventCollector)
     }
