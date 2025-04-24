@@ -18,7 +18,8 @@ final class AmplitudeSessionTests: XCTestCase {
             apiKey: apiKey,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            minTimeBetweenSessionsMillis: 100
+            minTimeBetweenSessionsMillis: 100,
+            enableAutoCaptureRemoteConfig: false
         )
     }
 
@@ -115,7 +116,8 @@ final class AmplitudeSessionTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             minTimeBetweenSessionsMillis: 100,
-            autocapture: []
+            autocapture: [],
+            enableAutoCaptureRemoteConfig: false
         )
         let amplitude = Amplitude(configuration: customCongiguration)
         amplitude.setSessionId(timestamp: 800)

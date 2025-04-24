@@ -8,7 +8,7 @@
 import Foundation
 
 @objc(AMPLogLevel)
-public enum LogLevelEnum: Int {
+public enum LogLevelEnum: Int, Sendable {
     case OFF
     case ERROR
     case WARN
@@ -89,6 +89,12 @@ public struct Constants {
     static let AMP_NETWORK_DURATION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Duration"
     static let AMP_NETWORK_REQUEST_BODY_SIZE_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Request Body Size"
     static let AMP_NETWORK_RESPONSE_BODY_SIZE_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Response Body Size"
+
+    struct RemoteConfig {
+        struct Key {
+            static let autocapture = "analyticsSDK.iosSDK.autocapture"
+        }
+    }
 
     public struct Configuration {
         public static let FLUSH_QUEUE_SIZE = 30

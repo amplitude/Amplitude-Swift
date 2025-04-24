@@ -25,7 +25,8 @@ final class AmplitudeIOSTests: XCTestCase {
             instanceName: #function,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            autocapture: .appLifecycles
+            autocapture: .appLifecycles,
+            enableAutoCaptureRemoteConfig: false
         )
         let amplitude = Amplitude(configuration: configuration)
         try storageMem.write(key: StorageKey.APP_BUILD, value: nil)
@@ -53,7 +54,8 @@ final class AmplitudeIOSTests: XCTestCase {
             instanceName: #function,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            autocapture: .appLifecycles
+            autocapture: .appLifecycles,
+            enableAutoCaptureRemoteConfig: false
         )
         try storageMem.write(key: StorageKey.APP_BUILD, value: "abc")
         try storageMem.write(key: StorageKey.APP_VERSION, value: "xyz")
@@ -81,7 +83,8 @@ final class AmplitudeIOSTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            autocapture: .appLifecycles
+            autocapture: .appLifecycles,
+            enableAutoCaptureRemoteConfig: false
         )
 
         let info = Bundle.main.infoDictionary
@@ -124,7 +127,8 @@ final class AmplitudeIOSTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            autocapture: .appLifecycles
+            autocapture: .appLifecycles,
+            enableAutoCaptureRemoteConfig: false
         )
 
         let info = Bundle.main.infoDictionary
@@ -190,7 +194,8 @@ final class AmplitudeIOSTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            autocapture: .appLifecycles
+            autocapture: .appLifecycles,
+            enableAutoCaptureRemoteConfig: false
         )
 
         let info = Bundle.main.infoDictionary
@@ -223,7 +228,8 @@ final class AmplitudeIOSTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
-            autocapture: .appLifecycles
+            autocapture: .appLifecycles,
+            enableAutoCaptureRemoteConfig: false
         )
 
         let amplitude = Amplitude(configuration: configuration)
