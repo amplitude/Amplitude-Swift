@@ -1,3 +1,23 @@
+# [1.12.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.10...v1.12.0) (2025-04-25)
+
+
+### Bug Fixes
+
+* apply identifies to identity userProperties in correct order ([#272](https://github.com/amplitude/Amplitude-Swift/issues/272)) ([41deb6a](https://github.com/amplitude/Amplitude-Swift/commit/41deb6a8ff4c8ab70d1f9b6146c645ad2a05d7a7))
+* clean up ios observers on stop ([#275](https://github.com/amplitude/Amplitude-Swift/issues/275)) ([3965e13](https://github.com/amplitude/Amplitude-Swift/commit/3965e136dce8ded31511d3ebbbcc6fc12790530d))
+* disallow setting nulls for various properties dicts, as this is not supported ([#277](https://github.com/amplitude/Amplitude-Swift/issues/277)) ([70ea4be](https://github.com/amplitude/Amplitude-Swift/commit/70ea4be802cbe2d7b2e8475376bdcce4d6d64073))
+* enable running tests from package.swift ([#274](https://github.com/amplitude/Amplitude-Swift/issues/274)) ([f7aad5b](https://github.com/amplitude/Amplitude-Swift/commit/f7aad5b7dfb0c94a7c1db69acbff2791b515d30d))
+* move default init properties to new defaults structure so they can be shared ([#276](https://github.com/amplitude/Amplitude-Swift/issues/276)) ([88e3b16](https://github.com/amplitude/Amplitude-Swift/commit/88e3b164840b66e684cf56fe9d6ea0c27cdce3cc))
+* remove unused enableRemoteConfig option ([#278](https://github.com/amplitude/Amplitude-Swift/issues/278)) ([c9a2608](https://github.com/amplitude/Amplitude-Swift/commit/c9a2608db78e7853a4c9bf01419cd2e22a312388))
+* treat non-op user properties as sets ([#273](https://github.com/amplitude/Amplitude-Swift/issues/273)) ([df65e7b](https://github.com/amplitude/Amplitude-Swift/commit/df65e7b29fdb1a9f1ed6db30411b57055bbbb359))
+
+
+### Features
+
+* add network tracking support ([#270](https://github.com/amplitude/Amplitude-Swift/issues/270)) ([d1647b3](https://github.com/amplitude/Amplitude-Swift/commit/d1647b3653eae5d294417794674cfc1c824669f6))
+* add ObjC interface for NetworkTrackingOptions ([#281](https://github.com/amplitude/Amplitude-Swift/issues/281)) ([8f699fa](https://github.com/amplitude/Amplitude-Swift/commit/8f699fa713c79c769860b44844dfc0ec5764c408))
+* unify several identity apis into a single Identity struct ([#268](https://github.com/amplitude/Amplitude-Swift/issues/268)) ([ceae1e4](https://github.com/amplitude/Amplitude-Swift/commit/ceae1e4e3526200fdc0477947838068742a4dbf9))
+
 ## [1.11.10](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.9...v1.11.10) (2025-04-14)
 
 
