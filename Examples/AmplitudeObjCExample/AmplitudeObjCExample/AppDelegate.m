@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 @import AmplitudeSwift;
+@import AmplitudeCore;
 
 @interface AppDelegate ()
 
