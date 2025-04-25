@@ -7,7 +7,6 @@
 
 @implementation AppDelegate
 
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     NSString* apiKey = @"API-KEY";
     AMPConfiguration* configuration = [AMPConfiguration initWithApiKey:apiKey];
@@ -16,15 +15,23 @@
     NSArray<AMPAutocaptureOptions *> *autocaptureOptions = @[
         AMPAutocaptureOptions.sessions,
         AMPAutocaptureOptions.appLifecycles,
-        AMPAutocaptureOptions.screenViews
+        AMPAutocaptureOptions.screenViews,
+        AMPAutocaptureOptions.networkTracking
     ];
     configuration.autocapture = [[AMPAutocaptureOptions alloc] initWithOptionsToUnion:autocaptureOptions];
     configuration.loggerProvider = ^(NSInteger logLevel, NSString* _Nonnull message) {
         NSLog(@"%@", message);
     };
-    Amplitude* amplitude = [Amplitude initWithConfiguration:configuration];
-    
-    [amplitude add:[AMPPlugin initWithType:AMPPluginTypeBefore execute:^AMPBaseEvent* _Nullable(AMPBaseEvent* _Nonnull event) {
+
+    AMPNetworkTrackingOptions *networkTrackingOptions = AMPNetworkTrackingOptions.defaultOptions;
+    NSMutableArray<AMPNetworkTrackingCaptureRule *> *rules = [networkTrackingOptions.captureRules mutableCopy];
+    [rules addObject:[[AMPNetworkTrackingCaptureRule alloc] initWithHosts:@[@"httpstat.us"] statusCodeRange:@"0,400-599"]];
+    networkTrackingOptions.captureRules = rules;
+    configuration.networkTrackingOptions = networkTrackingOptions;
+
+    self.amplitude = [Amplitude initWithConfiguration:configuration];
+
+    [self.amplitude add:[AMPPlugin initWithType:AMPPluginTypeBefore execute:^AMPBaseEvent* _Nullable(AMPBaseEvent* _Nonnull event) {
         [event.eventProperties set:@"plugin-prop" value:@234];
         event.locationLat = 34;
         event.locationLng = 78;
@@ -32,7 +39,7 @@
     }]];
     
     NSMutableArray<AMPBaseEvent*>* collectedEvents = [NSMutableArray array];
-    [amplitude add:[AMPPlugin initWithType:AMPPluginTypeDestination execute:^AMPBaseEvent* _Nullable(AMPBaseEvent* _Nonnull event) {
+    [self.amplitude add:[AMPPlugin initWithType:AMPPluginTypeDestination execute:^AMPBaseEvent* _Nullable(AMPBaseEvent* _Nonnull event) {
         [collectedEvents addObject:event];
         return nil;
     } flush:^() {
@@ -40,21 +47,21 @@
         [collectedEvents removeAllObjects];
     }]];
     
-    [amplitude setUserId:@"User-ObjC"];
-    
+    [self.amplitude setUserId:@"User-ObjC"];
+
     AMPIdentify* identify = [AMPIdentify new];
     [identify set:@"user-prop-1" value:@"value-1"];
     [identify set:@"user-prop-2" value:@123];
-    [amplitude identify:identify];
-    
-    [amplitude setGroup:@"orgName" groupName:@"Test Org"];
+    [self.amplitude identify:identify];
+
+    [self.amplitude setGroup:@"orgName" groupName:@"Test Org"];
     
     AMPIdentify* groupIdentify = [AMPIdentify new];
     [groupIdentify set:@"group-prop-1" value:@"value-A"];
     [groupIdentify set:@"group-prop-2" value:@true];
-    [amplitude groupIdentify:@"orgName" groupName:@"Test Org" identify:groupIdentify];
+    [self.amplitude groupIdentify:@"orgName" groupName:@"Test Org" identify:groupIdentify];
 
-    [amplitude track:@"Event-A" eventProperties:@{
+    [self.amplitude track:@"Event-A" eventProperties:@{
         @"prop-string": @"value-A",
         @"prop-int": @111,
         @"prop-string-array": @[@"item-1", @"item-2"]
@@ -63,17 +70,17 @@
     AMPBaseEvent* event = [AMPBaseEvent initWithEventType:@"Event-B"];
     event.appVersion = @"1.2.3";
     
-    [amplitude track:event callback:^(AMPBaseEvent* _Nonnull event, NSInteger code, NSString* _Nonnull message) {
+    [self.amplitude track:event callback:^(AMPBaseEvent* _Nonnull event, NSInteger code, NSString* _Nonnull message) {
         NSLog(@"%@ - %@", event.eventType, message);
     }];
     
     AMPBaseEvent* deepLinkOpenedEvent = [AMPDeepLinkOpenedEvent initWithUrl:@"http://example.com" referrer:@"https://referrer.com"];
-    [amplitude track:deepLinkOpenedEvent];
+    [self.amplitude track:deepLinkOpenedEvent];
     
     AMPBaseEvent* screenViewedEvent = [AMPScreenViewedEvent initWithScreenName:@"Settings"];
-    [amplitude track:screenViewedEvent];
+    [self.amplitude track:screenViewedEvent];
     
-    [amplitude flush];
+    [self.amplitude flush];
     
     return YES;
 }

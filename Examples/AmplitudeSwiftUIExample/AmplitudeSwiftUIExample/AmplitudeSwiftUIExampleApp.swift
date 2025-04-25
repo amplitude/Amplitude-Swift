@@ -80,7 +80,15 @@ extension Amplitude {
             trackingOptions: TrackingOptions().disableTrackCarrier().disableTrackDMA(),
             flushEventsOnClose: true,
             minTimeBetweenSessionsMillis: 15000,
-            autocapture: [.sessions, .networkTracking]
+            autocapture: .all,
+            networkTrackingOptions: .init(
+                captureRules: [
+                    .init(hosts: ["*"]), // all hosts, 500-599
+                    .init(hosts: ["httpstat.us"], statusCodeRange: "0,400-599"),
+                ],
+                ignoreHosts: ["notmyapi.com"],
+                ignoreAmplitudeRequests: true
+            ),
         )
     )
 

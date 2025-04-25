@@ -43,6 +43,12 @@ public final class ObjCAutocaptureOptions: NSObject {
     @objc
     public static let elementInteractions = ObjCAutocaptureOptions(options: .elementInteractions)
 
+    @objc
+    public static let networkTracking = ObjCAutocaptureOptions(options: .networkTracking)
+
+    @objc
+    public static let all: ObjCAutocaptureOptions = ObjCAutocaptureOptions(options: .all)
+
     // MARK: NSObject
 
     public override var hash: Int {

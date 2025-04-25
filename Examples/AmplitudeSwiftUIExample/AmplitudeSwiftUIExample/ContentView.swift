@@ -28,7 +28,7 @@ struct ContentView: View {
     @State var groupUserPropertyKey = ""
     @State var groupUserPropertyValue = ""
     @State var responseCode = "500"
-    @State var responseDelay = "0"
+    @State var responseDelay = ""
 
     var body: some View {
         VStack {
@@ -182,15 +182,18 @@ struct ContentView_Previews: PreviewProvider {
 }
 
 func requestNetwork(responseCode: String, responseDelay: String) {
+    let responseDelay = responseDelay.isEmpty ? "0" : responseDelay
     let url = URL(string: "https://httpstat.us/\(responseCode)?sleep=\(responseDelay)#test")
     let request = URLRequest(url: url!)
-    let session = URLSession.shared
+    let configuration = URLSessionConfiguration.default
+    configuration.timeoutIntervalForRequest = 3
+    let session = URLSession(configuration: configuration)
     let task = session.dataTask(with: request) { data, response, error in
-        print("Response: \(response)")
+        print("Response: \(String(describing: response))")
         if let error = error {
             print("Error: \(error)")
         }
     }
     task.resume()
-    print("Request sent: \(url)")
+    print("Request sent: \(String(describing: url))")
 }

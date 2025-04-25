@@ -294,4 +294,14 @@ public class ObjCConfiguration: NSObject {
             configuration.offline = value?.boolValue
         }
     }
+
+    @objc
+    public var networkTrackingOptions: ObjCNetworkTrackingOptions {
+        get {
+            return ObjCNetworkTrackingOptions(configuration.networkTrackingOptions)
+        }
+        set(value) {
+            configuration.networkTrackingOptions = value.options
+        }
+    }
 }
