@@ -16,34 +16,6 @@ public enum LogLevelEnum: Int {
     case DEBUG
 }
 
-@objc(AMPServerZone)
-public enum ServerZone: Int {
-    case US
-    case EU
-
-    public typealias RawValue = String
-
-    public var rawValue: RawValue {
-        switch self {
-        case .US:
-            return "US"
-        case .EU:
-            return "EU"
-        }
-    }
-
-    public init?(rawValue: RawValue) {
-        switch rawValue {
-        case "US":
-            self = .US
-        case "EU":
-            self = .EU
-        default:
-            return nil
-        }
-    }
-}
-
 public struct Constants {
     static let SDK_LIBRARY = "amplitude-swift"
     static let SDK_VERSION = "1.12.0"

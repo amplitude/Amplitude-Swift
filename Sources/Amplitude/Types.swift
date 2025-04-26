@@ -5,6 +5,7 @@
 //  Created by Marvin Liu on 10/27/22.
 //
 
+import AmplitudeCore
 import Foundation
 
 public struct Plan: Codable {
@@ -93,13 +94,9 @@ public enum PersistentStorageVersion: Int, Comparable {
     case API_KEY_AND_INSTANCE_NAME = 2
 }
 
-public protocol Logger {
+public protocol Logger: CoreLogger {
     associatedtype LogLevel: RawRepresentable
     var logLevel: Int { get set }
-    func error(message: String)
-    func warn(message: String)
-    func log(message: String)
-    func debug(message: String)
 }
 
 @objc(AMPPluginType)
@@ -111,16 +108,14 @@ public enum PluginType: Int, CaseIterable {
     case observe
 }
 
-public protocol Plugin: AnyObject {
+public protocol Plugin: UniversalPlugin {
     var type: PluginType { get }
     func setup(amplitude: Amplitude)
     func execute(event: BaseEvent) -> BaseEvent?
-    func teardown()
     func onUserIdChanged(_ userId: String?)
     func onDeviceIdChanged(_ deviceId: String?)
     func onSessionIdChanged(_ sessionId: Int64)
     func onOptOutChanged(_ optOut: Bool)
-    func onIdentityChanged(_ identity: Identity)
 }
 
 public protocol EventPlugin: Plugin {
@@ -132,23 +127,39 @@ public protocol EventPlugin: Plugin {
 }
 
 public extension Plugin {
+
+    var name: String? {
+        return nil
+    }
+
     // default behavior
     func execute(event: BaseEvent) -> BaseEvent? {
+        var event = event
+        execute(&event)
         return event
     }
 
-    func setup(amplitude: Amplitude) {
+    func execute<Event: AnalyticsEvent>(_ event: inout Event) {
+        // no-op
     }
 
-    func teardown(){
-        // Clean up any resources from setup if necessary
+    func setup(amplitude: Amplitude) {
+        setup(analyticsClient: amplitude,
+              amplitudeContext: amplitude.amplitudeContext)
+    }
+
+    func setup(analyticsClient: any AnalyticsClient, amplitudeContext: AmplitudeContext) {
+        // no-op
     }
 
     func onUserIdChanged(_ userId: String?) {}
     func onDeviceIdChanged(_ deviceId: String?) {}
     func onSessionIdChanged(_ sessionId: Int64) {}
     func onOptOutChanged(_ optOut: Bool) {}
-    func onIdentityChanged(_ identity: Identity) {}
+
+    func teardown(){
+        // Clean up any resources from setup if necessary
+    }
 }
 
 public protocol ResponseHandler {
