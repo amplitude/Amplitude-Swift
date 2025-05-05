@@ -45,18 +45,24 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1050)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func testDistantBackgroundEventsShouldStartNewSession() throws {
@@ -81,30 +87,40 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[3]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
         XCTAssertEqual(event.sessionId, 2000)
         XCTAssertEqual(event.timestamp, 2000)
         XCTAssertEqual(event.eventId, lastEventId+4)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[4]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, 2000)
         XCTAssertEqual(event.timestamp, 2000)
         XCTAssertEqual(event.eventId, lastEventId+5)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func testBackgroundOutOfSessionEvent() throws {
@@ -161,18 +177,24 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1050)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 2000)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func testCloseBackgroundForegroundEventsShouldNotStartNewSession() throws {
@@ -199,18 +221,24 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 2000)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func testDistantBackgroundForegroundEventsShouldStartNewSession() throws {
@@ -237,30 +265,40 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[3]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
         XCTAssertEqual(event.sessionId, 2000)
         XCTAssertEqual(event.timestamp, 2000)
         XCTAssertEqual(event.eventId, lastEventId+4)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[4]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, 2000)
         XCTAssertEqual(event.timestamp, 3000)
         XCTAssertEqual(event.eventId, lastEventId+5)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func testCloseForegroundBackgroundEventsShouldNotStartNewSession() throws {
@@ -287,18 +325,24 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1500)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 2050)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func testDistantForegroundBackgroundEventsShouldStartNewSession() throws {
@@ -325,30 +369,40 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1500)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 2000)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[3]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
         XCTAssertEqual(event.sessionId, 3000)
         XCTAssertEqual(event.timestamp, 3000)
         XCTAssertEqual(event.eventId, lastEventId+4)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[4]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, 3000)
         XCTAssertEqual(event.timestamp, 3000)
         XCTAssertEqual(event.eventId, lastEventId+5)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func testSessionDataShouldBePersisted() throws {
@@ -401,24 +455,32 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, 3000)
         XCTAssertEqual(event.timestamp, 1050)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[3]
         XCTAssertEqual(event.eventType, "test event 3")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1100)
         XCTAssertEqual(event.eventId, lastEventId+4)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func testExplicitNoSessionForEventShouldBePreserved() throws {
@@ -444,24 +506,32 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, -1)
         XCTAssertEqual(event.timestamp, 1050)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[3]
         XCTAssertEqual(event.eventType, "test event 3")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1100)
         XCTAssertEqual(event.eventId, lastEventId+4)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func testSetSessionIdInBackgroundShouldStartNewSession() throws {
@@ -487,30 +557,40 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 100)
         XCTAssertEqual(event.timestamp, 100)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 100)
         XCTAssertEqual(event.timestamp, 100)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
         XCTAssertEqual(event.sessionId, 100)
         XCTAssertEqual(event.timestamp, 100)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[3]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
         XCTAssertEqual(event.sessionId, 150)
         XCTAssertEqual(event.timestamp, 150)
         XCTAssertEqual(event.eventId, lastEventId+4)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[4]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, 150)
         XCTAssertEqual(event.timestamp, 200)
         XCTAssertEqual(event.eventId, lastEventId+5)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func testSetSessionIdInForegroundShouldStartNewSession() throws {
@@ -537,30 +617,40 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1050)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1050)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[3]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
         XCTAssertEqual(event.sessionId, 1100)
         XCTAssertEqual(event.timestamp, 1100)
         XCTAssertEqual(event.eventId, lastEventId+4)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[4]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, 1100)
         XCTAssertEqual(event.timestamp, 2000)
         XCTAssertEqual(event.eventId, lastEventId+5)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func testSessionEndInBackgroundShouldEndCurrentSession() throws {
@@ -593,30 +683,40 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[3]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
         XCTAssertEqual(event.sessionId, 2000)
         XCTAssertEqual(event.timestamp, 2000)
         XCTAssertEqual(event.eventId, lastEventId+4)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[4]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, 2000)
         XCTAssertEqual(event.timestamp, 2000)
         XCTAssertEqual(event.eventId, lastEventId+5)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func testSessionEndInForegroundShouldEndCurrentSession() throws {
@@ -650,30 +750,40 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+1)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event 1")
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1500)
         XCTAssertEqual(event.eventId, lastEventId+2)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[2]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
         XCTAssertEqual(event.sessionId, 1000)
         XCTAssertEqual(event.timestamp, 1500)
         XCTAssertEqual(event.eventId, lastEventId+3)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[3]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
         XCTAssertEqual(event.sessionId, 2000)
         XCTAssertEqual(event.timestamp, 2000)
         XCTAssertEqual(event.eventId, lastEventId+4)
+        XCTAssertEqual(event.userId, amplitude.getUserId())
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
         event = collectedEvents[4]
         XCTAssertEqual(event.eventType, "test event 2")
         XCTAssertEqual(event.sessionId, 2000)
         XCTAssertEqual(event.timestamp, 2000)
         XCTAssertEqual(event.eventId, lastEventId+5)
+        XCTAssertEqual(event.userId, "user")
+        XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
