@@ -1,3 +1,11 @@
+## [1.12.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.12.0...v1.12.1) (2025-05-05)
+
+
+### Bug Fixes
+
+* remove eventbridge ([#285](https://github.com/amplitude/Amplitude-Swift/issues/285)) ([6c6dfaf](https://github.com/amplitude/Amplitude-Swift/commit/6c6dfafeb315a19a3febeb3a276963c35808be66))
+* set user/device id on session events ([#286](https://github.com/amplitude/Amplitude-Swift/issues/286)) ([a25df6e](https://github.com/amplitude/Amplitude-Swift/commit/a25df6e806edfd9f6056922dafcf55a2c68ffd6c))
+
 # [1.12.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.11.10...v1.12.0) (2025-04-25)
 
 
