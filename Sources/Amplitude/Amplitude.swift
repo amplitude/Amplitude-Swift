@@ -367,7 +367,7 @@ public class Amplitude {
 
     @discardableResult
     public func setSessionId(timestamp: Int64) -> Amplitude {
-        trackingQueue.async { [self] in
+        trackingQueue.async { [self, identity] in
             let sessionEvents: [BaseEvent]
             if timestamp >= 0 {
                 sessionEvents = self.sessions.startNewSession(timestamp: timestamp)
@@ -375,6 +375,8 @@ public class Amplitude {
                 sessionEvents = self.sessions.endCurrentSession()
             }
             self.sessions.assignEventId(events: sessionEvents).forEach { e in
+                e.userId = e.userId ?? identity.userId
+                e.deviceId = e.deviceId ?? identity.deviceId
                 self.timeline.processEvent(event: e)
             }
         }
@@ -412,14 +414,13 @@ public class Amplitude {
             applyIdentityUpdate(updatedIdentity, sendIdentifyIfNeeded: false)
         }
 
-        let identity = self.identity
-        event.userId = event.userId ?? identity.userId
-        event.deviceId = event.deviceId ?? identity.deviceId
-
-        let inForeground = inForeground
-        trackingQueue.async { [self] in
+        trackingQueue.async { [self, identity, inForeground] in
             let events = self.sessions.processEvent(event: event, inForeground: inForeground)
-            events.forEach { e in self.timeline.processEvent(event: e) }
+            events.forEach { e in
+                e.userId = e.userId ?? identity.userId
+                e.deviceId = e.deviceId ?? identity.deviceId
+                self.timeline.processEvent(event: e)
+            }
         }
     }
 
@@ -429,10 +430,14 @@ public class Amplitude {
             timestamp: timestamp,
             eventType: Constants.AMP_SESSION_START_EVENT
         )
-        trackingQueue.async { [self] in
+        trackingQueue.async { [self, identity] in
             // set inForeground to false to represent state before event was fired
             let events = self.sessions.processEvent(event: dummySessionStartEvent, inForeground: false)
-            events.forEach { e in self.timeline.processEvent(event: e) }
+            events.forEach { e in
+                e.userId = e.userId ?? identity.userId
+                e.deviceId = e.deviceId ?? identity.deviceId
+                self.timeline.processEvent(event: e)
+            }
         }
     }
 
