@@ -71,6 +71,10 @@ extension DestinationPlugin {
     }
 
     public func apply(closure: (Plugin) -> Void) {
-        timeline.apply(closure)
+        timeline.apply { plugin in
+            if let plugin = plugin as? Plugin {
+                closure(plugin)
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@
 
 #if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
 
+import AmplitudeCore
 import Foundation
 import SwiftUI
 
@@ -14,6 +15,9 @@ class IOSLifecycleMonitor: UtilityPlugin {
 
     private var utils: DefaultEventUtils?
     private var sendApplicationOpenedOnDidBecomeActive = false
+    private var remoteConfigSubscription: Any?
+    private(set) var trackScreenViews = false
+    private(set) var trackElementInteractions = false
 
     override init() {
         super.init()
@@ -39,6 +43,8 @@ class IOSLifecycleMonitor: UtilityPlugin {
     public override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
         utils = DefaultEventUtils(amplitude: amplitude)
+        trackScreenViews = amplitude.configuration.autocapture.contains(.screenViews)
+        trackElementInteractions = amplitude.configuration.autocapture.contains(.elementInteractions)
 
         // If we are already in the foreground, dispatch installed / opened events now
         // Use keypath vs applicationState property to avoid main thread checker warning,
@@ -52,11 +58,45 @@ class IOSLifecycleMonitor: UtilityPlugin {
             utils?.trackAppOpenedEvent()
         }
 
-        if amplitude.configuration.autocapture.contains(.screenViews) {
-            UIKitScreenViews.register(amplitude)
+        updateAutocaptureSetup()
+
+        if amplitude.configuration.enableAutoCaptureRemoteConfig {
+            remoteConfigSubscription = amplitude
+                .amplitudeContext
+                .remoteConfigClient
+                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self] config, _, _ in
+                    guard let self, let config else {
+                        return
+                    }
+
+                    if let pageViews = config["pageViews"] as? Bool {
+                        trackScreenViews = pageViews
+                    }
+
+                    if let interactions = config["elementInteractions"] as? Bool {
+                        trackElementInteractions = interactions
+                    }
+
+                    updateAutocaptureSetup()
+                }
         }
-        if amplitude.configuration.autocapture.contains(.elementInteractions) {
+    }
+
+    private func updateAutocaptureSetup() {
+        guard let amplitude else {
+            return
+        }
+
+        if trackScreenViews {
+            UIKitScreenViews.register(amplitude)
+        } else {
+            UIKitScreenViews.unregister(amplitude)
+        }
+
+        if trackElementInteractions {
             UIKitElementInteractions.register(amplitude)
+        } else {
+            UIKitElementInteractions.unregister(amplitude)
         }
     }
 
@@ -129,8 +169,17 @@ class IOSLifecycleMonitor: UtilityPlugin {
         super.teardown()
 
         if let amplitude {
+            if let remoteConfigSubscription {
+                amplitude.amplitudeContext.remoteConfigClient.unsubscribe(remoteConfigSubscription)
+            }
             UIKitScreenViews.unregister(amplitude)
             UIKitElementInteractions.unregister(amplitude)
+        }
+    }
+
+    deinit {
+        if let amplitude, let remoteConfigSubscription {
+            amplitude.amplitudeContext.remoteConfigClient.unsubscribe(remoteConfigSubscription)
         }
     }
 }

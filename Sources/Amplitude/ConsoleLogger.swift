@@ -8,7 +8,8 @@
 import Foundation
 import os.log
 
-public class ConsoleLogger: Logger {
+@preconcurrency
+public class ConsoleLogger: Logger, @unchecked Sendable {
     public typealias LogLevel = LogLevelEnum
 
     public var logLevel: Int
