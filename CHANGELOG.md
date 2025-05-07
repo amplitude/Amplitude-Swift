@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.12.1...v1.13.0) (2025-05-07)
+
+
+### Features
+
+* Unified SDK Release ([#287](https://github.com/amplitude/Amplitude-Swift/issues/287)) ([7c4889d](https://github.com/amplitude/Amplitude-Swift/commit/7c4889ddca5fcc1cd52303a8de777db2bc6cd209)), closes [#279](https://github.com/amplitude/Amplitude-Swift/issues/279) [#280](https://github.com/amplitude/Amplitude-Swift/issues/280)
+
 ## [1.12.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.12.0...v1.12.1) (2025-05-05)
 
 
