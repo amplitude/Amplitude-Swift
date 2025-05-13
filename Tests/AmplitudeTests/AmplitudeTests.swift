@@ -940,4 +940,32 @@ final class AmplitudeTests: XCTestCase {
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
         return NSDictionary(dictionary: props as [AnyHashable: Any])
     }
+
+    func testPluginByType() {
+
+        class PluginA: Plugin {
+            let type: PluginType = .before
+        }
+
+        class PluginB: Plugin {
+            let type: PluginType = .before
+        }
+
+        let pluginAs = (0..<3).map { _ in PluginA() }
+        let pluginBs = (0..<4).map { _ in PluginB() }
+
+        let amplitude = Amplitude(configuration: .init(apiKey: ""))
+        pluginAs.forEach { amplitude.add(plugin: $0) }
+        pluginBs.forEach { amplitude.add(plugin: $0) }
+
+        XCTAssertEqual(amplitude.plugins(type: PluginA.self).count, pluginAs.count)
+        pluginAs.forEach { pluginA in
+            XCTAssert(amplitude.plugins(type: PluginA.self).contains { $0 === pluginA })
+        }
+
+        XCTAssertEqual(amplitude.plugins(type: PluginB.self).count, pluginBs.count)
+        pluginBs.forEach { pluginB in
+            XCTAssert(amplitude.plugins(type: PluginB.self).contains { $0 === pluginB })
+        }
+    }
 }

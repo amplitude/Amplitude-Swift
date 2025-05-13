@@ -1,7 +1,7 @@
 @_exported import AmplitudeCore
 import Foundation
 
-public class Amplitude: PluginHost {
+public class Amplitude {
 
     public private(set) var configuration: Configuration
     private var inForeground = false
@@ -357,10 +357,6 @@ public class Amplitude: PluginHost {
         return self
     }
 
-    public func plugin(name: String) -> UniversalPlugin? {
-        return timeline.plugin(name: name)
-    }
-
     @discardableResult
     public func flush() -> Amplitude {
         trackingQueue.async {
@@ -601,6 +597,23 @@ public class Amplitude: PluginHost {
             }
         }
         logger?.debug(message: "Completed trimming events, kept \(eventCount) most recent events")
+    }
+}
+
+extension Amplitude: PluginHost {
+
+    public func plugin(name: String) -> UniversalPlugin? {
+        return timeline.plugin(name: name)
+    }
+
+    public func plugins<PluginType: UniversalPlugin>(type: PluginType.Type) -> [PluginType] {
+        var typedPlugins: [PluginType] = []
+        timeline.apply { plugin in
+            if let typedPlugin = plugin as? PluginType {
+                typedPlugins.append(typedPlugin)
+            }
+        }
+        return typedPlugins
     }
 }
 

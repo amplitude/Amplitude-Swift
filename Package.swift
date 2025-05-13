@@ -20,7 +20,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/amplitude/analytics-connector-ios.git", from: "1.3.0"),
-        .package(url: "https://github.com/amplitude/AmplitudeCore-Swift.git", from: "1.0.10"),
+        .package(url: "https://github.com/amplitude/AmplitudeCore-Swift.git", from: "1.0.12"),
     ],
     targets: [
         .target(
