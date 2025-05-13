@@ -1,3 +1,10 @@
+## [1.13.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.0...v1.13.1) (2025-05-13)
+
+
+### Bug Fixes
+
+* implement plugin lookup by type ([#288](https://github.com/amplitude/Amplitude-Swift/issues/288)) ([729dee3](https://github.com/amplitude/Amplitude-Swift/commit/729dee316245a7bab77a1805d9ac3b8df22a58be))
+
 # [1.13.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.12.1...v1.13.0) (2025-05-07)
 
 
