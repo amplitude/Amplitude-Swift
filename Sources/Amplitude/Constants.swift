@@ -56,7 +56,7 @@ public struct Constants {
     static let AMP_DEEP_LINK_OPENED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Deep Link Opened"
     static let AMP_SCREEN_VIEWED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Screen Viewed"
     static let AMP_ELEMENT_INTERACTED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Element Interacted"
-    static let AMP_NETWORK_TRACKING_EVENT = "\(AMP_AMPLITUDE_PREFIX)Network Tracking"
+    static let AMP_NETWORK_TRACKING_EVENT = "\(AMP_AMPLITUDE_PREFIX)Network Request"
 
     static let AMP_REVENUE_EVENT = "revenue_amount"
 
