@@ -1,3 +1,10 @@
+## [1.13.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.1...v1.13.2) (2025-05-20)
+
+
+### Bug Fixes
+
+* name of network request event ([#289](https://github.com/amplitude/Amplitude-Swift/issues/289)) ([2ef0102](https://github.com/amplitude/Amplitude-Swift/commit/2ef01025da79af5ad754b549a28a6ea2680f5e86))
+
 ## [1.13.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.0...v1.13.1) (2025-05-13)
 
 
