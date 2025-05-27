@@ -352,7 +352,7 @@ public class Amplitude {
     }
 
     @discardableResult
-    public func remove(plugin: Plugin) -> Amplitude {
+    public func remove(plugin: UniversalPlugin) -> Amplitude {
         timeline.remove(plugin: plugin)
         return self
     }
