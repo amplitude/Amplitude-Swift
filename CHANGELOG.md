@@ -1,3 +1,10 @@
+## [1.13.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.2...v1.13.3) (2025-05-27)
+
+
+### Bug Fixes
+
+* fix amplitude remove and apply plugin ([#293](https://github.com/amplitude/Amplitude-Swift/issues/293)) ([b689baf](https://github.com/amplitude/Amplitude-Swift/commit/b689baf78a712332fd7e863a640995120d3085ca))
+
 ## [1.13.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.1...v1.13.2) (2025-05-20)
 
 
