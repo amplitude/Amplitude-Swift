@@ -1,3 +1,11 @@
+## [1.13.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.3...v1.13.4) (2025-05-29)
+
+
+### Bug Fixes
+
+* delay app start / end events when starting amplitude in foreground ([#295](https://github.com/amplitude/Amplitude-Swift/issues/295)) ([c979b1b](https://github.com/amplitude/Amplitude-Swift/commit/c979b1b02836a6aa71bf73007649568edfb778e4))
+* improve objc interface for Unified SDK ([#296](https://github.com/amplitude/Amplitude-Swift/issues/296)) ([eb0ccb2](https://github.com/amplitude/Amplitude-Swift/commit/eb0ccb2ef7d4a5438068e110130ff6b4d09a722d))
+
 ## [1.13.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.2...v1.13.3) (2025-05-27)
 
 
