@@ -47,15 +47,15 @@ class IOSLifecycleMonitor: UtilityPlugin {
         trackElementInteractions = amplitude.configuration.autocapture.contains(.elementInteractions)
 
         // If we are already in the foreground, dispatch installed / opened events now
-        // Use keypath vs applicationState property to avoid main thread checker warning,
         // we want to dispatch this from the initiating thread to maintain event ordering.
-        if let application = IOSVendorSystem.sharedApplication,
-           let rawState = application.value(forKey: #keyPath(UIApplication.applicationState)) as? Int,
-           let applicationState = UIApplication.State(rawValue: rawState),
-           applicationState == .active {
-            utils?.trackAppUpdatedInstalledEvent()
-            amplitude.onEnterForeground(timestamp: currentTimestamp)
-            utils?.trackAppOpenedEvent()
+        if IOSVendorSystem.applicationState == .active {
+            // this is added in init - launch on trackingQueue to allow identity to be set
+            // prior to firing the event
+            amplitude.trackingQueue.async { [self] in
+                utils?.trackAppUpdatedInstalledEvent()
+                amplitude.onEnterForeground(timestamp: currentTimestamp)
+                utils?.trackAppOpenedEvent()
+            }
         }
 
         updateAutocaptureSetup()
@@ -106,15 +106,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
 
         // Pre SceneDelegate apps wil not fire a willEnterForeground notification on app launch.
         // Instead, use the initial applicationDidBecomeActive
-        let sceneManifest = Bundle.main.infoDictionary?["UIApplicationSceneManifest"] as? [String: Any]
-        let sceneConfigurations = sceneManifest?["UISceneConfigurations"] as? [String: Any] ?? [:]
-        let hasSceneConfigurations = !sceneConfigurations.isEmpty
-
-        let appDelegate = IOSVendorSystem.sharedApplication?.delegate
-        let selector = #selector(UIApplicationDelegate.application(_:configurationForConnecting:options:))
-        let usesSceneDelegate = appDelegate?.responds(to: selector) ?? false
-
-        if !(hasSceneConfigurations || usesSceneDelegate) {
+        if !IOSVendorSystem.usesScenes {
             sendApplicationOpenedOnDidBecomeActive = true
         }
     }
@@ -133,16 +125,12 @@ class IOSLifecycleMonitor: UtilityPlugin {
     @objc
     func applicationWillEnterForeground(notification: Notification) {
         let fromBackground: Bool
-        if let sharedApplication = IOSVendorSystem.sharedApplication {
-            switch sharedApplication.applicationState {
-            case .active, .inactive:
-                fromBackground = false
-            case .background:
-                fromBackground = true
-            @unknown default:
-                fromBackground = false
-            }
-        } else {
+        switch IOSVendorSystem.applicationState {
+        case nil, .active, .inactive:
+            fromBackground = false
+        case .background:
+            fromBackground = true
+        @unknown default:
             fromBackground = false
         }
 

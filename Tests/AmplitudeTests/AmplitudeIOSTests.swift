@@ -19,6 +19,12 @@ final class AmplitudeIOSTests: XCTestCase {
         window.addSubview(rootViewController.view)
     }
 
+    override func tearDown() {
+        IOSVendorSystem.overrideApplicationState(nil)
+        IOSVendorSystem.overrideUsesScenes(nil)
+        super.tearDown()
+    }
+
     func testDidFinishLaunching_ApplicationInstalled() throws {
         let configuration = Configuration(
             apiKey: "api-key",
@@ -103,26 +109,6 @@ final class AmplitudeIOSTests: XCTestCase {
     }
 
     func testWillEnterForegroundFromBackground() throws {
-        class TestApplication {
-
-            static let sharedTest = TestApplication()
-
-            @objc class var shared: AnyObject {
-                return sharedTest
-            }
-
-            @objc var applicationState: UIApplication.State = .active
-        }
-
-        guard let originalMethod = class_getClassMethod(UIApplication.self, #selector(getter: UIApplication.shared)),
-              let testMethod = class_getClassMethod(TestApplication.self, #selector(getter: TestApplication.shared)) else {
-            XCTFail("Unable to find methods to swizzle")
-            return
-        }
-        let originalImplementation = method_getImplementation(originalMethod)
-        let testImplementation = method_getImplementation(testMethod)
-        method_setImplementation(originalMethod, testImplementation)
-
         let configuration = Configuration(
             apiKey: "api-key",
             storageProvider: storageMem,
@@ -137,10 +123,10 @@ final class AmplitudeIOSTests: XCTestCase {
 
         let amplitude = Amplitude(configuration: configuration)
 
-        TestApplication.sharedTest.applicationState = .inactive
+        IOSVendorSystem.overrideApplicationState(.inactive)
         NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
 
-        TestApplication.sharedTest.applicationState = .background
+        IOSVendorSystem.overrideApplicationState(.background)
         NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
 
         amplitude.waitForTrackingQueue()
@@ -158,37 +144,13 @@ final class AmplitudeIOSTests: XCTestCase {
         XCTAssertEqual(getDictionary(events[1].eventProperties!), [
             Constants.AMP_APP_BUILD_PROPERTY: currentBuild,
             Constants.AMP_APP_VERSION_PROPERTY: currentVersion,
-            Constants.AMP_APP_FROM_BACKGROUND_PROPERTY: false
+            Constants.AMP_APP_FROM_BACKGROUND_PROPERTY: true
         ])
-
-        // re-replace UIApplication.shared
-        method_setImplementation(originalMethod, originalImplementation)
     }
 
     func testDidBecomeActivePreSceneDelegate() {
 
-        class TestApplication: NSObject, UIApplicationDelegate {
-
-            // Override UIApplicationDelegate to self, which does not implement application(_:configurationForConnecting:connectingSceneSession:)
-            weak var delegate: UIApplicationDelegate? {
-                return self
-            }
-
-            static let sharedTest = TestApplication()
-
-            @objc class var shared: AnyObject {
-                return sharedTest
-            }
-        }
-
-        guard let originalMethod = class_getClassMethod(UIApplication.self, #selector(getter: UIApplication.shared)),
-              let testMethod = class_getClassMethod(TestApplication.self, #selector(getter: TestApplication.shared)) else {
-            XCTFail("Unable to find methods to swizzle")
-            return
-        }
-        let originalImplementation = method_getImplementation(originalMethod)
-        let testImplementation = method_getImplementation(testMethod)
-        method_setImplementation(originalMethod, testImplementation)
+        IOSVendorSystem.overrideUsesScenes(false)
 
         let configuration = Configuration(
             apiKey: "api-key",
@@ -218,9 +180,6 @@ final class AmplitudeIOSTests: XCTestCase {
             Constants.AMP_APP_VERSION_PROPERTY: currentVersion,
             Constants.AMP_APP_FROM_BACKGROUND_PROPERTY: false
         ])
-
-        // re-replace UIApplication.shared
-        method_setImplementation(originalMethod, originalImplementation)
     }
 
     func testDidEnterBackground() throws {
@@ -240,6 +199,31 @@ final class AmplitudeIOSTests: XCTestCase {
         XCTAssertEqual(events.count, 1)
         XCTAssertEqual(events[0].eventType, Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
         XCTAssertNil(events[0].eventProperties)
+    }
+
+    func testSetIdentityForAutoCapturedEvents() throws {
+        let configuration = Configuration(
+            apiKey: "api-key",
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            autocapture: .sessions,
+            enableAutoCaptureRemoteConfig: false
+        )
+
+        // force new session event to fire immediately
+        IOSVendorSystem.overrideApplicationState(.active)
+
+        let identity = Identity(userId: "test-user", deviceId: "test-device")
+        let amplitude = Amplitude(configuration: configuration)
+        amplitude.identity = identity
+        amplitude.waitForTrackingQueue()
+
+        let events = storageMem.events()
+        XCTAssertEqual(events.count, 1)
+        for event in events {
+            XCTAssertEqual(event.userId, identity.userId)
+            XCTAssertEqual(event.deviceId, identity.deviceId)
+        }
     }
 
     func testTopViewController_rootController() {
