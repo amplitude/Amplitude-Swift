@@ -49,6 +49,11 @@ public final class ObjCAutocaptureOptions: NSObject, @unchecked Sendable {
     @objc
     public static let all: ObjCAutocaptureOptions = ObjCAutocaptureOptions(options: .all)
 
+    @objc
+    public static var `default`: ObjCAutocaptureOptions {
+        return ObjCAutocaptureOptions(options: Configuration.Defaults.autocaptureOptions)
+    }
+
     // MARK: NSObject
 
     public override var hash: Int {

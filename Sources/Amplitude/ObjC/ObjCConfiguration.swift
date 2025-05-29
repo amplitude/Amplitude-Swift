@@ -24,6 +24,13 @@ public class ObjCConfiguration: NSObject {
         self.init(configuration: Configuration(apiKey: apiKey, instanceName: instanceName))
     }
 
+    @objc(initWithApiKey:instanceName:enableAutocaptureRemoteConfig:)
+    public convenience init(apiKey: String, instanceName: String, enableAutoCaptureRemoteConfig: Bool) {
+        self.init(configuration: Configuration(apiKey: apiKey,
+                                               instanceName: instanceName,
+                                               enableAutoCaptureRemoteConfig: enableAutoCaptureRemoteConfig))
+    }
+
     internal init(configuration: Configuration) {
         self.configuration = configuration
     }
@@ -303,5 +310,9 @@ public class ObjCConfiguration: NSObject {
         set(value) {
             configuration.networkTrackingOptions = value.options
         }
+    }
+
+    @objc public var enableAutoCaptureRemoteConfig: Bool {
+        return configuration.enableAutoCaptureRemoteConfig
     }
 }

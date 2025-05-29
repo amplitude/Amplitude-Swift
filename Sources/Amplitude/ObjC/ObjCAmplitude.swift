@@ -227,4 +227,25 @@ public class ObjCAmplitude: NSObject {
         amplitude.reset()
         return self
     }
+
+    @objc
+    var optOut: Bool {
+        get {
+            return amplitude.optOut
+        }
+        set {
+            amplitude.optOut = newValue
+        }
+    }
+}
+
+extension ObjCAmplitude: PluginHost {
+
+    public func plugin(name: String) -> (any UniversalPlugin)? {
+        return amplitude.plugin(name: name)
+    }
+
+    public func plugins<PluginType: UniversalPlugin>(type: PluginType.Type) -> [PluginType] {
+        return amplitude.plugins(type: type)
+    }
 }
