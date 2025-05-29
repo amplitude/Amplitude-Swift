@@ -92,8 +92,69 @@ import Foundation
         }
 
         // Extension-safe accessor for sharedApplication. Will return nil if run in an extension.
-        static var sharedApplication: UIApplication? {
+        // prefer to use individual property accessors which we can override for tests
+        private static var sharedApplication: UIApplication? {
             return UIApplication.value(forKeyPath: "sharedApplication") as? UIApplication
+        }
+
+        private static var overrideApplicationState: UIApplication.State?
+
+        static func overrideApplicationState(_ applicationState: UIApplication.State?) {
+            guard isRunningTests else {
+                return
+            }
+            overrideApplicationState = applicationState
+        }
+
+        static var applicationState: UIApplication.State? {
+            if let overrideApplicationState {
+                return overrideApplicationState
+            }
+
+            // Use keypath vs applicationState property to avoid main thread checker warning
+            guard let app = sharedApplication,
+                  let rawState = app.value(forKey: #keyPath(UIApplication.applicationState)) as? Int,
+                  let state = UIApplication.State(rawValue: rawState) else {
+                return nil
+            }
+
+            return state
+        }
+
+        private static var overrideUsesScenes: Bool?
+
+        static func overrideUsesScenes(_ usesScenes: Bool?) {
+            guard isRunningTests else {
+                return
+            }
+            overrideUsesScenes = usesScenes
+        }
+
+        static var usesScenes: Bool {
+            if let overrideUsesScenes {
+                return overrideUsesScenes
+            }
+
+            let sceneManifest = Bundle.main.infoDictionary?["UIApplicationSceneManifest"] as? [String: Any]
+            let sceneConfigurations = sceneManifest?["UISceneConfigurations"] as? [String: Any] ?? [:]
+            let hasSceneConfigurations = !sceneConfigurations.isEmpty
+
+            if hasSceneConfigurations {
+                return true
+            }
+
+            let selector = #selector(UIApplicationDelegate.application(_:configurationForConnecting:options:))
+            let usesSceneDelegate = sharedApplication?.delegate?.responds(to: selector) ?? false
+
+            if usesSceneDelegate {
+                return true
+            }
+
+            return false
+        }
+
+        private static var isRunningTests: Bool {
+            return NSClassFromString("XCTestCase") != nil
         }
     }
 #endif
