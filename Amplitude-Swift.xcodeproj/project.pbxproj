@@ -70,6 +70,7 @@
 		EA1F2CD92D8781950096A576 /* MethodSwizzlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1F2CD82D8781950096A576 /* MethodSwizzlerTest.swift */; };
 		EA5C95942D7A76B900DC8B3B /* NetworkSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */; };
 		EA5C95962D7A776D00DC8B3B /* MethodSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */; };
+		EA8CF7D02DE652CA000F94F6 /* RageClickEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8CF7CF2DE652C6000F94F6 /* RageClickEvent.swift */; };
 		EA8DA4BF2D91C101003B00F0 /* NetworkTrackingPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */; };
 		EA8DA4C12D91C131003B00F0 /* NetworkRequestEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */; };
 		EAE891872DA83B6F00AB97D0 /* FakeURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */; };
@@ -202,6 +203,7 @@
 		EA1F2CD82D8781950096A576 /* MethodSwizzlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodSwizzlerTest.swift; sourceTree = "<group>"; };
 		EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSwizzler.swift; sourceTree = "<group>"; };
 		EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodSwizzler.swift; sourceTree = "<group>"; };
+		EA8CF7CF2DE652C6000F94F6 /* RageClickEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RageClickEvent.swift; sourceTree = "<group>"; };
 		EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrackingPlugin.swift; sourceTree = "<group>"; };
 		EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRequestEvent.swift; sourceTree = "<group>"; };
 		EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeURLProtocol.swift; sourceTree = "<group>"; };
@@ -358,6 +360,7 @@
 		OBJ_13 /* Events */ = {
 			isa = PBXGroup;
 			children = (
+				EA8CF7CF2DE652C6000F94F6 /* RageClickEvent.swift */,
 				EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */,
 				6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */,
 				OBJ_14 /* BaseEvent.swift */,
@@ -798,6 +801,7 @@
 				OBJ_114 /* TrackingOptions.swift in Sources */,
 				OBJ_115 /* Types.swift in Sources */,
 				OBJ_116 /* Atomic.swift in Sources */,
+				EA8CF7D02DE652CA000F94F6 /* RageClickEvent.swift in Sources */,
 				EA5C95962D7A776D00DC8B3B /* MethodSwizzler.swift in Sources */,
 				OBJ_117 /* CodableExtension.swift in Sources */,
 				OBJ_118 /* EventPipeline.swift in Sources */,

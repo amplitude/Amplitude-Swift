@@ -57,6 +57,7 @@ public struct Constants {
     static let AMP_SCREEN_VIEWED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Screen Viewed"
     static let AMP_ELEMENT_INTERACTED_EVENT = "\(AMP_AMPLITUDE_PREFIX)Element Interacted"
     static let AMP_NETWORK_TRACKING_EVENT = "\(AMP_AMPLITUDE_PREFIX)Network Request"
+    static let AMP_RAGE_CLICK_EVENT = "\(AMP_AMPLITUDE_PREFIX)Rage Click"
 
     static let AMP_REVENUE_EVENT = "revenue_amount"
 
@@ -89,6 +90,11 @@ public struct Constants {
     static let AMP_NETWORK_DURATION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Duration"
     static let AMP_NETWORK_REQUEST_BODY_SIZE_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Request Body Size"
     static let AMP_NETWORK_RESPONSE_BODY_SIZE_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Response Body Size"
+
+    static let AMP_BEGIN_TIME_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Begin Time"
+    static let AMP_END_TIME_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)End Time"
+    static let AMP_DURATION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Duration"
+    static let AMP_CLICKS_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)CLICKS"
 
     struct RemoteConfig {
         struct Key {
