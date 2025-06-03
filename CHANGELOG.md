@@ -1,3 +1,11 @@
+## [1.13.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.4...v1.13.5) (2025-06-03)
+
+
+### Bug Fixes
+
+* Remove unused TimeInterval helpers ([c0afe2a](https://github.com/amplitude/Amplitude-Swift/commit/c0afe2a332c72a865b3933c4e368e242fca0b1d2))
+* update to xcode 16.1 for prebuilt artifacts ([8dc6c5d](https://github.com/amplitude/Amplitude-Swift/commit/8dc6c5d045f7ce8c48b28e09b11dd0203480dbc4))
+
 ## [1.13.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.3...v1.13.4) (2025-05-29)
 
 
