@@ -192,8 +192,8 @@ final class PersistentStorageTests: XCTestCase {
         persistentStorage.reset()
         let dispatchGroup = DispatchGroup()
         for i in 0..<100 {
+            dispatchGroup.enter()
             Thread.detachNewThread {
-                dispatchGroup.enter()
                 for d in 0..<10 {
                     try? persistentStorage.write(
                         key: StorageKey.EVENTS,
@@ -221,8 +221,8 @@ final class PersistentStorageTests: XCTestCase {
     func testConcurrentWriteOnMultipleInsances() {
         let dispatchGroup = DispatchGroup()
         for i in 0..<100 {
+            dispatchGroup.enter()
             Thread.detachNewThread {
-                dispatchGroup.enter()
                 let persistentStorage = PersistentStorage(storagePrefix: "xxx-multiple-instance", logger: self.logger, diagonostics: self.diagonostics)
                 for d in 0..<10 {
                     try? persistentStorage.write(
