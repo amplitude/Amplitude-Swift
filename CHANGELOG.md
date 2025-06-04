@@ -1,3 +1,10 @@
+## [1.13.6](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.5...v1.13.6) (2025-06-04)
+
+
+### Bug Fixes
+
+* update min core version ([68cce1e](https://github.com/amplitude/Amplitude-Swift/commit/68cce1e9499b17245e743e0290432f533eee22db))
+
 ## [1.13.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.4...v1.13.5) (2025-06-03)
 
 
