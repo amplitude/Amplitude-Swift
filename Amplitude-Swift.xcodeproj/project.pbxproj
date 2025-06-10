@@ -68,8 +68,12 @@
 		D010435F2B6C59EE00F8173C /* SandboxHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D010435E2B6C59EE00F8173C /* SandboxHelper.swift */; };
 		D01043612B6C5A8500F8173C /* SandboxHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01043602B6C5A8500F8173C /* SandboxHelperTests.swift */; };
 		EA1F2CD92D8781950096A576 /* MethodSwizzlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1F2CD82D8781950096A576 /* MethodSwizzlerTest.swift */; };
+		EA28FDA42DED997900848BBB /* InteractionsOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28FDA32DED997900848BBB /* InteractionsOptions.swift */; };
+		EA28FDA82DED99CF00848BBB /* SwiftUIExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28FDA72DED99CF00848BBB /* SwiftUIExtensions.swift */; };
 		EA5C95942D7A76B900DC8B3B /* NetworkSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */; };
 		EA5C95962D7A776D00DC8B3B /* MethodSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */; };
+		EA84CF0B2DF8D8E400CD1CAD /* MiscellaneousExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */; };
+		EA84CF0D2DF8EC2E00CD1CAD /* RageClickTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84CF0C2DF8EC2E00CD1CAD /* RageClickTests.swift */; };
 		EA8CF7D02DE652CA000F94F6 /* RageClickEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8CF7CF2DE652C6000F94F6 /* RageClickEvent.swift */; };
 		EA8DA4BF2D91C101003B00F0 /* NetworkTrackingPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */; };
 		EA8DA4C12D91C131003B00F0 /* NetworkRequestEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */; };
@@ -201,8 +205,12 @@
 		D010435E2B6C59EE00F8173C /* SandboxHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxHelper.swift; sourceTree = "<group>"; };
 		D01043602B6C5A8500F8173C /* SandboxHelperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxHelperTests.swift; sourceTree = "<group>"; };
 		EA1F2CD82D8781950096A576 /* MethodSwizzlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodSwizzlerTest.swift; sourceTree = "<group>"; };
+		EA28FDA32DED997900848BBB /* InteractionsOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractionsOptions.swift; sourceTree = "<group>"; };
+		EA28FDA72DED99CF00848BBB /* SwiftUIExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUIExtensions.swift; sourceTree = "<group>"; };
 		EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSwizzler.swift; sourceTree = "<group>"; };
 		EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodSwizzler.swift; sourceTree = "<group>"; };
+		EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiscellaneousExtension.swift; sourceTree = "<group>"; };
+		EA84CF0C2DF8EC2E00CD1CAD /* RageClickTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RageClickTests.swift; sourceTree = "<group>"; };
 		EA8CF7CF2DE652C6000F94F6 /* RageClickEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RageClickEvent.swift; sourceTree = "<group>"; };
 		EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrackingPlugin.swift; sourceTree = "<group>"; };
 		EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRequestEvent.swift; sourceTree = "<group>"; };
@@ -416,6 +424,7 @@
 		OBJ_32 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
+				EA28FDA72DED99CF00848BBB /* SwiftUIExtensions.swift */,
 				6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */,
 				OBJ_33 /* IOSLifecycleMonitor.swift */,
 				8EDEC650EF79B104DC3C9F4C /* UIKitScreenViews.swift */,
@@ -443,6 +452,7 @@
 		OBJ_43 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */,
 				EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */,
 				EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */,
 				OBJ_44 /* Atomic.swift */,
@@ -482,6 +492,7 @@
 		OBJ_53 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				EA84CF0C2DF8EC2E00CD1CAD /* RageClickTests.swift */,
 				4E27E4152DC1443800799F24 /* AutocaptureRemoteConfigTests.swift */,
 				4E654DE02D9B60E300BCAA85 /* IdentityTests.swift */,
 				6C04FC462C5897AC00EA8667 /* AutocaptureOptionsTests.swift */,
@@ -537,6 +548,7 @@
 		OBJ_7 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				EA28FDA32DED997900848BBB /* InteractionsOptions.swift */,
 				4E654D672D97454900BCAA85 /* Identity.swift */,
 				6C04FC442C58978900EA8667 /* AutocaptureOptions.swift */,
 				B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */,
@@ -734,6 +746,7 @@
 				OBJ_148 /* IdentifyTests.swift in Sources */,
 				BA9BEA4D299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift in Sources */,
 				OBJ_149 /* RevenueEventTests.swift in Sources */,
+				EA84CF0D2DF8EC2E00CD1CAD /* RageClickTests.swift in Sources */,
 				OBJ_150 /* RevenueTests.swift in Sources */,
 				EAE891872DA83B6F00AB97D0 /* FakeURLProtocol.swift in Sources */,
 				OBJ_151 /* PersistentStorageTests.swift in Sources */,
@@ -768,6 +781,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
+				EA84CF0B2DF8D8E400CD1CAD /* MiscellaneousExtension.swift in Sources */,
 				OBJ_88 /* Amplitude.swift in Sources */,
 				OBJ_89 /* Configuration.swift in Sources */,
 				OBJ_90 /* ConsoleLogger.swift in Sources */,
@@ -786,6 +800,7 @@
 				OBJ_104 /* IdentityEventSender.swift in Sources */,
 				OBJ_105 /* MacOSLifecycleMonitor.swift in Sources */,
 				OBJ_106 /* AppUtil.swift in Sources */,
+				EA28FDA82DED99CF00848BBB /* SwiftUIExtensions.swift in Sources */,
 				OBJ_107 /* VendorSystem.swift in Sources */,
 				OBJ_108 /* IOSLifecycleMonitor.swift in Sources */,
 				OBJ_109 /* WatchOSLifecycleMonitor.swift in Sources */,
@@ -803,6 +818,7 @@
 				OBJ_116 /* Atomic.swift in Sources */,
 				EA8CF7D02DE652CA000F94F6 /* RageClickEvent.swift in Sources */,
 				EA5C95962D7A776D00DC8B3B /* MethodSwizzler.swift in Sources */,
+				EA28FDA42DED997900848BBB /* InteractionsOptions.swift in Sources */,
 				OBJ_117 /* CodableExtension.swift in Sources */,
 				OBJ_118 /* EventPipeline.swift in Sources */,
 				6C04FC412C58974A00EA8667 /* UIKitElementInteractions.swift in Sources */,

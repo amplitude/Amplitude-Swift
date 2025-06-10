@@ -94,7 +94,7 @@ public struct Constants {
     static let AMP_BEGIN_TIME_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Begin Time"
     static let AMP_END_TIME_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)End Time"
     static let AMP_DURATION_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Duration"
-    static let AMP_CLICKS_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)CLICKS"
+    static let AMP_CLICKS_PROPERTY = "\(AMP_AMPLITUDE_PREFIX)Clicks"
 
     struct RemoteConfig {
         struct Key {

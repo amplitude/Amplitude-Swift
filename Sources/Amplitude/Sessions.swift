@@ -79,7 +79,7 @@ public class Sessions {
     }
 
     func processEvent(event: BaseEvent, inForeground: Bool) -> [BaseEvent] {
-        event.timestamp = event.timestamp ?? Int64(NSDate().timeIntervalSince1970 * 1000)
+        event.timestamp = event.timestamp ?? Date().amp_timestamp()
         let eventTimeStamp = event.timestamp!
         var skipEvent: Bool = false
         var sessionEvents: [BaseEvent]?

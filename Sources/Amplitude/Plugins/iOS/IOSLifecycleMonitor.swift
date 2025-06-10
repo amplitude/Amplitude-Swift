@@ -53,7 +53,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
             // prior to firing the event
             amplitude.trackingQueue.async { [self] in
                 utils?.trackAppUpdatedInstalledEvent()
-                amplitude.onEnterForeground(timestamp: currentTimestamp)
+                amplitude.onEnterForeground(timestamp: Date().amp_timestamp())
                 utils?.trackAppOpenedEvent()
             }
         }
@@ -93,7 +93,9 @@ class IOSLifecycleMonitor: UtilityPlugin {
             UIKitScreenViews.unregister(amplitude)
         }
 
-        if trackElementInteractions {
+        // Register UIKitElementInteractions if either element interactions or rage click is enabled
+        let needsElementInteractions = trackElementInteractions || amplitude.configuration.autocapture.contains(.rageClick)
+        if needsElementInteractions {
             UIKitElementInteractions.register(amplitude)
         } else {
             UIKitElementInteractions.unregister(amplitude)
@@ -118,7 +120,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
         }
         sendApplicationOpenedOnDidBecomeActive = false
 
-        amplitude?.onEnterForeground(timestamp: currentTimestamp)
+        amplitude?.onEnterForeground(timestamp: Date().amp_timestamp())
         utils?.trackAppOpenedEvent()
     }
 
@@ -134,7 +136,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
             fromBackground = false
         }
 
-        amplitude?.onEnterForeground(timestamp: currentTimestamp)
+        amplitude?.onEnterForeground(timestamp: Date().amp_timestamp())
         utils?.trackAppOpenedEvent(fromBackground: fromBackground)
     }
 
@@ -143,14 +145,10 @@ class IOSLifecycleMonitor: UtilityPlugin {
         guard let amplitude = amplitude else {
             return
         }
-        amplitude.onExitForeground(timestamp: currentTimestamp)
+        amplitude.onExitForeground(timestamp: Date().amp_timestamp())
         if amplitude.configuration.autocapture.contains(.appLifecycles) {
             amplitude.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
         }
-    }
-
-    private var currentTimestamp: Int64 {
-        return Int64(NSDate().timeIntervalSince1970 * 1000)
     }
 
     override func teardown() {
