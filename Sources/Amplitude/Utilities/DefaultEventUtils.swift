@@ -2,6 +2,7 @@ import Foundation
 
 public class DefaultEventUtils {
 
+    private static let lock = NSLock()
     private static var instanceNamesThatSentAppUpdatedInstalled: Set<String> = []
 
     private weak var amplitude: Amplitude?
@@ -28,13 +29,24 @@ public class DefaultEventUtils {
             try? amplitude.storage.write(key: StorageKey.APP_VERSION, value: currentVersion)
         }
 
-        guard amplitude.configuration.autocapture.contains(.appLifecycles),
-              !Self.instanceNamesThatSentAppUpdatedInstalled.contains(amplitude.configuration.instanceName) else {
+        guard amplitude.configuration.autocapture.contains(.appLifecycles) else {
             return
         }
+
         // Only send one app installed / updated event per instance name, no matter how many times we are
         // reinitialized
-        Self.instanceNamesThatSentAppUpdatedInstalled.insert(amplitude.configuration.instanceName)
+        let instanceName = amplitude.configuration.instanceName
+        let shouldSendAppInstalled = Self.lock.withLock {
+            if !Self.instanceNamesThatSentAppUpdatedInstalled.contains(instanceName) {
+                Self.instanceNamesThatSentAppUpdatedInstalled.insert(instanceName)
+                return true
+            }
+            return false
+        }
+
+        guard shouldSendAppInstalled else {
+            return
+        }
 
         if previousBuild == nil || previousVersion == nil {
             amplitude.track(eventType: Constants.AMP_APPLICATION_INSTALLED_EVENT, eventProperties: [

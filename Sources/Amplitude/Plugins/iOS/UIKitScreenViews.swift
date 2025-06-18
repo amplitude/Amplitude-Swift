@@ -3,8 +3,8 @@ import Foundation
 import UIKit
 
 class UIKitScreenViews {
-    private static let lock = NSLock()
-    fileprivate static var amplitudes = NSHashTable<Amplitude>.weakObjects()
+    fileprivate static let lock = NSLock()
+    fileprivate static let amplitudes = NSHashTable<Amplitude>.weakObjects()
     fileprivate static weak var lastTopViewController: UIViewController?
 
     static func register(_ amplitude: Amplitude) {
@@ -86,7 +86,11 @@ extension UIViewController {
 
         let screenName = UIKitScreenViews.screenName(for: top)
 
-        for amplitude in UIKitScreenViews.amplitudes.allObjects {
+        var amplitudes: [Amplitude] = []
+        UIKitScreenViews.lock.withLock {
+            amplitudes = UIKitScreenViews.amplitudes.allObjects
+        }
+        for amplitude in amplitudes {
             amplitude.track(event: ScreenViewedEvent(screenName: screenName))
         }
     }

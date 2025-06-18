@@ -20,13 +20,6 @@ internal class QueueTimer {
 
     @Atomic var state: State = .suspended
 
-    static var timers = [QueueTimer]()
-
-    static func schedule(interval: TimeInterval, queue: DispatchQueue = .main, handler: @escaping () -> Void) {
-        let timer = QueueTimer(interval: interval, queue: queue, handler: handler)
-        Self.timers.append(timer)
-    }
-
     init(interval: TimeInterval, once: Bool = false, queue: DispatchQueue = .main, handler: @escaping () -> Void) {
         self.interval = interval
         self.queue = queue
