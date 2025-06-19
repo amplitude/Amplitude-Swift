@@ -1,3 +1,10 @@
+## [1.13.7](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.6...v1.13.7) (2025-06-19)
+
+
+### Bug Fixes
+
+* improve thread safety around shared state ([505455a](https://github.com/amplitude/Amplitude-Swift/commit/505455ae64efb0360090a6a8906398ddc6d223bc))
+
 ## [1.13.6](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.5...v1.13.6) (2025-06-04)
 
 
