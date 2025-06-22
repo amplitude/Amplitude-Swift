@@ -10,9 +10,9 @@ import Foundation
 public class RageClickEvent: BaseEvent {
     convenience init(
         /// The time of the click, ISO 8601 format of UTC.
-        beginTime: Date? = nil,
+        beginTime: Date,
         /// The time of the click, ISO 8601 format of UTC.
-        endTime: Date? = nil,
+        endTime: Date,
         /// The clicks of the event.
         clicks: [Click]? = nil,
         screenName: String? = nil,
@@ -37,27 +37,14 @@ public class RageClickEvent: BaseEvent {
         eventProperties[Constants.AMP_APP_GESTURE_RECOGNIZER_PROPERTY] = gestureRecognizer
 
         // Add rage click specific properties
-        if let beginTime = beginTime {
-            eventProperties[Constants.AMP_BEGIN_TIME_PROPERTY] = beginTime.amp_iso8601String()
-        }
-        if let endTime = endTime {
-            eventProperties[Constants.AMP_END_TIME_PROPERTY] = endTime.amp_iso8601String()
-        }
-        if let beginTime = beginTime, let endTime = endTime {
-            let duration = endTime.timeIntervalSince(beginTime) * 1000 // Convert to milliseconds
-            eventProperties[Constants.AMP_DURATION_PROPERTY] = duration
-        }
-        if let clicks = clicks {
-            eventProperties[Constants.AMP_CLICKS_PROPERTY] = clicks.map { click in
-                var clickDict: [String: Any] = [:]
-                if let x = click.x { clickDict["X"] = x }
-                if let y = click.y { clickDict["Y"] = y }
-                if let time = click.time { clickDict["Time"] = time }
-                return clickDict
-            }
-        }
+        eventProperties[Constants.AMP_BEGIN_TIME_PROPERTY] = beginTime.amp_iso8601String()
+        eventProperties[Constants.AMP_END_TIME_PROPERTY] = endTime.amp_iso8601String()
+        let duration = endTime.timeIntervalSince(beginTime) * 1000 // Convert to milliseconds
+        eventProperties[Constants.AMP_DURATION_PROPERTY] = duration
+        eventProperties[Constants.AMP_CLICKS_PROPERTY] = clicks
+        eventProperties[Constants.AMP_CLICK_COUNT_PROPERTY] = clicks?.count ?? 0
 
-        self.init(eventType: Constants.AMP_RAGE_CLICK_EVENT, eventProperties: eventProperties)
+        self.init(timestamp: beginTime.amp_timestamp(), eventType: Constants.AMP_RAGE_CLICK_EVENT, eventProperties: eventProperties)
     }
 }
 

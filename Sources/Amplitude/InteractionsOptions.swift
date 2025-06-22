@@ -8,21 +8,27 @@
 import Foundation
 
 public class InteractionsOptions {
-    public var rageClick: RageClickOptions
-    
-    public init(rageClick: RageClickOptions = RageClickOptions()) {
+    public let rageClick: RageClickOptions
+    public let deadClick: DeadClickOptions
+
+    init(rageClick: RageClickOptions = RageClickOptions(), deadClick: DeadClickOptions = DeadClickOptions()) {
         self.rageClick = rageClick
+        self.deadClick = deadClick
     }
 }
 
-public class RageClickOptions {
-    /// Number of clicks to trigger rage click (3 or more)
-    public var threshold: Int
-    /// Maximum time to wait for any response, measure in milliseconds (1000 or more)
-    public var timeout: Int
-    
-    public init(threshold: Int = 3, timeout: Int = 1000) {
-        self.threshold = max(3, threshold)
-        self.timeout = max(1000, timeout)
+public struct RageClickOptions {
+    public let enabled: Bool
+
+    public init(enabled: Bool = true) {
+        self.enabled = enabled
     }
-} 
+}
+
+public struct DeadClickOptions {
+    public let enabled: Bool
+
+    public init(enabled: Bool = true) {
+        self.enabled = enabled
+    }
+}

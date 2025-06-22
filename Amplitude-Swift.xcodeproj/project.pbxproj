@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -73,13 +73,14 @@
 		EA5C95942D7A76B900DC8B3B /* NetworkSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */; };
 		EA5C95962D7A776D00DC8B3B /* MethodSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */; };
 		EA84CF0B2DF8D8E400CD1CAD /* MiscellaneousExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */; };
-		EA84CF0D2DF8EC2E00CD1CAD /* RageClickTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84CF0C2DF8EC2E00CD1CAD /* RageClickTests.swift */; };
 		EA8CF7D02DE652CA000F94F6 /* RageClickEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8CF7CF2DE652C6000F94F6 /* RageClickEvent.swift */; };
 		EA8DA4BF2D91C101003B00F0 /* NetworkTrackingPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */; };
 		EA8DA4C12D91C131003B00F0 /* NetworkRequestEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */; };
 		EAE891872DA83B6F00AB97D0 /* FakeURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */; };
 		EAE989292DA831F200835345 /* NetworkTrackingPluginTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE989282DA831F200835345 /* NetworkTrackingPluginTest.swift */; };
 		EAF020772DBAE9D1003D22A2 /* ObjCNetworkTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */; };
+		EAF7B53A2E0912E200E6E61A /* DeadClickEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5392E0912E200E6E61A /* DeadClickEvent.swift */; };
+		EAF7B54B2E09446F00E6E61A /* FrustrationInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
 		OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* AmplitudeDestinationPlugin.swift */; };
 		OBJ_102 /* ContextPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ContextPlugin.swift */; };
@@ -210,13 +211,14 @@
 		EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSwizzler.swift; sourceTree = "<group>"; };
 		EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodSwizzler.swift; sourceTree = "<group>"; };
 		EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiscellaneousExtension.swift; sourceTree = "<group>"; };
-		EA84CF0C2DF8EC2E00CD1CAD /* RageClickTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RageClickTests.swift; sourceTree = "<group>"; };
 		EA8CF7CF2DE652C6000F94F6 /* RageClickEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RageClickEvent.swift; sourceTree = "<group>"; };
 		EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrackingPlugin.swift; sourceTree = "<group>"; };
 		EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRequestEvent.swift; sourceTree = "<group>"; };
 		EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeURLProtocol.swift; sourceTree = "<group>"; };
 		EAE989282DA831F200835345 /* NetworkTrackingPluginTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrackingPluginTest.swift; sourceTree = "<group>"; };
 		EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjCNetworkTrackingOptions.swift; sourceTree = "<group>"; };
+		EAF7B5392E0912E200E6E61A /* DeadClickEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadClickEvent.swift; sourceTree = "<group>"; };
+		EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrustrationInteractions.swift; sourceTree = "<group>"; };
 		OBJ_10 /* ConsoleLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleLogger.swift; sourceTree = "<group>"; };
 		OBJ_11 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		OBJ_14 /* BaseEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseEvent.swift; sourceTree = "<group>"; };
@@ -368,6 +370,7 @@
 		OBJ_13 /* Events */ = {
 			isa = PBXGroup;
 			children = (
+				EAF7B5392E0912E200E6E61A /* DeadClickEvent.swift */,
 				EA8CF7CF2DE652C6000F94F6 /* RageClickEvent.swift */,
 				EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */,
 				6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */,
@@ -424,6 +427,7 @@
 		OBJ_32 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
+				EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */,
 				EA28FDA72DED99CF00848BBB /* SwiftUIExtensions.swift */,
 				6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */,
 				OBJ_33 /* IOSLifecycleMonitor.swift */,
@@ -492,7 +496,6 @@
 		OBJ_53 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				EA84CF0C2DF8EC2E00CD1CAD /* RageClickTests.swift */,
 				4E27E4152DC1443800799F24 /* AutocaptureRemoteConfigTests.swift */,
 				4E654DE02D9B60E300BCAA85 /* IdentityTests.swift */,
 				6C04FC462C5897AC00EA8667 /* AutocaptureOptionsTests.swift */,
@@ -746,7 +749,6 @@
 				OBJ_148 /* IdentifyTests.swift in Sources */,
 				BA9BEA4D299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift in Sources */,
 				OBJ_149 /* RevenueEventTests.swift in Sources */,
-				EA84CF0D2DF8EC2E00CD1CAD /* RageClickTests.swift in Sources */,
 				OBJ_150 /* RevenueTests.swift in Sources */,
 				EAE891872DA83B6F00AB97D0 /* FakeURLProtocol.swift in Sources */,
 				OBJ_151 /* PersistentStorageTests.swift in Sources */,
@@ -781,6 +783,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
+				EAF7B54B2E09446F00E6E61A /* FrustrationInteractions.swift in Sources */,
 				EA84CF0B2DF8D8E400CD1CAD /* MiscellaneousExtension.swift in Sources */,
 				OBJ_88 /* Amplitude.swift in Sources */,
 				OBJ_89 /* Configuration.swift in Sources */,
@@ -793,6 +796,7 @@
 				OBJ_97 /* IdentifyEvent.swift in Sources */,
 				OBJ_98 /* Revenue.swift in Sources */,
 				OBJ_99 /* RevenueEvent.swift in Sources */,
+				EAF7B53A2E0912E200E6E61A /* DeadClickEvent.swift in Sources */,
 				OBJ_100 /* Mediator.swift in Sources */,
 				OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */,
 				OBJ_102 /* ContextPlugin.swift in Sources */,

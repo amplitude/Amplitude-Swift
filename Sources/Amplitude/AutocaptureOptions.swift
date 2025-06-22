@@ -14,7 +14,7 @@ public struct AutocaptureOptions: OptionSet {
     /// Won't work on watchOS
     public static let networkTracking     = AutocaptureOptions(rawValue: 1 << 4)
     /// Rage click detection for iOS/tvOS/visionOS
-    public static let rageClick           = AutocaptureOptions(rawValue: 1 << 5)
+    public static let frustrationInteractions = AutocaptureOptions(rawValue: 1 << 5)
 
     public static let all: AutocaptureOptions = [
         .sessions,
@@ -22,6 +22,6 @@ public struct AutocaptureOptions: OptionSet {
         .screenViews,
         .elementInteractions,
         .networkTracking,
-        .rageClick
+        .frustrationInteractions
     ]
 }

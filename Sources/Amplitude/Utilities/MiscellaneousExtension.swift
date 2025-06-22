@@ -18,7 +18,7 @@ extension Date {
     func amp_timestamp() -> Int64 {
         return Int64(timeIntervalSince1970 * 1000)
     }
-    
+
     func amp_iso8601String() -> String {
         if #available(iOS 15.0, macOS 12.0, *) {
             let iso8601Format = Date.ISO8601FormatStyle(includingFractionalSeconds: true)

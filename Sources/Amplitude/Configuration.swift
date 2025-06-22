@@ -28,7 +28,7 @@ public class Configuration {
         public static let enableAutoCaptureRemoteConfig = true
         public static let trackingOptions = TrackingOptions()
         public static let networkTrackingOptions = NetworkTrackingOptions.default
-        public static let interactionsOptions = InteractionsOptions()
+        static let interactionsOptions = InteractionsOptions()
     }
 
     public internal(set) var apiKey: String
@@ -75,7 +75,7 @@ public class Configuration {
     public var maxQueuedEventCount = -1
     var optOutChanged: ((Bool) -> Void)?
     public let enableAutoCaptureRemoteConfig: Bool
-    public internal(set) var interactionsOptions: InteractionsOptions
+    public let interactionsOptions: InteractionsOptions
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
     public convenience init(
@@ -106,8 +106,7 @@ public class Configuration {
         identifyBatchIntervalMillis: Int = Defaults.identifyBatchIntervalMillis,
         migrateLegacyData: Bool = Defaults.migrateLegacyData,
         offline: Bool? = false,
-        networkTrackingOptions: NetworkTrackingOptions = Defaults.networkTrackingOptions,
-        interactionsOptions: InteractionsOptions = Defaults.interactionsOptions
+        networkTrackingOptions: NetworkTrackingOptions = Defaults.networkTrackingOptions
     ) {
         self.init(apiKey: apiKey,
             flushQueueSize: flushQueueSize,
@@ -135,8 +134,7 @@ public class Configuration {
             identifyBatchIntervalMillis: identifyBatchIntervalMillis,
             migrateLegacyData: migrateLegacyData,
             offline: offline,
-            networkTrackingOptions: networkTrackingOptions,
-            interactionsOptions: interactionsOptions)
+            networkTrackingOptions: networkTrackingOptions)
         self.defaultTracking = defaultTracking
     }
 
@@ -170,8 +168,7 @@ public class Configuration {
         migrateLegacyData: Bool = Defaults.migrateLegacyData,
         offline: Bool? = false,
         networkTrackingOptions: NetworkTrackingOptions = Defaults.networkTrackingOptions,
-        enableAutoCaptureRemoteConfig: Bool = Defaults.enableAutoCaptureRemoteConfig,
-        interactionsOptions: InteractionsOptions = Defaults.interactionsOptions
+        enableAutoCaptureRemoteConfig: Bool = Defaults.enableAutoCaptureRemoteConfig
     ) {
         let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
@@ -209,7 +206,7 @@ public class Configuration {
         self.offline = offline
         self.networkTrackingOptions = networkTrackingOptions
         self.enableAutoCaptureRemoteConfig = enableAutoCaptureRemoteConfig
-        self.interactionsOptions = interactionsOptions
+        self.interactionsOptions = Defaults.interactionsOptions
     }
 
     func isValid() -> Bool {

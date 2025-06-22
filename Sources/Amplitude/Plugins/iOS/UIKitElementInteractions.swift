@@ -1,5 +1,6 @@
 #if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
 import UIKit
+import AmplitudeCore
 
 class UIKitElementInteractions {
     struct EventData {
@@ -14,6 +15,8 @@ class UIKitElementInteractions {
         let accessibilityLabel: String?
 
         let accessibilityIdentifier: String?
+
+        let targetViewIdentifier: ObjectIdentifier
 
         let targetViewClass: String
 
@@ -35,113 +38,10 @@ class UIKitElementInteractions {
             )
         }
     }
-    
-    struct RageClickData {
-        let eventData: EventData
-        let location: CGPoint
-        let timestamp: Date
-        let action: String
-        let source: EventData.Source?
-        let sourceName: String?
-    }
-    
-    class RageClickDetector {
-        private var clickQueue: [RageClickData] = []
-        private var debounceTimer: Timer?
-        private let lock = NSLock()
-        private weak var amplitude: Amplitude?
-        
-        init(amplitude: Amplitude) {
-            self.amplitude = amplitude
-        }
-        
-        func processClick(_ clickData: RageClickData) {
-            lock.withLock {
-                let config = amplitude?.configuration.interactionsOptions.rageClick
-                let threshold = config?.threshold ?? 3
-                let timeoutMs = config?.timeout ?? 1000
-                let timeoutInterval = TimeInterval(timeoutMs) / 1000.0
-                
-                // Filter out clicks that are too old or not on the same element
-                let cutoffTime = clickData.timestamp.addingTimeInterval(-timeoutInterval)
-                clickQueue = clickQueue.filter { existingClick in
-                    existingClick.timestamp >= cutoffTime &&
-                    isSameElement(existingClick.eventData, clickData.eventData) &&
-                    isWithinRange(existingClick.location, clickData.location)
-                }
-
-                clickQueue.append(clickData)
-                
-                // Check if we have enough clicks for rage click
-                if clickQueue.count >= threshold {
-                    // Cancel existing timer and start new debounce
-                    debounceTimer?.invalidate()
-                    debounceTimer = Timer.scheduledTimer(withTimeInterval: timeoutInterval, repeats: false) { [weak self] _ in
-                        self?.triggerRageClick()
-                    }
-                }
-            }
-        }
-        
-        private func isSameElement(_ data1: EventData, _ data2: EventData) -> Bool {
-            return data1.hierarchy == data2.hierarchy &&
-                   data1.targetViewClass == data2.targetViewClass &&
-                   data1.accessibilityIdentifier == data2.accessibilityIdentifier
-        }
-        
-        private func isWithinRange(_ point1: CGPoint, _ point2: CGPoint) -> Bool {
-            let distance = sqrt(pow(point1.x - point2.x, 2) + pow(point1.y - point2.y, 2))
-            return distance <= 50.0
-        }
-        
-        private func triggerRageClick() {
-            lock.withLock {
-                guard let amplitude = amplitude,
-                      let firstClick = clickQueue.first,
-                      let lastClick = clickQueue.last
-                else { return }
-
-                let clicks = clickQueue.map { clickData in
-                    Click(
-                        x: clickData.location.x,
-                        y: clickData.location.y,
-                        time: clickData.timestamp.amp_iso8601String()
-                    )
-                }
-                
-                let rageClickEvent = RageClickEvent(
-                    beginTime: firstClick.timestamp,
-                    endTime: lastClick.timestamp,
-                    clicks: clicks,
-                    screenName: firstClick.eventData.screenName,
-                    accessibilityLabel: firstClick.eventData.accessibilityLabel,
-                    accessibilityIdentifier: firstClick.eventData.accessibilityIdentifier,
-                    action: firstClick.action,
-                    targetViewClass: firstClick.eventData.targetViewClass,
-                    targetText: firstClick.eventData.targetText,
-                    hierarchy: firstClick.eventData.hierarchy,
-                    actionMethod: firstClick.source == .actionMethod ? firstClick.sourceName : nil,
-                    gestureRecognizer: firstClick.source == .gestureRecognizer ? firstClick.sourceName : nil
-                )
-                
-                amplitude.track(event: rageClickEvent)
-
-                clickQueue.removeAll()
-            }
-        }
-        
-        func reset() {
-            lock.withLock {
-                debounceTimer?.invalidate()
-                debounceTimer = nil
-                clickQueue.removeAll()
-            }
-        }
-    }
 
     fileprivate static let amplitudeInstances = NSHashTable<Amplitude>.weakObjects()
     fileprivate static var rageClickDetectors: [ObjectIdentifier: RageClickDetector] = [:]
-
+    fileprivate static var deadClickDetectors: [ObjectIdentifier: DeadClickDetector] = [:]
     fileprivate static let lock = NSLock()
 
     private static let addNotificationObservers: Void = {
@@ -158,10 +58,14 @@ class UIKitElementInteractions {
         lock.withLock {
             amplitudeInstances.add(amplitude)
             let identifier = ObjectIdentifier(amplitude)
-            
-            // Only create rage click detector if rage click detection is enabled
-            if amplitude.configuration.autocapture.contains(.rageClick) {
-                rageClickDetectors[identifier] = RageClickDetector(amplitude: amplitude)
+
+            if amplitude.configuration.autocapture.contains(.frustrationInteractions) {
+                if amplitude.configuration.interactionsOptions.rageClick.enabled {
+                    rageClickDetectors[identifier] = RageClickDetector(amplitude: amplitude)
+                }
+                if amplitude.configuration.interactionsOptions.deadClick.enabled {
+                    deadClickDetectors[identifier] = DeadClickDetector(amplitude: amplitude)
+                }
             }
         }
         setupMethodSwizzling
@@ -172,54 +76,15 @@ class UIKitElementInteractions {
         lock.withLock {
             amplitudeInstances.remove(amplitude)
             let identifier = ObjectIdentifier(amplitude)
-            rageClickDetectors[identifier]?.reset()
-            rageClickDetectors.removeValue(forKey: identifier)
-        }
-    }
-    
-    fileprivate static func processRageClickForView(_ view: UIView, action: String, source: EventData.Source?, sourceName: String?, event: UIEvent?) {
-        // Check if rage click detection is disabled for this view
-        if view.amp_ignoreRageClick {
-            return
-        }
-        
-        // Get touch location
-        var location = CGPoint.zero
-        
-        if let event = event, let touch = event.allTouches?.first {
-            // For UIControl events, get location relative to the main window
-            if let window = view.window {
-                location = touch.location(in: window)
-            } else {
-                location = touch.location(in: view)
+
+            if let rageClickDetector = rageClickDetectors[identifier] {
+                rageClickDetector.reset()
+                rageClickDetectors.removeValue(forKey: identifier)
             }
-        } else {
-            // Fallback: use the center of the view in window coordinates
-            if let window = view.window {
-                location = view.convert(view.bounds.center, to: window)
-            } else {
-                location = view.bounds.center
-            }
-        }
-        
-        let clickData = RageClickData(
-            eventData: view.eventData,
-            location: location,
-            timestamp: Date(),
-            action: action,
-            source: source,
-            sourceName: sourceName
-        )
-        
-        lock.withLock {
-            for amplitude in amplitudeInstances.allObjects {
-                // Check if rage click detection is enabled in autocapture options
-                guard amplitude.configuration.autocapture.contains(.rageClick) else {
-                    continue
-                }
-                
-                let identifier = ObjectIdentifier(amplitude)
-                rageClickDetectors[identifier]?.processClick(clickData)
+
+            if let deadClickDetector = deadClickDetectors[identifier] {
+                deadClickDetector.reset()
+                deadClickDetectors.removeValue(forKey: identifier)
             }
         }
     }
@@ -227,7 +92,7 @@ class UIKitElementInteractions {
     @objc static func didEndEditing(_ notification: NSNotification) {
         guard let view = notification.object as? UIView else { return }
         // Text fields in SwiftUI are identifiable only after the text field is edited.
-        
+
         // Track element interaction events only if .elementInteractions is enabled
         amplitudeInstances.allObjects.forEach { amplitude in
             if amplitude.configuration.autocapture.contains(.elementInteractions) {
@@ -255,6 +120,50 @@ class UIKitElementInteractions {
             swizzledImp,
             method_getTypeEncoding(swizzledMethod))
     }
+
+    static func uiChangeProviderDidChange(amplitude: Amplitude) {
+        let identifier = ObjectIdentifier(amplitude)
+        self.deadClickDetectors[identifier]?.uiChangeProviderDidChange()
+    }
+
+    fileprivate static func processFrustrationInteractionForView(_ view: UIView,
+                                                                 location: CGPoint,
+                                                                 action: String,
+                                                                 source: EventData.Source?,
+                                                                 sourceName: String?) {
+        let clickData = FrustrationClickData(
+            time: Date(),
+            eventData: view.eventData,
+            location: location,
+            action: action,
+            source: source,
+            sourceName: sourceName
+        )
+
+        lock.withLock {
+            for amplitude in amplitudeInstances.allObjects {
+                if amplitude.configuration.isRageClickEnabled,
+                   !view.amp_ignoreRageClick {
+                    rageClickDetectors[ObjectIdentifier(amplitude)]?.processClick(clickData)
+                }
+
+                if amplitude.configuration.isDeadClickEnabled,
+                   !view.amp_ignoreDeadClick {
+                    deadClickDetectors[ObjectIdentifier(amplitude)]?.processClick(clickData)
+                }
+            }
+        }
+    }
+}
+
+extension Configuration {
+    var isRageClickEnabled: Bool {
+        autocapture.contains(.frustrationInteractions) && interactionsOptions.rageClick.enabled
+    }
+
+    var isDeadClickEnabled: Bool {
+        autocapture.contains(.frustrationInteractions) && interactionsOptions.deadClick.enabled
+    }
 }
 
 extension UIApplication {
@@ -281,10 +190,27 @@ extension UIApplication {
                 amplitude.track(event: elementInteractionEvent)
             }
         }
-        
-        // Process rage click detection for touch events if .rageClick is enabled
-        if actionEvent == "touch" {
-            UIKitElementInteractions.processRageClickForView(control, action: actionEvent, source: .actionMethod, sourceName: NSStringFromSelector(action), event: event)
+
+        if actionEvent == "touch", !control.amp_ignoreRageClick || !control.amp_ignoreDeadClick {
+            var location = CGPoint.zero
+
+            if let event = event, let touch = event.allTouches?.first {
+                // For UIControl events, get location relative to the main window
+                if let window = control.window {
+                    location = touch.location(in: window)
+                } else {
+                    location = touch.location(in: control)
+                }
+            } else {
+                // Fallback: use the center of the view in window coordinates
+                if let window = control.window {
+                    location = control.convert(control.bounds.center, to: window)
+                } else {
+                    location = control.bounds.center
+                }
+            }
+
+            UIKitElementInteractions.processFrustrationInteractionForView(control, location: location, action: actionEvent, source: .actionMethod, sourceName: NSStringFromSelector(action))
         }
 
         return sendActionResult
@@ -343,37 +269,17 @@ extension UIGestureRecognizer {
                 amplitude.track(event: elementInteractionEvent)
             }
         }
-        
-        // Process rage click detection for tap gestures if .rageClick is enabled
-        if gestureAction == "tap" {
-            // Get location from the gesture recognizer
-            var location = CGPoint.zero
+
+        if gestureAction == "tap", !view.amp_ignoreDeadClick || !view.amp_ignoreRageClick {
+
+            let location: CGPoint
             if let window = view.window {
                 location = self.location(in: window)
             } else {
                 location = self.location(in: view)
             }
-            
-            let clickData = UIKitElementInteractions.RageClickData(
-                eventData: view.eventData,
-                location: location,
-                timestamp: Date(),
-                action: gestureAction,
-                source: .gestureRecognizer,
-                sourceName: descriptiveTypeName
-            )
-            
-            UIKitElementInteractions.lock.withLock {
-                for amplitude in UIKitElementInteractions.amplitudeInstances.allObjects {
-                    // Check if rage click detection is enabled in autocapture options
-                    guard amplitude.configuration.autocapture.contains(.rageClick) else {
-                        continue
-                    }
-                    
-                    let identifier = ObjectIdentifier(amplitude)
-                    UIKitElementInteractions.rageClickDetectors[identifier]?.processClick(clickData)
-                }
-            }
+
+            UIKitElementInteractions.processFrustrationInteractionForView(view, location: location, action: gestureAction, source: .gestureRecognizer, sourceName: descriptiveTypeName)
         }
     }
 }
@@ -388,6 +294,7 @@ extension UIView {
                 .flatMap(UIKitScreenViews.screenName),
             accessibilityLabel: accessibilityLabel,
             accessibilityIdentifier: accessibilityIdentifier,
+            targetViewIdentifier: ObjectIdentifier(self),
             targetViewClass: descriptiveTypeName,
             targetText: amp_title,
             hierarchy: sequence(first: self, next: \.superview)
@@ -499,7 +406,8 @@ extension UISwitch {
 // MARK: - Rage Click Ignore Extension
 extension UIView {
     private static var amp_ignoreRageClickKey: UInt8 = 0
-    
+    private static var amp_ignoreDeadClickKey: UInt8 = 0
+
     /// Whether this view should be ignored for rage click detection
     var amp_ignoreRageClick: Bool {
         get {
@@ -509,12 +417,26 @@ extension UIView {
             objc_setAssociatedObject(self, &UIView.amp_ignoreRageClickKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
-    
+
+    /// Whether this view should be ignored for dead click detection
+    var amp_ignoreDeadClick: Bool {
+        get {
+            return objc_getAssociatedObject(self, &UIView.amp_ignoreDeadClickKey) as? Bool ?? false
+        }
+        set {
+            objc_setAssociatedObject(self, &UIView.amp_ignoreDeadClickKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+
     /// Mark this view to be ignored for specific interaction events
     /// - Parameter rageClick: Whether to ignore rage click detection for this view
-    @objc func amp_ignoreInteractionEvent(rageClick: Bool = false) {
+    /// - Parameter deadClick: Whether to ignore dead click detection for this view
+    @objc public func amp_ignoreInteractionEvent(rageClick: Bool = true, deadClick: Bool = true) {
         if rageClick {
             self.amp_ignoreRageClick = true
+        }
+        if deadClick {
+            self.amp_ignoreDeadClick = true
         }
     }
 }
