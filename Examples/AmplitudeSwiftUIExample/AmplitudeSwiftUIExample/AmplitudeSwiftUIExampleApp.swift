@@ -86,7 +86,7 @@ extension Amplitude {
             trackingOptions: TrackingOptions().disableTrackCarrier().disableTrackDMA(),
             flushEventsOnClose: true,
             minTimeBetweenSessionsMillis: 15000,
-            autocapture: [.sessions, .rageClick],
+            autocapture: [.sessions, .frustrationInteractions],
             networkTrackingOptions: .init(
                 captureRules: [
                     .init(hosts: ["*"]), // all hosts, 500-599
