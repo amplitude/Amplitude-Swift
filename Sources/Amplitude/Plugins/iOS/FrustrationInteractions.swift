@@ -18,7 +18,7 @@ struct FrustrationClickData {
     let sourceName: String?
 }
 
-class DeadClickDetector: UISignalReceiver, @unchecked Sendable {
+class DeadClickDetector: InterfaceSignalReceiver, @unchecked Sendable {
     private let CLICK_TIMEOUT_MS = 3000
     // Check all pending clicks to see if this UI change is related to any of them
     // Account for slight delay between click and UI change (typically < 500ms)
@@ -30,16 +30,16 @@ class DeadClickDetector: UISignalReceiver, @unchecked Sendable {
 
     init(amplitude: Amplitude) {
         self.amplitude = amplitude
-        self.amplitude?.uiChangeProvider?.addUISignalReceiver(self)
+        self.amplitude?.interfaceSignalProvider?.addInterfaceSignalReceiver(self)
     }
 
-    func uiChangeProviderDidChange() {
-        self.amplitude?.uiChangeProvider?.addUISignalReceiver(self)
+    func interfaceSignalProviderDidChange() {
+        self.amplitude?.interfaceSignalProvider?.addInterfaceSignalReceiver(self)
     }
 
     func processClick(_ clickData: FrustrationClickData) {
         lock.withLock {
-            guard self.amplitude?.uiChangeProvider?.isProviding == true else {
+            guard self.amplitude?.interfaceSignalProvider?.isProviding == true else {
                 return
             }
 
@@ -56,15 +56,15 @@ class DeadClickDetector: UISignalReceiver, @unchecked Sendable {
         }
     }
 
-    @objc func onUIChanged(signal: UIChangeSignal) {
+    @objc func onInterfaceChanged(signal: InterfaceChangeSignal) {
         lock.withLock {
-            let uiChangeTimestamp = signal.timestamp
+            let interfaceChangeTimestamp = signal.time.timeIntervalSince1970
 
             var clicksToRemove: [UUID] = []
 
             // remove the clicks happend before UI change
             for (clickId, (clickData, timer)) in pendingClicks
-            where clickData.time.timeIntervalSince1970 < uiChangeTimestamp {
+            where clickData.time.timeIntervalSince1970 < interfaceChangeTimestamp {
                 timer.invalidate()
                 clicksToRemove.append(clickId)
             }

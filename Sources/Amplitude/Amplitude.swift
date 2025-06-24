@@ -79,9 +79,9 @@ public class Amplitude {
 
     var contextPlugin: ContextPlugin
     let timeline = Timeline()
-    weak var uiChangeProvider: UISignalProvider? {
+    weak var interfaceSignalProvider: InterfaceSignalProvider? {
         didSet {
-            UIKitElementInteractions.uiChangeProviderDidChange(amplitude: self)
+            UIKitElementInteractions.interfaceChangeProviderDidChange(amplitude: self)
         }
     }
 
@@ -354,8 +354,8 @@ public class Amplitude {
         } else {
             plugin.setup(analyticsClient: self, amplitudeContext: amplitudeContext)
         }
-        if let uiSignalProvider = plugin as? UISignalProvider {
-            self.uiChangeProvider = uiSignalProvider
+        if let interfaceSignalProvider = plugin as? InterfaceSignalProvider {
+            self.interfaceSignalProvider = interfaceSignalProvider
         }
         timeline.add(plugin: plugin)
         return self

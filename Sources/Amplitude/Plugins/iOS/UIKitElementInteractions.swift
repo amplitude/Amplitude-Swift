@@ -121,9 +121,9 @@ class UIKitElementInteractions {
             method_getTypeEncoding(swizzledMethod))
     }
 
-    static func uiChangeProviderDidChange(amplitude: Amplitude) {
+    static func interfaceChangeProviderDidChange(amplitude: Amplitude) {
         let identifier = ObjectIdentifier(amplitude)
-        self.deadClickDetectors[identifier]?.uiChangeProviderDidChange()
+        self.deadClickDetectors[identifier]?.interfaceSignalProviderDidChange()
     }
 
     fileprivate static func processFrustrationInteractionForView(_ view: UIView,
