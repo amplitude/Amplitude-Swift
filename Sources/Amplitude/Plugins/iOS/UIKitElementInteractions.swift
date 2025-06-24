@@ -403,41 +403,25 @@ extension UISwitch {
 }
 #endif
 
-// MARK: - Rage Click Ignore Extension
+// MARK: - Frustration Click Ignore Extension
 extension UIView {
     private static var amp_ignoreRageClickKey: UInt8 = 0
     private static var amp_ignoreDeadClickKey: UInt8 = 0
 
-    /// Whether this view should be ignored for rage click detection
     var amp_ignoreRageClick: Bool {
-        get {
-            return objc_getAssociatedObject(self, &UIView.amp_ignoreRageClickKey) as? Bool ?? false
-        }
-        set {
-            objc_setAssociatedObject(self, &UIView.amp_ignoreRageClickKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
+        return objc_getAssociatedObject(self, &UIView.amp_ignoreRageClickKey) as? Bool ?? false
     }
 
-    /// Whether this view should be ignored for dead click detection
     var amp_ignoreDeadClick: Bool {
-        get {
-            return objc_getAssociatedObject(self, &UIView.amp_ignoreDeadClickKey) as? Bool ?? false
-        }
-        set {
-            objc_setAssociatedObject(self, &UIView.amp_ignoreDeadClickKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
+        return objc_getAssociatedObject(self, &UIView.amp_ignoreDeadClickKey) as? Bool ?? false
     }
 
     /// Mark this view to be ignored for specific interaction events
     /// - Parameter rageClick: Whether to ignore rage click detection for this view
     /// - Parameter deadClick: Whether to ignore dead click detection for this view
     @objc public func amp_ignoreInteractionEvent(rageClick: Bool = true, deadClick: Bool = true) {
-        if rageClick {
-            self.amp_ignoreRageClick = true
-        }
-        if deadClick {
-            self.amp_ignoreDeadClick = true
-        }
+        objc_setAssociatedObject(self, &UIView.amp_ignoreRageClickKey, rageClick, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        objc_setAssociatedObject(self, &UIView.amp_ignoreDeadClickKey, deadClick, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
 }
 
