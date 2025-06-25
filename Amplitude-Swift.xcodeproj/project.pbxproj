@@ -78,7 +78,6 @@
 		EAE891872DA83B6F00AB97D0 /* FakeURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */; };
 		EAE989292DA831F200835345 /* NetworkTrackingPluginTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE989282DA831F200835345 /* NetworkTrackingPluginTest.swift */; };
 		EAF020772DBAE9D1003D22A2 /* ObjCNetworkTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */; };
-		EAF7B53A2E0912E200E6E61A /* DeadClickEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5392E0912E200E6E61A /* DeadClickEvent.swift */; };
 		EAF7B54B2E09446F00E6E61A /* FrustrationInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */; };
 		EAF7B5512E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5502E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
@@ -210,13 +209,11 @@
 		EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSwizzler.swift; sourceTree = "<group>"; };
 		EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodSwizzler.swift; sourceTree = "<group>"; };
 		EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiscellaneousExtension.swift; sourceTree = "<group>"; };
-		EA8CF7CF2DE652C6000F94F6 /* RageClickEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RageClickEvent.swift; sourceTree = "<group>"; };
 		EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrackingPlugin.swift; sourceTree = "<group>"; };
 		EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRequestEvent.swift; sourceTree = "<group>"; };
 		EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeURLProtocol.swift; sourceTree = "<group>"; };
 		EAE989282DA831F200835345 /* NetworkTrackingPluginTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrackingPluginTest.swift; sourceTree = "<group>"; };
 		EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjCNetworkTrackingOptions.swift; sourceTree = "<group>"; };
-		EAF7B5392E0912E200E6E61A /* DeadClickEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadClickEvent.swift; sourceTree = "<group>"; };
 		EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrustrationInteractions.swift; sourceTree = "<group>"; };
 		EAF7B5502E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrustrationIgnoreExtensions.swift; sourceTree = "<group>"; };
 		OBJ_10 /* ConsoleLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleLogger.swift; sourceTree = "<group>"; };
@@ -796,7 +793,6 @@
 				OBJ_97 /* IdentifyEvent.swift in Sources */,
 				OBJ_98 /* Revenue.swift in Sources */,
 				OBJ_99 /* RevenueEvent.swift in Sources */,
-				EAF7B53A2E0912E200E6E61A /* DeadClickEvent.swift in Sources */,
 				OBJ_100 /* Mediator.swift in Sources */,
 				OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */,
 				OBJ_102 /* ContextPlugin.swift in Sources */,
@@ -820,7 +816,6 @@
 				OBJ_115 /* Types.swift in Sources */,
 				EAF7B5512E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift in Sources */,
 				OBJ_116 /* Atomic.swift in Sources */,
-				EA8CF7D02DE652CA000F94F6 /* RageClickEvent.swift in Sources */,
 				EA5C95962D7A776D00DC8B3B /* MethodSwizzler.swift in Sources */,
 				EA28FDA42DED997900848BBB /* InteractionsOptions.swift in Sources */,
 				OBJ_117 /* CodableExtension.swift in Sources */,

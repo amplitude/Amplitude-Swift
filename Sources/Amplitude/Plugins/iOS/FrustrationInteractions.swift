@@ -16,6 +16,20 @@ struct FrustrationClickData {
     let action: String
     let source: UIKitElementInteractions.EventData.Source?
     let sourceName: String?
+
+    func generateEventProperties() -> [String: Any] {
+        var eventProperties: [String: Any] = [:]
+        eventProperties[Constants.AMP_APP_SCREEN_NAME_PROPERTY] = eventData.screenName
+        eventProperties[Constants.AMP_APP_TARGET_AXLABEL_PROPERTY] = eventData.accessibilityLabel
+        eventProperties[Constants.AMP_APP_TARGET_AXIDENTIFIER_PROPERTY] = eventData.accessibilityIdentifier
+        eventProperties[Constants.AMP_APP_ACTION_PROPERTY] = action
+        eventProperties[Constants.AMP_APP_TARGET_VIEW_CLASS_PROPERTY] = eventData.targetViewClass
+        eventProperties[Constants.AMP_APP_TARGET_TEXT_PROPERTY] = eventData.targetText
+        eventProperties[Constants.AMP_APP_HIERARCHY_PROPERTY] = eventData.hierarchy
+        eventProperties[Constants.AMP_APP_ACTION_METHOD_PROPERTY] = source == .actionMethod ? sourceName : nil
+        eventProperties[Constants.AMP_APP_GESTURE_RECOGNIZER_PROPERTY] = source == .gestureRecognizer ? sourceName : nil
+        return eventProperties
+    }
 }
 
 class DeadClickDetector: InterfaceSignalReceiver, @unchecked Sendable {
@@ -89,22 +103,13 @@ class DeadClickDetector: InterfaceSignalReceiver, @unchecked Sendable {
             guard let (clickData, _) = pendingClicks.removeValue(forKey: clickId),
                   let amplitude = amplitude else { return }
 
-            let deadClickEvent = DeadClickEvent(
-                time: clickData.time,
-                x: clickData.location.x,
-                y: clickData.location.y,
-                screenName: clickData.eventData.screenName,
-                accessibilityLabel: clickData.eventData.accessibilityLabel,
-                accessibilityIdentifier: clickData.eventData.accessibilityIdentifier,
-                action: clickData.action,
-                targetViewClass: clickData.eventData.targetViewClass,
-                targetText: clickData.eventData.targetText,
-                hierarchy: clickData.eventData.hierarchy,
-                actionMethod: clickData.source == .actionMethod ? clickData.sourceName : nil,
-                gestureRecognizer: clickData.source == .gestureRecognizer ? clickData.sourceName : nil
-            )
+            var eventProperties = clickData.generateEventProperties()
+            eventProperties[Constants.AMP_COORDINATE_X] = clickData.location.x
+            eventProperties[Constants.AMP_COORDINATE_Y] = clickData.location.y
 
-            amplitude.track(event: deadClickEvent)
+            amplitude.track(event: BaseEvent(timestamp: clickData.time.amp_timestamp(),
+                                             eventType: Constants.AMP_DEAD_CLICK_EVENT,
+                                             eventProperties: eventProperties))
 
             trim(for: clickData.eventData.targetViewIdentifier)
         }
@@ -184,29 +189,26 @@ class RageClickDetector {
         else { return }
 
         let clicks = clickQueue.map { clickData in
-            Click(
-                x: clickData.location.x,
-                y: clickData.location.y,
-                time: clickData.time.amp_iso8601String()
-            )
+            [
+                "X": clickData.location.x,
+                "Y": clickData.location.y,
+                "Time": clickData.time.amp_iso8601String()
+            ]
         }
 
-        let rageClickEvent = RageClickEvent(
-            beginTime: firstClick.time,
-            endTime: lastClick.time,
-            clicks: clicks,
-            screenName: firstClick.eventData.screenName,
-            accessibilityLabel: firstClick.eventData.accessibilityLabel,
-            accessibilityIdentifier: firstClick.eventData.accessibilityIdentifier,
-            action: firstClick.action,
-            targetViewClass: firstClick.eventData.targetViewClass,
-            targetText: firstClick.eventData.targetText,
-            hierarchy: firstClick.eventData.hierarchy,
-            actionMethod: firstClick.source == .actionMethod ? firstClick.sourceName : nil,
-            gestureRecognizer: firstClick.source == .gestureRecognizer ? firstClick.sourceName : nil
-        )
+        var eventProperties: [String: Any] = firstClick.generateEventProperties()
 
-        amplitude.track(event: rageClickEvent)
+        // Add rage click specific properties
+        eventProperties[Constants.AMP_BEGIN_TIME_PROPERTY] = firstClick.time.amp_iso8601String()
+        eventProperties[Constants.AMP_END_TIME_PROPERTY] = lastClick.time.amp_iso8601String()
+        let duration = lastClick.time.timeIntervalSince(firstClick.time) * 1000 // Convert to milliseconds
+        eventProperties[Constants.AMP_DURATION_PROPERTY] = duration
+        eventProperties[Constants.AMP_CLICKS_PROPERTY] = clicks
+        eventProperties[Constants.AMP_CLICK_COUNT_PROPERTY] = clicks.count
+
+        amplitude.track(event: BaseEvent(timestamp: firstClick.time.amp_timestamp(),
+                                         eventType: Constants.AMP_RAGE_CLICK_EVENT,
+                                         eventProperties: eventProperties))
     }
 
     func reset() {
