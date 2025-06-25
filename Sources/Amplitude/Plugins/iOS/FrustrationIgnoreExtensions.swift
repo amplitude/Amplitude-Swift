@@ -1,16 +1,41 @@
 //
-//  SwiftUIExtensions.swift
+//  FrustrationIgnoreExtensions.swift
 //  Amplitude-Swift
 //
 //  Created by Jin Xu on 5/23/25.
 //
+
+// MARK: - Frustration Click Ignore Extension for UIKit
+extension UIView {
+    private static var amp_ignoreRageClickKey: UInt8 = 0
+    private static var amp_ignoreDeadClickKey: UInt8 = 0
+
+    var amp_ignoreRageClick: Bool {
+        return objc_getAssociatedObject(self, &UIView.amp_ignoreRageClickKey) as? Bool ?? false
+    }
+
+    var amp_ignoreDeadClick: Bool {
+        return objc_getAssociatedObject(self, &UIView.amp_ignoreDeadClickKey) as? Bool ?? false
+    }
+
+    /// Mark this view to be ignored for specific interaction events
+    /// - Parameter rageClick: Whether to ignore rage click detection for this view
+    /// - Parameter deadClick: Whether to ignore dead click detection for this view
+    @objc public func amp_ignoreInteractionEvent(rageClick: Bool = true, deadClick: Bool = true) {
+        objc_setAssociatedObject(self, &UIView.amp_ignoreRageClickKey, rageClick, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        objc_setAssociatedObject(self, &UIView.amp_ignoreDeadClickKey, deadClick, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    }
+}
+
+// MARK: - Frustration Click Ignore Extension for SwiftUI
+// TODO: this can’t work properly on SwiftUI yet; keep it internal for now.
 
 #if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
 import SwiftUI
 import UIKit
 
 @available(iOS 13.0, tvOS 13.0, macOS 10.15, watchOS 6.0, *)
-public struct IgnoreInteractionEventModifier: ViewModifier {
+struct IgnoreInteractionEventModifier: ViewModifier {
     let rageClick: Bool
     let deadClick: Bool
 
@@ -25,7 +50,7 @@ public struct IgnoreInteractionEventModifier: ViewModifier {
 }
 
 @available(iOS 13.0, tvOS 13.0, macOS 10.15, watchOS 6.0, *)
-private struct IgnoreInteractionViewRepresentable: UIViewRepresentable {
+struct IgnoreInteractionViewRepresentable: UIViewRepresentable {
     let rageClick: Bool
     let deadClick: Bool
 
@@ -65,7 +90,7 @@ private struct IgnoreInteractionViewRepresentable: UIViewRepresentable {
 }
 
 @available(iOS 13.0, tvOS 13.0, macOS 10.15, watchOS 6.0, *)
-public extension View {
+extension View {
     /// Mark this view to be ignored for specific interaction events
     /// - Parameter rageClick: Whether to ignore rage click detection for this view
     func amp_ignoreInteractionEvent(rageClick: Bool = true, deadClick: Bool = true) -> some View {

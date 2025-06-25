@@ -69,7 +69,6 @@
 		D01043612B6C5A8500F8173C /* SandboxHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01043602B6C5A8500F8173C /* SandboxHelperTests.swift */; };
 		EA1F2CD92D8781950096A576 /* MethodSwizzlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1F2CD82D8781950096A576 /* MethodSwizzlerTest.swift */; };
 		EA28FDA42DED997900848BBB /* InteractionsOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28FDA32DED997900848BBB /* InteractionsOptions.swift */; };
-		EA28FDA82DED99CF00848BBB /* SwiftUIExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28FDA72DED99CF00848BBB /* SwiftUIExtensions.swift */; };
 		EA5C95942D7A76B900DC8B3B /* NetworkSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */; };
 		EA5C95962D7A776D00DC8B3B /* MethodSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */; };
 		EA84CF0B2DF8D8E400CD1CAD /* MiscellaneousExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */; };
@@ -81,6 +80,7 @@
 		EAF020772DBAE9D1003D22A2 /* ObjCNetworkTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */; };
 		EAF7B53A2E0912E200E6E61A /* DeadClickEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5392E0912E200E6E61A /* DeadClickEvent.swift */; };
 		EAF7B54B2E09446F00E6E61A /* FrustrationInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */; };
+		EAF7B5512E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5502E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
 		OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* AmplitudeDestinationPlugin.swift */; };
 		OBJ_102 /* ContextPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ContextPlugin.swift */; };
@@ -207,7 +207,6 @@
 		D01043602B6C5A8500F8173C /* SandboxHelperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxHelperTests.swift; sourceTree = "<group>"; };
 		EA1F2CD82D8781950096A576 /* MethodSwizzlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodSwizzlerTest.swift; sourceTree = "<group>"; };
 		EA28FDA32DED997900848BBB /* InteractionsOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractionsOptions.swift; sourceTree = "<group>"; };
-		EA28FDA72DED99CF00848BBB /* SwiftUIExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUIExtensions.swift; sourceTree = "<group>"; };
 		EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSwizzler.swift; sourceTree = "<group>"; };
 		EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodSwizzler.swift; sourceTree = "<group>"; };
 		EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiscellaneousExtension.swift; sourceTree = "<group>"; };
@@ -219,6 +218,7 @@
 		EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjCNetworkTrackingOptions.swift; sourceTree = "<group>"; };
 		EAF7B5392E0912E200E6E61A /* DeadClickEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadClickEvent.swift; sourceTree = "<group>"; };
 		EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrustrationInteractions.swift; sourceTree = "<group>"; };
+		EAF7B5502E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrustrationIgnoreExtensions.swift; sourceTree = "<group>"; };
 		OBJ_10 /* ConsoleLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleLogger.swift; sourceTree = "<group>"; };
 		OBJ_11 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		OBJ_14 /* BaseEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseEvent.swift; sourceTree = "<group>"; };
@@ -427,8 +427,8 @@
 		OBJ_32 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
+				EAF7B5502E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift */,
 				EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */,
-				EA28FDA72DED99CF00848BBB /* SwiftUIExtensions.swift */,
 				6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */,
 				OBJ_33 /* IOSLifecycleMonitor.swift */,
 				8EDEC650EF79B104DC3C9F4C /* UIKitScreenViews.swift */,
@@ -804,7 +804,6 @@
 				OBJ_104 /* IdentityEventSender.swift in Sources */,
 				OBJ_105 /* MacOSLifecycleMonitor.swift in Sources */,
 				OBJ_106 /* AppUtil.swift in Sources */,
-				EA28FDA82DED99CF00848BBB /* SwiftUIExtensions.swift in Sources */,
 				OBJ_107 /* VendorSystem.swift in Sources */,
 				OBJ_108 /* IOSLifecycleMonitor.swift in Sources */,
 				OBJ_109 /* WatchOSLifecycleMonitor.swift in Sources */,
@@ -819,6 +818,7 @@
 				OBJ_113 /* Timeline.swift in Sources */,
 				OBJ_114 /* TrackingOptions.swift in Sources */,
 				OBJ_115 /* Types.swift in Sources */,
+				EAF7B5512E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift in Sources */,
 				OBJ_116 /* Atomic.swift in Sources */,
 				EA8CF7D02DE652CA000F94F6 /* RageClickEvent.swift in Sources */,
 				EA5C95962D7A776D00DC8B3B /* MethodSwizzler.swift in Sources */,
