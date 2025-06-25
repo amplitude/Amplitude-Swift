@@ -106,7 +106,7 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
 
         logger?.debug(message: "NetworkTrackingPlugin: onTaskResume(\(task)) for \(url)")
 
-        task.requestTimestamp = Date().amp_timestamp()
+        task.requestTimestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
     }
 
     func onTask(_ task: URLSessionTask, setState state: URLSessionTask.State) {
@@ -127,7 +127,7 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
 
         guard task.state == .running, state == .completed else { return }
 
-        let responseTimestamp = Date().amp_timestamp()
+        let responseTimestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
 
         let event = NetworkRequestEvent(url: url,
                                         method: method,

@@ -170,7 +170,7 @@ final class AmplitudeTests: XCTestCase {
         }
         amplitude.setDeviceId(deviceId: expectedDeviceId)
 
-        let expectedSessionId = Date().amp_timestamp()
+        let expectedSessionId = Int64(Date().timeIntervalSince1970 * 1000)
         let sessionIdExpectation = expectation(description: "Should receive sessionId changes")
         testPlugin.sessionIdChanged = { sessionId in
             XCTAssertEqual(sessionId, expectedSessionId)
@@ -507,7 +507,7 @@ final class AmplitudeTests: XCTestCase {
         )
         let amplitude = Amplitude(configuration: configuration)
         amplitude.sessions = SessionsWithDelayedEventStartProcessing(amplitude: amplitude)
-        let timestamp = Date().amp_timestamp()
+        let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
 
         let oneHourEarlierTimestamp = timestamp - (1 * 60 * 60 * 1000)
         amplitude.setSessionId(timestamp: oneHourEarlierTimestamp)
@@ -803,13 +803,13 @@ final class AmplitudeTests: XCTestCase {
                                                                autocapture: [.sessions, .appLifecycles]))
         let eventCollector = EventCollectorPlugin()
         amplitude.add(plugin: eventCollector)
-        let sessionID = Date().amp_timestamp()
+        let sessionID = Int64(Date().timeIntervalSince1970 * 1000)
         amplitude.setSessionId(timestamp: sessionID)
 
         DispatchQueue.concurrentPerform(iterations: 100) { i in
-            amplitude.onEnterForeground(timestamp: Date().amp_timestamp())
+            amplitude.onEnterForeground(timestamp: Int64(Date().timeIntervalSince1970 * 1000))
             amplitude.track(eventType: "Test Event \(i)")
-            amplitude.onExitForeground(timestamp: Date().amp_timestamp())
+            amplitude.onExitForeground(timestamp: Int64(Date().timeIntervalSince1970 * 1000))
         }
 
         amplitude.waitForTrackingQueue()

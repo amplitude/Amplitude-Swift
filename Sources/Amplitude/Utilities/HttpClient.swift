@@ -14,6 +14,12 @@ class HttpClient {
     let diagnostics: Diagnostics
     let callbackQueue: DispatchQueue
 
+    private lazy var dateFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions.insert(.withFractionalSeconds)
+        return formatter
+    }()
+
     init(configuration: Configuration, diagnostics: Diagnostics, callbackQueue: DispatchQueue? = nil) {
         self.configuration = configuration
         self.diagnostics = diagnostics
@@ -106,7 +112,7 @@ class HttpClient {
 
     func getRequestData(events: String) -> Data? {
         let apiKey = configuration.apiKey
-        let clientUploadTime: String = getDate().amp_iso8601String()
+        let clientUploadTime: String = dateFormatter.string(from: getDate())
         var requestPayload = """
             {"api_key":"\(apiKey)","client_upload_time":"\(clientUploadTime)","events":\(events)
             """

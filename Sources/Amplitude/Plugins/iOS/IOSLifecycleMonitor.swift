@@ -53,7 +53,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
             // prior to firing the event
             amplitude.trackingQueue.async { [self] in
                 utils?.trackAppUpdatedInstalledEvent()
-                amplitude.onEnterForeground(timestamp: Date().amp_timestamp())
+                amplitude.onEnterForeground(timestamp: currentTimestamp)
                 utils?.trackAppOpenedEvent()
             }
         }
@@ -120,7 +120,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
         }
         sendApplicationOpenedOnDidBecomeActive = false
 
-        amplitude?.onEnterForeground(timestamp: Date().amp_timestamp())
+        amplitude?.onEnterForeground(timestamp: currentTimestamp)
         utils?.trackAppOpenedEvent()
     }
 
@@ -136,7 +136,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
             fromBackground = false
         }
 
-        amplitude?.onEnterForeground(timestamp: Date().amp_timestamp())
+        amplitude?.onEnterForeground(timestamp: currentTimestamp)
         utils?.trackAppOpenedEvent(fromBackground: fromBackground)
     }
 
@@ -145,10 +145,14 @@ class IOSLifecycleMonitor: UtilityPlugin {
         guard let amplitude = amplitude else {
             return
         }
-        amplitude.onExitForeground(timestamp: Date().amp_timestamp())
+        amplitude.onExitForeground(timestamp: currentTimestamp)
         if amplitude.configuration.autocapture.contains(.appLifecycles) {
             amplitude.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
         }
+    }
+
+    private var currentTimestamp: Int64 {
+        return Int64(NSDate().timeIntervalSince1970 * 1000)
     }
 
     override func teardown() {

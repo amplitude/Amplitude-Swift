@@ -49,11 +49,13 @@
         }
 
         func applicationWillEnterForeground(notification: NSNotification) {
-            self.amplitude?.onEnterForeground(timestamp: Date().amp_timestamp())
+            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+            self.amplitude?.onEnterForeground(timestamp: timestamp)
         }
 
         func applicationDidEnterBackground(notification: NSNotification) {
-            self.amplitude?.onExitForeground(timestamp: Date().amp_timestamp())
+            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+            self.amplitude?.onExitForeground(timestamp: timestamp)
         }
     }
 

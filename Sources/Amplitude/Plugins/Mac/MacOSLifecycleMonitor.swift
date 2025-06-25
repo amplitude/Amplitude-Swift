@@ -48,11 +48,13 @@
         }
 
         func applicationDidBecomeActive(notification: NSNotification) {
-            self.amplitude?.onEnterForeground(timestamp: Date().amp_timestamp())
+            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+            self.amplitude?.onEnterForeground(timestamp: timestamp)
         }
 
         func applicationWillResignActive(notification: NSNotification) {
-            self.amplitude?.onExitForeground(timestamp: Date().amp_timestamp())
+            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+            self.amplitude?.onExitForeground(timestamp: timestamp)
         }
     }
 
