@@ -33,12 +33,13 @@ struct FrustrationClickData {
 }
 
 class DeadClickDetector: InterfaceSignalReceiver, @unchecked Sendable {
-    private let CLICK_TIMEOUT_MS = 3000
+    private let CLICK_TIMEOUT = 3.0
     // Check all pending clicks to see if this UI change is related to any of them
     // Account for slight delay between click and UI change (typically < 500ms)
-    private let UI_CHANGE_MAX_DELAY: TimeInterval = 0.5 // 500ms max delay between click and UI change
+    private let UI_CHANGE_MAX_DELAY = 0.5 // 500ms max delay between click and UI change
 
-    private var pendingClicks: [UUID: (FrustrationClickData, Timer)] = [:]
+    private var pendingClicks: [FrustrationClickData] = []
+    private var timer: Timer?
     private let lock = NSLock()
     private weak var amplitude: Amplitude?
 
@@ -58,16 +59,11 @@ class DeadClickDetector: InterfaceSignalReceiver, @unchecked Sendable {
                 return
             }
 
-            let timeoutMs = CLICK_TIMEOUT_MS
-            let timeoutInterval = TimeInterval(timeoutMs) / 1000.0 + UI_CHANGE_MAX_DELAY
+            pendingClicks.append(clickData)
 
-            let clickId = UUID()
-
-            let timer = Timer.scheduledTimer(withTimeInterval: timeoutInterval, repeats: false) { [weak self] _ in
-                self?.triggerDeadClick(clickId: clickId)
+            if timer?.isValid != true {
+                refreshTimer()
             }
-
-            pendingClicks[clickId] = (clickData, timer)
         }
     }
 
@@ -75,18 +71,29 @@ class DeadClickDetector: InterfaceSignalReceiver, @unchecked Sendable {
         lock.withLock {
             let interfaceChangeTimestamp = signal.time.timeIntervalSince1970
 
-            var clicksToRemove: [UUID] = []
+            timer?.invalidate()
 
             // remove the clicks happend before UI change
-            for (clickId, (clickData, timer)) in pendingClicks
-            where clickData.time.timeIntervalSince1970 < interfaceChangeTimestamp {
-                timer.invalidate()
-                clicksToRemove.append(clickId)
+            pendingClicks.removeAll { clickData in
+                return clickData.time.timeIntervalSince1970 < interfaceChangeTimestamp
             }
 
-            for clickId in clicksToRemove {
-                pendingClicks.removeValue(forKey: clickId)
+            refreshTimer()
+        }
+    }
+
+    func refreshTimer() {
+        guard let firstClick = pendingClicks.first else { return }
+
+        let timeoutInterval = CLICK_TIMEOUT + UI_CHANGE_MAX_DELAY - Date().timeIntervalSince(firstClick.time)
+        if timeoutInterval > 0 {
+            timer = Timer.scheduledTimer(withTimeInterval: timeoutInterval, repeats: false) { [weak self] _ in
+                self?.lock.withLock {
+                    self?.triggerDeadClick()
+                }
             }
+        } else {
+            triggerDeadClick()
         }
     }
 
@@ -99,42 +106,34 @@ class DeadClickDetector: InterfaceSignalReceiver, @unchecked Sendable {
         reset()
     }
 
-    private func triggerDeadClick(clickId: UUID) {
-        lock.withLock {
-            guard let (clickData, _) = pendingClicks.removeValue(forKey: clickId),
-                  let amplitude = amplitude else { return }
+    private func triggerDeadClick() {
+        guard let clickData = pendingClicks.first,
+              let amplitude = amplitude else { return }
 
-            var eventProperties = clickData.generateEventProperties()
-            eventProperties[Constants.AMP_COORDINATE_X] = clickData.location.x
-            eventProperties[Constants.AMP_COORDINATE_Y] = clickData.location.y
+        var eventProperties = clickData.generateEventProperties()
+        eventProperties[Constants.AMP_COORDINATE_X] = clickData.location.x
+        eventProperties[Constants.AMP_COORDINATE_Y] = clickData.location.y
 
-            amplitude.track(event: BaseEvent(timestamp: clickData.time.amp_timestamp(),
-                                             eventType: Constants.AMP_DEAD_CLICK_EVENT,
-                                             eventProperties: eventProperties))
+        amplitude.track(event: BaseEvent(timestamp: clickData.time.amp_timestamp(),
+                                         eventType: Constants.AMP_DEAD_CLICK_EVENT,
+                                         eventProperties: eventProperties))
 
-            trim(for: clickData.eventData.targetViewIdentifier)
-        }
+        trim(for: clickData.eventData.targetViewIdentifier)
+
+        timer?.invalidate()
+
+        refreshTimer()
     }
 
     func trim(for elementIdentifier: ObjectIdentifier) {
-        var clicksToRemove: [UUID] = []
-
-        for (clickId, (clickData, timer)) in pendingClicks
-        where clickData.eventData.targetViewIdentifier == elementIdentifier {
-                timer.invalidate()
-                clicksToRemove.append(clickId)
-        }
-
-        for clickId in clicksToRemove {
-            pendingClicks.removeValue(forKey: clickId)
+        pendingClicks.removeAll { clickData in
+            clickData.eventData.targetViewIdentifier == elementIdentifier
         }
     }
 
     func reset() {
         lock.withLock {
-            for (_, (_, timer)) in pendingClicks {
-                timer.invalidate()
-            }
+            timer?.invalidate()
             pendingClicks.removeAll()
         }
     }
