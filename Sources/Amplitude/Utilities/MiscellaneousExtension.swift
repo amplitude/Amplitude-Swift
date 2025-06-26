@@ -29,3 +29,9 @@ extension Date {
         }
     }
 }
+
+extension CGRect {
+    var amp_center: CGPoint {
+        return CGPoint(x: midX, y: midY)
+    }
+}

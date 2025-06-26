@@ -206,9 +206,9 @@ extension UIApplication {
             } else {
                 // Fallback: use the center of the view in window coordinates
                 if let window = control.window {
-                    location = control.convert(control.bounds.center, to: window)
+                    location = control.convert(control.bounds.amp_center, to: window)
                 } else {
-                    location = control.bounds.center
+                    location = control.bounds.amp_center
                 }
             }
 
@@ -349,12 +349,6 @@ extension UIResponder {
 extension NSObject {
     var descriptiveTypeName: String {
         String(describing: type(of: self))
-    }
-}
-
-extension CGRect {
-    var center: CGPoint {
-        return CGPoint(x: midX, y: midY)
     }
 }
 
