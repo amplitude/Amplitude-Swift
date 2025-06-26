@@ -47,8 +47,9 @@ class DeadClickDetector: InterfaceSignalReceiver, @unchecked Sendable {
         self.amplitude?.interfaceSignalProvider?.addInterfaceSignalReceiver(self)
     }
 
-    func interfaceSignalProviderDidChange() {
-        self.amplitude?.interfaceSignalProvider?.addInterfaceSignalReceiver(self)
+    func interfaceSignalProviderDidChange(from oldProvider: InterfaceSignalProvider?, to newProvider: InterfaceSignalProvider?) {
+        oldProvider?.removeInterfaceSignalReceiver(self)
+        newProvider?.addInterfaceSignalReceiver(self)
     }
 
     func processClick(_ clickData: FrustrationClickData) {

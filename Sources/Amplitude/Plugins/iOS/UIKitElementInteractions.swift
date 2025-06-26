@@ -121,9 +121,11 @@ class UIKitElementInteractions {
             method_getTypeEncoding(swizzledMethod))
     }
 
-    static func interfaceChangeProviderDidChange(amplitude: Amplitude) {
-        let identifier = ObjectIdentifier(amplitude)
-        self.deadClickDetectors[identifier]?.interfaceSignalProviderDidChange()
+    static func interfaceChangeProviderDidChange(for amplitude: Amplitude, from oldProvider: InterfaceSignalProvider?, to newProvider: InterfaceSignalProvider?) {
+        lock.withLock {
+            let identifier = ObjectIdentifier(amplitude)
+            self.deadClickDetectors[identifier]?.interfaceSignalProviderDidChange(from: oldProvider, to: newProvider)
+        }
     }
 
     fileprivate static func processFrustrationInteractionForView(_ view: UIView,

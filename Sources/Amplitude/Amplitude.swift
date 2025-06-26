@@ -81,7 +81,7 @@ public class Amplitude {
     let timeline = Timeline()
     weak var interfaceSignalProvider: InterfaceSignalProvider? {
         didSet {
-            UIKitElementInteractions.interfaceChangeProviderDidChange(amplitude: self)
+            UIKitElementInteractions.interfaceChangeProviderDidChange(for: self, from: oldValue, to: interfaceSignalProvider)
         }
     }
 
@@ -347,7 +347,6 @@ public class Amplitude {
     }
 
     @discardableResult
-
     public func add(plugin: UniversalPlugin) -> Self {
         if let plugin = plugin as? Plugin {
             plugin.setup(amplitude: self)
@@ -363,6 +362,9 @@ public class Amplitude {
 
     @discardableResult
     public func remove(plugin: UniversalPlugin) -> Amplitude {
+        if self.interfaceSignalProvider === plugin {
+            self.interfaceSignalProvider = nil
+        }
         timeline.remove(plugin: plugin)
         return self
     }
