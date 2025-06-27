@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -72,7 +72,6 @@
 		EA5C95942D7A76B900DC8B3B /* NetworkSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */; };
 		EA5C95962D7A776D00DC8B3B /* MethodSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */; };
 		EA84CF0B2DF8D8E400CD1CAD /* MiscellaneousExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */; };
-		EA8CF7D02DE652CA000F94F6 /* RageClickEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8CF7CF2DE652C6000F94F6 /* RageClickEvent.swift */; };
 		EA8DA4BF2D91C101003B00F0 /* NetworkTrackingPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */; };
 		EA8DA4C12D91C131003B00F0 /* NetworkRequestEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */; };
 		EAE891872DA83B6F00AB97D0 /* FakeURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */; };
@@ -367,8 +366,6 @@
 		OBJ_13 /* Events */ = {
 			isa = PBXGroup;
 			children = (
-				EAF7B5392E0912E200E6E61A /* DeadClickEvent.swift */,
-				EA8CF7CF2DE652C6000F94F6 /* RageClickEvent.swift */,
 				EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */,
 				6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */,
 				OBJ_14 /* BaseEvent.swift */,
@@ -1308,7 +1305,7 @@
 			repositoryURL = "https://github.com/amplitude/AmplitudeCore-Swift";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.13;
+				minimumVersion = 1.1.0;
 			};
 		};
 		4EB530762CD2EB9700E961F4 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */ = {

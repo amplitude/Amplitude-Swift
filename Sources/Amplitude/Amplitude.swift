@@ -81,7 +81,9 @@ public class Amplitude {
     let timeline = Timeline()
     weak var interfaceSignalProvider: InterfaceSignalProvider? {
         didSet {
+#if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
             UIKitElementInteractions.interfaceChangeProviderDidChange(for: self, from: oldValue, to: interfaceSignalProvider)
+#endif
         }
     }
 

@@ -5,6 +5,11 @@
 //  Created by Jin Xu on 5/23/25.
 //
 
+#if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
+
+import SwiftUI
+import UIKit
+
 // MARK: - Frustration Click Ignore Extension for UIKit
 extension UIView {
     private static var amp_ignoreRageClickKey: UInt8 = 0
@@ -29,10 +34,6 @@ extension UIView {
 
 // MARK: - Frustration Click Ignore Extension for SwiftUI
 // TODO: this can’t work properly on SwiftUI yet; keep it internal for now.
-
-#if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
-import SwiftUI
-import UIKit
 
 @available(iOS 13.0, tvOS 13.0, macOS 10.15, watchOS 6.0, *)
 struct IgnoreInteractionEventModifier: ViewModifier {

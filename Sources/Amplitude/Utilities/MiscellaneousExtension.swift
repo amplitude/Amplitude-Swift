@@ -20,7 +20,7 @@ extension Date {
     }
 
     func amp_iso8601String() -> String {
-        if #available(iOS 15.0, macOS 12.0, *) {
+        if #available(iOS 15.0, macOS 12.0, watchOS 8.0, tvOS 15.0, *) {
             let iso8601Format = Date.ISO8601FormatStyle(includingFractionalSeconds: true)
             return self.formatted(iso8601Format)
         } else {
