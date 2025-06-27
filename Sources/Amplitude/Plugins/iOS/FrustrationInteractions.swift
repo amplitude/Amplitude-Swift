@@ -142,7 +142,7 @@ class DeadClickDetector: InterfaceSignalReceiver, @unchecked Sendable {
 class RageClickDetector {
     private let CLICK_RANGE_THRESHOLD: CGFloat = 50
     private let CLICK_COUNT_THRESHOLD: Int = 3
-    private let CLICK_TIMEOUT_MS: TimeInterval = 1000
+    private let CLICK_TIMEOUT: TimeInterval = 1.0
 
     private var clickQueue: [FrustrationClickData] = []
     private var debounceTimer: Timer?
@@ -155,10 +155,27 @@ class RageClickDetector {
 
     func processClick(_ clickData: FrustrationClickData) {
         lock.withLock {
-            let timeoutInterval = TimeInterval(CLICK_TIMEOUT_MS) / 1000.0
+            let timeoutInterval = CLICK_TIMEOUT
 
-            if let last = clickQueue.last, !isSameElement(last, clickData) || !isWithinRange(last.location, clickData.location) {
-                self.triggerRageClick()
+            // Trigger a rage click if the last click is not the same element or location
+            if let lastClick = clickQueue.last,
+               !isSameElement(lastClick, clickData) || !isWithinRange(lastClick.location, clickData.location) {
+                triggerRageClick()
+            }
+
+            // Check if the last click satisfy the rage click threshold in timeout interval
+            let thresholdIndex = clickQueue.count - (CLICK_COUNT_THRESHOLD - 1)
+            if thresholdIndex >= 0 {
+                let thresholdClick = clickQueue[thresholdIndex]
+                let timeSinceThresholdClick = clickData.time.timeIntervalSince(thresholdClick.time)
+
+                if timeSinceThresholdClick >= timeoutInterval {
+                    if thresholdIndex == 0 {
+                        clickQueue.removeFirst()
+                    } else {
+                        triggerRageClick()
+                    }
+                }
             }
 
             clickQueue.append(clickData)

@@ -11,7 +11,7 @@ public class InteractionsOptions {
     public let rageClick: RageClickOptions
     public let deadClick: DeadClickOptions
 
-    init(rageClick: RageClickOptions = RageClickOptions(), deadClick: DeadClickOptions = DeadClickOptions()) {
+    public init(rageClick: RageClickOptions = RageClickOptions(), deadClick: DeadClickOptions = DeadClickOptions()) {
         self.rageClick = rageClick
         self.deadClick = deadClick
     }
