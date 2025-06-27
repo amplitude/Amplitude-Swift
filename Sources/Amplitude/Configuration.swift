@@ -75,7 +75,7 @@ public class Configuration {
     public var maxQueuedEventCount = -1
     var optOutChanged: ((Bool) -> Void)?
     public let enableAutoCaptureRemoteConfig: Bool
-    public let interactionsOptions: InteractionsOptions
+    public var interactionsOptions: InteractionsOptions
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
     public convenience init(

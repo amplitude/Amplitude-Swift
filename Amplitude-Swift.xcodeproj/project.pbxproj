@@ -79,6 +79,7 @@
 		EAF020772DBAE9D1003D22A2 /* ObjCNetworkTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */; };
 		EAF7B54B2E09446F00E6E61A /* FrustrationInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */; };
 		EAF7B5512E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5502E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift */; };
+		EAF7B5582E0F1C1D00E6E61A /* ObjCInteractionsOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5572E0F1C1000E6E61A /* ObjCInteractionsOptions.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
 		OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* AmplitudeDestinationPlugin.swift */; };
 		OBJ_102 /* ContextPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ContextPlugin.swift */; };
@@ -215,6 +216,7 @@
 		EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjCNetworkTrackingOptions.swift; sourceTree = "<group>"; };
 		EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrustrationInteractions.swift; sourceTree = "<group>"; };
 		EAF7B5502E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrustrationIgnoreExtensions.swift; sourceTree = "<group>"; };
+		EAF7B5572E0F1C1000E6E61A /* ObjCInteractionsOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjCInteractionsOptions.swift; sourceTree = "<group>"; };
 		OBJ_10 /* ConsoleLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleLogger.swift; sourceTree = "<group>"; };
 		OBJ_11 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		OBJ_14 /* BaseEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseEvent.swift; sourceTree = "<group>"; };
@@ -317,6 +319,7 @@
 		8EDECAFD8271434E8DC7BA78 /* ObjC */ = {
 			isa = PBXGroup;
 			children = (
+				EAF7B5572E0F1C1000E6E61A /* ObjCInteractionsOptions.swift */,
 				EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */,
 				6C04FC422C58976800EA8667 /* ObjCAutocaptureOptions.swift */,
 				B6CCC6CC2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift */,
@@ -813,6 +816,7 @@
 				OBJ_115 /* Types.swift in Sources */,
 				EAF7B5512E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift in Sources */,
 				OBJ_116 /* Atomic.swift in Sources */,
+				EAF7B5582E0F1C1D00E6E61A /* ObjCInteractionsOptions.swift in Sources */,
 				EA5C95962D7A776D00DC8B3B /* MethodSwizzler.swift in Sources */,
 				EA28FDA42DED997900848BBB /* InteractionsOptions.swift in Sources */,
 				OBJ_117 /* CodableExtension.swift in Sources */,

@@ -17,7 +17,8 @@
         AMPAutocaptureOptions.sessions,
         AMPAutocaptureOptions.appLifecycles,
         AMPAutocaptureOptions.screenViews,
-        AMPAutocaptureOptions.networkTracking
+        AMPAutocaptureOptions.networkTracking,
+        AMPAutocaptureOptions.frustrationInteractions,
     ];
     configuration.autocapture = [[AMPAutocaptureOptions alloc] initWithOptionsToUnion:autocaptureOptions];
     configuration.loggerProvider = ^(NSInteger logLevel, NSString* _Nonnull message) {
@@ -29,6 +30,11 @@
     [rules addObject:[[AMPNetworkTrackingCaptureRule alloc] initWithHosts:@[@"httpstat.us"] statusCodeRange:@"0,400-599"]];
     networkTrackingOptions.captureRules = rules;
     configuration.networkTrackingOptions = networkTrackingOptions;
+
+    AMPRageClickOptions *rageClickOptions = [[AMPRageClickOptions alloc] initWithEnabled:YES];
+    AMPDeadClickOptions *deadClickOptions = [[AMPDeadClickOptions alloc] initWithEnabled: NO];
+    AMPInteractionsOptions *interactionsOptions = [[AMPInteractionsOptions alloc] initWithRageClick:rageClickOptions deadClick:deadClickOptions];
+    configuration.interactionsOptions = interactionsOptions;
 
     self.amplitude = [Amplitude initWithConfiguration:configuration];
 
