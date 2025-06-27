@@ -101,7 +101,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertEqual(event.eventProperties?[Constants.AMP_NETWORK_RESPONSE_BODY_SIZE_PROPERTY] as! Int64, 0)
         XCTAssertTrue(event.eventProperties?[Constants.AMP_NETWORK_START_TIME_PROPERTY] as! Int64 > 0)
         XCTAssertTrue(event.eventProperties?[Constants.AMP_NETWORK_COMPLETION_TIME_PROPERTY] as! Int64 > 0)
-        XCTAssertTrue(event.eventProperties?[Constants.AMP_NETWORK_DURATION_PROPERTY] as! Int64 > 0)
+        XCTAssertTrue(event.eventProperties?[Constants.AMP_DURATION_PROPERTY] as! Int64 > 0)
     }
 
     func testDefaultNetworkTrackingOptionsShouldNotCapture200() {
@@ -295,7 +295,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertEqual(event.eventProperties?[Constants.AMP_NETWORK_RESPONSE_BODY_SIZE_PROPERTY] as! Int64, 0)
         XCTAssertTrue(event.eventProperties?[Constants.AMP_NETWORK_START_TIME_PROPERTY] as! Int64 > 0)
         XCTAssertTrue(event.eventProperties?[Constants.AMP_NETWORK_COMPLETION_TIME_PROPERTY] as! Int64 > 0)
-        XCTAssertTrue(event.eventProperties?[Constants.AMP_NETWORK_DURATION_PROPERTY] as! Int64 > 0)
+        XCTAssertTrue(event.eventProperties?[Constants.AMP_DURATION_PROPERTY] as! Int64 > 0)
     }
 
     func testCapturingUploadTask() {

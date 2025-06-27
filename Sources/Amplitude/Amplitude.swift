@@ -79,6 +79,13 @@ public class Amplitude {
 
     var contextPlugin: ContextPlugin
     let timeline = Timeline()
+    weak var interfaceSignalProvider: InterfaceSignalProvider? {
+        didSet {
+#if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
+            UIKitElementInteractions.interfaceChangeProviderDidChange(for: self, from: oldValue, to: interfaceSignalProvider)
+#endif
+        }
+    }
 
     public let amplitudeContext: AmplitudeContext
 
@@ -342,12 +349,14 @@ public class Amplitude {
     }
 
     @discardableResult
-
     public func add(plugin: UniversalPlugin) -> Self {
         if let plugin = plugin as? Plugin {
             plugin.setup(amplitude: self)
         } else {
             plugin.setup(analyticsClient: self, amplitudeContext: amplitudeContext)
+        }
+        if let interfaceSignalProvider = plugin as? InterfaceSignalProvider {
+            self.interfaceSignalProvider = interfaceSignalProvider
         }
         timeline.add(plugin: plugin)
         return self
@@ -355,6 +364,9 @@ public class Amplitude {
 
     @discardableResult
     public func remove(plugin: UniversalPlugin) -> Amplitude {
+        if self.interfaceSignalProvider === plugin {
+            self.interfaceSignalProvider = nil
+        }
         timeline.remove(plugin: plugin)
         return self
     }

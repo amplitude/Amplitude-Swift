@@ -312,6 +312,16 @@ public class ObjCConfiguration: NSObject {
         }
     }
 
+    @objc
+    public var interactionsOptions: ObjCInteractionsOptions {
+        get {
+            return ObjCInteractionsOptions(configuration.interactionsOptions)
+        }
+        set(value) {
+            configuration.interactionsOptions = value.options
+        }
+    }
+
     @objc public var enableAutoCaptureRemoteConfig: Bool {
         return configuration.enableAutoCaptureRemoteConfig
     }

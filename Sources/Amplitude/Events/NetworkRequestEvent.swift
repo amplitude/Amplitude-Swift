@@ -43,7 +43,7 @@ public class NetworkRequestEvent: BaseEvent {
         eventProperties[Constants.AMP_NETWORK_START_TIME_PROPERTY] = startTime
         eventProperties[Constants.AMP_NETWORK_COMPLETION_TIME_PROPERTY] = completionTime
         if let completionTime = completionTime, let startTime = startTime {
-            eventProperties[Constants.AMP_NETWORK_DURATION_PROPERTY] = completionTime - startTime
+            eventProperties[Constants.AMP_DURATION_PROPERTY] = completionTime - startTime
         }
         eventProperties[Constants.AMP_NETWORK_REQUEST_BODY_SIZE_PROPERTY] = requestBodySize
         eventProperties[Constants.AMP_NETWORK_RESPONSE_BODY_SIZE_PROPERTY] = responseBodySize

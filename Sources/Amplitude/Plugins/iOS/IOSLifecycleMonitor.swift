@@ -93,7 +93,9 @@ class IOSLifecycleMonitor: UtilityPlugin {
             UIKitScreenViews.unregister(amplitude)
         }
 
-        if trackElementInteractions {
+        // Register UIKitElementInteractions if either element interactions or frustration interactions is enabled
+        let needsElementInteractions = trackElementInteractions || amplitude.configuration.autocapture.contains(.frustrationInteractions)
+        if needsElementInteractions {
             UIKitElementInteractions.register(amplitude)
         } else {
             UIKitElementInteractions.unregister(amplitude)
