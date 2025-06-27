@@ -23,12 +23,6 @@ struct AmplitudeSwiftUIExampleApp: App {
         Amplitude.testInstance.add(plugin: FilterPlugin())
 
         Amplitude.experimentClient.fetch(user: nil, completion: nil)
-
-        var networkTrackingOptions = NetworkTrackingOptions.default
-        networkTrackingOptions.captureRules.append(
-            .init(hosts: ["*.example.com", "example.com"], statusCodeRange: "0,400-599")
-        )
-        networkTrackingOptions.ignoreHosts.append("notmyapi.com")
     }
 
     var body: some Scene {
