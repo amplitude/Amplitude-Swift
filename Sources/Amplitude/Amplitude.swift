@@ -427,7 +427,8 @@ public class Amplitude {
 
     @discardableResult
     public func setSessionId(date: Date) -> Amplitude {
-        setSessionId(timestamp: date.amp_timestamp())
+        let timestamp = Int64(date.timeIntervalSince1970 * 1000)
+        setSessionId(timestamp: timestamp)
         return self
     }
 
