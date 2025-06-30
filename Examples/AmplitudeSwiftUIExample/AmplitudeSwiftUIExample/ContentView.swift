@@ -156,12 +156,6 @@ struct ContentView: View {
                             }.buttonStyle(AmplitudeButton())
 
                             Toggle("Rage Click", isOn: $rageClickTest)
-
-                            Button("Ignored Button") {
-                                print("Ignored button tapped - this will NOT trigger rage click detection")
-                            }.buttonStyle(AmplitudeButton())
-                            // Mark this button to be ignored for rage click detection
-                            .amp_ignoreInteractionEvent(rageClick: true)
                         }
                     }
                     Button(action: {
