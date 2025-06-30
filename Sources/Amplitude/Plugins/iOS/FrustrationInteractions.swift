@@ -141,7 +141,7 @@ class DeadClickDetector: InterfaceSignalReceiver, @unchecked Sendable {
 
 class RageClickDetector {
     private let CLICK_RANGE_THRESHOLD: CGFloat = 50
-    private let CLICK_COUNT_THRESHOLD: Int = 3
+    private let CLICK_COUNT_THRESHOLD: Int = 4
     private let CLICK_TIMEOUT: TimeInterval = 1.0
 
     private var clickQueue: [FrustrationClickData] = []
