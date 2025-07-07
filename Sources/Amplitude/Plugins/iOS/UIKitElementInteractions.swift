@@ -253,13 +253,19 @@ extension UIGestureRecognizer {
             gestureAction = "pinch"
         case is UIRotationGestureRecognizer:
             gestureAction = "rotation"
+        case is UIHoverGestureRecognizer:
+            gestureAction = nil
 #endif
 #if !os(tvOS) && !os(visionOS)
         case is UIScreenEdgePanGestureRecognizer:
             gestureAction = "screenEdgePan"
 #endif
         default:
-            gestureAction = nil
+            if view is UIWindow {
+                gestureAction = nil
+            } else {
+                gestureAction = String(describing: type(of: self))
+            }
         }
 
         guard let gestureAction else { return }
@@ -272,15 +278,8 @@ extension UIGestureRecognizer {
             }
         }
 
-        if gestureAction == "tap", !view.amp_ignoreDeadClick || !view.amp_ignoreRageClick {
-
-            let location: CGPoint
-            if let window = view.window {
-                location = self.location(in: window)
-            } else {
-                location = self.location(in: view)
-            }
-
+        if !view.amp_ignoreDeadClick || !view.amp_ignoreRageClick {
+            let location = self.location(in: nil)
             UIKitElementInteractions.processFrustrationInteractionForView(view, location: location, action: gestureAction, source: .gestureRecognizer, sourceName: descriptiveTypeName)
         }
     }
