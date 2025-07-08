@@ -102,7 +102,9 @@ class IOSLifecycleMonitor: UtilityPlugin {
 
     @objc
     func applicationDidFinishLaunchingNotification(notification: Notification) {
-        utils?.trackAppUpdatedInstalledEvent()
+        amplitude?.trackingQueue.async { [self] in
+            utils?.trackAppUpdatedInstalledEvent()
+        }
 
         // Pre SceneDelegate apps wil not fire a willEnterForeground notification on app launch.
         // Instead, use the initial applicationDidBecomeActive
