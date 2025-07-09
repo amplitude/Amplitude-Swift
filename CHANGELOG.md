@@ -1,3 +1,10 @@
+## [1.13.8](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.7...v1.13.8) (2025-07-09)
+
+
+### Bug Fixes
+
+* fix deadlock problem in app install event trigger ([#308](https://github.com/amplitude/Amplitude-Swift/issues/308)) ([5730a90](https://github.com/amplitude/Amplitude-Swift/commit/5730a90665c5a96bd1266df81a33d0653d472392))
+
 ## [1.13.7](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.6...v1.13.7) (2025-06-19)
 
 
