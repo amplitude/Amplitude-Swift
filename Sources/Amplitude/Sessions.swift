@@ -6,9 +6,10 @@ public class Sessions {
     private let storage: Storage
     private let timeline: Timeline
     private let context: AmplitudeContext
-    private var _sessionId: Int64 = -1
-    private(set) var trackSessionEvents: Bool
+    @Atomic private(set) var trackSessionEvents: Bool
     private var remoteConfigSubscription: Any?
+
+    private var _sessionId: Int64 = -1
     private(set) var sessionId: Int64 {
         get {
             sessionIdLock.withLock {
@@ -20,12 +21,12 @@ public class Sessions {
                 _sessionId = newValue
             }
             do {
-                try storage.write(key: StorageKey.PREVIOUS_SESSION_ID, value: _sessionId)
+                try storage.write(key: StorageKey.PREVIOUS_SESSION_ID, value: newValue)
             } catch {
                 context.logger.warn(message: "Can't write PREVIOUS_SESSION_ID to storage: \(error)")
             }
             timeline.apply {
-                $0.onSessionIdChanged(_sessionId)
+                $0.onSessionIdChanged(newValue)
             }
             context.remoteConfigClient.updateConfigs()
         }
