@@ -174,8 +174,8 @@ final class AmplitudeIOSTests: XCTestCase {
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 2)
-        XCTAssertEqual(events[0].eventType, Constants.AMP_APPLICATION_OPENED_EVENT)
-        XCTAssertEqual(getDictionary(events[0].eventProperties!), [
+        XCTAssertEqual(events[1].eventType, Constants.AMP_APPLICATION_OPENED_EVENT)
+        XCTAssertEqual(getDictionary(events[1].eventProperties!), [
             Constants.AMP_APP_BUILD_PROPERTY: currentBuild,
             Constants.AMP_APP_VERSION_PROPERTY: currentVersion,
             Constants.AMP_APP_FROM_BACKGROUND_PROPERTY: false

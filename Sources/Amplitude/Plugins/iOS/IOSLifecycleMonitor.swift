@@ -121,7 +121,9 @@ class IOSLifecycleMonitor: UtilityPlugin {
         sendApplicationOpenedOnDidBecomeActive = false
 
         amplitude?.onEnterForeground(timestamp: currentTimestamp)
-        utils?.trackAppOpenedEvent()
+        amplitude?.trackingQueue.async { [self] in
+            utils?.trackAppOpenedEvent()
+        }
     }
 
     @objc
