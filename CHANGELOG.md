@@ -1,3 +1,11 @@
+## [1.13.9](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.8...v1.13.9) (2025-07-18)
+
+
+### Bug Fixes
+
+* app install/opened event order for pre-scenedelegate apps ([#311](https://github.com/amplitude/Amplitude-Swift/issues/311)) ([17306e0](https://github.com/amplitude/Amplitude-Swift/commit/17306e0b9fde698617733a586204bcdaf1b529f1))
+* Empty Commit to trigger a build ([c246c60](https://github.com/amplitude/Amplitude-Swift/commit/c246c60e6b7edacb199734a3548f7c13ebc379e5))
+
 ## [1.13.8](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.7...v1.13.8) (2025-07-09)
 
 
