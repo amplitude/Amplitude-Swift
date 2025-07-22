@@ -5,6 +5,7 @@
 //  Created by Hao Yu on 11/30/22.
 //
 
+@_spi(Frustration)
 import AmplitudeSwift
 import AppTrackingTransparency
 import Experiment

@@ -18,7 +18,9 @@
         AMPAutocaptureOptions.appLifecycles,
         AMPAutocaptureOptions.screenViews,
         AMPAutocaptureOptions.networkTracking,
+        /* TODO: Re-enable when frustration GA
         AMPAutocaptureOptions.frustrationInteractions,
+         */
     ];
     configuration.autocapture = [[AMPAutocaptureOptions alloc] initWithOptionsToUnion:autocaptureOptions];
     configuration.loggerProvider = ^(NSInteger logLevel, NSString* _Nonnull message) {

@@ -14,14 +14,13 @@ public struct AutocaptureOptions: OptionSet {
     /// Won't work on watchOS
     public static let networkTracking     = AutocaptureOptions(rawValue: 1 << 4)
     /// Rage Click and Dead Click detection
-    public static let frustrationInteractions = AutocaptureOptions(rawValue: 1 << 5)
+    @_spi(Frustration) public static let frustrationInteractions = AutocaptureOptions(rawValue: 1 << 5)
 
     public static let all: AutocaptureOptions = [
         .sessions,
         .appLifecycles,
         .screenViews,
         .elementInteractions,
-        .networkTracking,
-        .frustrationInteractions
+        .networkTracking
     ]
 }
