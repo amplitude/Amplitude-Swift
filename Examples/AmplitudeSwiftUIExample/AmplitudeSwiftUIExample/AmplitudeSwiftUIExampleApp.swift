@@ -90,6 +90,7 @@ extension Amplitude {
                 ignoreHosts: ["notmyapi.com"],
                 ignoreAmplitudeRequests: true
             ),
+            interactionsOptions: .init(deadClick: .init(enabled: false)),
         )
     )
 
