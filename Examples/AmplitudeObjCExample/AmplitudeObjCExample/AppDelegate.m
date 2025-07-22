@@ -18,7 +18,9 @@
         AMPAutocaptureOptions.appLifecycles,
         AMPAutocaptureOptions.screenViews,
         AMPAutocaptureOptions.networkTracking,
+        /* TODO: Re-enable when frustration GA
         AMPAutocaptureOptions.frustrationInteractions,
+         */
     ];
     configuration.autocapture = [[AMPAutocaptureOptions alloc] initWithOptionsToUnion:autocaptureOptions];
     configuration.loggerProvider = ^(NSInteger logLevel, NSString* _Nonnull message) {
@@ -31,10 +33,12 @@
     networkTrackingOptions.captureRules = rules;
     configuration.networkTrackingOptions = networkTrackingOptions;
 
+    /* TODO: Re-enable when frustration GA
     AMPRageClickOptions *rageClickOptions = [[AMPRageClickOptions alloc] initWithEnabled:YES];
     AMPDeadClickOptions *deadClickOptions = [[AMPDeadClickOptions alloc] initWithEnabled: NO];
     AMPInteractionsOptions *interactionsOptions = [[AMPInteractionsOptions alloc] initWithRageClick:rageClickOptions deadClick:deadClickOptions];
     configuration.interactionsOptions = interactionsOptions;
+     */
 
     self.amplitude = [Amplitude initWithConfiguration:configuration];
 

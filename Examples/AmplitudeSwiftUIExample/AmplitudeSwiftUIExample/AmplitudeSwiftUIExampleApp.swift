@@ -5,6 +5,7 @@
 //  Created by Hao Yu on 11/30/22.
 //
 
+@_spi(Frustration)
 import AmplitudeSwift
 import AppTrackingTransparency
 import Experiment
@@ -89,6 +90,7 @@ extension Amplitude {
                 ignoreHosts: ["notmyapi.com"],
                 ignoreAmplitudeRequests: true
             ),
+            interactionsOptions: .init(deadClick: .init(enabled: false)),
         )
     )
 

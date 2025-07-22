@@ -30,8 +30,10 @@ extension Date {
     }
 }
 
+#if !AMPLITUDE_DISABLE_UIKIT
 extension CGRect {
     var amp_center: CGPoint {
         return CGPoint(x: midX, y: midY)
     }
 }
+#endif
