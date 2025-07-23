@@ -30,6 +30,8 @@ struct ContentView: View {
     @State var responseCode = "500"
     @State var responseDelay = ""
 
+    @State var rageClickTest: Bool = false
+
     var body: some View {
         VStack {
             LazyVStack {
@@ -146,6 +148,15 @@ struct ContentView: View {
                         }) {
                             Text("Request Network")
                         }.buttonStyle(AmplitudeButton())
+                    }
+                    Section(header: Text("RAGE CLICK")) {
+                        HStack(spacing: 20) {
+                            Button("Tap Me") {
+                                print("Button tapped - this can trigger rage click detection")
+                            }.buttonStyle(AmplitudeButton())
+
+                            Toggle("Rage Click", isOn: $rageClickTest)
+                        }
                     }
                     Button(action: {
                         Amplitude.testInstance.flush()

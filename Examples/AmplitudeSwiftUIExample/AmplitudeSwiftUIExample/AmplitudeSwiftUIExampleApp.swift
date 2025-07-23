@@ -5,6 +5,7 @@
 //  Created by Hao Yu on 11/30/22.
 //
 
+@_spi(Frustration)
 import AmplitudeSwift
 import AppTrackingTransparency
 import Experiment
@@ -80,7 +81,7 @@ extension Amplitude {
             trackingOptions: TrackingOptions().disableTrackCarrier().disableTrackDMA(),
             flushEventsOnClose: true,
             minTimeBetweenSessionsMillis: 15000,
-            autocapture: .all,
+            autocapture: [.sessions, .frustrationInteractions],
             networkTrackingOptions: .init(
                 captureRules: [
                     .init(hosts: ["*"]), // all hosts, 500-599
@@ -89,6 +90,7 @@ extension Amplitude {
                 ignoreHosts: ["notmyapi.com"],
                 ignoreAmplitudeRequests: true
             ),
+            interactionsOptions: .init(deadClick: .init(enabled: false)),
         )
     )
 

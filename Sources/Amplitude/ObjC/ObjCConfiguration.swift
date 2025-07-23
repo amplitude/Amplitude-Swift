@@ -312,6 +312,18 @@ public class ObjCConfiguration: NSObject {
         }
     }
 
+    /* TODO: Re-enable when frustration GA
+    @objc
+    public var interactionsOptions: ObjCInteractionsOptions {
+        get {
+            return ObjCInteractionsOptions(configuration.interactionsOptions)
+        }
+        set(value) {
+            configuration.interactionsOptions = value.options
+        }
+    }
+     */
+
     @objc public var enableAutoCaptureRemoteConfig: Bool {
         return configuration.enableAutoCaptureRemoteConfig
     }

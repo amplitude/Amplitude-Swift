@@ -1,5 +1,6 @@
 #if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
 import UIKit
+import AmplitudeCore
 
 class UIKitElementInteractions {
     struct EventData {
@@ -14,6 +15,8 @@ class UIKitElementInteractions {
         let accessibilityLabel: String?
 
         let accessibilityIdentifier: String?
+
+        let targetViewIdentifier: ObjectIdentifier
 
         let targetViewClass: String
 
@@ -37,8 +40,9 @@ class UIKitElementInteractions {
     }
 
     fileprivate static let amplitudeInstances = NSHashTable<Amplitude>.weakObjects()
-
-    private static let lock = NSLock()
+    fileprivate static var rageClickDetectors: [ObjectIdentifier: RageClickDetector] = [:]
+    fileprivate static var deadClickDetectors: [ObjectIdentifier: DeadClickDetector] = [:]
+    fileprivate static let lock = NSLock()
 
     private static let addNotificationObservers: Void = {
         NotificationCenter.default.addObserver(UIKitElementInteractions.self, selector: #selector(didEndEditing), name: UITextField.textDidEndEditingNotification, object: nil)
@@ -53,6 +57,16 @@ class UIKitElementInteractions {
     static func register(_ amplitude: Amplitude) {
         lock.withLock {
             amplitudeInstances.add(amplitude)
+            let identifier = ObjectIdentifier(amplitude)
+
+            if amplitude.configuration.autocapture.contains(.frustrationInteractions) {
+                if amplitude.configuration.interactionsOptions.rageClick.enabled {
+                    rageClickDetectors[identifier] = RageClickDetector(amplitude: amplitude)
+                }
+                if amplitude.configuration.interactionsOptions.deadClick.enabled {
+                    deadClickDetectors[identifier] = DeadClickDetector(amplitude: amplitude)
+                }
+            }
         }
         setupMethodSwizzling
         addNotificationObservers
@@ -61,15 +75,30 @@ class UIKitElementInteractions {
     static func unregister(_ amplitude: Amplitude) {
         lock.withLock {
             amplitudeInstances.remove(amplitude)
+            let identifier = ObjectIdentifier(amplitude)
+
+            if let rageClickDetector = rageClickDetectors[identifier] {
+                rageClickDetector.reset()
+                rageClickDetectors.removeValue(forKey: identifier)
+            }
+
+            if let deadClickDetector = deadClickDetectors[identifier] {
+                deadClickDetector.reset()
+                deadClickDetectors.removeValue(forKey: identifier)
+            }
         }
     }
 
     @objc static func didEndEditing(_ notification: NSNotification) {
         guard let view = notification.object as? UIView else { return }
         // Text fields in SwiftUI are identifiable only after the text field is edited.
-        let elementInteractionEvent = view.eventData.elementInteractionEvent(for: "didEndEditing")
-        amplitudeInstances.allObjects.forEach {
-            $0.track(event: elementInteractionEvent)
+
+        // Track element interaction events only if .elementInteractions is enabled
+        amplitudeInstances.allObjects.forEach { amplitude in
+            if amplitude.configuration.autocapture.contains(.elementInteractions) {
+                let elementInteractionEvent = view.eventData.elementInteractionEvent(for: "didEndEditing")
+                amplitude.track(event: elementInteractionEvent)
+            }
         }
     }
 
@@ -91,6 +120,52 @@ class UIKitElementInteractions {
             swizzledImp,
             method_getTypeEncoding(swizzledMethod))
     }
+
+    static func interfaceChangeProviderDidChange(for amplitude: Amplitude, from oldProvider: InterfaceSignalProvider?, to newProvider: InterfaceSignalProvider?) {
+        lock.withLock {
+            let identifier = ObjectIdentifier(amplitude)
+            self.deadClickDetectors[identifier]?.interfaceSignalProviderDidChange(from: oldProvider, to: newProvider)
+        }
+    }
+
+    fileprivate static func processFrustrationInteractionForView(_ view: UIView,
+                                                                 location: CGPoint,
+                                                                 action: String,
+                                                                 source: EventData.Source?,
+                                                                 sourceName: String?) {
+        let clickData = FrustrationClickData(
+            time: Date(),
+            eventData: view.eventData,
+            location: location,
+            action: action,
+            source: source,
+            sourceName: sourceName
+        )
+
+        lock.withLock {
+            for amplitude in amplitudeInstances.allObjects {
+                if amplitude.configuration.isRageClickEnabled,
+                   !view.amp_ignoreRageClick {
+                    rageClickDetectors[ObjectIdentifier(amplitude)]?.processClick(clickData)
+                }
+
+                if amplitude.configuration.isDeadClickEnabled,
+                   !view.amp_ignoreDeadClick {
+                    deadClickDetectors[ObjectIdentifier(amplitude)]?.processClick(clickData)
+                }
+            }
+        }
+    }
+}
+
+extension Configuration {
+    var isRageClickEnabled: Bool {
+        autocapture.contains(.frustrationInteractions) && interactionsOptions.rageClick.enabled
+    }
+
+    var isDeadClickEnabled: Bool {
+        autocapture.contains(.frustrationInteractions) && interactionsOptions.deadClick.enabled
+    }
 }
 
 extension UIApplication {
@@ -110,10 +185,34 @@ extension UIApplication {
               let actionEvent = control.event(for: action, to: target)?.description
         else { return sendActionResult }
 
-        let elementInteractionEvent = control.eventData.elementInteractionEvent(for: actionEvent, from: .actionMethod, withName: NSStringFromSelector(action))
+        // Track element interaction events only if .elementInteractions is enabled
+        UIKitElementInteractions.amplitudeInstances.allObjects.forEach { amplitude in
+            if amplitude.configuration.autocapture.contains(.elementInteractions) {
+                let elementInteractionEvent = control.eventData.elementInteractionEvent(for: actionEvent, from: .actionMethod, withName: NSStringFromSelector(action))
+                amplitude.track(event: elementInteractionEvent)
+            }
+        }
 
-        UIKitElementInteractions.amplitudeInstances.allObjects.forEach {
-            $0.track(event: elementInteractionEvent)
+        if actionEvent == "touch", !control.amp_ignoreRageClick || !control.amp_ignoreDeadClick {
+            var location = CGPoint.zero
+
+            if let event = event, let touch = event.allTouches?.first {
+                // For UIControl events, get location relative to the main window
+                if let window = control.window {
+                    location = touch.location(in: window)
+                } else {
+                    location = touch.location(in: control)
+                }
+            } else {
+                // Fallback: use the center of the view in window coordinates
+                if let window = control.window {
+                    location = control.convert(control.bounds.amp_center, to: window)
+                } else {
+                    location = control.bounds.amp_center
+                }
+            }
+
+            UIKitElementInteractions.processFrustrationInteractionForView(control, location: location, action: actionEvent, source: .actionMethod, sourceName: NSStringFromSelector(action))
         }
 
         return sendActionResult
@@ -154,21 +253,34 @@ extension UIGestureRecognizer {
             gestureAction = "pinch"
         case is UIRotationGestureRecognizer:
             gestureAction = "rotation"
+        case is UIHoverGestureRecognizer:
+            gestureAction = nil
 #endif
 #if !os(tvOS) && !os(visionOS)
         case is UIScreenEdgePanGestureRecognizer:
             gestureAction = "screenEdgePan"
 #endif
         default:
-            gestureAction = nil
+            if view is UIWindow {
+                gestureAction = nil
+            } else {
+                gestureAction = String(describing: type(of: self))
+            }
         }
 
         guard let gestureAction else { return }
 
-        let elementInteractionEvent = view.eventData.elementInteractionEvent(for: gestureAction, from: .gestureRecognizer, withName: descriptiveTypeName)
+        // Track element interaction events only if .elementInteractions is enabled
+        UIKitElementInteractions.amplitudeInstances.allObjects.forEach { amplitude in
+            if amplitude.configuration.autocapture.contains(.elementInteractions) {
+                let elementInteractionEvent = view.eventData.elementInteractionEvent(for: gestureAction, from: .gestureRecognizer, withName: descriptiveTypeName)
+                amplitude.track(event: elementInteractionEvent)
+            }
+        }
 
-        UIKitElementInteractions.amplitudeInstances.allObjects.forEach {
-            $0.track(event: elementInteractionEvent)
+        if !view.amp_ignoreDeadClick || !view.amp_ignoreRageClick {
+            let location = self.location(in: nil)
+            UIKitElementInteractions.processFrustrationInteractionForView(view, location: location, action: gestureAction, source: .gestureRecognizer, sourceName: descriptiveTypeName)
         }
     }
 }
@@ -183,6 +295,7 @@ extension UIView {
                 .flatMap(UIKitScreenViews.screenName),
             accessibilityLabel: accessibilityLabel,
             accessibilityIdentifier: accessibilityIdentifier,
+            targetViewIdentifier: ObjectIdentifier(self),
             targetViewClass: descriptiveTypeName,
             targetText: amp_title,
             hierarchy: sequence(first: self, next: \.superview)

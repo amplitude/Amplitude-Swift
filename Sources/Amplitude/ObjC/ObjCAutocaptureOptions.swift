@@ -46,6 +46,11 @@ public final class ObjCAutocaptureOptions: NSObject, @unchecked Sendable {
     @objc
     public static let networkTracking = ObjCAutocaptureOptions(options: .networkTracking)
 
+    /* TODO: Re-enable when frustration GA
+    @objc
+    public static let frustrationInteractions = ObjCAutocaptureOptions(options: .frustrationInteractions)
+     */
+
     @objc
     public static let all: ObjCAutocaptureOptions = ObjCAutocaptureOptions(options: .all)
 
