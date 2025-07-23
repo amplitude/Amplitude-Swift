@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.9...v1.14.0) (2025-07-23)
+
+
+### Features
+
+* Add autocapture for Rage Click and Dead Click ([#313](https://github.com/amplitude/Amplitude-Swift/issues/313)) ([e7965ec](https://github.com/amplitude/Amplitude-Swift/commit/e7965ece84ab6e305ffb1dca22c636e09a72d32c)), closes [#304](https://github.com/amplitude/Amplitude-Swift/issues/304) [#305](https://github.com/amplitude/Amplitude-Swift/issues/305) [#306](https://github.com/amplitude/Amplitude-Swift/issues/306) [#312](https://github.com/amplitude/Amplitude-Swift/issues/312)
+
 ## [1.13.9](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.8...v1.13.9) (2025-07-18)
 
 
