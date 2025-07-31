@@ -6,7 +6,9 @@
 //
 
 import AmplitudeCore
-@testable import AmplitudeSwift
+@_spi(Frustration)
+@testable
+import AmplitudeSwift
 import ObjectiveC
 import XCTest
 
@@ -114,11 +116,11 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertFalse(iosLifecycleMonitor.trackScreenViews)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.screenViews)
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
-        XCTAssertTrue(iosLifecycleMonitor.trackScreenViews)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.screenViews)
     }
 
     func testScreenViewsTurnsOffFromRemoteConfig() {
@@ -145,11 +147,11 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(iosLifecycleMonitor.trackScreenViews)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.screenViews)
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
-        XCTAssertFalse(iosLifecycleMonitor.trackScreenViews)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.screenViews)
     }
 
     func testElementInteractionsTurnsOnFromRemoteConfig() {
@@ -176,11 +178,11 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertFalse(iosLifecycleMonitor.trackElementInteractions)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.elementInteractions)
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
-        XCTAssertTrue(iosLifecycleMonitor.trackElementInteractions)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.elementInteractions)
     }
 
     func testElementInteractionsTurnsOffFromRemoteConfig() {
@@ -207,11 +209,154 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(iosLifecycleMonitor.trackElementInteractions)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.elementInteractions)
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
-        XCTAssertFalse(iosLifecycleMonitor.trackElementInteractions)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.elementInteractions)
+    }
+
+    func testFrustrationInteractionsTurnsOnFromRemoteConfig() {
+        RemoteConfigClient.setNextFetchedRemoteConfig([
+            "analyticsSDK": [
+                "iosSDK": [
+                    "autocapture": [
+                        "frustrationInteractions": [
+                            "enabled": true,
+                            "rageClick": [
+                                "enabled": true
+                            ],
+                            "deadClick": [
+                                "enabled": false
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ])
+
+        let interactionsOptions = InteractionsOptions(
+            rageClick: .init(enabled: false),
+            deadClick: .init(enabled: false)
+        )
+        let config = Configuration(apiKey: "aaa",
+                                   autocapture: [],
+                                   interactionsOptions: interactionsOptions)
+        let amplitude = Amplitude(configuration: config)
+
+        var iosLifecycleMonitor: IOSLifecycleMonitor?
+        amplitude.apply { plugin in
+            if let monitor = plugin as? IOSLifecycleMonitor {
+                iosLifecycleMonitor = monitor
+            }
+        }
+        guard let iosLifecycleMonitor else {
+            XCTFail("iOS lifecycle monitor not installed")
+            return
+        }
+
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.frustrationInteractions)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.rageClick)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.deadClick)
+
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.deadClick)
+    }
+
+    func testFrustrationInteractionsTurnsOffFromRemoteConfig() {
+        RemoteConfigClient.setNextFetchedRemoteConfig([
+            "analyticsSDK": [
+                "iosSDK": [
+                    "autocapture": [
+                        "frustrationInteractions": [
+                            "enabled": false
+                        ]
+                    ]
+                ]
+            ]
+        ])
+
+        let interactionsOptions = InteractionsOptions(
+            rageClick: .init(enabled: true),
+            deadClick: .init(enabled: true)
+        )
+        let config = Configuration(apiKey: "aaa",
+                                   autocapture: [.frustrationInteractions],
+                                   interactionsOptions: interactionsOptions)
+        let amplitude = Amplitude(configuration: config)
+
+        var iosLifecycleMonitor: IOSLifecycleMonitor?
+        amplitude.apply { plugin in
+            if let monitor = plugin as? IOSLifecycleMonitor {
+                iosLifecycleMonitor = monitor
+            }
+        }
+        guard let iosLifecycleMonitor else {
+            XCTFail("iOS lifecycle monitor not installed")
+            return
+        }
+
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick)
+
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.frustrationInteractions)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick) // Local config value still true
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick) // Local config value still true
+    }
+
+    func testFrustrationInteractionsPartialRemoteConfig() {
+        // Test that missing values in remote config fall back to local config
+        RemoteConfigClient.setNextFetchedRemoteConfig([
+            "analyticsSDK": [
+                "iosSDK": [
+                    "autocapture": [
+                        "frustrationInteractions": [
+                            "enabled": true,
+                            "rageClick": [
+                                "enabled": false
+                            ]
+                            // deadClick is missing, should use local config
+                        ]
+                    ]
+                ]
+            ]
+        ])
+
+        let interactionsOptions = InteractionsOptions(
+            rageClick: .init(enabled: true),
+            deadClick: .init(enabled: true)
+        )
+        let config = Configuration(apiKey: "aaa",
+                                   autocapture: [.frustrationInteractions],
+                                   interactionsOptions: interactionsOptions)
+        let amplitude = Amplitude(configuration: config)
+
+        var iosLifecycleMonitor: IOSLifecycleMonitor?
+        amplitude.apply { plugin in
+            if let monitor = plugin as? IOSLifecycleMonitor {
+                iosLifecycleMonitor = monitor
+            }
+        }
+        guard let iosLifecycleMonitor else {
+            XCTFail("iOS lifecycle monitor not installed")
+            return
+        }
+
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick)
+
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.rageClick) // Overridden by remote config
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick) // Falls back to local config
     }
 
 #endif
