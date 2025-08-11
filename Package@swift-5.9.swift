@@ -27,7 +27,7 @@ let package = Package(
         .target(
             name: "AmplitudeSwift",
             dependencies: [
-                .product(name: "AmplitudeCoreFramework", package: "AmplitudeCore-Swift"),
+                .product(name: "AmplitudeCore", package: "AmplitudeCore-Swift"),
                 .product(name: "AnalyticsConnector", package: "analytics-connector-ios"),
             ],
             path: "Sources/Amplitude",
