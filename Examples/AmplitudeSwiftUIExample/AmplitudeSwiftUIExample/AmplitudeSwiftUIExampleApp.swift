@@ -6,6 +6,7 @@
 //
 
 @_spi(Frustration)
+@_spi(NetworkTracking)
 import AmplitudeSwift
 import AppTrackingTransparency
 import Experiment
@@ -81,11 +82,19 @@ extension Amplitude {
             trackingOptions: TrackingOptions().disableTrackCarrier().disableTrackDMA(),
             flushEventsOnClose: true,
             minTimeBetweenSessionsMillis: 15000,
-            autocapture: [.sessions, .frustrationInteractions],
+            autocapture: [.sessions, .appLifecycles, .networkTracking, .frustrationInteractions],
+//            networkTrackingOptions: .init(
+//                captureRules: [
+//                    .init(hosts: ["*"]), // all hosts, 500-599
+//                    .init(hosts: ["httpstat.us"], statusCodeRange: "0,400-599"),
+//                ],
+//                ignoreHosts: ["notmyapi.com"],
+//                ignoreAmplitudeRequests: true
+//            ),
             networkTrackingOptions: .init(
                 captureRules: [
-                    .init(hosts: ["*"]), // all hosts, 500-599
-                    .init(hosts: ["httpstat.us"], statusCodeRange: "0,400-599"),
+//                    .init(hosts: ["*"]), // all hosts, 500-599
+                    .init(urls: [.regex("https://httpbin\\.org/")], statusCodeRange: "0,400-599", requestBody: .init(allowList: ["**"])),
                 ],
                 ignoreHosts: ["notmyapi.com"],
                 ignoreAmplitudeRequests: true

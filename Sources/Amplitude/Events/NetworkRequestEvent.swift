@@ -15,9 +15,12 @@ public class NetworkRequestEvent: BaseEvent {
                      startTime: Int64?,
                      completionTime: Int64?,
                      requestBodySize: Int64? = nil,
-                     responseBodySize: Int64? = nil
+                     responseBodySize: Int64? = nil,
+                     requestHeaders: [String: String]? = nil,
+                     responseHeaders: [String: String]? = nil,
+                     requestBody: String? = nil,
+                     responseBody: String? = nil
     ) {
-
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         let query = components?.query
         let fragment = components?.fragment
@@ -47,6 +50,15 @@ public class NetworkRequestEvent: BaseEvent {
         }
         eventProperties[Constants.AMP_NETWORK_REQUEST_BODY_SIZE_PROPERTY] = requestBodySize
         eventProperties[Constants.AMP_NETWORK_RESPONSE_BODY_SIZE_PROPERTY] = responseBodySize
-        self.init(eventType: Constants.AMP_NETWORK_TRACKING_EVENT, eventProperties: eventProperties)
+
+        eventProperties[Constants.AMP_NETWORK_REQUEST_HEADERS_PROPERTY] = requestHeaders
+        eventProperties[Constants.AMP_NETWORK_RESPONSE_HEADERS_PROPERTY] = responseHeaders
+
+        eventProperties[Constants.AMP_NETWORK_REQUEST_BODY_PROPERTY] = requestBody
+        eventProperties[Constants.AMP_NETWORK_RESPONSE_BODY_PROPERTY] = responseBody
+
+        self.init(timestamp: completionTime,
+                  eventType: Constants.AMP_NETWORK_TRACKING_EVENT,
+                  eventProperties: eventProperties)
     }
 }

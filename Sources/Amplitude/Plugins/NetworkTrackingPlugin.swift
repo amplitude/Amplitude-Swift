@@ -8,14 +8,130 @@
 import Foundation
 import ObjectiveC
 
+private let SAFE_HEADERS: [String] = [
+    "access-control-allow-origin",
+    "access-control-allow-credentials",
+    "access-control-expose-headers",
+    "access-control-max-age",
+    "access-control-allow-methods",
+    "access-control-allow-headers",
+    "accept-patch",
+    "accept-ranges",
+    "age",
+    "allow",
+    "alt-svc",
+    "cache-control",
+    "connection",
+    "content-disposition",
+    "content-encoding",
+    "content-language",
+    "content-length",
+    "content-location",
+    "content-md5",
+    "content-range",
+    "content-type",
+    "date",
+    "delta-base",
+    "etag",
+    "expires",
+    "im",
+    "last-modified",
+    "link",
+    "location",
+    "permanent",
+    "p3p",
+    "pragma",
+    "proxy-authenticate",
+    "public-key-pins",
+    "retry-after",
+    "server",
+    "status",
+    "strict-transport-security",
+    "trailer",
+    "transfer-encoding",
+    "tk",
+    "upgrade",
+    "vary",
+    "via",
+    "warning",
+    "www-authenticate",
+    "x-b3-traceid",
+    "x-frame-options",
+]
+
+private let BLOCK_HEADERS = [
+    "authorization",
+    "cookie",
+    "proxy-authorization"
+]
+
 public struct NetworkTrackingOptions {
+    public enum URLPattern {
+        case exact(String)
+        case regex(String)
+    }
+
+    public struct CaptureHeader {
+        public let allowList: [String]
+        public let captureSafeHeaders: Bool
+
+        public init(allowList: [String] = [], captureSafeHeaders: Bool = true) {
+            self.allowList = allowList
+            self.captureSafeHeaders = captureSafeHeaders
+        }
+    }
+
+    public struct CaptureBody {
+        public let allowList: [String]
+        public let blocklist: [String]
+
+        public init(allowList: [String], blocklist: [String] = []) {
+            self.allowList = allowList
+            self.blocklist = blocklist
+        }
+    }
+
     public struct CaptureRule {
         public var hosts: [String]
+        public private(set) var urls: [URLPattern]
+        public private(set) var methods: [String]
         public var statusCodeRange: String
+
+        public let requestHeaders: CaptureHeader?
+        public let responseHeaders: CaptureHeader?
+
+        public let requestBody: CaptureBody?
+        public let responseBody: CaptureBody?
 
         public init(hosts: [String], statusCodeRange: String = "500-599") {
             self.hosts = hosts
+            self.urls = []
             self.statusCodeRange = statusCodeRange
+            self.methods = ["*"]
+            self.requestHeaders = nil
+            self.responseHeaders = nil
+            self.requestBody = nil
+            self.responseBody = nil
+        }
+
+        @_spi(NetworkTracking)
+        public init(urls: [URLPattern],
+                    methods: [String] = ["*"],
+                    statusCodeRange: String = "500-599",
+                    requestHeaders: CaptureHeader? = nil,
+                    responseHeaders: CaptureHeader? = nil,
+                    requestBody: CaptureBody? = nil,
+                    responseBody: CaptureBody? = nil
+
+        ) {
+            self.hosts = []
+            self.urls = urls
+            self.methods = methods
+            self.statusCodeRange = statusCodeRange
+            self.requestHeaders = requestHeaders
+            self.responseHeaders = responseHeaders
+            self.requestBody = requestBody
+            self.responseBody = responseBody
         }
     }
 
@@ -72,25 +188,35 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
         NetworkSwizzler.shared.removeListener(listener: self)
     }
 
-    func ruleForHost(_ host: String) -> CompiledNetworkTrackingOptions.CaptureRule? {
-        guard let options = options else { return nil }
+    func ruleForRequest(_ request: URLRequest) -> CompiledNetworkTrackingOptions.CaptureRule? {
+        guard let options = options,
+              let url = request.url else { return nil }
+
+        let host = url.host
+        let urlString = url.urlToMatch.absoluteString
+        let method = request.httpMethod
+
+        // Check ignore hosts first
+        if let host = host, options.ignoreHosts.matches(host) {
+            return nil
+        }
+
+        // Create cache key combining host, url, and method
+        let cacheKey = "\(urlString)||\(method ?? "")"
 
         ruleCacheLock.lock()
         defer { ruleCacheLock.unlock() }
 
-        if let rule = ruleCache[host] {
+        if let rule = ruleCache[cacheKey] {
             return rule
         }
 
-        let rule: CompiledNetworkTrackingOptions.CaptureRule? = if options.ignoreHosts.matches(host) {
-            nil
-        } else {
-            options.captureRules.last { rule in
-                rule.hosts.matches(host)
-            }
+        // Find matching rule
+        let rule = options.captureRules.last { rule in
+            rule.matchesRequest(host: host, url: urlString, method: method)
         }
 
-        ruleCache[host] = rule
+        ruleCache[cacheKey] = rule
         return rule
     }
 
@@ -100,21 +226,21 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
               task.state != .canceling,
               let request = task.originalRequest,
               let url = request.url,
-              let host = url.host,
-              ruleForHost(host) != nil
+              ruleForRequest(request) != nil
         else { return }
 
         logger?.debug(message: "NetworkTrackingPlugin: onTaskResume(\(task)) for \(url)")
 
-        task.requestTimestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+        if task.amp_requestTimestamp == nil {
+            task.amp_requestTimestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
+        }
     }
 
     func onTask(_ task: URLSessionTask, setState state: URLSessionTask.State) {
         guard isListening(task),
               let request = task.originalRequest,
               let url: URL = request.url,
-              let host = url.host,
-              let rule = ruleForHost(host) else { return }
+              let rule = ruleForRequest(request) else { return }
 
         logger?.debug(message: "NetworkTrackingPlugin: setState: \(state) for \(url)")
 
@@ -129,15 +255,42 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
 
         let responseTimestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
 
-        let event = NetworkRequestEvent(url: url,
-                                        method: method,
-                                        statusCode: response?.statusCode,
-                                        error: task.error as? NSError,
-                                        startTime: task.requestTimestamp,
-                                        completionTime: responseTimestamp,
-                                        requestBodySize: task.countOfBytesSent,
-                                        responseBodySize: task.countOfBytesReceived)
-        amplitude?.track(event: event)
+        amplitude?.trackingQueue.async { [self] in
+            let requestHeaders = rule.requestHeaders?.filterHeaders(request.allHTTPHeaderFields)
+            let responseHeaders = rule.responseHeaders?.filterHeaders(response?.allHeaderFields as? [String: String])
+            let requestBody = rule.requestBody?.filterBodyData(request.httpBody)
+
+            var responseBody: String?
+            if let dataTask = task as? URLSessionDataTask,
+               let responseData = dataTask.amp_responseData {
+                responseBody = rule.responseBody?.filterBodyData(responseData)
+            }
+
+            let event = NetworkRequestEvent(url: url,
+                                            method: method,
+                                            statusCode: response?.statusCode,
+                                            error: task.error as? NSError,
+                                            startTime: task.amp_requestTimestamp,
+                                            completionTime: responseTimestamp,
+                                            requestBodySize: task.countOfBytesSent,
+                                            responseBodySize: task.countOfBytesReceived,
+                                            requestHeaders: requestHeaders,
+                                            responseHeaders: responseHeaders,
+                                            requestBody: requestBody,
+                                            responseBody: responseBody
+            )
+            amplitude?.track(event: event)
+        }
+    }
+
+    func onDataTaskCompletion(_ task: URLSessionDataTask, data: Data?, response: URLResponse?, error: Error?) {
+        guard isListening(task),
+              let request = task.originalRequest,
+              ruleForRequest(request) != nil else { return }
+
+        if let data = data {
+            task.amp_responseData = data
+        }
     }
 
     func isListening(_ task: URLSessionTask) -> Bool {
@@ -148,15 +301,28 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
 
 // Key for associated object
 private var sendTimeKey: UInt8 = 0
+private var responseDataKey: UInt8 = 0
 
 extension URLSessionTask {
     // Associate send time with URLSessionTask
-    var requestTimestamp: Int64? {
+    var amp_requestTimestamp: Int64? {
         get {
             return objc_getAssociatedObject(self, &sendTimeKey) as? Int64
         }
         set {
             objc_setAssociatedObject(self, &sendTimeKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+}
+
+extension URLSessionDataTask {
+    // Associate response data with URLSessionDataTask
+    var amp_responseData: Data? {
+        get {
+            return objc_getAssociatedObject(self, &responseDataKey) as? Data
+        }
+        set {
+            objc_setAssociatedObject(self, &responseDataKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
 }
@@ -192,13 +358,159 @@ class CompiledNetworkTrackingOptions {
         }
     }
 
-    class CaptureRule {
-        let hosts: WildcardHosts
-        let statusCodeIndexSet: IndexSet
+    class URLPatternMatcher {
+        let plainPatterns: Set<String>
+        let regexPatterns: [NSRegularExpression]
 
-        init(hosts: [String], statusCodeRange: String) throws {
-            self.hosts = try WildcardHosts(hosts: hosts)
-            self.statusCodeIndexSet = try IndexSet(fromString: statusCodeRange)
+        init(patterns: [NetworkTrackingOptions.URLPattern]) throws {
+            var plainPatterns = Set<String>()
+            var regexPatterns: [NSRegularExpression] = []
+
+            for pattern in patterns {
+                switch pattern {
+                case .exact(let url):
+                    plainPatterns.insert(url)
+                case .regex(let regexString):
+                    let regex = try NSRegularExpression(pattern: regexString, options: [])
+                    regexPatterns.append(regex)
+                }
+            }
+
+            self.plainPatterns = plainPatterns
+            self.regexPatterns = regexPatterns
+        }
+
+        func matches(_ urlString: String) -> Bool {
+            if plainPatterns.contains(urlString) {
+                return true
+            }
+
+            for regex in regexPatterns {
+                let range = NSRange(location: 0, length: urlString.utf16.count)
+                if regex.firstMatch(in: urlString, range: range) != nil {
+                    return true
+                }
+            }
+
+            return false
+        }
+    }
+
+    class CompiledHeaders {
+        let allowSet: Set<String>
+
+        init(header: NetworkTrackingOptions.CaptureHeader) {
+            var combinedSet = Set(header.allowList.map { $0.lowercased() })
+
+            if header.captureSafeHeaders {
+                combinedSet.formUnion(SAFE_HEADERS)
+            }
+
+            combinedSet.subtract(BLOCK_HEADERS)
+
+            self.allowSet = combinedSet
+        }
+
+        func filterHeaders(_ headers: [String: String]?) -> [String: String]? {
+            guard let headers, !allowSet.isEmpty else {
+                return nil
+            }
+
+            var filteredHeader: [String: String] = [:]
+
+            for (key, value) in headers where allowSet.contains(key.lowercased()) {
+                filteredHeader[key] = value
+            }
+
+            return filteredHeader.isEmpty ? nil : filteredHeader
+        }
+    }
+
+    class CompiledBody {
+        let objectFilter: ObjectFilter
+
+        init(body: NetworkTrackingOptions.CaptureBody) {
+            self.objectFilter = ObjectFilter(allowList: body.allowList, blockList: body.blocklist)
+        }
+
+        func filterBody(_ body: Any) -> Any? {
+            return objectFilter.filterd(body)
+        }
+
+        func filterBodyData(_ bodyData: Data?) -> String? {
+            guard let bodyData = bodyData else { return nil }
+
+            if let json = try? JSONSerialization.jsonObject(with: bodyData, options: []),
+               let filterBody = filterBody(json),
+               let jsonString = try? JSONSerialization.data(withJSONObject: filterBody, options: []) {
+                return String(data: jsonString, encoding: .utf8)
+            }
+
+            return nil
+        }
+    }
+
+    class CaptureRule: CustomDebugStringConvertible {
+        let hosts: WildcardHosts?
+        let urls: URLPatternMatcher?
+        let methods: Set<String>
+        let statusCodeIndexSet: IndexSet
+        let requestHeaders: CompiledHeaders?
+        let responseHeaders: CompiledHeaders?
+        let requestBody: CompiledBody?
+        let responseBody: CompiledBody?
+
+        init(rule: NetworkTrackingOptions.CaptureRule) throws {
+            self.hosts = rule.hosts.isEmpty ? nil : try WildcardHosts(hosts: rule.hosts)
+            self.urls = rule.urls.isEmpty ? nil : try URLPatternMatcher(patterns: rule.urls)
+
+            if rule.methods.contains("*") {
+                self.methods = Set(["*"])
+            } else {
+                self.methods = Set(rule.methods.map { $0.uppercased() })
+            }
+
+            self.statusCodeIndexSet = try IndexSet(fromString: rule.statusCodeRange)
+            self.requestHeaders = rule.requestHeaders.map { CompiledHeaders(header: $0) }
+            self.responseHeaders = rule.responseHeaders.map { CompiledHeaders(header: $0) }
+
+            self.requestBody = rule.requestBody.map { CompiledBody(body: $0) }
+            self.responseBody = rule.responseBody.map { CompiledBody(body: $0) }
+        }
+
+        func matchesRequest(host: String?, url: String, method: String?) -> Bool {
+            // If URLs are configured, only check the URLs
+            if let urls = urls {
+                if !urls.matches(url) {
+                    return false
+                }
+            } else if let hosts = hosts, let host = host {
+                if !hosts.matches(host) {
+                    return false
+                }
+            } else {
+                return false
+            }
+
+            // Check method matching
+            if let method = method?.uppercased() {
+                if !methods.contains("*") && !methods.contains(method) {
+                    return false
+                }
+            }
+
+            return true
+        }
+
+        var debugDescription: String {
+            return """
+            CaptureRule(
+                hosts: \(hosts?.hostSet ?? []),
+                urls: \(urls?.plainPatterns ?? []),
+                methods: \(methods),
+                statusCodeIndexSet: \(statusCodeIndexSet)
+            )
+            """
         }
     }
 
@@ -206,7 +518,7 @@ class CompiledNetworkTrackingOptions {
     let ignoreHosts: WildcardHosts
 
     init(options: NetworkTrackingOptions) throws {
-        self.captureRules = try options.captureRules.map { try CaptureRule(hosts: $0.hosts, statusCodeRange: $0.statusCodeRange) }
+        self.captureRules = try options.captureRules.map { try CaptureRule(rule: $0) }
 
         var ignoreHosts = options.ignoreHosts
         if options.ignoreAmplitudeRequests {
@@ -258,5 +570,16 @@ extension IndexSet {
         if self.isEmpty {
             throw ParseError.invalidFormat
         }
+    }
+}
+
+fileprivate extension URL {
+    var urlToMatch: URL {
+        var components = URLComponents(url: self, resolvingAgainstBaseURL: false)
+        components?.query = nil
+        components?.fragment = nil
+        components?.user = nil
+        components?.password = nil
+        return components?.url ?? self
     }
 }

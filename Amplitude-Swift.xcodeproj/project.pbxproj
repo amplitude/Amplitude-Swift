@@ -74,6 +74,8 @@
 		EA84CF0B2DF8D8E400CD1CAD /* MiscellaneousExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */; };
 		EA8DA4BF2D91C101003B00F0 /* NetworkTrackingPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */; };
 		EA8DA4C12D91C131003B00F0 /* NetworkRequestEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */; };
+		EAE4C5FA2E5F76A400FCD6E4 /* ObjectFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE4C5F92E5F769D00FCD6E4 /* ObjectFilter.swift */; };
+		EAE4C5FC2E5FA0C700FCD6E4 /* ObjectFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE4C5FB2E5FA0C100FCD6E4 /* ObjectFilterTests.swift */; };
 		EAE891872DA83B6F00AB97D0 /* FakeURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */; };
 		EAE989292DA831F200835345 /* NetworkTrackingPluginTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE989282DA831F200835345 /* NetworkTrackingPluginTest.swift */; };
 		EAF020772DBAE9D1003D22A2 /* ObjCNetworkTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */; };
@@ -211,6 +213,8 @@
 		EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiscellaneousExtension.swift; sourceTree = "<group>"; };
 		EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrackingPlugin.swift; sourceTree = "<group>"; };
 		EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRequestEvent.swift; sourceTree = "<group>"; };
+		EAE4C5F92E5F769D00FCD6E4 /* ObjectFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectFilter.swift; sourceTree = "<group>"; };
+		EAE4C5FB2E5FA0C100FCD6E4 /* ObjectFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectFilterTests.swift; sourceTree = "<group>"; };
 		EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeURLProtocol.swift; sourceTree = "<group>"; };
 		EAE989282DA831F200835345 /* NetworkTrackingPluginTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrackingPluginTest.swift; sourceTree = "<group>"; };
 		EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjCNetworkTrackingOptions.swift; sourceTree = "<group>"; };
@@ -453,6 +457,7 @@
 		OBJ_43 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				EAE4C5F92E5F769D00FCD6E4 /* ObjectFilter.swift */,
 				EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */,
 				EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */,
 				EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */,
@@ -576,6 +581,7 @@
 		OBJ_70 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				EAE4C5FB2E5FA0C100FCD6E4 /* ObjectFilterTests.swift */,
 				OBJ_71 /* EventPipelineTests.swift */,
 				OBJ_72 /* HttpClientTests.swift */,
 				OBJ_73 /* PersistentStorageResponseHandlerTests.swift */,
@@ -761,6 +767,7 @@
 				6C04FC482C589C8100EA8667 /* AutocaptureOptionsTests.swift in Sources */,
 				OBJ_156 /* HttpClientTests.swift in Sources */,
 				D01043612B6C5A8500F8173C /* SandboxHelperTests.swift in Sources */,
+				EAE4C5FC2E5FA0C700FCD6E4 /* ObjectFilterTests.swift in Sources */,
 				OBJ_157 /* PersistentStorageResponseHandlerTests.swift in Sources */,
 				4E05BB942BE41AEB009DE475 /* Amplitude+Extensions.swift in Sources */,
 				OBJ_158 /* UrlExtensionTests.swift in Sources */,
@@ -786,6 +793,7 @@
 				OBJ_89 /* Configuration.swift in Sources */,
 				OBJ_90 /* ConsoleLogger.swift in Sources */,
 				OBJ_91 /* Constants.swift in Sources */,
+				EAE4C5FA2E5F76A400FCD6E4 /* ObjectFilter.swift in Sources */,
 				OBJ_93 /* BaseEvent.swift in Sources */,
 				OBJ_94 /* EventOptions.swift in Sources */,
 				OBJ_95 /* GroupIdentifyEvent.swift in Sources */,
