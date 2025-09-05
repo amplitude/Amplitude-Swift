@@ -63,7 +63,7 @@ public class DefaultEventUtils {
         }
     }
 
-    func trackAppOpenedEvent(fromBackground: Bool = false) {
+    public func trackAppOpenedEvent(fromBackground: Bool = false) {
         guard let amplitude = amplitude,
               amplitude.configuration.autocapture.contains(.appLifecycles) else {
             return
