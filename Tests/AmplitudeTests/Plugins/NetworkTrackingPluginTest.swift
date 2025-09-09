@@ -429,7 +429,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         let expectedResponseHeaders = responseHeaders.filter { ["custom-header-3", "custom-header-4"].contains($0.key) }
 
         let options: NetworkTrackingOptions = .init(captureRules: [
-            .init(urls: [.exact("https://example.com")],
+            .init(urls: [.regex("https://example\\.com.*")],
                   requestHeaders: .init(allowList: ["custom-header-1", "custom-header-2"]),
                   responseHeaders: .init(allowList: ["custom-header-3", "custom-header-4"]))
         ])
@@ -492,7 +492,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
             expectations[1].fulfill()
         }.resume()
 
-        // Should match - query parameters are ignored in matching
+        // Should NOT match - extra query params
         taskForRequest("https://api.example.com/v1/users?id=123") { _, _, _ in
             expectations[2].fulfill()
         }.resume()
@@ -502,20 +502,15 @@ final class NetworkTrackingPluginTest: XCTestCase {
         wait()
 
         let events = eventCollector.events
-        XCTAssertEqual(events.count, 2, "Should capture only matching URLs")
+        XCTAssertEqual(events.count, 1, "Should capture only matching URLs")
 
-        // Verify both events captured the base URL correctly
+        // Verify event captured correctly
         for event in events {
             let networkEvent = event as! NetworkRequestEvent
             XCTAssertEqual(networkEvent.eventProperties?[Constants.AMP_NETWORK_URL_PROPERTY] as! String, "https://api.example.com/v1/users")
+            XCTAssertNil(networkEvent.eventProperties?[Constants.AMP_NETWORK_URL_QUERY_PROPERTY])
+            XCTAssertNil(networkEvent.eventProperties?[Constants.AMP_NETWORK_URL_FRAGMENT_PROPERTY])
         }
-
-        // Check if any event has query params (the one with ?id=123)
-        let hasQueryParam = events.contains { event in
-            let networkEvent = event as! NetworkRequestEvent
-            return networkEvent.eventProperties?[Constants.AMP_NETWORK_URL_QUERY_PROPERTY] as? String == "id=123"
-        }
-        XCTAssertTrue(hasQueryParam, "One event should have the query parameter id=123")
     }
 
     func testURLRegexMatching() {

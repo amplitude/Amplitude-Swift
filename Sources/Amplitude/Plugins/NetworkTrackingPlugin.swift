@@ -193,7 +193,7 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
               let url = request.url else { return nil }
 
         let host = url.host
-        let urlString = url.urlToMatch.absoluteString
+        let urlString = url.absoluteString
         let method = request.httpMethod
 
         // Check ignore hosts first
@@ -570,16 +570,5 @@ extension IndexSet {
         if self.isEmpty {
             throw ParseError.invalidFormat
         }
-    }
-}
-
-fileprivate extension URL {
-    var urlToMatch: URL {
-        var components = URLComponents(url: self, resolvingAgainstBaseURL: false)
-        components?.query = nil
-        components?.fragment = nil
-        components?.user = nil
-        components?.password = nil
-        return components?.url ?? self
     }
 }
