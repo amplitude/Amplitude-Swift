@@ -156,6 +156,8 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
     var ruleCache: [String: CompiledNetworkTrackingOptions.CaptureRule?] = [:]
     var optOut = true
 
+    let networkTrackingQueue = DispatchQueue(label: "com.amplitude.analytics.networkTracking", attributes: .concurrent)
+
     private let ruleCacheLock: NSLock = NSLock()
 
     var logger: (any Logger)? {
@@ -255,7 +257,7 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
 
         let responseTimestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
 
-        amplitude?.trackingQueue.async { [self] in
+        let sendEventAction = { [self] in
             let requestHeaders = rule.requestHeaders?.filterHeaders(request.allHTTPHeaderFields)
             let responseHeaders = rule.responseHeaders?.filterHeaders(response?.allHeaderFields as? [String: String])
             let requestBody = rule.requestBody?.filterBodyData(request.httpBody)
@@ -281,16 +283,23 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
             )
             amplitude?.track(event: event)
         }
+
+        if rule.responseBody != nil {
+            // onDataTaskCompletion is called earlier than onTask, add delay to make response body capture more stable
+            networkTrackingQueue.asyncAfter(deadline: .now() + 0.1, execute: sendEventAction)
+        } else {
+            networkTrackingQueue.async(execute: sendEventAction)
+        }
     }
 
     func onDataTaskCompletion(_ task: URLSessionDataTask, data: Data?, response: URLResponse?, error: Error?) {
         guard isListening(task),
               let request = task.originalRequest,
-              ruleForRequest(request) != nil else { return }
+              ruleForRequest(request)?.responseBody != nil,
+              let data = data
+        else { return }
 
-        if let data = data {
-            task.amp_responseData = data
-        }
+        task.amp_responseData = data
     }
 
     func isListening(_ task: URLSessionTask) -> Bool {

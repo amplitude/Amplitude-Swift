@@ -74,6 +74,7 @@
 		EA84CF0B2DF8D8E400CD1CAD /* MiscellaneousExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */; };
 		EA8DA4BF2D91C101003B00F0 /* NetworkTrackingPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */; };
 		EA8DA4C12D91C131003B00F0 /* NetworkRequestEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */; };
+		EA9D50F92E7342BD0037E925 /* NetworkTrackingPlugin+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA9D50F82E7342AE0037E925 /* NetworkTrackingPlugin+Extensions.swift */; };
 		EAE4C5FA2E5F76A400FCD6E4 /* ObjectFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE4C5F92E5F769D00FCD6E4 /* ObjectFilter.swift */; };
 		EAE4C5FC2E5FA0C700FCD6E4 /* ObjectFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE4C5FB2E5FA0C100FCD6E4 /* ObjectFilterTests.swift */; };
 		EAE891872DA83B6F00AB97D0 /* FakeURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */; };
@@ -213,6 +214,7 @@
 		EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiscellaneousExtension.swift; sourceTree = "<group>"; };
 		EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrackingPlugin.swift; sourceTree = "<group>"; };
 		EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRequestEvent.swift; sourceTree = "<group>"; };
+		EA9D50F82E7342AE0037E925 /* NetworkTrackingPlugin+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NetworkTrackingPlugin+Extensions.swift"; sourceTree = "<group>"; };
 		EAE4C5F92E5F769D00FCD6E4 /* ObjectFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectFilter.swift; sourceTree = "<group>"; };
 		EAE4C5FB2E5FA0C100FCD6E4 /* ObjectFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectFilterTests.swift; sourceTree = "<group>"; };
 		EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeURLProtocol.swift; sourceTree = "<group>"; };
@@ -515,6 +517,7 @@
 				8EDECBC5925DC68913C7CB89 /* Migration */,
 				BA1EC0F52A9F63FD00C2D547 /* AmplitudeIOSTests.swift */,
 				4E05BB932BE41AEB009DE475 /* Amplitude+Extensions.swift */,
+				EA9D50F82E7342AE0037E925 /* NetworkTrackingPlugin+Extensions.swift */,
 			);
 			name = Tests;
 			path = Tests/AmplitudeTests;
@@ -753,6 +756,7 @@
 				BA9BEA4D299FB4BB00BC0F7C /* IdentifyInterceptorTests.swift in Sources */,
 				OBJ_149 /* RevenueEventTests.swift in Sources */,
 				OBJ_150 /* RevenueTests.swift in Sources */,
+				EA9D50F92E7342BD0037E925 /* NetworkTrackingPlugin+Extensions.swift in Sources */,
 				EAE891872DA83B6F00AB97D0 /* FakeURLProtocol.swift in Sources */,
 				OBJ_151 /* PersistentStorageTests.swift in Sources */,
 				4E654DE12D9B60E700BCAA85 /* IdentityTests.swift in Sources */,

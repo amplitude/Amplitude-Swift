@@ -48,6 +48,12 @@ final class NetworkTrackingPluginTest: XCTestCase {
         amplitude.add(plugin: eventCollector)
     }
 
+    var networkTrackingPlugin: NetworkTrackingPlugin? {
+        return amplitude.timeline.plugins[PluginType.utility]?.plugins.first {
+            $0 is NetworkTrackingPlugin
+        } as? NetworkTrackingPlugin
+    }
+
     func taskForRequest(_ url: String = "https://example.com",
                         method: String = "GET",
                         requestHeaders: [String: String]? = nil,
@@ -92,8 +98,10 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
         wait(for: [expectation], timeout: 2)
 
-        wait() // Wait for Autocapture works
+        wait()
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
+
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1)
         XCTAssertTrue(events[0] is NetworkRequestEvent)
@@ -120,8 +128,9 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
         wait(for: [expectation], timeout: 2)
 
-        amplitude.waitForTrackingQueue()
         wait()
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
+        amplitude.waitForTrackingQueue()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 0, "Should not capture network request event with status code 200")
@@ -135,8 +144,9 @@ final class NetworkTrackingPluginTest: XCTestCase {
         amplitude.track(eventType: "Test")
         amplitude.flush()
 
-        amplitude.waitForTrackingQueue()
         wait()
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
+        amplitude.waitForTrackingQueue()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1)
@@ -153,8 +163,10 @@ final class NetworkTrackingPluginTest: XCTestCase {
         amplitude.track(eventType: "Test")
         amplitude.flush()
 
+        wait(for: 0.1)
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
-        wait()
+        amplitude.waitForTrackingQueue()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2)
@@ -376,9 +388,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         ])
         setupAmplitude(with: options)
 
-        let plugin = amplitude.timeline.plugins[PluginType.utility]?.plugins.first {
-            $0 is NetworkTrackingPlugin
-        } as! NetworkTrackingPlugin
+        let plugin = networkTrackingPlugin!
 
         let rule = plugin.ruleForRequest(URLRequest(url: URL(string: "https://api.example.com/foo")!))
         XCTAssertNotNil(rule)
@@ -408,6 +418,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         wait(for: expectations, timeout: 2)
 
         wait()
+        plugin.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
 
         let events = eventCollector.events
@@ -443,6 +454,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         wait(for: [expectation], timeout: 2)
 
         wait() // Wait for Autocapture works
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1)
@@ -498,6 +510,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
         wait()
 
@@ -562,6 +575,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
         wait()
 
@@ -637,6 +651,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
         wait()
 
@@ -689,8 +704,9 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
-        amplitude.waitForTrackingQueue()
         wait()
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
+        amplitude.waitForTrackingQueue()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1, "URL patterns should take priority over host patterns")
@@ -742,8 +758,9 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
-        amplitude.waitForTrackingQueue()
         wait()
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
+        amplitude.waitForTrackingQueue()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2, "Should capture only GET and POST requests")
@@ -789,8 +806,9 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
-        amplitude.waitForTrackingQueue()
         wait()
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
+        amplitude.waitForTrackingQueue()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 3, "Should capture all HTTP methods with wildcard")
@@ -829,8 +847,9 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
-        amplitude.waitForTrackingQueue()
         wait()
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
+        amplitude.waitForTrackingQueue()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 3, "Method matching should be case-insensitive")
@@ -885,8 +904,9 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
-        amplitude.waitForTrackingQueue()
         wait()
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
+        amplitude.waitForTrackingQueue()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2, "Should capture only requests matching both URL and method criteria")
@@ -968,8 +988,9 @@ final class NetworkTrackingPluginTest: XCTestCase {
         task.resume()
 
         wait(for: [expectation], timeout: 2.0)
+        wait(for: 0.2)
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
-        wait()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1, "Should capture 1 POST request")
@@ -1001,7 +1022,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
             XCTAssertEqual(responseJson?["created_at"] as? String, "2025-01-01T00:00:00Z")
             XCTAssertNil(responseJson?["internal_data"], "Internal data should be filtered out")
         } else {
-            print("Note: Response body capture not yet working - needs delegate-based swizzling")
+            XCTFail("Note: Response body not captured")
         }
     }
 
@@ -1061,8 +1082,9 @@ final class NetworkTrackingPluginTest: XCTestCase {
         task.resume()
 
         wait(for: [expectation], timeout: 2.0)
-        amplitude.waitForTrackingQueue()
         wait()
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
+        amplitude.waitForTrackingQueue()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1, "Should capture 1 GET request")
@@ -1155,8 +1177,9 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
-        amplitude.waitForTrackingQueue()
         wait()
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
+        amplitude.waitForTrackingQueue()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 3, "Should capture requests matching any of the rules")
