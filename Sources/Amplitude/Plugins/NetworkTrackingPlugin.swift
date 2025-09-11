@@ -79,6 +79,12 @@ public struct NetworkTrackingOptions {
             self.allowList = allowList
             self.captureSafeHeaders = captureSafeHeaders
         }
+
+        static func fromRemoteConfig(_ config: [String: Any]) -> Self {
+            let allowList = config["allowlist"] as? [String] ?? []
+            let captureSafeHeaders = config["captureSafeHeaders"] as? Bool ?? true
+            return CaptureHeader(allowList: allowList, captureSafeHeaders: captureSafeHeaders)
+        }
     }
 
     public struct CaptureBody {
@@ -88,6 +94,12 @@ public struct NetworkTrackingOptions {
         public init(allowList: [String], blocklist: [String] = []) {
             self.allowList = allowList
             self.blocklist = blocklist
+        }
+
+        static func fromRemoteConfig(_ config: [String: Any]) -> Self {
+            let allowList = config["allowlist"] as? [String] ?? []
+            let blocklist = config["blocklist"] as? [String] ?? []
+            return CaptureBody(allowList: allowList, blocklist: blocklist)
         }
     }
 
@@ -133,6 +145,56 @@ public struct NetworkTrackingOptions {
             self.requestBody = requestBody
             self.responseBody = responseBody
         }
+
+        private init(hosts: [String],
+                     urls: [URLPattern],
+                     methods: [String],
+                     statusCodeRange: String,
+                     requestHeaders: CaptureHeader?,
+                     responseHeaders: CaptureHeader?,
+                     requestBody: CaptureBody?,
+                     responseBody: CaptureBody?
+        ) {
+            self.hosts = hosts
+            self.urls = urls
+            self.methods = methods
+            self.statusCodeRange = statusCodeRange
+            self.requestHeaders = requestHeaders
+            self.responseHeaders = responseHeaders
+            self.requestBody = requestBody
+            self.responseBody = responseBody
+        }
+
+        static func fromRemoteConfig(_ config: [String: Any]) -> Self {
+            let hosts = config["hosts"] as? [String] ?? []
+            let urls = config["urls"] as? [String]
+            let methods = config["methods"] as? [String] ?? ["*"]
+            let statusCodeRange = config["statusCodeRange"] as? String ?? "500-599"
+            let urlsRegex = config["urlsRegex"] as? [String]
+            let requestHeaders = config["requestHeaders"] as? [String: Any]
+            let responseHeaders = config["responseHeaders"] as? [String: Any]
+            let requestBody = config["requestBody"] as? [String: Any]
+            let responseBody = config["responseBody"] as? [String: Any]
+
+            var urlPatterns: [URLPattern] = []
+            if let urls = urls {
+                urlPatterns.append(contentsOf: urls.compactMap { URLPattern.exact($0) })
+            }
+            if let urlsRegex = urlsRegex {
+                urlPatterns.append(contentsOf: urlsRegex.compactMap { URLPattern.regex($0) })
+            }
+
+            return CaptureRule(
+                hosts: hosts,
+                urls: urlPatterns,
+                methods: methods,
+                statusCodeRange: statusCodeRange,
+                requestHeaders: requestHeaders.map { CaptureHeader.fromRemoteConfig($0) },
+                responseHeaders: responseHeaders.map { CaptureHeader.fromRemoteConfig($0) },
+                requestBody: requestBody.map { CaptureBody.fromRemoteConfig($0) },
+                responseBody: responseBody.map { CaptureBody.fromRemoteConfig($0) }
+            )
+        }
     }
 
     public var captureRules: [CaptureRule]
@@ -155,6 +217,8 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
     var options: CompiledNetworkTrackingOptions?
     var ruleCache: [String: CompiledNetworkTrackingOptions.CaptureRule?] = [:]
     var optOut = true
+    var originalOptions: NetworkTrackingOptions?
+    private var remoteConfigSubscription: Any?
 
     let networkTrackingQueue = DispatchQueue(label: "com.amplitude.analytics.networkTracking", attributes: .concurrent)
 
@@ -171,23 +235,73 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
         logger?.warn(message: "NetworkTrackingPlugin is not supported on watchOS yet.")
         optOut = true
 #else
-        let originalOptions = amplitude.configuration.networkTrackingOptions
+        optOut = !amplitude.configuration.autocapture.contains(.networkTracking)
+        originalOptions = amplitude.configuration.networkTrackingOptions
+
+        if amplitude.configuration.enableAutoCaptureRemoteConfig {
+            remoteConfigSubscription = amplitude
+                .amplitudeContext
+                .remoteConfigClient
+                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self] config, _, _ in
+                    guard let self else {
+                        return
+                    }
+
+                    if let options = config?["networkTracking"] as? [String: Any] {
+                        if let enabled = options["enabled"] as? Bool {
+                            self.optOut = !enabled
+                        }
+
+                        if let ignoreHosts = options["ignoreHosts"] as? [String] {
+                            originalOptions?.ignoreHosts = ignoreHosts
+                        }
+
+                        if let ignoreAmplitudeRequests = options["ignoreAmplitudeRequests"] as? Bool {
+                            originalOptions?.ignoreAmplitudeRequests = ignoreAmplitudeRequests
+                        }
+
+                        if let captureRules = options["captureRules"] as? [[String: Any]] {
+                            originalOptions?.captureRules = captureRules.map {
+                                NetworkTrackingOptions.CaptureRule.fromRemoteConfig($0)
+                            }
+                        }
+                    }
+
+                    updateConfig()
+                }
+        } else {
+            updateConfig()
+        }
+#endif
+    }
+
+    func updateConfig() {
+        guard let originalOptions = originalOptions else {
+            return
+        }
 
         do {
             options = try CompiledNetworkTrackingOptions(options: originalOptions)
-            NetworkSwizzler.shared.addListener(listener: self)
-            optOut = false
+            if optOut {
+                NetworkSwizzler.shared.removeListener(self)
+            } else {
+                NetworkSwizzler.shared.addListener(self)
+            }
         } catch {
             logger?.error(message: "NetworkTrackingPlugin: Failed to parse options: \(originalOptions), error: \(error.localizedDescription)")
             optOut = true
+            NetworkSwizzler.shared.removeListener(self)
         }
-#endif
     }
 
     override func teardown() {
         super.teardown()
 
-        NetworkSwizzler.shared.removeListener(listener: self)
+        if let remoteConfigSubscription {
+            amplitude?.amplitudeContext.remoteConfigClient.unsubscribe(remoteConfigSubscription)
+        }
+
+        NetworkSwizzler.shared.removeListener(self)
     }
 
     func ruleForRequest(_ request: URLRequest) -> CompiledNetworkTrackingOptions.CaptureRule? {
