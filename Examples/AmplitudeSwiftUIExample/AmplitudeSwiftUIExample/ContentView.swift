@@ -143,11 +143,18 @@ struct ContentView: View {
                             TextField("Delay in ms", text: $responseDelay)
                                 .keyboardType(.numberPad)
                         }
-                        Button(action: {
-                            requestNetwork(responseCode: responseCode, responseDelay: responseDelay)
-                        }) {
-                            Text("Request Network")
-                        }.buttonStyle(AmplitudeButton())
+                        HStack {
+                            Button(action: {
+                                requestGET(responseCode: responseCode, responseDelay: responseDelay)
+                            }) {
+                                Text("GET")
+                            }.buttonStyle(AmplitudeButton())
+                            Button(action: {
+                                requestPOST(responseCode: responseCode, responseDelay: responseDelay)
+                            }) {
+                                Text("POST")
+                            }.buttonStyle(AmplitudeButton())
+                        }
                     }
                     Section(header: Text("RAGE CLICK")) {
                         HStack(spacing: 20) {
@@ -192,10 +199,32 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
-func requestNetwork(responseCode: String, responseDelay: String) {
+func requestGET(responseCode: String, responseDelay: String) {
     let responseDelay = responseDelay.isEmpty ? "0" : responseDelay
-    let url = URL(string: "https://httpstat.us/\(responseCode)?sleep=\(responseDelay)#test")
-    let request = URLRequest(url: url!)
+    let url = URL(string: "https://httpbin.org/status/\(responseCode)?sleep=\(responseDelay)#test")
+    var request = URLRequest(url: url!)
+    request.setValue("application/json", forHTTPHeaderField: "Accept")
+    let configuration = URLSessionConfiguration.default
+    configuration.timeoutIntervalForRequest = 3
+    let session = URLSession(configuration: configuration)
+    let task = session.dataTask(with: request) { data, response, error in
+        print("Response: \(String(describing: response))")
+        if let error = error {
+            print("Error: \(error)")
+        }
+    }
+    task.resume()
+    print("Request sent: \(String(describing: url))")
+}
+
+func requestPOST(responseCode: String, responseDelay: String) {
+    let url = URL(string: "https://httpbin.org/status/\(responseCode)")
+    var request = URLRequest(url: url!)
+    request.setValue("application/json", forHTTPHeaderField: "Accept")
+    request.httpMethod = "POST"
+    let body: [String : Any] = ["test": 0, "query": "a query string", "keyBool": true, "keyNull": NSNull(), "keyArray": [1, 2, 3], "keyDictionary": ["a": ["c": ["e": 5]], "b": "bbbbb"], "keyMix": ["a", ["c": ["e": 5]]]]
+//    let body: [Any] = [["query": "query 1", "other": "other value"], ["query": "query 2", "other": "other value 2"]]
+    request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
     let configuration = URLSessionConfiguration.default
     configuration.timeoutIntervalForRequest = 3
     let session = URLSession(configuration: configuration)

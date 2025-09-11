@@ -15,12 +15,18 @@ class FakeURLProtocol: URLProtocol {
         let data: Data?
         let error: Error?
         let delay: TimeInterval
+        let headers: [String: String]?
 
-        init(statusCode: Int = 200, data: Data? = nil, error: Error? = nil, delay: TimeInterval = 0.01) {
+        init(statusCode: Int = 200,
+             data: Data? = nil,
+             error: Error? = nil,
+             delay: TimeInterval = 0.01,
+             headers: [String: String]? = nil) {
             self.statusCode = statusCode
             self.data = data
             self.error = error
             self.delay = delay
+            self.headers = headers
         }
     }
 
@@ -53,7 +59,7 @@ class FakeURLProtocol: URLProtocol {
             url: url,
             statusCode: mockResponse.statusCode,
             httpVersion: "HTTP/1.1",
-            headerFields: ["Content-Type": "application/json"]
+            headerFields: mockResponse.headers ?? ["Content-Type": "application/json"]
         )!
 
         let delay = mockResponse.delay

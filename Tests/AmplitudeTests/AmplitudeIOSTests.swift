@@ -171,6 +171,8 @@ final class AmplitudeIOSTests: XCTestCase {
         NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
 
         amplitude.waitForTrackingQueue()
+        // wait twice for async event generate
+        amplitude.waitForTrackingQueue()
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 2)
