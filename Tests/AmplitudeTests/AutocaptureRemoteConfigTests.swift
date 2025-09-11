@@ -575,6 +575,10 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         // Verify ignoreAmplitudeRequests stayed from local config
         XCTAssertEqual(networkTrackingPlugin.originalOptions?.ignoreAmplitudeRequests, false)
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> f99d627 (add network tracking remote config support)
 #endif
 }
 
