@@ -7,7 +7,6 @@
 
 import Foundation
 
-@_spi(Frustration)
 public class InteractionsOptions {
     public let rageClick: RageClickOptions
     public let deadClick: DeadClickOptions
@@ -18,7 +17,6 @@ public class InteractionsOptions {
     }
 }
 
-@_spi(Frustration)
 public struct RageClickOptions {
     public let enabled: Bool
 
@@ -27,7 +25,6 @@ public struct RageClickOptions {
     }
 }
 
-@_spi(Frustration)
 public struct DeadClickOptions {
     public let enabled: Bool
 

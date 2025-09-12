@@ -7,7 +7,6 @@
 
 import Foundation
 
-/* TODO: Re-enable when frustration GA
 @objc(AMPInteractionsOptions)
 public class ObjCInteractionsOptions: NSObject {
     let options: InteractionsOptions
@@ -61,4 +60,3 @@ public class ObjCDeadClickOptions: NSObject {
         return options.enabled
     }
 }
- */

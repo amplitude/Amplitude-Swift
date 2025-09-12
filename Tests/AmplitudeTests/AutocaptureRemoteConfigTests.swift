@@ -6,7 +6,6 @@
 //
 
 import AmplitudeCore
-@_spi(Frustration)
 @testable
 import AmplitudeSwift
 import ObjectiveC
@@ -575,13 +574,6 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         // Verify ignoreAmplitudeRequests stayed from local config
         XCTAssertEqual(networkTrackingPlugin.originalOptions?.ignoreAmplitudeRequests, false)
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
->>>>>>> f99d627 (add network tracking remote config support)
-=======
->>>>>>> 076cb17 (improve remote config ut success rate)
 #endif
 }
 

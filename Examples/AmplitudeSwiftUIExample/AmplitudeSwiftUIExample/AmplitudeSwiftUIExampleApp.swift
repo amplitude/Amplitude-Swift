@@ -5,7 +5,6 @@
 //  Created by Hao Yu on 11/30/22.
 //
 
-@_spi(Frustration)
 @_spi(NetworkTracking)
 import AmplitudeSwift
 import AppTrackingTransparency
