@@ -79,12 +79,6 @@ public struct NetworkTrackingOptions {
             self.allowlist = allowlist
             self.captureSafeHeaders = captureSafeHeaders
         }
-
-        static func fromRemoteConfig(_ config: [String: Any]) -> Self {
-            let allowList = config["allowlist"] as? [String] ?? []
-            let captureSafeHeaders = config["captureSafeHeaders"] as? Bool ?? true
-            return CaptureHeader(allowList: allowList, captureSafeHeaders: captureSafeHeaders)
-        }
     }
 
     public struct CaptureBody: Decodable {
@@ -94,12 +88,6 @@ public struct NetworkTrackingOptions {
         public init(allowlist: [String], blocklist: [String] = []) {
             self.allowlist = allowlist
             self.blocklist = blocklist
-        }
-
-        static func fromRemoteConfig(_ config: [String: Any]) -> Self {
-            let allowList = config["allowlist"] as? [String] ?? []
-            let blocklist = config["blocklist"] as? [String] ?? []
-            return CaptureBody(allowList: allowList, blocklist: blocklist)
         }
     }
 
