@@ -6,7 +6,6 @@
 //
 
 import AmplitudeCore
-@_spi(Frustration)
 @testable
 import AmplitudeSwift
 import ObjectiveC

@@ -28,7 +28,6 @@ public class Configuration {
         public static let enableAutoCaptureRemoteConfig = true
         public static let trackingOptions = TrackingOptions()
         public static let networkTrackingOptions = NetworkTrackingOptions.default
-        @_spi(Frustration)
         public static let interactionsOptions = InteractionsOptions()
     }
 
@@ -76,7 +75,6 @@ public class Configuration {
     public var maxQueuedEventCount = -1
     var optOutChanged: ((Bool) -> Void)?
     public let enableAutoCaptureRemoteConfig: Bool
-    @_spi(Frustration)
     public var interactionsOptions: InteractionsOptions
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
@@ -140,7 +138,6 @@ public class Configuration {
         self.defaultTracking = defaultTracking
     }
 
-    @_spi(Frustration)
     public init(
         apiKey: String,
         flushQueueSize: Int = Defaults.flushQueueSize,
@@ -211,70 +208,6 @@ public class Configuration {
         self.networkTrackingOptions = networkTrackingOptions
         self.enableAutoCaptureRemoteConfig = enableAutoCaptureRemoteConfig
         self.interactionsOptions = interactionsOptions
-    }
-
-    // TODO: remove when frustration GA
-    public convenience init(
-        apiKey: String,
-        flushQueueSize: Int = Defaults.flushQueueSize,
-        flushIntervalMillis: Int = Defaults.flushIntervalMillis,
-        instanceName: String = Defaults.instanceName,
-        optOut: Bool = Defaults.optOut,
-        storageProvider: (any Storage)? = nil,
-        identifyStorageProvider: (any Storage)? = nil,
-        logLevel: LogLevelEnum = Defaults.logLevel,
-        loggerProvider: any Logger = ConsoleLogger(),
-        minIdLength: Int? = nil,
-        partnerId: String? = nil,
-        callback: EventCallback? = nil,
-        flushMaxRetries: Int = Defaults.flushMaxRetries,
-        useBatch: Bool = Defaults.useBatch,
-        serverZone: ServerZone = Defaults.serverZone,
-        serverUrl: String? = nil,
-        plan: Plan? = nil,
-        ingestionMetadata: IngestionMetadata? = nil,
-        trackingOptions: TrackingOptions = Defaults.trackingOptions,
-        enableCoppaControl: Bool = Defaults.enableCoppaControl,
-        flushEventsOnClose: Bool = Defaults.flushEventsOnClose,
-        minTimeBetweenSessionsMillis: Int = Defaults.minTimeBetweenSessionsMillis,
-        autocapture: AutocaptureOptions = Defaults.autocaptureOptions,
-        identifyBatchIntervalMillis: Int = Defaults.identifyBatchIntervalMillis,
-        maxQueuedEventCount: Int = Defaults.maxQueuedEventCount,
-        migrateLegacyData: Bool = Defaults.migrateLegacyData,
-        offline: Bool? = false,
-        networkTrackingOptions: NetworkTrackingOptions = Defaults.networkTrackingOptions,
-        enableAutoCaptureRemoteConfig: Bool = Defaults.enableAutoCaptureRemoteConfig
-    ) {
-        self.init(apiKey: apiKey,
-                  flushQueueSize: flushQueueSize,
-                  flushIntervalMillis: flushIntervalMillis,
-                  instanceName: instanceName,
-                  optOut: optOut,
-                  storageProvider: storageProvider,
-                  identifyStorageProvider: identifyStorageProvider,
-                  logLevel: logLevel,
-                  loggerProvider: loggerProvider,
-                  minIdLength: minIdLength,
-                  partnerId: partnerId,
-                  callback: callback,
-                  flushMaxRetries: flushMaxRetries,
-                  useBatch: useBatch,
-                  serverZone: serverZone,
-                  serverUrl: serverUrl,
-                  plan: plan,
-                  ingestionMetadata: ingestionMetadata,
-                  trackingOptions: trackingOptions,
-                  enableCoppaControl: enableCoppaControl,
-                  flushEventsOnClose: flushEventsOnClose,
-                  minTimeBetweenSessionsMillis: minTimeBetweenSessionsMillis,
-                  autocapture: autocapture,
-                  identifyBatchIntervalMillis: identifyBatchIntervalMillis,
-                  maxQueuedEventCount: maxQueuedEventCount,
-                  migrateLegacyData: migrateLegacyData,
-                  offline: offline,
-                  networkTrackingOptions: networkTrackingOptions,
-                  enableAutoCaptureRemoteConfig: enableAutoCaptureRemoteConfig,
-                  interactionsOptions: Defaults.interactionsOptions)
     }
 
     func isValid() -> Bool {
