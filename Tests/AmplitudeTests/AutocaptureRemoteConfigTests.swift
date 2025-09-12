@@ -502,20 +502,20 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
             // Verify headers configuration
             XCTAssertNotNil(captureRule.requestHeaders)
-            XCTAssertEqual(captureRule.requestHeaders?.allowList, ["Content-Type", "Authorization"])
+            XCTAssertEqual(captureRule.requestHeaders?.allowlist, ["Content-Type", "Authorization"])
             XCTAssertTrue(captureRule.requestHeaders?.captureSafeHeaders ?? false)
 
             XCTAssertNotNil(captureRule.responseHeaders)
-            XCTAssertEqual(captureRule.responseHeaders?.allowList, ["Content-Type"])
+            XCTAssertEqual(captureRule.responseHeaders?.allowlist, ["Content-Type"])
             XCTAssertFalse(captureRule.responseHeaders?.captureSafeHeaders ?? true)
 
             // Verify body configuration
             XCTAssertNotNil(captureRule.requestBody)
-            XCTAssertEqual(captureRule.requestBody?.allowList, ["userId", "eventType"])
+            XCTAssertEqual(captureRule.requestBody?.allowlist, ["userId", "eventType"])
             XCTAssertEqual(captureRule.requestBody?.blocklist, ["password", "token"])
 
             XCTAssertNotNil(captureRule.responseBody)
-            XCTAssertEqual(captureRule.responseBody?.allowList, ["status", "message"])
+            XCTAssertEqual(captureRule.responseBody?.allowlist, ["status", "message"])
             XCTAssertEqual(captureRule.responseBody?.blocklist, ["secret"])
         }
     }

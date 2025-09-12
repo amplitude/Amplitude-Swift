@@ -441,8 +441,8 @@ final class NetworkTrackingPluginTest: XCTestCase {
 
         let options: NetworkTrackingOptions = .init(captureRules: [
             .init(urls: [.regex("https://example\\.com.*")],
-                  requestHeaders: .init(allowList: ["custom-header-1", "custom-header-2"]),
-                  responseHeaders: .init(allowList: ["custom-header-3", "custom-header-4"]))
+                  requestHeaders: .init(allowlist: ["custom-header-1", "custom-header-2"]),
+                  responseHeaders: .init(allowlist: ["custom-header-3", "custom-header-4"]))
         ])
         setupAmplitude(with: options)
         FakeURLProtocol.mockResponses = [.init(statusCode: 500, headers: responseHeaders)]
@@ -936,11 +936,11 @@ final class NetworkTrackingPluginTest: XCTestCase {
                     requestHeaders: NetworkTrackingOptions.CaptureHeader(),
                     responseHeaders: NetworkTrackingOptions.CaptureHeader(),
                     requestBody: NetworkTrackingOptions.CaptureBody(
-                        allowList: ["name", "email"],
+                        allowlist: ["name", "email"],
                         blocklist: ["password"]
                     ),
                     responseBody: NetworkTrackingOptions.CaptureBody(
-                        allowList: ["id", "name", "created_at"],
+                        allowlist: ["id", "name", "created_at"],
                         blocklist: ["internal_data"]
                     )
                 )
@@ -1038,7 +1038,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
                     responseHeaders: NetworkTrackingOptions.CaptureHeader(),
                     requestBody: nil,  // GET requests typically don't have body
                     responseBody: NetworkTrackingOptions.CaptureBody(
-                        allowList: ["products", "total"],
+                        allowlist: ["products", "total"],
                         blocklist: ["internal_metadata"]
                     )
                 )
