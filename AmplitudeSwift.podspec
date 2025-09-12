@@ -34,5 +34,12 @@ Pod::Spec.new do |s|
   s.dependency 'AnalyticsConnector', '~> 1.3.0'
   s.dependency 'AmplitudeCore', '>=1.1.0', '<2.0.0'
 
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
+  s.pod_target_xcconfig = { 
+    'DEFINES_MODULE' => 'YES',
+    'EXCLUDED_ARCHS[sdk=watchsimulator*]' => 'i386'
+  }
+  s.user_target_xcconfig = {
+    'EXCLUDED_ARCHS[sdk=watchsimulator*]' => 'i386'
+  }
+  
 end
