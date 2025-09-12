@@ -65,6 +65,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         let sessions = amplitude.sessions
         XCTAssertFalse(sessions.trackSessionEvents)
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         XCTAssertTrue(sessions.trackSessionEvents)
@@ -85,6 +86,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         let sessions = amplitude.sessions
         XCTAssertTrue(sessions.trackSessionEvents)
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         XCTAssertFalse(sessions.trackSessionEvents)
@@ -118,6 +120,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         XCTAssertFalse(iosLifecycleMonitor.trackingState.screenViews)
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         XCTAssertTrue(iosLifecycleMonitor.trackingState.screenViews)
@@ -149,6 +152,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         XCTAssertTrue(iosLifecycleMonitor.trackingState.screenViews)
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         XCTAssertFalse(iosLifecycleMonitor.trackingState.screenViews)
@@ -180,6 +184,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         XCTAssertFalse(iosLifecycleMonitor.trackingState.elementInteractions)
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         XCTAssertTrue(iosLifecycleMonitor.trackingState.elementInteractions)
@@ -211,6 +216,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         XCTAssertTrue(iosLifecycleMonitor.trackingState.elementInteractions)
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         XCTAssertFalse(iosLifecycleMonitor.trackingState.elementInteractions)
@@ -259,6 +265,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         XCTAssertFalse(iosLifecycleMonitor.trackingState.rageClick)
         XCTAssertFalse(iosLifecycleMonitor.trackingState.deadClick)
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions)
@@ -303,6 +310,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick)
         XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick)
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         XCTAssertFalse(iosLifecycleMonitor.trackingState.frustrationInteractions)
@@ -352,6 +360,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick)
         XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick)
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions)
@@ -388,6 +397,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         XCTAssertTrue(networkTrackingPlugin.optOut)
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         XCTAssertFalse(networkTrackingPlugin.optOut)
@@ -421,6 +431,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         XCTAssertFalse(networkTrackingPlugin.optOut)
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         XCTAssertTrue(networkTrackingPlugin.optOut)
@@ -479,6 +490,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         // Verify the plugin is enabled
@@ -560,6 +572,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
+        wait()
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
 
         // Verify the plugin is enabled from remote config
@@ -576,10 +589,18 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         XCTAssertEqual(networkTrackingPlugin.originalOptions?.ignoreAmplitudeRequests, false)
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> f99d627 (add network tracking remote config support)
+=======
+>>>>>>> 076cb17 (improve remote config ut success rate)
 #endif
+
+    func wait(for interval: TimeInterval = 0.1) {
+        let expectation = XCTestExpectation(description: "Wait for time interval")
+        XCTWaiter().wait(for: [expectation], timeout: interval)
+    }
 }
 
 extension RemoteConfigClient {
