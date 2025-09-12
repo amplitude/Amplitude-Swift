@@ -174,10 +174,6 @@ public class Amplitude {
             }
         }
 
-        if configuration.autocapture.contains(.networkTracking) {
-            NetworkSwizzler.shared.swizzle()
-        }
-
         trackingQueue.async { [self] in
             self.trimQueuedEvents()
         }

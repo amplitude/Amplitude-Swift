@@ -71,27 +71,27 @@ public struct NetworkTrackingOptions {
         case regex(String)
     }
 
-    public struct CaptureHeader {
-        public let allowList: [String]
+    public struct CaptureHeader: Decodable {
+        public let allowlist: [String]
         public let captureSafeHeaders: Bool
 
-        public init(allowList: [String] = [], captureSafeHeaders: Bool = true) {
-            self.allowList = allowList
+        public init(allowlist: [String] = [], captureSafeHeaders: Bool = true) {
+            self.allowlist = allowlist
             self.captureSafeHeaders = captureSafeHeaders
         }
     }
 
-    public struct CaptureBody {
-        public let allowList: [String]
+    public struct CaptureBody: Decodable {
+        public let allowlist: [String]
         public let blocklist: [String]
 
-        public init(allowList: [String], blocklist: [String] = []) {
-            self.allowList = allowList
+        public init(allowlist: [String], blocklist: [String] = []) {
+            self.allowlist = allowlist
             self.blocklist = blocklist
         }
     }
 
-    public struct CaptureRule {
+    public struct CaptureRule: Decodable {
         public var hosts: [String]
         public private(set) var urls: [URLPattern]
         public private(set) var methods: [String]
@@ -102,6 +102,42 @@ public struct NetworkTrackingOptions {
 
         public let requestBody: CaptureBody?
         public let responseBody: CaptureBody?
+
+        // Custom CodingKeys to handle the urls/urlsRegex split in JSON
+        private enum CodingKeys: String, CodingKey {
+            case hosts
+            case urls
+            case urlsRegex
+            case methods
+            case statusCodeRange
+            case requestHeaders
+            case responseHeaders
+            case requestBody
+            case responseBody
+        }
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+
+            self.hosts = try container.decodeIfPresent([String].self, forKey: .hosts) ?? []
+            self.methods = try container.decodeIfPresent([String].self, forKey: .methods) ?? ["*"]
+            self.statusCodeRange = try container.decodeIfPresent(String.self, forKey: .statusCodeRange) ?? "500-599"
+
+            // Decode URLs - combine urls (exact) and urlsRegex (regex) into URLPattern array
+            var urlPatterns: [URLPattern] = []
+            if let exactUrls = try container.decodeIfPresent([String].self, forKey: .urls) {
+                urlPatterns.append(contentsOf: exactUrls.map { .exact($0) })
+            }
+            if let regexUrls = try container.decodeIfPresent([String].self, forKey: .urlsRegex) {
+                urlPatterns.append(contentsOf: regexUrls.map { .regex($0) })
+            }
+            self.urls = urlPatterns
+
+            self.requestHeaders = try container.decodeIfPresent(CaptureHeader.self, forKey: .requestHeaders)
+            self.responseHeaders = try container.decodeIfPresent(CaptureHeader.self, forKey: .responseHeaders)
+            self.requestBody = try container.decodeIfPresent(CaptureBody.self, forKey: .requestBody)
+            self.responseBody = try container.decodeIfPresent(CaptureBody.self, forKey: .responseBody)
+        }
 
         public init(hosts: [String], statusCodeRange: String = "500-599") {
             self.hosts = hosts
@@ -133,6 +169,34 @@ public struct NetworkTrackingOptions {
             self.requestBody = requestBody
             self.responseBody = responseBody
         }
+
+        private init(hosts: [String],
+                     urls: [URLPattern],
+                     methods: [String],
+                     statusCodeRange: String,
+                     requestHeaders: CaptureHeader?,
+                     responseHeaders: CaptureHeader?,
+                     requestBody: CaptureBody?,
+                     responseBody: CaptureBody?
+        ) {
+            self.hosts = hosts
+            self.urls = urls
+            self.methods = methods
+            self.statusCodeRange = statusCodeRange
+            self.requestHeaders = requestHeaders
+            self.responseHeaders = responseHeaders
+            self.requestBody = requestBody
+            self.responseBody = responseBody
+        }
+
+        static func fromRemoteConfig(_ configs: [[String: Any]]) -> [Self]? {
+            guard !configs.isEmpty,
+                  let data = try? JSONSerialization.data(withJSONObject: configs),
+                  let rules = try? JSONDecoder().decode([CaptureRule].self, from: data) else {
+                return nil
+            }
+            return rules
+        }
     }
 
     public var captureRules: [CaptureRule]
@@ -155,6 +219,8 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
     var options: CompiledNetworkTrackingOptions?
     var ruleCache: [String: CompiledNetworkTrackingOptions.CaptureRule?] = [:]
     var optOut = true
+    var originalOptions: NetworkTrackingOptions?
+    private var remoteConfigSubscription: Any?
 
     let networkTrackingQueue = DispatchQueue(label: "com.amplitude.analytics.networkTracking", attributes: .concurrent)
 
@@ -171,23 +237,72 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
         logger?.warn(message: "NetworkTrackingPlugin is not supported on watchOS yet.")
         optOut = true
 #else
-        let originalOptions = amplitude.configuration.networkTrackingOptions
+        optOut = !amplitude.configuration.autocapture.contains(.networkTracking)
+        originalOptions = amplitude.configuration.networkTrackingOptions
+
+        if amplitude.configuration.enableAutoCaptureRemoteConfig {
+            remoteConfigSubscription = amplitude
+                .amplitudeContext
+                .remoteConfigClient
+                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self] config, _, _ in
+                    guard let self else {
+                        return
+                    }
+
+                    if let options = config?["networkTracking"] as? [String: Any] {
+                        if let enabled = options["enabled"] as? Bool {
+                            self.optOut = !enabled
+                        }
+
+                        if let ignoreHosts = options["ignoreHosts"] as? [String] {
+                            originalOptions?.ignoreHosts = ignoreHosts
+                        }
+
+                        if let ignoreAmplitudeRequests = options["ignoreAmplitudeRequests"] as? Bool {
+                            originalOptions?.ignoreAmplitudeRequests = ignoreAmplitudeRequests
+                        }
+
+                        if let captureRules = options["captureRules"] as? [[String: Any]],
+                           let rules = NetworkTrackingOptions.CaptureRule.fromRemoteConfig(captureRules) {
+                            originalOptions?.captureRules = rules
+                        }
+                    }
+
+                    updateConfig()
+                }
+        } else {
+            updateConfig()
+        }
+#endif
+    }
+
+    func updateConfig() {
+        guard let originalOptions = originalOptions else {
+            return
+        }
 
         do {
             options = try CompiledNetworkTrackingOptions(options: originalOptions)
-            NetworkSwizzler.shared.addListener(listener: self)
-            optOut = false
+            if optOut {
+                NetworkSwizzler.shared.removeListener(self)
+            } else {
+                NetworkSwizzler.shared.addListener(self)
+            }
         } catch {
             logger?.error(message: "NetworkTrackingPlugin: Failed to parse options: \(originalOptions), error: \(error.localizedDescription)")
             optOut = true
+            NetworkSwizzler.shared.removeListener(self)
         }
-#endif
     }
 
     override func teardown() {
         super.teardown()
 
-        NetworkSwizzler.shared.removeListener(listener: self)
+        if let remoteConfigSubscription {
+            amplitude?.amplitudeContext.remoteConfigClient.unsubscribe(remoteConfigSubscription)
+        }
+
+        NetworkSwizzler.shared.removeListener(self)
     }
 
     func ruleForRequest(_ request: URLRequest) -> CompiledNetworkTrackingOptions.CaptureRule? {
@@ -409,7 +524,7 @@ class CompiledNetworkTrackingOptions {
         let allowSet: Set<String>
 
         init(header: NetworkTrackingOptions.CaptureHeader) {
-            var combinedSet = Set(header.allowList.map { $0.lowercased() })
+            var combinedSet = Set(header.allowlist.map { $0.lowercased() })
 
             if header.captureSafeHeaders {
                 combinedSet.formUnion(SAFE_HEADERS)
@@ -439,7 +554,7 @@ class CompiledNetworkTrackingOptions {
         let objectFilter: ObjectFilter
 
         init(body: NetworkTrackingOptions.CaptureBody) {
-            self.objectFilter = ObjectFilter(allowList: body.allowList, blockList: body.blocklist)
+            self.objectFilter = ObjectFilter(allowList: body.allowlist, blockList: body.blocklist)
         }
 
         func filterBody(_ body: Any) -> Any? {

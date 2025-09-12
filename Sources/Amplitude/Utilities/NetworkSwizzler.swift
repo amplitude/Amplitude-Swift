@@ -85,13 +85,14 @@ class NetworkSwizzler {
         )
     }
 
-    func addListener(listener: NetworkTaskListener) {
+    func addListener(_ listener: NetworkTaskListener) {
+        swizzle()
         lock.withLock {
             listeners.append(listener)
         }
     }
 
-    func removeListener(listener: NetworkTaskListener) {
+    func removeListener(_ listener: NetworkTaskListener) {
         lock.withLock {
             listeners.removeAll { $0 === listener }
         }
