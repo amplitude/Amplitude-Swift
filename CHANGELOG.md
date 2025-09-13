@@ -1,3 +1,12 @@
+# [1.15.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.14.0...v1.15.0) (2025-09-13)
+
+
+### Features
+
+* add autocapture support for frustration and network tracking ([#317](https://github.com/amplitude/Amplitude-Swift/issues/317)) ([5f70980](https://github.com/amplitude/Amplitude-Swift/commit/5f70980f182607cd4566617e08e7895b2306d9b0))
+* add urls and header body support for network tracking ([#320](https://github.com/amplitude/Amplitude-Swift/issues/320)) ([82620af](https://github.com/amplitude/Amplitude-Swift/commit/82620af315161db2f04e9ead239761cd7a171cf9))
+* make frustration interaction GA ([#323](https://github.com/amplitude/Amplitude-Swift/issues/323)) ([414bffe](https://github.com/amplitude/Amplitude-Swift/commit/414bffe4d857118eedb5f9c87aab97f14df836dc))
+
 # [1.14.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.13.9...v1.14.0) (2025-07-23)
 
 
