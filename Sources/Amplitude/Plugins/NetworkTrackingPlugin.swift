@@ -216,10 +216,10 @@ public struct NetworkTrackingOptions {
 
 class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
 
-    var options: CompiledNetworkTrackingOptions?
+    @Atomic var options: CompiledNetworkTrackingOptions?
+    @Atomic var optOut = true
+    @Atomic var originalOptions: NetworkTrackingOptions?
     var ruleCache: [String: CompiledNetworkTrackingOptions.CaptureRule?] = [:]
-    var optOut = true
-    var originalOptions: NetworkTrackingOptions?
     private var remoteConfigSubscription: Any?
 
     let networkTrackingQueue = DispatchQueue(label: "com.amplitude.analytics.networkTracking", attributes: .concurrent)
