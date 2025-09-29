@@ -19,12 +19,13 @@ class IOSLifecycleMonitor: UtilityPlugin {
         var frustrationInteractions: Bool = false
         var rageClick: Bool = false
         var deadClick: Bool = false
+        var appLifecycles: Bool = false
     }
 
     private var utils: DefaultEventUtils?
     private var sendApplicationOpenedOnDidBecomeActive = false
     private var remoteConfigSubscription: Any?
-    private(set) var trackingState = TrackingState()
+    @Atomic private(set) var trackingState = TrackingState()
 
     override init() {
         super.init()
@@ -55,6 +56,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
         trackingState.frustrationInteractions = amplitude.configuration.autocapture.contains(.frustrationInteractions)
         trackingState.rageClick = amplitude.configuration.interactionsOptions.rageClick.enabled
         trackingState.deadClick = amplitude.configuration.interactionsOptions.deadClick.enabled
+        trackingState.appLifecycles = amplitude.configuration.autocapture.contains(.appLifecycles)
 
         // If we are already in the foreground, dispatch installed / opened events now
         // we want to dispatch this from the initiating thread to maintain event ordering.
@@ -79,29 +81,37 @@ class IOSLifecycleMonitor: UtilityPlugin {
                         return
                     }
 
+                    var newState = trackingState
+
                     if let pageViews = config["pageViews"] as? Bool {
-                        trackingState.screenViews = pageViews
+                        newState.screenViews = pageViews
                     }
 
                     if let interactions = config["elementInteractions"] as? Bool {
-                        trackingState.elementInteractions = interactions
+                        newState.elementInteractions = interactions
                     }
 
                     if let frustrationInteractions = config["frustrationInteractions"] as? [String: Any] {
                         if let enabled = frustrationInteractions["enabled"] as? Bool {
-                            trackingState.frustrationInteractions = enabled
+                            newState.frustrationInteractions = enabled
                         }
 
                         if let rageClick = frustrationInteractions["rageClick"] as? [String: Any],
                            let rageClickEnabled = rageClick["enabled"] as? Bool {
-                            trackingState.rageClick = rageClickEnabled
+                            newState.rageClick = rageClickEnabled
                         }
 
                         if let deadClick = frustrationInteractions["deadClick"] as? [String: Any],
                            let deadClickEnabled = deadClick["enabled"] as? Bool {
-                            trackingState.deadClick = deadClickEnabled
+                            newState.deadClick = deadClickEnabled
                         }
                     }
+
+                    if let appLifecycles = config["appLifecycles"] as? Bool {
+                        newState.appLifecycles = appLifecycles
+                    }
+
+                    trackingState = newState
 
                     updateAutocaptureSetup()
                 }
@@ -176,7 +186,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
             return
         }
         amplitude.onExitForeground(timestamp: currentTimestamp)
-        if amplitude.configuration.autocapture.contains(.appLifecycles) {
+        if trackingState.appLifecycles {
             amplitude.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
         }
     }

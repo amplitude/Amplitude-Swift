@@ -6,9 +6,28 @@ public class DefaultEventUtils {
     private static var instanceNamesThatSentAppUpdatedInstalled: Set<String> = []
 
     private weak var amplitude: Amplitude?
+    private var remoteConfigSubscription: Any?
+    @Atomic private var trackAppLifecycles: Bool = false
 
     public init(amplitude: Amplitude) {
         self.amplitude = amplitude
+
+        trackAppLifecycles = amplitude.configuration.autocapture.contains(.appLifecycles)
+
+        if amplitude.configuration.enableAutoCaptureRemoteConfig {
+            remoteConfigSubscription = amplitude
+                .amplitudeContext
+                .remoteConfigClient
+                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self] config, _, _ in
+                    guard let self, let config else {
+                        return
+                    }
+
+                    if let appLifecycles = config["appLifecycles"] as? Bool {
+                        trackAppLifecycles = appLifecycles
+                    }
+                }
+        }
     }
 
     public func trackAppUpdatedInstalledEvent() {
@@ -29,7 +48,7 @@ public class DefaultEventUtils {
             try? amplitude.storage.write(key: StorageKey.APP_VERSION, value: currentVersion)
         }
 
-        guard amplitude.configuration.autocapture.contains(.appLifecycles) else {
+        guard trackAppLifecycles else {
             return
         }
 
@@ -64,18 +83,23 @@ public class DefaultEventUtils {
     }
 
     func trackAppOpenedEvent(fromBackground: Bool = false) {
-        guard let amplitude = amplitude,
-              amplitude.configuration.autocapture.contains(.appLifecycles) else {
+        guard let amplitude = amplitude, trackAppLifecycles else {
             return
         }
 
         let info = Bundle.main.infoDictionary
         let currentBuild = info?["CFBundleVersion"] as? String
         let currentVersion = info?["CFBundleShortVersionString"] as? String
-        self.amplitude?.track(eventType: Constants.AMP_APPLICATION_OPENED_EVENT, eventProperties: [
+        amplitude.track(eventType: Constants.AMP_APPLICATION_OPENED_EVENT, eventProperties: [
             Constants.AMP_APP_BUILD_PROPERTY: currentBuild ?? "",
             Constants.AMP_APP_VERSION_PROPERTY: currentVersion ?? "",
             Constants.AMP_APP_FROM_BACKGROUND_PROPERTY: fromBackground,
         ])
+    }
+
+    deinit {
+        if let amplitude, let remoteConfigSubscription {
+            amplitude.amplitudeContext.remoteConfigClient.unsubscribe(remoteConfigSubscription)
+        }
     }
 }
