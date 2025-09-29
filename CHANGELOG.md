@@ -1,3 +1,10 @@
+## [1.15.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.15.0...v1.15.1) (2025-09-29)
+
+
+### Bug Fixes
+
+* add appLifecycles remote config support ([#328](https://github.com/amplitude/Amplitude-Swift/issues/328)) ([8c7a376](https://github.com/amplitude/Amplitude-Swift/commit/8c7a37639570fe7210c82f641d7d35a34dc359e8))
+
 # [1.15.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.14.0...v1.15.0) (2025-09-13)
 
 
