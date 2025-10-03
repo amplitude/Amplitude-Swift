@@ -89,6 +89,11 @@ public struct NetworkTrackingOptions {
             self.allowlist = allowlist
             self.blocklist = blocklist
         }
+
+        enum CodingKeys: String, CodingKey {
+            case allowlist
+            case blocklist = "excludelist"
+        }
     }
 
     public struct CaptureRule: Decodable {

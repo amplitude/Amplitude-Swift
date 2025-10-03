@@ -451,11 +451,11 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                                     ],
                                     "requestBody": [
                                         "allowlist": ["userId", "eventType"],
-                                        "blocklist": ["password", "token"]
+                                        "excludelist": ["password", "token"]
                                     ],
                                     "responseBody": [
                                         "allowlist": ["status", "message"],
-                                        "blocklist": ["secret"]
+                                        "excludelist": ["secret"]
                                     ]
                                 ]
                             ]
