@@ -11,11 +11,16 @@ import Foundation
 internal class Mediator {
     // create an array with certain type.
     internal var plugins = [UniversalPlugin]()
+    private var pluginsByName: [String: UniversalPlugin] = [:]
     private let lock = NSLock()
 
     internal func add(plugin: UniversalPlugin) {
         lock.lock()
         defer { lock.unlock() }
+
+        if let name = plugin.name {
+            pluginsByName[name] = plugin
+        }
 
         plugins.append(plugin)
     }
@@ -23,6 +28,10 @@ internal class Mediator {
     internal func remove(plugin: UniversalPlugin) {
         lock.lock()
         defer { lock.unlock() }
+
+        if let name = plugin.name {
+            pluginsByName[name] = nil
+        }
 
         plugins.removeAll { (storedPlugin) -> Bool in
             if storedPlugin === plugin {
@@ -34,8 +43,7 @@ internal class Mediator {
     }
 
     internal func execute(event: BaseEvent?) -> BaseEvent? {
-        lock.lock()
-        defer { lock.unlock() }
+        let plugins = lock.withLock { self.plugins }
 
         var result: BaseEvent? = event
         plugins.forEach { plugin in
@@ -64,10 +72,12 @@ internal class Mediator {
         return result
     }
 
-    internal func applyClosure(_ closure: (UniversalPlugin) -> Void) {
-        lock.lock()
-        defer { lock.unlock() }
+    internal func plugin(name: String) -> UniversalPlugin? {
+        return lock.withLock { pluginsByName[name] }
+    }
 
+    internal func applyClosure(_ closure: (UniversalPlugin) -> Void) {
+        let plugins = lock.withLock { self.plugins }
         plugins.forEach { plugin in
             closure(plugin)
         }

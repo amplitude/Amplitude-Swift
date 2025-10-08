@@ -10,7 +10,7 @@ import Foundation
 
 public class Timeline {
     internal let plugins: [PluginType: Mediator]
-    private var pluginsByName: [String: UniversalPlugin] = [:]
+    private let addLock = NSLock()
 
     init() {
         self.plugins = [
@@ -37,50 +37,44 @@ public class Timeline {
     }
 
     internal func add(plugin: UniversalPlugin) {
-        if let name = plugin.name {
-            if pluginsByName[name] != nil {
+        addLock.withLock {
+            guard plugin.name.flatMap({ self.plugin(name: $0) }) == nil else {
                 return
             }
-            pluginsByName[name] = plugin
-        }
-        let pluginType: PluginType
-        switch plugin {
-        case let plugin as Plugin:
-            pluginType = plugin.type
-        default:
-            pluginType = .enrichment
-        }
-        if let mediator = plugins[pluginType] {
-            mediator.add(plugin: plugin)
+            let pluginType: PluginType
+            switch plugin {
+            case let plugin as Plugin:
+                pluginType = plugin.type
+            default:
+                pluginType = .enrichment
+            }
+            if let mediator = plugins[pluginType] {
+                mediator.add(plugin: plugin)
+            }
         }
     }
 
     internal func remove(plugin: UniversalPlugin) {
         // remove all plugins with this name in every category
-        for _plugin in plugins {
-            let list = _plugin.value
-            list.remove(plugin: plugin)
-        }
-
-        if let name = plugin.name {
-            pluginsByName[name] = nil
+        for mediator in plugins.values {
+            mediator.remove(plugin: plugin)
         }
     }
 
     internal func apply(_ closure: (UniversalPlugin) -> Void) {
         for type in PluginType.allCases {
-            if let plugins = plugins[type]?.plugins {
-                plugins.forEach { (plugin) in
-                    closure(plugin)
-                    if let destPlugin = plugin as? DestinationPlugin {
-                        destPlugin.apply(closure: closure)
-                    }
+            plugins[type]?.applyClosure { plugin in
+                closure(plugin)
+                if let destPlugin = plugin as? DestinationPlugin {
+                    destPlugin.apply(closure: closure)
                 }
             }
         }
     }
 
     func plugin(name: String) -> UniversalPlugin? {
-        return pluginsByName[name]
+        return PluginType.allCases
+            .compactMap { self.plugins[$0]?.plugin(name: name) }
+            .first
     }
 }
