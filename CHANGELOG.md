@@ -1,3 +1,11 @@
+## [1.15.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.15.1...v1.15.2) (2025-10-20)
+
+
+### Bug Fixes
+
+* improve timeline thread safety ([60de801](https://github.com/amplitude/Amplitude-Swift/commit/60de80198762cc08901af5df6447614f4aca173f))
+* use correct remote config key for block lists ([361d540](https://github.com/amplitude/Amplitude-Swift/commit/361d540a89c9901d50be3f74c7ad035fd6e2c160))
+
 ## [1.15.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.15.0...v1.15.1) (2025-09-29)
 
 
