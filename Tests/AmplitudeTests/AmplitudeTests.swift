@@ -199,6 +199,35 @@ final class AmplitudeTests: XCTestCase {
         waitForExpectations(timeout: 10)
     }
 
+    func testPluginResetNotification() {
+        class TestPlugin: Plugin {
+            let type: PluginType = .enrichment
+
+            var reset: (() -> Void)?
+
+            func onReset() {
+                reset?()
+            }
+        }
+
+        let testPlugin = TestPlugin()
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "testPluginChangeNotifications",
+                                                               flushIntervalMillis: 1000000,
+                                                               optOut: false,
+                                                               storageProvider: FakeInMemoryStorage()))
+        amplitude.add(plugin: testPlugin)
+        amplitude.waitForTrackingQueue()
+
+        let resetExpectation = expectation(description: "Should receive reset")
+        testPlugin.reset = {
+            XCTAssertNil(amplitude.getUserId())
+            resetExpectation.fulfill()
+        }
+        amplitude.reset()
+
+        waitForExpectations(timeout: 10)
+    }
+
     func testContextWithDisableTrackingOptions() {
         let apiKey = "testApiKeyForDisableTrackingOptions"
         let trackingOptions = TrackingOptions()

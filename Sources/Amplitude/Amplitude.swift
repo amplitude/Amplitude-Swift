@@ -433,6 +433,7 @@ public class Amplitude {
         setUserId(userId: nil)
         identity.userProperties.removeAll()
         contextPlugin.initializeDeviceId(forceReset: true)
+        timeline.apply { $0.onReset() }
         return self
     }
 
