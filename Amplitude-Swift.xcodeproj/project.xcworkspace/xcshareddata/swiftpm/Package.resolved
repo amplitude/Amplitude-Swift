@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/amplitude/AmplitudeCore-Swift",
       "state" : {
-        "revision" : "ce504eddff3597f88b23af640200d59841dc4907",
-        "version" : "1.2.2"
+        "revision" : "1d9b590e202c3e2abb27ccb6b5b5ae62145406f0",
+        "version" : "1.2.4"
       }
     },
     {
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/amplitude/analytics-connector-ios",
       "state" : {
-        "revision" : "decb203b5ce0e06091bbc5040acbf24fa85ebdce",
-        "version" : "1.3.0"
+        "revision" : "4adbfe85486e6dcdcdca5fa9362097ffe5ec712b",
+        "version" : "1.3.1"
       }
     }
   ],
