@@ -1,3 +1,10 @@
+## [1.15.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.15.2...v1.15.3) (2025-11-05)
+
+
+### Bug Fixes
+
+* support onReset plugin lifecycle event ([ed883e8](https://github.com/amplitude/Amplitude-Swift/commit/ed883e8414f58658a708033c21f612da0c441a8c))
+
 ## [1.15.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.15.1...v1.15.2) (2025-10-20)
 
 
