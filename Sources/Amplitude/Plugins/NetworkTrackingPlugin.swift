@@ -250,44 +250,52 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
                 .amplitudeContext
                 .remoteConfigClient
                 .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self] config, _, _ in
-                    guard let self else {
-                        return
-                    }
-
-                    if let options = config?["networkTracking"] as? [String: Any] {
-                        if let enabled = options["enabled"] as? Bool {
-                            self.optOut = !enabled
-                        }
-
-                        if let ignoreHosts = options["ignoreHosts"] as? [String] {
-                            originalOptions?.ignoreHosts = ignoreHosts
-                        }
-
-                        if let ignoreAmplitudeRequests = options["ignoreAmplitudeRequests"] as? Bool {
-                            originalOptions?.ignoreAmplitudeRequests = ignoreAmplitudeRequests
-                        }
-
-                        if let captureRules = options["captureRules"] as? [[String: Any]],
-                           let rules = NetworkTrackingOptions.CaptureRule.fromRemoteConfig(captureRules) {
-                            originalOptions?.captureRules = rules
-                        }
-                    }
-
-                    updateConfig()
+                    guard let self else { return }
+                    self.updateConfig(config)
                 }
         } else {
-            updateConfig()
+            if let originalOptions = originalOptions {
+                compileConfig(originalOptions)
+            }
         }
 #endif
     }
 
-    func updateConfig() {
-        guard let originalOptions = originalOptions else {
+    private func updateConfig(_ config: [String: Any]?) {
+        guard var updatedOptions = originalOptions,
+              let options = config?["networkTracking"] as? [String: Any] else {
             return
         }
 
+        // Update from remote config
+        if let enabled = options["enabled"] as? Bool {
+            optOut = !enabled
+        }
+        if let ignoreHosts = options["ignoreHosts"] as? [String] {
+            updatedOptions.ignoreHosts = ignoreHosts
+        }
+        if let ignoreAmplitudeRequests = options["ignoreAmplitudeRequests"] as? Bool {
+            updatedOptions.ignoreAmplitudeRequests = ignoreAmplitudeRequests
+        }
+        if let captureRules = options["captureRules"] as? [[String: Any]],
+           let rules = NetworkTrackingOptions.CaptureRule.fromRemoteConfig(captureRules) {
+            updatedOptions.captureRules = rules
+        }
+
+        originalOptions = updatedOptions
+        compileConfig(updatedOptions)
+    }
+
+    func compileConfig(_ originalOptions: NetworkTrackingOptions) {
+        guard let originalOptions = self.originalOptions else { return }
+
         do {
             options = try CompiledNetworkTrackingOptions(options: originalOptions)
+
+            ruleCacheLock.withLock {
+                ruleCache.removeAll()
+            }
+
             if optOut {
                 NetworkSwizzler.shared.removeListener(self)
             } else {
