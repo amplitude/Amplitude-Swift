@@ -1,3 +1,10 @@
+## [1.15.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.15.3...v1.15.4) (2025-11-15)
+
+
+### Bug Fixes
+
+* prevent network tracking plugin remote config update crash ([#336](https://github.com/amplitude/Amplitude-Swift/issues/336)) ([06b1315](https://github.com/amplitude/Amplitude-Swift/commit/06b131544236408d150a4bbb65a7e59ab67f35d8))
+
 ## [1.15.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.15.2...v1.15.3) (2025-11-05)
 
 
