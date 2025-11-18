@@ -7,6 +7,9 @@
 
 import Foundation
 
+@_spi(Internal)
+import AmplitudeCore
+
 class PersistentStorage: Storage {
     typealias EventBlock = URL
 
@@ -29,8 +32,9 @@ class PersistentStorage: Storage {
     let storageVersionKey: String
     let logger: (any Logger)?
     let diagonostics: Diagnostics
+    let diagonosticsClient: CoreDiagnostics
 
-    init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics) {
+    init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics, diagnosticsClient: CoreDiagnostics) {
         self.storagePrefix = storagePrefix == PersistentStorage.DEFAULT_STORAGE_PREFIX || storagePrefix.starts(with: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-")
             ? storagePrefix
             : "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(storagePrefix)"
@@ -40,6 +44,7 @@ class PersistentStorage: Storage {
         self.storageVersionKey = "\(PersistentStorage.STORAGE_VERSION).\(self.storagePrefix)"
         self.logger = logger
         self.diagonostics = diagonostics
+        self.diagonosticsClient = diagnosticsClient
         // Make sure Amplitude data is sandboxed per app
         self.appPath = isStorageSandboxed() ? "" : "\(Bundle.main.bundleIdentifier!)/"
         handleV1Files()
@@ -136,7 +141,8 @@ class PersistentStorage: Storage {
             storage: self,
             eventPipeline: eventPipeline,
             eventBlock: eventBlock,
-            eventsString: eventsString
+            eventsString: eventsString,
+            diagnosticsClient: diagonosticsClient
         )
     }
 

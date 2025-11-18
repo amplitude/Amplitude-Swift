@@ -165,6 +165,15 @@ struct ContentView: View {
                             Toggle("Rage Click", isOn: $rageClickTest)
                         }
                     }
+                    Section(header: Text("Crash Detection")) {
+                        HStack(spacing: 20) {
+                            Button("Crash!!") {
+                                print("Crash tapped - this can trigger a crash")
+                                let x = [1,2,3]
+                                print(x[99])
+                            }.buttonStyle(AmplitudeButton())
+                        }
+                    }
                     Button(action: {
                         Amplitude.testInstance.flush()
                     }) {
