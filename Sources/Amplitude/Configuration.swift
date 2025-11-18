@@ -7,6 +7,9 @@
 
 import Foundation
 
+@_spi(Internal)
+import AmplitudeCore
+
 public class Configuration {
 
     public struct Defaults {
@@ -29,6 +32,7 @@ public class Configuration {
         public static let trackingOptions = TrackingOptions()
         public static let networkTrackingOptions = NetworkTrackingOptions.default
         public static let interactionsOptions = InteractionsOptions()
+        public static let enableDiagnostics = true
     }
 
     public internal(set) var apiKey: String
@@ -76,6 +80,9 @@ public class Configuration {
     var optOutChanged: ((Bool) -> Void)?
     public let enableAutoCaptureRemoteConfig: Bool
     public var interactionsOptions: InteractionsOptions
+    public var enableDiagnostics: Bool
+
+    let diagnosticsClient: CoreDiagnostics
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
     public convenience init(
@@ -169,7 +176,8 @@ public class Configuration {
         offline: Bool? = false,
         networkTrackingOptions: NetworkTrackingOptions = Defaults.networkTrackingOptions,
         enableAutoCaptureRemoteConfig: Bool = Defaults.enableAutoCaptureRemoteConfig,
-        interactionsOptions: InteractionsOptions = Defaults.interactionsOptions
+        interactionsOptions: InteractionsOptions = Defaults.interactionsOptions,
+        enableDiagnostics: Bool = Defaults.enableDiagnostics
     ) {
         let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
@@ -181,16 +189,22 @@ public class Configuration {
         self.diagonostics = Diagnostics()
         self.logLevel = logLevel
         self.loggerProvider = loggerProvider
+        self.serverZone = serverZone
+        self.enableDiagnostics = enableDiagnostics
+        self.diagnosticsClient = DiagnosticsClient(apiKey: self.apiKey,
+                                                   serverZone: self.serverZone,
+                                                   instanceName: self.instanceName,
+                                                   logger: self.loggerProvider,
+                                                   enabled: self.enableDiagnostics)
         self.storageProvider = storageProvider
-        ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics)
+        ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         self.identifyStorageProvider = identifyStorageProvider
-        ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics)
+        ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         self.minIdLength = minIdLength
         self.partnerId = partnerId
         self.callback = callback
         self.flushMaxRetries = flushMaxRetries
         self.useBatch = useBatch
-        self.serverZone = serverZone
         self.serverUrl = serverUrl
         self.plan = plan
         self.ingestionMetadata = ingestionMetadata

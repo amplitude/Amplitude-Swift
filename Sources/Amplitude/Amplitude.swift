@@ -1,3 +1,4 @@
+@_spi(Internal)
 @_exported import AmplitudeCore
 import Foundation
 
@@ -118,6 +119,9 @@ public class Amplitude {
 
     let trackingQueue = DispatchQueue(label: "com.amplitude.analytics")
 
+    private var diagnosticsObserverTask: Task<Void, Never>?
+    private var diagnosticsObserverId: UUID?
+
     public init(
         configuration: Configuration
     ) {
@@ -137,7 +141,8 @@ public class Amplitude {
         amplitudeContext = AmplitudeContext(apiKey: configuration.apiKey,
                                             instanceName: configuration.getNormalizeInstanceName(),
                                             serverZone: serverZone,
-                                            logger: configuration.loggerProvider)
+                                            logger: configuration.loggerProvider,
+                                            diagnosticsClient: configuration.diagnosticsClient)
 
         let contextPlugin = ContextPlugin()
         self.contextPlugin = contextPlugin
@@ -178,6 +183,8 @@ public class Amplitude {
             self.trimQueuedEvents()
         }
         trackingQueue.resume()
+
+        setupDiagnosticsObserver()
     }
 
     convenience init(apiKey: String, configuration: Configuration) {
@@ -506,12 +513,12 @@ public class Amplitude {
         }
         configuration.loggerProvider.debug(message: "Running migrateApiKeyStorages")
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
-            let apiKeyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(configuration.apiKey)", logger: self.logger, diagonostics: configuration.diagonostics)
+            let apiKeyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(configuration.apiKey)", logger: self.logger, diagonostics: configuration.diagonostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
             StoragePrefixMigration(source: apiKeyStorage, destination: persistentStorage, logger: logger).execute()
         }
 
         if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
-            let apiKeyIdentifyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(configuration.apiKey)", logger: self.logger, diagonostics: configuration.diagonostics)
+            let apiKeyIdentifyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(configuration.apiKey)", logger: self.logger, diagonostics: configuration.diagonostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
             StoragePrefixMigration(source: apiKeyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
     }
@@ -524,12 +531,12 @@ public class Amplitude {
         configuration.loggerProvider.debug(message: "Running migrateDefaultInstanceStorages")
         let legacyDefaultInstanceName = "default_instance"
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
-            let legacyStorage = PersistentStorage(storagePrefix: "storage-\(legacyDefaultInstanceName)", logger: self.logger, diagonostics: configuration.diagonostics)
+            let legacyStorage = PersistentStorage(storagePrefix: "storage-\(legacyDefaultInstanceName)", logger: self.logger, diagonostics: configuration.diagonostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
             StoragePrefixMigration(source: legacyStorage, destination: persistentStorage, logger: logger).execute()
         }
 
         if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
-            let legacyIdentifyStorage = PersistentStorage(storagePrefix: "identify-\(legacyDefaultInstanceName)", logger: self.logger, diagonostics: configuration.diagonostics)
+            let legacyIdentifyStorage = PersistentStorage(storagePrefix: "identify-\(legacyDefaultInstanceName)", logger: self.logger, diagonostics: configuration.diagonostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
             StoragePrefixMigration(source: legacyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
     }
@@ -550,7 +557,7 @@ public class Amplitude {
         let instanceName = configuration.getNormalizeInstanceName()
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
             let instanceOnlyEventPrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-storage-\(instanceName)"
-            let instanceNameOnlyStorage = PersistentStorage(storagePrefix: instanceOnlyEventPrefix, logger: self.logger, diagonostics: configuration.diagonostics)
+            let instanceNameOnlyStorage = PersistentStorage(storagePrefix: instanceOnlyEventPrefix, logger: self.logger, diagonostics: configuration.diagonostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
             StoragePrefixMigration(
                 source: instanceNameOnlyStorage,
                 destination: persistentStorage,
@@ -560,7 +567,7 @@ public class Amplitude {
 
         if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
             let instanceOnlyIdentifyPrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(instanceName)"
-            let instanceNameOnlyIdentifyStorage = PersistentStorage(storagePrefix: instanceOnlyIdentifyPrefix, logger: self.logger, diagonostics: configuration.diagonostics)
+            let instanceNameOnlyIdentifyStorage = PersistentStorage(storagePrefix: instanceOnlyIdentifyPrefix, logger: self.logger, diagonostics: configuration.diagonostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
             StoragePrefixMigration(
                 source: instanceNameOnlyIdentifyStorage,
                 destination: persistentIdentifyStorage,
@@ -609,6 +616,10 @@ public class Amplitude {
         }
         logger?.debug(message: "Completed trimming events, kept \(eventCount) most recent events")
     }
+
+    deinit {
+        diagnosticsObserverTask?.cancel()
+    }
 }
 
 extension Amplitude: PluginHost {
@@ -640,6 +651,49 @@ extension Amplitude: AnalyticsClient {
         }
         set {
             configuration.optOut = newValue
+        }
+    }
+}
+
+// MARK: - Diagnostics
+
+extension Amplitude {
+
+    private func setupDiagnosticsObserver() {
+        diagnosticsObserverTask = Task { [weak self] in
+            guard let self else { return }
+            
+            let (stream, observerId) = await self.amplitudeContext.diagnosticsClient.observeIsRunning()
+            self.diagnosticsObserverId = observerId
+            
+            for await isRunning in stream {
+                guard isRunning else { continue }
+                await self.setupDiagnostics()
+                await self.cleanupDiagnosticsObserver()
+                break
+            }
+        }
+    }
+
+    private func cleanupDiagnosticsObserver() async {
+        if let observerId = diagnosticsObserverId {
+            await self.amplitudeContext.diagnosticsClient.stopObservingIsRunning(observerId)
+            diagnosticsObserverId = nil
+        }
+        diagnosticsObserverTask?.cancel()
+        diagnosticsObserverTask = nil
+    }
+
+    private func setupDiagnostics() async {
+        await amplitudeContext.diagnosticsClient.setTag(name: "sdk.\(Constants.SDK_LIBRARY).version", value: Constants.SDK_VERSION)
+
+        CrashCatcher.register()
+
+        if let crash = CrashCatcher.checkForPreviousCrash() {
+            CrashCatcher.clearCrashReport()
+            await amplitudeContext.diagnosticsClient.increment(name: "analytics.crash")
+            let eventProperties = ["report": crash]
+            await amplitudeContext.diagnosticsClient.recordEvent(name: "analytics.crash", properties: eventProperties)
         }
     }
 }
