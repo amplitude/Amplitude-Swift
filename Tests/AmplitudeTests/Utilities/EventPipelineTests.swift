@@ -22,7 +22,8 @@ final class EventPipelineTests: XCTestCase {
         storage = PersistentStorage(
             storagePrefix: "event-pipeline-tests",
             logger: nil,
-            diagonostics: Diagnostics())
+            diagonostics: Diagnostics(),
+            diagnosticsClient: FakeDiagnosticsClient())
         configuration = Configuration(
             apiKey: "testApiKey",
             flushIntervalMillis: Int(Self.FLUSH_INTERVAL_SECONDS * 1000),
