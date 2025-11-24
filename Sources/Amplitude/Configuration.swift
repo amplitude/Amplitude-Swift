@@ -82,6 +82,7 @@ public class Configuration {
     public var interactionsOptions: InteractionsOptions
     public var enableDiagnostics: Bool
 
+    let remoteConfigClient: RemoteConfigClient
     let diagnosticsClient: CoreDiagnostics
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
@@ -191,11 +192,16 @@ public class Configuration {
         self.loggerProvider = loggerProvider
         self.serverZone = serverZone
         self.enableDiagnostics = enableDiagnostics
+        self.remoteConfigClient = RemoteConfigClient(apiKey: self.apiKey,
+                                                     serverZone: self.serverZone,
+                                                     instanceName: self.instanceName,
+                                                     logger: self.loggerProvider)
         self.diagnosticsClient = DiagnosticsClient(apiKey: self.apiKey,
                                                    serverZone: self.serverZone,
                                                    instanceName: self.instanceName,
                                                    logger: self.loggerProvider,
-                                                   enabled: self.enableDiagnostics)
+                                                   enabled: self.enableDiagnostics,
+                                                   remoteConfigClient: self.remoteConfigClient)
         self.storageProvider = storageProvider
         ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         self.identifyStorageProvider = identifyStorageProvider

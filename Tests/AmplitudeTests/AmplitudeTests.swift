@@ -662,7 +662,7 @@ final class AmplitudeTests: XCTestCase {
                 enableAutoCaptureRemoteConfig: false
             )
 
-        // Create storages using instance name only
+            // Create storages using instance name only
             let legacyEventStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "storage-\(config.getNormalizeInstanceName())", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
             let legacyIdentityStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "identify-\(config.getNormalizeInstanceName())", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
 

@@ -181,22 +181,16 @@ extension PersistentStorageResponseHandler {
 
         let diagnosticsClient = self.diagnosticsClient
         if code >= 1, code < 300 {
-            Task.detached {
-                await diagnosticsClient.increment(name: "analytics.events.sent", size: events.count)
-            }
+            diagnosticsClient.increment(name: "analytics.events.sent", size: events.count)
         } else {
-            Task.detached {
-                await diagnosticsClient.increment(name: "analytics.events.dropped", size: events.count)
-            }
-            Task.detached {
-                let properties = [
-                    "events": events.map { $0.eventType },
-                    "count": events.count,
-                    "code": code,
-                    "message": message
-                ] as? [String: any Sendable]
-                await diagnosticsClient.recordEvent(name: "analytics.events.dropped", properties: properties)
-            }
+            diagnosticsClient.increment(name: "analytics.events.dropped", size: events.count)
+            let properties = [
+                "events": events.map { $0.eventType },
+                "count": events.count,
+                "code": code,
+                "message": message
+            ] as? [String: any Sendable]
+            diagnosticsClient.recordEvent(name: "analytics.events.dropped", properties: properties)
         }
     }
 

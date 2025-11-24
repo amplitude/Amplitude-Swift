@@ -119,8 +119,8 @@ public class Amplitude {
 
     let trackingQueue = DispatchQueue(label: "com.amplitude.analytics")
 
-    private var diagnosticsObserverTask: Task<Void, Never>?
-    private var diagnosticsObserverId: UUID?
+    private var enabledAutocapture: AutocaptureOptions = .init(rawValue: 0)
+    private var needsSetAutocaptureDiagnostics: Bool = false
 
     public init(
         configuration: Configuration
@@ -142,6 +142,7 @@ public class Amplitude {
                                             instanceName: configuration.getNormalizeInstanceName(),
                                             serverZone: serverZone,
                                             logger: configuration.loggerProvider,
+                                            remoteConfigClient: configuration.remoteConfigClient,
                                             diagnosticsClient: configuration.diagnosticsClient)
 
         let contextPlugin = ContextPlugin()
@@ -184,7 +185,10 @@ public class Amplitude {
         }
         trackingQueue.resume()
 
-        setupDiagnosticsObserver()
+        amplitudeContext.diagnosticsClient.setTag(name: "sdk.\(Constants.SDK_LIBRARY).version", value: Constants.SDK_VERSION)
+
+        enabledAutocapture = configuration.autocapture
+        updateDiagnosticsAutocaptureTags()
     }
 
     convenience init(apiKey: String, configuration: Configuration) {
@@ -616,10 +620,6 @@ public class Amplitude {
         }
         logger?.debug(message: "Completed trimming events, kept \(eventCount) most recent events")
     }
-
-    deinit {
-        diagnosticsObserverTask?.cancel()
-    }
 }
 
 extension Amplitude: PluginHost {
@@ -655,45 +655,26 @@ extension Amplitude: AnalyticsClient {
     }
 }
 
-// MARK: - Diagnostics
-
 extension Amplitude {
 
-    private func setupDiagnosticsObserver() {
-        diagnosticsObserverTask = Task { [weak self] in
-            guard let self else { return }
-            
-            let (stream, observerId) = await self.amplitudeContext.diagnosticsClient.observeIsRunning()
-            self.diagnosticsObserverId = observerId
-            
-            for await isRunning in stream {
-                guard isRunning else { continue }
-                await self.setupDiagnostics()
-                await self.cleanupDiagnosticsObserver()
-                break
+    func updateEnabledAutocapture(_ options: AutocaptureOptions, enabled: Bool) {
+        trackingQueue.async {
+            if enabled {
+                self.enabledAutocapture.formUnion(options)
+            } else {
+                self.enabledAutocapture.subtract(options)
+            }
+            self.needsSetAutocaptureDiagnostics = true
+
+            self.trackingQueue.async { [weak self] in
+                guard let self, needsSetAutocaptureDiagnostics else { return }
+                needsSetAutocaptureDiagnostics = false
+                updateDiagnosticsAutocaptureTags()
             }
         }
     }
 
-    private func cleanupDiagnosticsObserver() async {
-        if let observerId = diagnosticsObserverId {
-            await self.amplitudeContext.diagnosticsClient.stopObservingIsRunning(observerId)
-            diagnosticsObserverId = nil
-        }
-        diagnosticsObserverTask?.cancel()
-        diagnosticsObserverTask = nil
-    }
-
-    private func setupDiagnostics() async {
-        await amplitudeContext.diagnosticsClient.setTag(name: "sdk.\(Constants.SDK_LIBRARY).version", value: Constants.SDK_VERSION)
-
-        CrashCatcher.register()
-
-        if let crash = CrashCatcher.checkForPreviousCrash() {
-            CrashCatcher.clearCrashReport()
-            await amplitudeContext.diagnosticsClient.increment(name: "analytics.crash")
-            let eventProperties = ["report": crash]
-            await amplitudeContext.diagnosticsClient.recordEvent(name: "analytics.crash", properties: eventProperties)
-        }
+    func updateDiagnosticsAutocaptureTags() {
+        amplitudeContext.diagnosticsClient.setTag(name: "autocapture.enabled", value: enabledAutocapture.stringRepresentation())
     }
 }

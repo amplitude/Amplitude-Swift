@@ -5,6 +5,7 @@
 //  Created by Hao Yu on 11/30/22.
 //
 
+@_spi(Internal)
 import AmplitudeSwift
 import AppTrackingTransparency
 import CoreData
@@ -165,8 +166,13 @@ struct ContentView: View {
                             Toggle("Rage Click", isOn: $rageClickTest)
                         }
                     }
-                    Section(header: Text("Crash Detection")) {
+                    Section(header: Text("Diagnostics")) {
                         HStack(spacing: 20) {
+                            Button("Flush") {
+                                Task {
+                                    await Amplitude.testInstance.amplitudeContext.diagnosticsClient.flush()
+                                }
+                            }.buttonStyle(AmplitudeButton())
                             Button("Crash!!") {
                                 print("Crash tapped - this can trigger a crash")
                                 let x = [1,2,3]

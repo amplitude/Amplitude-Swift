@@ -93,7 +93,7 @@ extension Amplitude {
             networkTrackingOptions: .init(
                 captureRules: [
 //                    .init(hosts: ["*"]), // all hosts, 500-599
-                    .init(urls: [.regex("https://httpbin\\.org/")], statusCodeRange: "0,400-599", requestBody: .init(allowList: ["**"])),
+                    .init(urls: [.regex("https://httpbin\\.org/")], statusCodeRange: "0,400-599", requestBody: .init(allowlist: ["**"])),
                 ],
                 ignoreHosts: ["notmyapi.com"],
                 ignoreAmplitudeRequests: true

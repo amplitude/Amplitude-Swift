@@ -18,13 +18,14 @@ public class DefaultEventUtils {
             remoteConfigSubscription = amplitude
                 .amplitudeContext
                 .remoteConfigClient
-                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self] config, _, _ in
+                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self, weak amplitude] config, _, _ in
                     guard let self, let config else {
                         return
                     }
 
                     if let appLifecycles = config["appLifecycles"] as? Bool {
                         trackAppLifecycles = appLifecycles
+                        amplitude?.updateEnabledAutocapture(.appLifecycles, enabled: appLifecycles)
                     }
                 }
         }
