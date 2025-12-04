@@ -262,22 +262,23 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
     }
 
     private func updateConfig(_ config: [String: Any]?) {
-        guard var updatedOptions = originalOptions,
-              let options = config?["networkTracking"] as? [String: Any] else {
+        guard var updatedOptions = originalOptions else {
             return
         }
 
+        let options = config?["networkTracking"] as? [String: Any]
+
         // Update from remote config
-        if let enabled = options["enabled"] as? Bool {
+        if let enabled = options?["enabled"] as? Bool {
             optOut = !enabled
         }
-        if let ignoreHosts = options["ignoreHosts"] as? [String] {
+        if let ignoreHosts = options?["ignoreHosts"] as? [String] {
             updatedOptions.ignoreHosts = ignoreHosts
         }
-        if let ignoreAmplitudeRequests = options["ignoreAmplitudeRequests"] as? Bool {
+        if let ignoreAmplitudeRequests = options?["ignoreAmplitudeRequests"] as? Bool {
             updatedOptions.ignoreAmplitudeRequests = ignoreAmplitudeRequests
         }
-        if let captureRules = options["captureRules"] as? [[String: Any]],
+        if let captureRules = options?["captureRules"] as? [[String: Any]],
            let rules = NetworkTrackingOptions.CaptureRule.fromRemoteConfig(captureRules) {
             updatedOptions.captureRules = rules
         }
