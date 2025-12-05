@@ -76,7 +76,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
             remoteConfigSubscription = amplitude
                 .amplitudeContext
                 .remoteConfigClient
-                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self] config, _, _ in
+                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self, weak amplitude] config, _, _ in
                     guard let self, let config else {
                         return
                     }
@@ -85,15 +85,18 @@ class IOSLifecycleMonitor: UtilityPlugin {
 
                     if let pageViews = config["pageViews"] as? Bool {
                         newState.screenViews = pageViews
+                        amplitude?.updateEnabledAutocapture(.screenViews, enabled: pageViews)
                     }
 
                     if let interactions = config["elementInteractions"] as? Bool {
                         newState.elementInteractions = interactions
+                        amplitude?.updateEnabledAutocapture(.elementInteractions, enabled: interactions)
                     }
 
                     if let frustrationInteractions = config["frustrationInteractions"] as? [String: Any] {
                         if let enabled = frustrationInteractions["enabled"] as? Bool {
                             newState.frustrationInteractions = enabled
+                            amplitude?.updateEnabledAutocapture(.frustrationInteractions, enabled: enabled)
                         }
 
                         if let rageClick = frustrationInteractions["rageClick"] as? [String: Any],
@@ -109,6 +112,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
 
                     if let appLifecycles = config["appLifecycles"] as? Bool {
                         newState.appLifecycles = appLifecycles
+                        amplitude?.updateEnabledAutocapture(.appLifecycles, enabled: appLifecycles)
                     }
 
                     trackingState = newState
