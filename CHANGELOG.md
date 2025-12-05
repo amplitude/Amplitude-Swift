@@ -1,3 +1,10 @@
+## [1.15.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.15.4...v1.15.5) (2025-12-05)
+
+
+### Bug Fixes
+
+* network tracking not initialized for specify scenario ([#338](https://github.com/amplitude/Amplitude-Swift/issues/338)) ([13b9765](https://github.com/amplitude/Amplitude-Swift/commit/13b97659d063d911d685758a60afa8921dd4b773))
+
 ## [1.15.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.15.3...v1.15.4) (2025-11-15)
 
 
