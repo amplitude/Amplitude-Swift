@@ -1,0 +1,28 @@
+{
+  "private": true,
+  "version": "0.0.0",
+  "description": "<p align=\"center\">   <a href=\"https://amplitude.com\" target=\"_blank\" align=\"center\">     <img src=\"https://static.amplitude.com/lightning/46c85bfd91905de8047f1ee65c7c93d6fa9ee6ea/static/media/amplitude-logo-with-text.4fb9e463.svg\" width=\"280\">   </a>   <br/> </p>",
+  "main": "release.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amplitude/Amplitude-Swift.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amplitude/Amplitude-Swift/issues"
+  },
+  "homepage": "https://github.com/amplitude/Amplitude-Swift#readme",
+  "devDependencies": {
+    "lodash": "4.17.21",
+    "semantic-release": "17.4.7",
+    "@semantic-release/changelog": "5.0.1",
+    "@semantic-release/git": "9.0.1",
+    "@google/semantic-release-replace-plugin": "1.2.0",
+    "@semantic-release/exec": "5.0.0"
+  },
+  "packageManager": "pnpm@10.20.0+sha512.cf9998222162dd85864d0a8102e7892e7ba4ceadebbf5a31f9c2fce48dfce317a9c53b9f6464d1ef9042cba2e02ae02a9f7c143a2b438cd93c91840f0192b9dd"
+}
