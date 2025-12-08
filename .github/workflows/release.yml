@@ -66,7 +66,7 @@ jobs:
           GIT_COMMITTER_NAME: amplitude-sdk-bot
           GIT_COMMITTER_EMAIL: amplitude-sdk-bot@users.noreply.github.com
         run: |
-          pnpm install
+          pnpm install --frozen-lockfile
           pnpm exec semantic-release --dry-run
 
       - name: Semantic Release
@@ -79,5 +79,5 @@ jobs:
           GIT_COMMITTER_NAME: amplitude-sdk-bot
           GIT_COMMITTER_EMAIL: amplitude-sdk-bot@users.noreply.github.com
         run: |
-          pnpm install
+          pnpm install --frozen-lockfile
           pnpm exec semantic-release
