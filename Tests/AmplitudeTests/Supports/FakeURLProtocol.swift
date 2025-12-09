@@ -33,7 +33,8 @@ class FakeURLProtocol: URLProtocol {
     // MARK: - URLProtocol Overrides
 
     override class func canInit(with request: URLRequest) -> Bool {
-        return true
+        let isRemoteConfig = request.url?.absoluteString.hasPrefix("https://sr-client-cfg.") ?? false
+        return !isRemoteConfig
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {

@@ -1,5 +1,9 @@
-@_spi(Internal)
-@_exported import AmplitudeCore
+#if AMPLITUDE_DISABLE_UIKIT
+@_spi(Internal) @_exported import AmplitudeCoreNoUIKit
+#else
+@_spi(Internal) @_exported import AmplitudeCore
+#endif
+
 import Foundation
 
 public class Amplitude {
@@ -128,7 +132,11 @@ public class Amplitude {
         trackingQueue.suspend()
         self.configuration = configuration
 
+#if AMPLITUDE_DISABLE_UIKIT
+        let serverZone: AmplitudeCoreNoUIKit.ServerZone
+#else
         let serverZone: AmplitudeCore.ServerZone
+#endif
         switch configuration.serverZone {
         case .US:
             serverZone = .US

@@ -5,7 +5,11 @@
 //  Created by Hao Yu on 11/9/22.
 //
 
+#if AMPLITUDE_DISABLE_UIKIT
+import AmplitudeCoreNoUIKit
+#else
 import AmplitudeCore
+#endif
 import Foundation
 
 internal class Mediator {

@@ -16,7 +16,6 @@
 		4E3871622BB34DBC002890AB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */; };
 		4E654D682D97454900BCAA85 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E654D672D97454900BCAA85 /* Identity.swift */; };
 		4E654DE12D9B60E700BCAA85 /* IdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E654DE02D9B60E300BCAA85 /* IdentityTests.swift */; };
-		4E65A53A2DA88C98004ED163 /* AmplitudeCoreFramework in Frameworks */ = {isa = PBXBuildFile; productRef = 4E65A5392DA88C98004ED163 /* AmplitudeCoreFramework */; };
 		4EB530752CD2E46A00E961F4 /* AnalyticsConnectorFramework in Frameworks */ = {isa = PBXBuildFile; productRef = 4EB530742CD2E46A00E961F4 /* AnalyticsConnectorFramework */; };
 		6C04FC3F2C58973C00EA8667 /* ElementInteractionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */; };
 		6C04FC412C58974A00EA8667 /* UIKitElementInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */; };
@@ -69,6 +68,8 @@
 		D01043612B6C5A8500F8173C /* SandboxHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01043602B6C5A8500F8173C /* SandboxHelperTests.swift */; };
 		EA1F2CD92D8781950096A576 /* MethodSwizzlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1F2CD82D8781950096A576 /* MethodSwizzlerTest.swift */; };
 		EA28FDA42DED997900848BBB /* InteractionsOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28FDA32DED997900848BBB /* InteractionsOptions.swift */; };
+		EA2FD8862EE8A0E4002AB27E /* AmplitudeCoreFramework in Frameworks */ = {isa = PBXBuildFile; productRef = EA2FD8852EE8A0E4002AB27E /* AmplitudeCoreFramework */; };
+		EA2FD8882EE8A0EB002AB27E /* AmplitudeCoreNoUIKitFramework in Frameworks */ = {isa = PBXBuildFile; productRef = EA2FD8872EE8A0EB002AB27E /* AmplitudeCoreNoUIKitFramework */; };
 		EA5C95942D7A76B900DC8B3B /* NetworkSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */; };
 		EA5C95962D7A776D00DC8B3B /* MethodSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */; };
 		EA84CF0B2DF8D8E400CD1CAD /* MiscellaneousExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */; };
@@ -79,6 +80,92 @@
 		EAE4C5FC2E5FA0C700FCD6E4 /* ObjectFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE4C5FB2E5FA0C100FCD6E4 /* ObjectFilterTests.swift */; };
 		EAE891872DA83B6F00AB97D0 /* FakeURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */; };
 		EAE989292DA831F200835345 /* NetworkTrackingPluginTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE989282DA831F200835345 /* NetworkTrackingPluginTest.swift */; };
+		EAED99FB2EE7B47E00A5FC08 /* FrustrationInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */; };
+		EAED99FC2EE7B47E00A5FC08 /* MiscellaneousExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */; };
+		EAED99FD2EE7B47E00A5FC08 /* Amplitude.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_8 /* Amplitude.swift */; };
+		EAED99FE2EE7B47E00A5FC08 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Configuration.swift */; };
+		EAED99FF2EE7B47E00A5FC08 /* ConsoleLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* ConsoleLogger.swift */; };
+		EAED9A002EE7B47E00A5FC08 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* Constants.swift */; };
+		EAED9A012EE7B47E00A5FC08 /* ObjectFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE4C5F92E5F769D00FCD6E4 /* ObjectFilter.swift */; };
+		EAED9A022EE7B47E00A5FC08 /* BaseEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* BaseEvent.swift */; };
+		EAED9A032EE7B47E00A5FC08 /* EventOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* EventOptions.swift */; };
+		EAED9A042EE7B47E00A5FC08 /* GroupIdentifyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* GroupIdentifyEvent.swift */; };
+		EAED9A052EE7B47E00A5FC08 /* Identify.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* Identify.swift */; };
+		EAED9A062EE7B47E00A5FC08 /* IdentifyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* IdentifyEvent.swift */; };
+		EAED9A072EE7B47E00A5FC08 /* Revenue.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* Revenue.swift */; };
+		EAED9A082EE7B47E00A5FC08 /* RevenueEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* RevenueEvent.swift */; };
+		EAED9A092EE7B47E00A5FC08 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
+		EAED9A0A2EE7B47E00A5FC08 /* AmplitudeDestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* AmplitudeDestinationPlugin.swift */; };
+		EAED9A0B2EE7B47E00A5FC08 /* ContextPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ContextPlugin.swift */; };
+		EAED9A0C2EE7B47E00A5FC08 /* DestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* DestinationPlugin.swift */; };
+		EAED9A0D2EE7B47E00A5FC08 /* IdentityEventSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* IdentityEventSender.swift */; };
+		EAED9A0E2EE7B47E00A5FC08 /* MacOSLifecycleMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* MacOSLifecycleMonitor.swift */; };
+		EAED9A0F2EE7B47E00A5FC08 /* AppUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* AppUtil.swift */; };
+		EAED9A102EE7B47E00A5FC08 /* VendorSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* VendorSystem.swift */; };
+		EAED9A112EE7B47E00A5FC08 /* IOSLifecycleMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* IOSLifecycleMonitor.swift */; };
+		EAED9A122EE7B47E00A5FC08 /* WatchOSLifecycleMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* WatchOSLifecycleMonitor.swift */; };
+		EAED9A132EE7B47E00A5FC08 /* ObjCNetworkConnectivityCheckerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CCC6CC2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift */; };
+		EAED9A142EE7B47E00A5FC08 /* InMemoryStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* InMemoryStorage.swift */; };
+		EAED9A152EE7B47E00A5FC08 /* DispatchQueueHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E281B902B9BCC14009D913B /* DispatchQueueHolder.swift */; };
+		EAED9A162EE7B47E00A5FC08 /* DefaultEventUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60539692BB767390027FC24 /* DefaultEventUtils.swift */; };
+		EAED9A172EE7B47E00A5FC08 /* PersistentStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* PersistentStorage.swift */; };
+		EAED9A182EE7B47E00A5FC08 /* NetworkSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */; };
+		EAED9A192EE7B47E00A5FC08 /* IdentifyInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9BEA4A299FB43B00BC0F7C /* IdentifyInterceptor.swift */; };
+		EAED9A1A2EE7B47E00A5FC08 /* LegacyDatabaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0639F52A4DD491000F1CEE /* LegacyDatabaseStorage.swift */; };
+		EAED9A1B2EE7B47E00A5FC08 /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_40 /* Timeline.swift */; };
+		EAED9A1C2EE7B47E00A5FC08 /* TrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_41 /* TrackingOptions.swift */; };
+		EAED9A1D2EE7B47E00A5FC08 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* Types.swift */; };
+		EAED9A1E2EE7B47E00A5FC08 /* FrustrationIgnoreExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5502E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift */; };
+		EAED9A1F2EE7B47E00A5FC08 /* Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_44 /* Atomic.swift */; };
+		EAED9A202EE7B47E00A5FC08 /* ObjCInteractionsOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5572E0F1C1000E6E61A /* ObjCInteractionsOptions.swift */; };
+		EAED9A212EE7B47E00A5FC08 /* MethodSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */; };
+		EAED9A222EE7B47E00A5FC08 /* InteractionsOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28FDA32DED997900848BBB /* InteractionsOptions.swift */; };
+		EAED9A232EE7B47E00A5FC08 /* CodableExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_45 /* CodableExtension.swift */; };
+		EAED9A242EE7B47E00A5FC08 /* EventPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_46 /* EventPipeline.swift */; };
+		EAED9A252EE7B47E00A5FC08 /* UIKitElementInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */; };
+		EAED9A262EE7B47E00A5FC08 /* HttpClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_47 /* HttpClient.swift */; };
+		EAED9A272EE7B47E00A5FC08 /* OutputFileStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_48 /* OutputFileStream.swift */; };
+		EAED9A282EE7B47E00A5FC08 /* PersistentStorageResponseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* PersistentStorageResponseHandler.swift */; };
+		EAED9A292EE7B47E00A5FC08 /* QueueTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* QueueTimer.swift */; };
+		EAED9A2A2EE7B47E00A5FC08 /* UrlExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_52 /* UrlExtension.swift */; };
+		EAED9A2B2EE7B47E00A5FC08 /* Sessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC2B8B38E04CDB51F0E83 /* Sessions.swift */; };
+		EAED9A2C2EE7B47E00A5FC08 /* Diagonostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E281B8B2B967F19009D913B /* Diagonostics.swift */; };
+		EAED9A2D2EE7B47E00A5FC08 /* StoragePrefixMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECC2335BCF4C2EC3A6206 /* StoragePrefixMigration.swift */; };
+		EAED9A2E2EE7B47E00A5FC08 /* RemnantDataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC19F9FBC98A0D4E5A513 /* RemnantDataMigration.swift */; };
+		EAED9A2F2EE7B47E00A5FC08 /* NetworkRequestEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4C02D91C131003B00F0 /* NetworkRequestEvent.swift */; };
+		EAED9A302EE7B47E00A5FC08 /* BasePlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC448C42C8C0A464FAA15 /* BasePlugins.swift */; };
+		EAED9A312EE7B47E00A5FC08 /* AnalyticsConnectorPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECD39BAA97DD4320C0AA5 /* AnalyticsConnectorPlugin.swift */; };
+		EAED9A322EE7B47E00A5FC08 /* SandboxHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D010435E2B6C59EE00F8173C /* SandboxHelper.swift */; };
+		EAED9A332EE7B47E00A5FC08 /* AnalyticsConnectorIdentityPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC48916EFEF6D5B3EEF9A /* AnalyticsConnectorIdentityPlugin.swift */; };
+		EAED9A342EE7B47E00A5FC08 /* DefaultTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC17A6A0F8112A5DC8CEB /* DefaultTrackingOptions.swift */; };
+		EAED9A352EE7B47E00A5FC08 /* UIKitScreenViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC650EF79B104DC3C9F4C /* UIKitScreenViews.swift */; };
+		EAED9A362EE7B47E00A5FC08 /* ElementInteractionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */; };
+		EAED9A372EE7B47E00A5FC08 /* ObjCAutocaptureOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC422C58976800EA8667 /* ObjCAutocaptureOptions.swift */; };
+		EAED9A382EE7B47E00A5FC08 /* ScreenViewedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECB455E34133AB256D720 /* ScreenViewedEvent.swift */; };
+		EAED9A392EE7B47E00A5FC08 /* DeepLinkOpenedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECC405793463C10F52EF2 /* DeepLinkOpenedEvent.swift */; };
+		EAED9A3A2EE7B47E00A5FC08 /* NetworkTrackingPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */; };
+		EAED9A3B2EE7B47E00A5FC08 /* ObjCNetworkTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */; };
+		EAED9A3C2EE7B47E00A5FC08 /* ObjCConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECEC5AAE15FD05E76359A /* ObjCConfiguration.swift */; };
+		EAED9A3D2EE7B47E00A5FC08 /* ObjCPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECB1FA2AFF022A19104EE /* ObjCPlan.swift */; };
+		EAED9A3E2EE7B47E00A5FC08 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E654D672D97454900BCAA85 /* Identity.swift */; };
+		EAED9A3F2EE7B47E00A5FC08 /* ObjCIngestionMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC500EBDA8B813056E2DB /* ObjCIngestionMetadata.swift */; };
+		EAED9A402EE7B47E00A5FC08 /* ObjCAmplitude.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC1576C95A2EB2FEF00A8 /* ObjCAmplitude.swift */; };
+		EAED9A412EE7B47E00A5FC08 /* ObjCEventOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECE07F682FAAE47F77B24 /* ObjCEventOptions.swift */; };
+		EAED9A422EE7B47E00A5FC08 /* ObjCBaseEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECCFD935A0C5A6FE85E87 /* ObjCBaseEvent.swift */; };
+		EAED9A432EE7B47E00A5FC08 /* ObjCTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC48D9C242C1A39AABCC4 /* ObjCTrackingOptions.swift */; };
+		EAED9A442EE7B47E00A5FC08 /* ObjCIdentify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC5A50E197C9C5067C19E /* ObjCIdentify.swift */; };
+		EAED9A452EE7B47E00A5FC08 /* ObjCRevenue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECB730131FFFBE11EF9FF /* ObjCRevenue.swift */; };
+		EAED9A462EE7B47E00A5FC08 /* ObjCPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC1160D95DC3F0E48DDF7 /* ObjCPlugin.swift */; };
+		EAED9A472EE7B47E00A5FC08 /* ObjCProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC18449A3E12FCADAD756 /* ObjCProperties.swift */; };
+		EAED9A482EE7B47E00A5FC08 /* ObjCLoggerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECD4B7ED7CBCD6955D097 /* ObjCLoggerProvider.swift */; };
+		EAED9A492EE7B47E00A5FC08 /* ObjCDefaultTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC44D23EBD92D7892628E /* ObjCDefaultTrackingOptions.swift */; };
+		EAED9A4A2EE7B47E00A5FC08 /* ObjCScreenViewedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDEC7D924907683D0A14CA6 /* ObjCScreenViewedEvent.swift */; };
+		EAED9A4B2EE7B47E00A5FC08 /* AutocaptureOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC442C58978900EA8667 /* AutocaptureOptions.swift */; };
+		EAED9A4C2EE7B47E00A5FC08 /* ObjCDeepLinkOpenedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECD6CF59CA94D5D0256CD /* ObjCDeepLinkOpenedEvent.swift */; };
+		EAED9A4D2EE7B47E00A5FC08 /* NetworkConnectivityCheckerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6EDB4CF2B643C8400454B90 /* NetworkConnectivityCheckerPlugin.swift */; };
+		EAED9A4E2EE7B47E00A5FC08 /* ObjCStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDECF8CF745F7339B65D6DB /* ObjCStorage.swift */; };
+		EAED9A502EE7B47E00A5FC08 /* AnalyticsConnectorFramework in Frameworks */ = {isa = PBXBuildFile; productRef = EAED99F72EE7B47E00A5FC08 /* AnalyticsConnectorFramework */; };
+		EAED9A542EE7B47E00A5FC08 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */; };
 		EAF020772DBAE9D1003D22A2 /* ObjCNetworkTrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */; };
 		EAF7B54B2E09446F00E6E61A /* FrustrationInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */; };
 		EAF7B5512E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5502E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift */; };
@@ -219,6 +306,7 @@
 		EAE4C5FB2E5FA0C100FCD6E4 /* ObjectFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectFilterTests.swift; sourceTree = "<group>"; };
 		EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeURLProtocol.swift; sourceTree = "<group>"; };
 		EAE989282DA831F200835345 /* NetworkTrackingPluginTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrackingPluginTest.swift; sourceTree = "<group>"; };
+		EAED9A5B2EE7B47E00A5FC08 /* AmplitudeSwiftNoUIKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AmplitudeSwiftNoUIKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjCNetworkTrackingOptions.swift; sourceTree = "<group>"; };
 		EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrustrationInteractions.swift; sourceTree = "<group>"; };
 		EAF7B5502E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrustrationIgnoreExtensions.swift; sourceTree = "<group>"; };
@@ -285,11 +373,20 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		EAED9A4F2EE7B47E00A5FC08 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+				EA2FD8882EE8A0EB002AB27E /* AmplitudeCoreNoUIKitFramework in Frameworks */,
+				EAED9A502EE7B47E00A5FC08 /* AnalyticsConnectorFramework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		OBJ_125 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				4E65A53A2DA88C98004ED163 /* AmplitudeCoreFramework in Frameworks */,
+				EA2FD8862EE8A0E4002AB27E /* AmplitudeCoreFramework in Frameworks */,
 				4EB530752CD2E46A00E961F4 /* AnalyticsConnectorFramework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -603,6 +700,7 @@
 			children = (
 				"amplitude-swift::Amplitude-Swift::Product" /* AmplitudeSwift.framework */,
 				"amplitude-swift::Amplitude-SwiftTests::Product" /* Amplitude-SwiftTests.xctest */,
+				EAED9A5B2EE7B47E00A5FC08 /* AmplitudeSwiftNoUIKit.framework */,
 			);
 			name = Products;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -610,6 +708,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		EAED99F62EE7B47E00A5FC08 /* Amplitude-Swift-NoUIKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EAED9A562EE7B47E00A5FC08 /* Build configuration list for PBXNativeTarget "Amplitude-Swift-NoUIKit" */;
+			buildPhases = (
+				EAED99FA2EE7B47E00A5FC08 /* Sources */,
+				EAED9A4F2EE7B47E00A5FC08 /* Frameworks */,
+				EAED9A522EE7B47E00A5FC08 /* ShellScript */,
+				EAED9A532EE7B47E00A5FC08 /* Resources */,
+				EAED9A552EE7B47E00A5FC08 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Amplitude-Swift-NoUIKit";
+			packageProductDependencies = (
+				EAED99F72EE7B47E00A5FC08 /* AnalyticsConnectorFramework */,
+				EA2FD8872EE8A0EB002AB27E /* AmplitudeCoreNoUIKitFramework */,
+			);
+			productName = Amplitude_Swift;
+			productReference = EAED9A5B2EE7B47E00A5FC08 /* AmplitudeSwiftNoUIKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		"amplitude-swift::Amplitude-Swift" /* Amplitude-Swift */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = OBJ_84 /* Build configuration list for PBXNativeTarget "Amplitude-Swift" */;
@@ -618,7 +739,6 @@
 				OBJ_125 /* Frameworks */,
 				3E281B8F2B98EC92009D913B /* ShellScript */,
 				4E3871612BB34DB1002890AB /* Resources */,
-				4EA4AEBE2CC1A0CD008741ED /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -627,7 +747,7 @@
 			name = "Amplitude-Swift";
 			packageProductDependencies = (
 				4EB530742CD2E46A00E961F4 /* AnalyticsConnectorFramework */,
-				4E65A5392DA88C98004ED163 /* AmplitudeCoreFramework */,
+				EA2FD8852EE8A0E4002AB27E /* AmplitudeCoreFramework */,
 			);
 			productName = Amplitude_Swift;
 			productReference = "amplitude-swift::Amplitude-Swift::Product" /* AmplitudeSwift.framework */;
@@ -678,6 +798,7 @@
 			targets = (
 				"amplitude-swift::Amplitude-Swift" /* Amplitude-Swift */,
 				"amplitude-swift::Amplitude-SwiftTests" /* Amplitude-SwiftTests */,
+				EAED99F62EE7B47E00A5FC08 /* Amplitude-Swift-NoUIKit */,
 			);
 		};
 /* End PBXProject section */
@@ -697,6 +818,14 @@
 			files = (
 				BA994B9D2A4F4FCB00D0913F /* legacy_v4.sqlite in Resources */,
 				BA0359CA2A51585D007C383B /* legacy_v3.sqlite in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EAED9A532EE7B47E00A5FC08 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EAED9A542EE7B47E00A5FC08 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -721,7 +850,7 @@
 			shellPath = /bin/sh;
 			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint Sources\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
-		4EA4AEBE2CC1A0CD008741ED /* ShellScript */ = {
+		EAED9A522EE7B47E00A5FC08 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -737,11 +866,120 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "SHOULD_LINK_UIKIT=$(echo \"$TARGET_NAME\" | grep -v UIKitDisabled)\nHAS_UIKIT=$(otool -L \"$TARGET_BUILD_DIR/$EXECUTABLE_PATH\" | tail -n +3 | grep UIKit)\n\nif [ ! \"$SHOULD_LINK_UIKIT\" ] && [ -n \"$HAS_UIKIT\" ]; then\n  echo \"error: AmplitudeSwift was built with AMPLITUDE_DISABLE_UIKIT, but UIKit is still linked. Check any added UIKit imports and surround with conditional compilation flags.\"\n  exit 1\nfi\n";
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint Sources\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+		EAED9A552EE7B47E00A5FC08 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "HAS_UIKIT=$(otool -L \"$TARGET_BUILD_DIR/$EXECUTABLE_PATH\" | tail -n +3 | grep UIKit)\n\nif [ -n \"$HAS_UIKIT\" ]; then\n  echo \"error: AmplitudeSwift was built with AMPLITUDE_DISABLE_UIKIT, but UIKit is still linked. Check any added UIKit imports and surround with conditional compilation flags.\"\n  exit 1\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		EAED99FA2EE7B47E00A5FC08 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				EAED99FB2EE7B47E00A5FC08 /* FrustrationInteractions.swift in Sources */,
+				EAED99FC2EE7B47E00A5FC08 /* MiscellaneousExtension.swift in Sources */,
+				EAED99FD2EE7B47E00A5FC08 /* Amplitude.swift in Sources */,
+				EAED99FE2EE7B47E00A5FC08 /* Configuration.swift in Sources */,
+				EAED99FF2EE7B47E00A5FC08 /* ConsoleLogger.swift in Sources */,
+				EAED9A002EE7B47E00A5FC08 /* Constants.swift in Sources */,
+				EAED9A012EE7B47E00A5FC08 /* ObjectFilter.swift in Sources */,
+				EAED9A022EE7B47E00A5FC08 /* BaseEvent.swift in Sources */,
+				EAED9A032EE7B47E00A5FC08 /* EventOptions.swift in Sources */,
+				EAED9A042EE7B47E00A5FC08 /* GroupIdentifyEvent.swift in Sources */,
+				EAED9A052EE7B47E00A5FC08 /* Identify.swift in Sources */,
+				EAED9A062EE7B47E00A5FC08 /* IdentifyEvent.swift in Sources */,
+				EAED9A072EE7B47E00A5FC08 /* Revenue.swift in Sources */,
+				EAED9A082EE7B47E00A5FC08 /* RevenueEvent.swift in Sources */,
+				EAED9A092EE7B47E00A5FC08 /* Mediator.swift in Sources */,
+				EAED9A0A2EE7B47E00A5FC08 /* AmplitudeDestinationPlugin.swift in Sources */,
+				EAED9A0B2EE7B47E00A5FC08 /* ContextPlugin.swift in Sources */,
+				EAED9A0C2EE7B47E00A5FC08 /* DestinationPlugin.swift in Sources */,
+				EAED9A0D2EE7B47E00A5FC08 /* IdentityEventSender.swift in Sources */,
+				EAED9A0E2EE7B47E00A5FC08 /* MacOSLifecycleMonitor.swift in Sources */,
+				EAED9A0F2EE7B47E00A5FC08 /* AppUtil.swift in Sources */,
+				EAED9A102EE7B47E00A5FC08 /* VendorSystem.swift in Sources */,
+				EAED9A112EE7B47E00A5FC08 /* IOSLifecycleMonitor.swift in Sources */,
+				EAED9A122EE7B47E00A5FC08 /* WatchOSLifecycleMonitor.swift in Sources */,
+				EAED9A132EE7B47E00A5FC08 /* ObjCNetworkConnectivityCheckerPlugin.swift in Sources */,
+				EAED9A142EE7B47E00A5FC08 /* InMemoryStorage.swift in Sources */,
+				EAED9A152EE7B47E00A5FC08 /* DispatchQueueHolder.swift in Sources */,
+				EAED9A162EE7B47E00A5FC08 /* DefaultEventUtils.swift in Sources */,
+				EAED9A172EE7B47E00A5FC08 /* PersistentStorage.swift in Sources */,
+				EAED9A182EE7B47E00A5FC08 /* NetworkSwizzler.swift in Sources */,
+				EAED9A192EE7B47E00A5FC08 /* IdentifyInterceptor.swift in Sources */,
+				EAED9A1A2EE7B47E00A5FC08 /* LegacyDatabaseStorage.swift in Sources */,
+				EAED9A1B2EE7B47E00A5FC08 /* Timeline.swift in Sources */,
+				EAED9A1C2EE7B47E00A5FC08 /* TrackingOptions.swift in Sources */,
+				EAED9A1D2EE7B47E00A5FC08 /* Types.swift in Sources */,
+				EAED9A1E2EE7B47E00A5FC08 /* FrustrationIgnoreExtensions.swift in Sources */,
+				EAED9A1F2EE7B47E00A5FC08 /* Atomic.swift in Sources */,
+				EAED9A202EE7B47E00A5FC08 /* ObjCInteractionsOptions.swift in Sources */,
+				EAED9A212EE7B47E00A5FC08 /* MethodSwizzler.swift in Sources */,
+				EAED9A222EE7B47E00A5FC08 /* InteractionsOptions.swift in Sources */,
+				EAED9A232EE7B47E00A5FC08 /* CodableExtension.swift in Sources */,
+				EAED9A242EE7B47E00A5FC08 /* EventPipeline.swift in Sources */,
+				EAED9A252EE7B47E00A5FC08 /* UIKitElementInteractions.swift in Sources */,
+				EAED9A262EE7B47E00A5FC08 /* HttpClient.swift in Sources */,
+				EAED9A272EE7B47E00A5FC08 /* OutputFileStream.swift in Sources */,
+				EAED9A282EE7B47E00A5FC08 /* PersistentStorageResponseHandler.swift in Sources */,
+				EAED9A292EE7B47E00A5FC08 /* QueueTimer.swift in Sources */,
+				EAED9A2A2EE7B47E00A5FC08 /* UrlExtension.swift in Sources */,
+				EAED9A2B2EE7B47E00A5FC08 /* Sessions.swift in Sources */,
+				EAED9A2C2EE7B47E00A5FC08 /* Diagonostics.swift in Sources */,
+				EAED9A2D2EE7B47E00A5FC08 /* StoragePrefixMigration.swift in Sources */,
+				EAED9A2E2EE7B47E00A5FC08 /* RemnantDataMigration.swift in Sources */,
+				EAED9A2F2EE7B47E00A5FC08 /* NetworkRequestEvent.swift in Sources */,
+				EAED9A302EE7B47E00A5FC08 /* BasePlugins.swift in Sources */,
+				EAED9A312EE7B47E00A5FC08 /* AnalyticsConnectorPlugin.swift in Sources */,
+				EAED9A322EE7B47E00A5FC08 /* SandboxHelper.swift in Sources */,
+				EAED9A332EE7B47E00A5FC08 /* AnalyticsConnectorIdentityPlugin.swift in Sources */,
+				EAED9A342EE7B47E00A5FC08 /* DefaultTrackingOptions.swift in Sources */,
+				EAED9A352EE7B47E00A5FC08 /* UIKitScreenViews.swift in Sources */,
+				EAED9A362EE7B47E00A5FC08 /* ElementInteractionEvent.swift in Sources */,
+				EAED9A372EE7B47E00A5FC08 /* ObjCAutocaptureOptions.swift in Sources */,
+				EAED9A382EE7B47E00A5FC08 /* ScreenViewedEvent.swift in Sources */,
+				EAED9A392EE7B47E00A5FC08 /* DeepLinkOpenedEvent.swift in Sources */,
+				EAED9A3A2EE7B47E00A5FC08 /* NetworkTrackingPlugin.swift in Sources */,
+				EAED9A3B2EE7B47E00A5FC08 /* ObjCNetworkTrackingOptions.swift in Sources */,
+				EAED9A3C2EE7B47E00A5FC08 /* ObjCConfiguration.swift in Sources */,
+				EAED9A3D2EE7B47E00A5FC08 /* ObjCPlan.swift in Sources */,
+				EAED9A3E2EE7B47E00A5FC08 /* Identity.swift in Sources */,
+				EAED9A3F2EE7B47E00A5FC08 /* ObjCIngestionMetadata.swift in Sources */,
+				EAED9A402EE7B47E00A5FC08 /* ObjCAmplitude.swift in Sources */,
+				EAED9A412EE7B47E00A5FC08 /* ObjCEventOptions.swift in Sources */,
+				EAED9A422EE7B47E00A5FC08 /* ObjCBaseEvent.swift in Sources */,
+				EAED9A432EE7B47E00A5FC08 /* ObjCTrackingOptions.swift in Sources */,
+				EAED9A442EE7B47E00A5FC08 /* ObjCIdentify.swift in Sources */,
+				EAED9A452EE7B47E00A5FC08 /* ObjCRevenue.swift in Sources */,
+				EAED9A462EE7B47E00A5FC08 /* ObjCPlugin.swift in Sources */,
+				EAED9A472EE7B47E00A5FC08 /* ObjCProperties.swift in Sources */,
+				EAED9A482EE7B47E00A5FC08 /* ObjCLoggerProvider.swift in Sources */,
+				EAED9A492EE7B47E00A5FC08 /* ObjCDefaultTrackingOptions.swift in Sources */,
+				EAED9A4A2EE7B47E00A5FC08 /* ObjCScreenViewedEvent.swift in Sources */,
+				EAED9A4B2EE7B47E00A5FC08 /* AutocaptureOptions.swift in Sources */,
+				EAED9A4C2EE7B47E00A5FC08 /* ObjCDeepLinkOpenedEvent.swift in Sources */,
+				EAED9A4D2EE7B47E00A5FC08 /* NetworkConnectivityCheckerPlugin.swift in Sources */,
+				EAED9A4E2EE7B47E00A5FC08 /* ObjCStorage.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		OBJ_141 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
@@ -889,28 +1127,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		4EA4AEB42CC189DC008741ED /* ReleaseDisableUIKit */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_ARC = YES;
-				COMBINE_HIDPI_IMAGES = YES;
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_OPTIMIZATION_LEVEL = s;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				OTHER_SWIFT_FLAGS = "$(inherited) -DXcode";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = "$(AVAILABLE_PLATFORMS)";
-				SUPPORTS_MACCATALYST = YES;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				USE_HEADERMAP = NO;
-			};
-			name = ReleaseDisableUIKit;
-		};
-		4EA4AEB52CC189DC008741ED /* ReleaseDisableUIKit */ = {
+		EAED9A572EE7B47E00A5FC08 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
@@ -933,82 +1150,22 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "Amplitude-Swift";
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)NoUIKit";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)NoUIKit";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx watchos watchsimulator xros xrsimulator";
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) AMPLITUDE_DISABLE_UIKIT";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3,4,6,7";
-				TARGET_NAME = AmplitudeSwift;
+				TARGET_NAME = AmplitudeSwiftNoUIKit;
 				TVOS_DEPLOYMENT_TARGET = 13.0;
 				WATCHOS_DEPLOYMENT_TARGET = 7.0;
 				XROS_DEPLOYMENT_TARGET = 1.3;
 			};
-			name = ReleaseDisableUIKit;
+			name = Debug;
 		};
-		4EA4AEB82CC189DC008741ED /* ReleaseDisableUIKit */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
-				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = "Amplitude-Swift.xcodeproj/Amplitude_SwiftTests_Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@loader_path/../Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = "Amplitude-SwiftTests";
-				TVOS_DEPLOYMENT_TARGET = 14.0;
-				WATCHOS_DEPLOYMENT_TARGET = 7.0;
-			};
-			name = ReleaseDisableUIKit;
-		};
-		4EA4AEB92CC189EF008741ED /* DebugDisableUIKiit */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_ARC = YES;
-				COMBINE_HIDPI_IMAGES = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				ENABLE_NS_ASSERTIONS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					"DEBUG=1",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				ONLY_ACTIVE_ARCH = YES;
-				OTHER_SWIFT_FLAGS = "$(inherited) -DXcode";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = "$(AVAILABLE_PLATFORMS)";
-				SUPPORTS_MACCATALYST = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				USE_HEADERMAP = NO;
-			};
-			name = DebugDisableUIKiit;
-		};
-		4EA4AEBA2CC189EF008741ED /* DebugDisableUIKiit */ = {
+		EAED9A592EE7B47E00A5FC08 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
@@ -1031,58 +1188,20 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "Amplitude-Swift";
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)NoUIKit";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)NoUIKit";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx watchos watchsimulator xros xrsimulator";
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) AMPLITUDE_DISABLE_UIKIT";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3,4,6,7";
-				TARGET_NAME = AmplitudeSwift;
+				TARGET_NAME = AmplitudeSwiftNoUIKit;
 				TVOS_DEPLOYMENT_TARGET = 13.0;
 				WATCHOS_DEPLOYMENT_TARGET = 7.0;
 				XROS_DEPLOYMENT_TARGET = 1.3;
 			};
-			name = DebugDisableUIKiit;
-		};
-		4EA4AEBD2CC189EF008741ED /* DebugDisableUIKiit */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
-				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					"DEBUG=1",
-				);
-				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = "Amplitude-Swift.xcodeproj/Amplitude_SwiftTests_Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@loader_path/../Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = "Amplitude-SwiftTests";
-				TVOS_DEPLOYMENT_TARGET = 14.0;
-				WATCHOS_DEPLOYMENT_TARGET = 7.0;
-			};
-			name = DebugDisableUIKiit;
+			name = Release;
 		};
 		OBJ_139 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1219,11 +1338,8 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "Amplitude-Swift";
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx watchos watchsimulator xros xrsimulator";
 				SUPPORTS_MACCATALYST = YES;
@@ -1259,11 +1375,8 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "Amplitude-Swift";
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx watchos watchsimulator xros xrsimulator";
 				SUPPORTS_MACCATALYST = YES;
@@ -1280,13 +1393,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		EAED9A562EE7B47E00A5FC08 /* Build configuration list for PBXNativeTarget "Amplitude-Swift-NoUIKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EAED9A572EE7B47E00A5FC08 /* Debug */,
+				EAED9A592EE7B47E00A5FC08 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		OBJ_138 /* Build configuration list for PBXNativeTarget "Amplitude-SwiftTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				OBJ_139 /* Debug */,
-				4EA4AEBD2CC189EF008741ED /* DebugDisableUIKiit */,
 				OBJ_140 /* Release */,
-				4EA4AEB82CC189DC008741ED /* ReleaseDisableUIKit */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1295,9 +1415,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				OBJ_3 /* Debug */,
-				4EA4AEB92CC189EF008741ED /* DebugDisableUIKiit */,
 				OBJ_4 /* Release */,
-				4EA4AEB42CC189DC008741ED /* ReleaseDisableUIKit */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1306,9 +1424,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				OBJ_85 /* Debug */,
-				4EA4AEBA2CC189EF008741ED /* DebugDisableUIKiit */,
 				OBJ_86 /* Release */,
-				4EA4AEB52CC189DC008741ED /* ReleaseDisableUIKit */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1321,7 +1437,7 @@
 			repositoryURL = "https://github.com/amplitude/AmplitudeCore-Swift";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.2.4;
+				minimumVersion = 1.3.1;
 			};
 		};
 		4EB530762CD2EB9700E961F4 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */ = {
@@ -1335,12 +1451,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		4E65A5392DA88C98004ED163 /* AmplitudeCoreFramework */ = {
+		4EB530742CD2E46A00E961F4 /* AnalyticsConnectorFramework */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AnalyticsConnectorFramework;
+		};
+		EA2FD8852EE8A0E4002AB27E /* AmplitudeCoreFramework */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4E65A5382DA88C98004ED163 /* XCRemoteSwiftPackageReference "AmplitudeCore-Swift" */;
 			productName = AmplitudeCoreFramework;
 		};
-		4EB530742CD2E46A00E961F4 /* AnalyticsConnectorFramework */ = {
+		EA2FD8872EE8A0EB002AB27E /* AmplitudeCoreNoUIKitFramework */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4E65A5382DA88C98004ED163 /* XCRemoteSwiftPackageReference "AmplitudeCore-Swift" */;
+			productName = AmplitudeCoreNoUIKitFramework;
+		};
+		EAED99F72EE7B47E00A5FC08 /* AnalyticsConnectorFramework */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AnalyticsConnectorFramework;
 		};

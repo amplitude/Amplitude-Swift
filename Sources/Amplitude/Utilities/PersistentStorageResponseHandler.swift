@@ -7,8 +7,11 @@
 
 import Foundation
 
-@_spi(Internal)
-import AmplitudeCore
+#if AMPLITUDE_DISABLE_UIKIT
+@_spi(Internal) import AmplitudeCoreNoUIKit
+#else
+@_spi(Internal) import AmplitudeCore
+#endif
 
 class PersistentStorageResponseHandler: ResponseHandler {
     var configuration: Configuration

@@ -341,8 +341,8 @@ actor FakeDiagnosticsClient: CoreDiagnostics {
     init() { }
 
     func setTag(name: String, value: String) { }
-    
-    func setTags(_ tags: [String : String]) { }
+
+    func setTags(_ tags: [String: String]) { }
 
     func increment(name: String) { }
 
@@ -350,14 +350,7 @@ actor FakeDiagnosticsClient: CoreDiagnostics {
 
     func recordHistogram(name: String, value: Double) { }
 
-    func recordEvent(name: String, properties: [String : any Sendable]?) { }
+    func recordEvent(name: String, properties: [String: any Sendable]?) { }
 
-    func observeIsRunning() -> (stream: AsyncStream<Bool>, id: UUID) { abort() }
-
-    func stopObservingIsRunning(_ id: UUID) { }
-
-    var isRunning: Bool {
-        return false
-    }
-
+    func flush() async {}
 }

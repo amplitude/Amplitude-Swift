@@ -5,7 +5,11 @@
 //  Created by Chris Leonavicius on 3/28/25.
 //
 
+#if AMPLITUDE_DISABLE_UIKIT
+import AmplitudeCoreNoUIKit
+#else
 import AmplitudeCore
+#endif
 
 public struct Identity: AnalyticsIdentity {
     public var userId: String?
