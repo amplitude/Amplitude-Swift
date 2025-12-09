@@ -60,7 +60,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ])
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey, autocapture: []))
         let sessions = amplitude.sessions
         XCTAssertFalse(sessions.trackSessionEvents)
 
@@ -80,7 +80,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ])
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: [.sessions]))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey, autocapture: [.sessions]))
         let sessions = amplitude.sessions
         XCTAssertTrue(sessions.trackSessionEvents)
 
@@ -102,7 +102,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ])
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey, autocapture: []))
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
         amplitude.apply { plugin in
@@ -133,7 +133,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ])
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: [.screenViews]))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey, autocapture: [.screenViews]))
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
         amplitude.apply { plugin in
@@ -164,7 +164,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ])
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey, autocapture: []))
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
         amplitude.apply { plugin in
@@ -195,7 +195,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ])
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: [.elementInteractions]))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey, autocapture: [.elementInteractions]))
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
         amplitude.apply { plugin in
@@ -238,7 +238,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             rageClick: .init(enabled: false),
             deadClick: .init(enabled: false)
         )
-        let config = Configuration(apiKey: "aaa",
+        let config = Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey,
                                    autocapture: [],
                                    interactionsOptions: interactionsOptions)
         let amplitude = Amplitude(configuration: config)
@@ -282,7 +282,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             rageClick: .init(enabled: true),
             deadClick: .init(enabled: true)
         )
-        let config = Configuration(apiKey: "aaa",
+        let config = Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey,
                                    autocapture: [.frustrationInteractions],
                                    interactionsOptions: interactionsOptions)
         let amplitude = Amplitude(configuration: config)
@@ -331,7 +331,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             rageClick: .init(enabled: true),
             deadClick: .init(enabled: true)
         )
-        let config = Configuration(apiKey: "aaa",
+        let config = Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey,
                                    autocapture: [.frustrationInteractions],
                                    interactionsOptions: interactionsOptions)
         let amplitude = Amplitude(configuration: config)
@@ -372,7 +372,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ])
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey, autocapture: []))
 
         var networkTrackingPlugin: NetworkTrackingPlugin?
         amplitude.apply { plugin in
@@ -405,7 +405,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ])
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: [.networkTracking]))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey, autocapture: [.networkTracking]))
 
         var networkTrackingPlugin: NetworkTrackingPlugin?
         amplitude.apply { plugin in
@@ -465,7 +465,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ])
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey, autocapture: []))
 
         var networkTrackingPlugin: NetworkTrackingPlugin?
         amplitude.apply { plugin in
@@ -543,7 +543,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ])
 
-        let config = Configuration(apiKey: "aaa",
+        let config = Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey,
                                    autocapture: [.networkTracking],
                                    networkTrackingOptions: localOptions)
         let amplitude = Amplitude(configuration: config)
@@ -614,7 +614,7 @@ extension RemoteConfigClient {
                 ]
             ]
         ])
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa"))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: RemoteConfigUrlProtocol.testApiKey))
         XCTWaiter().wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation],
                          timeout: 1)
     }
@@ -630,10 +630,16 @@ extension URLSessionConfiguration {
 
 class RemoteConfigUrlProtocol: URLProtocol {
 
+    static let testApiKey = "remote-config-tests"
     static var nextConfigs: [RemoteConfigClient.RemoteConfig] = []
 
     override class func canInit(with request: URLRequest) -> Bool {
-        return request.url?.absoluteString.hasPrefix("https://sr-client-cfg.") ?? false
+        guard let url = request.url,
+              url.absoluteString.hasPrefix("https://sr-client-cfg.") else {
+            return false
+        }
+        // Only intercept requests with our test API key
+        return url.pathComponents.contains(testApiKey)
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
