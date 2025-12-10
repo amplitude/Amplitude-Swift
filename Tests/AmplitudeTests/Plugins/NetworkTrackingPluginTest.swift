@@ -402,20 +402,32 @@ final class NetworkTrackingPluginTest: XCTestCase {
         let rule3 = plugin.ruleForRequest(URLRequest(url: URL(string: "https://example.com/foo")!))
         XCTAssertNil(rule3)
 
-        FakeURLProtocol.mockResponses = [.init(statusCode: 400), .init(statusCode: 500), .init(statusCode: 500, delay: 0.1)]
+        // Run requests sequentially to ensure deterministic mock response assignment.
+        // Parallel execution causes race conditions where the wrong URL may receive the wrong status code.
 
-        let url = ["https://api.example.com", "https://api.example.com", "https://api2.example.com"]
-        let expectations = (0..<3).map { _ in XCTestExpectation(description: "Network request finished") }
-        taskForRequest(url[0]) { _, _, _ in
-            expectations[0].fulfill()
+        // Request 1: api.example.com with 400 -> should be captured (matches rule for 400-499)
+        FakeURLProtocol.mockResponses = [.init(statusCode: 400)]
+        let expectation1 = XCTestExpectation(description: "Request 1 finished")
+        taskForRequest("https://api.example.com") { _, _, _ in
+            expectation1.fulfill()
         }.resume()
-        taskForRequest(url[1]) { _, _, _ in
-            expectations[1].fulfill()
+        wait(for: [expectation1], timeout: 2)
+
+        // Request 2: api.example.com with 500 -> should NOT be captured (rule only allows 400-499)
+        FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
+        let expectation2 = XCTestExpectation(description: "Request 2 finished")
+        taskForRequest("https://api.example.com") { _, _, _ in
+            expectation2.fulfill()
         }.resume()
-        taskForRequest(url[2]) { _, _, _ in
-            expectations[2].fulfill()
+        wait(for: [expectation2], timeout: 2)
+
+        // Request 3: api2.example.com with 500 -> should be captured (matches wildcard rule for 0,500-599)
+        FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
+        let expectation3 = XCTestExpectation(description: "Request 3 finished")
+        taskForRequest("https://api2.example.com") { _, _, _ in
+            expectation3.fulfill()
         }.resume()
-        wait(for: expectations, timeout: 2)
+        wait(for: [expectation3], timeout: 2)
 
         wait()
         plugin.waitforNetworkTrackingQueue()
@@ -426,10 +438,10 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertTrue(events[0] is NetworkRequestEvent)
         XCTAssertTrue(events[1] is NetworkRequestEvent)
         let event = events[0] as! NetworkRequestEvent
-        XCTAssertEqual(event.eventProperties?[Constants.AMP_NETWORK_URL_PROPERTY] as! String, url[0])
+        XCTAssertEqual(event.eventProperties?[Constants.AMP_NETWORK_URL_PROPERTY] as! String, "https://api.example.com")
         XCTAssertEqual(event.eventProperties?[Constants.AMP_NETWORK_STATUS_CODE_PROPERTY] as! Int, 400)
         let event2 = events[1] as! NetworkRequestEvent
-        XCTAssertEqual(event2.eventProperties?[Constants.AMP_NETWORK_URL_PROPERTY] as! String, url[2])
+        XCTAssertEqual(event2.eventProperties?[Constants.AMP_NETWORK_URL_PROPERTY] as! String, "https://api2.example.com")
         XCTAssertEqual(event2.eventProperties?[Constants.AMP_NETWORK_STATUS_CODE_PROPERTY] as! Int, 500)
     }
 

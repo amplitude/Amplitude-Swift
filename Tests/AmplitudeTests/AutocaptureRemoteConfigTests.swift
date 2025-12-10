@@ -699,6 +699,8 @@ class RemoteConfigUrlProtocol: URLProtocol {
             return
         }
 
+        print("RemoteConfigUrlProtocol: Starting to load \(url)")
+
         let response = HTTPURLResponse(url: url,
                                        statusCode: 200,
                                        httpVersion: nil,
@@ -711,6 +713,8 @@ class RemoteConfigUrlProtocol: URLProtocol {
                 client?.urlProtocol(self, didLoad: data)
             }
             client?.urlProtocolDidFinishLoading(self)
+
+            print("RemoteConfigUrlProtocol: Finished loading \(url): \(config)")
         }
     }
 
