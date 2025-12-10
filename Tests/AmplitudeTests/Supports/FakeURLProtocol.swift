@@ -80,7 +80,7 @@ class FakeURLProtocol: URLProtocol {
 
             self.client?.urlProtocolDidFinishLoading(self)
 
-            print("FakeURLProtocol: Finished loading \(url)")
+            print("FakeURLProtocol: Finished loading \(url), response: \(mockResponse)")
         }
     }
 
