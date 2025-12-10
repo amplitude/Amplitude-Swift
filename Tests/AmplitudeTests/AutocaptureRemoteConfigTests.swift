@@ -620,14 +620,17 @@ extension RemoteConfigClient {
         let expectation = XCTestExpectation(description: "didFetchRemote")
 
         let subscriptionHolder = SubscriptionHolder()
-        subscriptionHolder.subscription = subscribe { [weak self] _, source, _ in
-            guard source == .remote else {
-                return
-            }
+        subscriptionHolder.subscription = subscribe(deliveryMode: .waitForRemote(timeout: 2)) { [weak self] _, source, _ in
             if let subscription = subscriptionHolder.subscription {
                 self?.unsubscribe(subscription)
             }
-            expectation.fulfill()
+            // Add a small delay to ensure other subscription callbacks complete.
+            // Callbacks are processed asynchronously, so even though this subscription
+            // was registered after the plugin's subscription, there's no guarantee
+            // about callback execution order.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                expectation.fulfill()
+            }
         }
 
         return expectation
