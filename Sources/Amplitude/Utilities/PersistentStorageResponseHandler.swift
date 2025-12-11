@@ -187,12 +187,12 @@ extension PersistentStorageResponseHandler {
             diagnosticsClient.increment(name: "analytics.events.sent", size: events.count)
         } else {
             diagnosticsClient.increment(name: "analytics.events.dropped", size: events.count)
-            let properties = [
+            let properties: [String: any Sendable] = [
                 "events": events.map { $0.eventType },
                 "count": events.count,
                 "code": code,
                 "message": message
-            ] as? [String: any Sendable]
+            ]
             diagnosticsClient.recordEvent(name: "analytics.events.dropped", properties: properties)
         }
     }
