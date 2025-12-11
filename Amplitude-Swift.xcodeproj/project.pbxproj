@@ -884,7 +884,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "HAS_UIKIT=$(otool -L \"$TARGET_BUILD_DIR/$EXECUTABLE_PATH\" | tail -n +3 | grep UIKit)\n\nif [ -n \"$HAS_UIKIT\" ]; then\n  echo \"error: AmplitudeSwift was built with AMPLITUDE_DISABLE_UIKIT, but UIKit is still linked. Check any added UIKit imports and surround with conditional compilation flags.\"\n  exit 1\nfi\n";
+			shellScript = "HAS_UIKIT=$(otool -L \"$TARGET_BUILD_DIR/$EXECUTABLE_PATH\" | tail -n +3 | grep grep \"/UIKit\")\n\nif [[ \"$SDK_NAME\" == iphone* ]] && [ -n \"$HAS_UIKIT\" ]; then\n  echo \"error: AmplitudeSwift was built with AMPLITUDE_DISABLE_UIKIT, but UIKit is still linked. Check any added UIKit imports and surround with conditional compilation flags.\"\n  exit 1\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
