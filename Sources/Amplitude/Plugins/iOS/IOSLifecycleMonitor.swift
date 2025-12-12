@@ -13,19 +13,8 @@ import SwiftUI
 
 class IOSLifecycleMonitor: UtilityPlugin {
 
-    struct TrackingState {
-        var screenViews: Bool = false
-        var elementInteractions: Bool = false
-        var frustrationInteractions: Bool = false
-        var rageClick: Bool = false
-        var deadClick: Bool = false
-        var appLifecycles: Bool = false
-    }
-
     private var utils: DefaultEventUtils?
     private var sendApplicationOpenedOnDidBecomeActive = false
-    private var remoteConfigSubscription: Any?
-    @Atomic private(set) var trackingState = TrackingState()
 
     override init() {
         super.init()
@@ -51,12 +40,6 @@ class IOSLifecycleMonitor: UtilityPlugin {
     public override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
         utils = DefaultEventUtils(amplitude: amplitude)
-        trackingState.screenViews = amplitude.configuration.autocapture.contains(.screenViews)
-        trackingState.elementInteractions = amplitude.configuration.autocapture.contains(.elementInteractions)
-        trackingState.frustrationInteractions = amplitude.configuration.autocapture.contains(.frustrationInteractions)
-        trackingState.rageClick = amplitude.configuration.interactionsOptions.rageClick.enabled
-        trackingState.deadClick = amplitude.configuration.interactionsOptions.deadClick.enabled
-        trackingState.appLifecycles = amplitude.configuration.autocapture.contains(.appLifecycles)
 
         // If we are already in the foreground, dispatch installed / opened events now
         // we want to dispatch this from the initiating thread to maintain event ordering.
@@ -72,71 +55,26 @@ class IOSLifecycleMonitor: UtilityPlugin {
 
         updateAutocaptureSetup()
 
-        if amplitude.configuration.enableAutoCaptureRemoteConfig {
-            remoteConfigSubscription = amplitude
-                .amplitudeContext
-                .remoteConfigClient
-                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self, weak amplitude] config, _, _ in
-                    guard let self, let config else {
-                        return
-                    }
-
-                    var newState = trackingState
-
-                    if let pageViews = config["pageViews"] as? Bool {
-                        newState.screenViews = pageViews
-                        amplitude?.updateEnabledAutocapture(.screenViews, enabled: pageViews)
-                    }
-
-                    if let interactions = config["elementInteractions"] as? Bool {
-                        newState.elementInteractions = interactions
-                        amplitude?.updateEnabledAutocapture(.elementInteractions, enabled: interactions)
-                    }
-
-                    if let frustrationInteractions = config["frustrationInteractions"] as? [String: Any] {
-                        if let enabled = frustrationInteractions["enabled"] as? Bool {
-                            newState.frustrationInteractions = enabled
-                            amplitude?.updateEnabledAutocapture(.frustrationInteractions, enabled: enabled)
-                        }
-
-                        if let rageClick = frustrationInteractions["rageClick"] as? [String: Any],
-                           let rageClickEnabled = rageClick["enabled"] as? Bool {
-                            newState.rageClick = rageClickEnabled
-                        }
-
-                        if let deadClick = frustrationInteractions["deadClick"] as? [String: Any],
-                           let deadClickEnabled = deadClick["enabled"] as? Bool {
-                            newState.deadClick = deadClickEnabled
-                        }
-                    }
-
-                    if let appLifecycles = config["appLifecycles"] as? Bool {
-                        newState.appLifecycles = appLifecycles
-                        amplitude?.updateEnabledAutocapture(.appLifecycles, enabled: appLifecycles)
-                    }
-
-                    trackingState = newState
-
-                    updateAutocaptureSetup()
-                }
+        // Listen for autocapture config changes from the manager
+        amplitude.autocaptureManager.onChange { [weak self] _ in
+            self?.updateAutocaptureSetup()
         }
     }
 
     private func updateAutocaptureSetup() {
-        guard let amplitude else {
-            return
-        }
+        guard let amplitude else { return }
+        let manager = amplitude.autocaptureManager
 
-        if trackingState.screenViews {
+        if manager.isEnabled(.screenViews) {
             UIKitScreenViews.register(amplitude)
         } else {
             UIKitScreenViews.unregister(amplitude)
         }
 
         // Register UIKitElementInteractions if either element interactions or frustration interactions is enabled
-        let needsElementInteractions = trackingState.elementInteractions || trackingState.frustrationInteractions
+        let needsElementInteractions = manager.isEnabled(.elementInteractions) || manager.isEnabled(.frustrationInteractions)
         if needsElementInteractions {
-            UIKitElementInteractions.register(amplitude, trackingState: trackingState)
+            UIKitElementInteractions.register(amplitude)
         } else {
             UIKitElementInteractions.unregister(amplitude)
         }
@@ -190,7 +128,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
             return
         }
         amplitude.onExitForeground(timestamp: currentTimestamp)
-        if trackingState.appLifecycles {
+        if amplitude.autocaptureManager.isEnabled(.appLifecycles) {
             amplitude.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
         }
     }
@@ -203,17 +141,8 @@ class IOSLifecycleMonitor: UtilityPlugin {
         super.teardown()
 
         if let amplitude {
-            if let remoteConfigSubscription {
-                amplitude.amplitudeContext.remoteConfigClient.unsubscribe(remoteConfigSubscription)
-            }
             UIKitScreenViews.unregister(amplitude)
             UIKitElementInteractions.unregister(amplitude)
-        }
-    }
-
-    deinit {
-        if let amplitude, let remoteConfigSubscription {
-            amplitude.amplitudeContext.remoteConfigClient.unsubscribe(remoteConfigSubscription)
         }
     }
 }

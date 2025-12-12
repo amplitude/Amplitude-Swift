@@ -6,29 +6,13 @@ public class DefaultEventUtils {
     private static var instanceNamesThatSentAppUpdatedInstalled: Set<String> = []
 
     private weak var amplitude: Amplitude?
-    private var remoteConfigSubscription: Any?
-    @Atomic private var trackAppLifecycles: Bool = false
+
+    private var trackAppLifecycles: Bool {
+        amplitude?.autocaptureManager.isEnabled(.appLifecycles) ?? false
+    }
 
     public init(amplitude: Amplitude) {
         self.amplitude = amplitude
-
-        trackAppLifecycles = amplitude.configuration.autocapture.contains(.appLifecycles)
-
-        if amplitude.configuration.enableAutoCaptureRemoteConfig {
-            remoteConfigSubscription = amplitude
-                .amplitudeContext
-                .remoteConfigClient
-                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self, weak amplitude] config, _, _ in
-                    guard let self, let config else {
-                        return
-                    }
-
-                    if let appLifecycles = config["appLifecycles"] as? Bool {
-                        trackAppLifecycles = appLifecycles
-                        amplitude?.updateEnabledAutocapture(.appLifecycles, enabled: appLifecycles)
-                    }
-                }
-        }
     }
 
     public func trackAppUpdatedInstalledEvent() {
@@ -98,9 +82,4 @@ public class DefaultEventUtils {
         ])
     }
 
-    deinit {
-        if let amplitude, let remoteConfigSubscription {
-            amplitude.amplitudeContext.remoteConfigClient.unsubscribe(remoteConfigSubscription)
-        }
-    }
 }

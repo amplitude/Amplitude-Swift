@@ -42,7 +42,6 @@ class UIKitElementInteractions {
     fileprivate static let amplitudeInstances = NSHashTable<Amplitude>.weakObjects()
     fileprivate static var rageClickDetectors: [ObjectIdentifier: RageClickDetector] = [:]
     fileprivate static var deadClickDetectors: [ObjectIdentifier: DeadClickDetector] = [:]
-    fileprivate static var trackingStates: [ObjectIdentifier: IOSLifecycleMonitor.TrackingState] = [:]
     fileprivate static let lock = NSLock()
 
     private static let addNotificationObservers: Void = {
@@ -55,19 +54,21 @@ class UIKitElementInteractions {
         swizzleMethod(UIGestureRecognizer.self, from: #selector(setter: UIGestureRecognizer.state), to: #selector(UIGestureRecognizer.amp_setState))
     }()
 
-    static func register(_ amplitude: Amplitude, trackingState: IOSLifecycleMonitor.TrackingState) {
+    static func register(_ amplitude: Amplitude) {
+        let manager = amplitude.autocaptureManager
+
         lock.withLock {
             amplitudeInstances.add(amplitude)
             let identifier = ObjectIdentifier(amplitude)
-            trackingStates[identifier] = trackingState
+            let frustrationInteractions = manager.isEnabled(.frustrationInteractions)
 
-            if trackingState.frustrationInteractions, trackingState.rageClick {
+            if frustrationInteractions, manager.rageClickEnabled {
                 rageClickDetectors[identifier] = RageClickDetector(amplitude: amplitude)
             } else if let rageClickDetector = rageClickDetectors.removeValue(forKey: identifier) {
                 rageClickDetector.reset()
             }
 
-            if trackingState.frustrationInteractions, trackingState.deadClick {
+            if frustrationInteractions, manager.deadClickEnabled {
                 deadClickDetectors[identifier] = DeadClickDetector(amplitude: amplitude)
             } else if let deadClickDetector = deadClickDetectors.removeValue(forKey: identifier) {
                 deadClickDetector.reset()
@@ -81,8 +82,6 @@ class UIKitElementInteractions {
         lock.withLock {
             amplitudeInstances.remove(amplitude)
             let identifier = ObjectIdentifier(amplitude)
-
-            trackingStates.removeValue(forKey: identifier)
 
             if let rageClickDetector = rageClickDetectors.removeValue(forKey: identifier) {
                 rageClickDetector.reset()
@@ -100,13 +99,9 @@ class UIKitElementInteractions {
 
         // Track element interaction events only if .elementInteractions is enabled
         lock.withLock {
-            for amplitude in amplitudeInstances.allObjects {
-                let identifier = ObjectIdentifier(amplitude)
-                if let trackingState = trackingStates[identifier],
-                   trackingState.elementInteractions {
-                    let elementInteractionEvent = view.eventData.elementInteractionEvent(for: "didEndEditing")
-                    amplitude.track(event: elementInteractionEvent)
-                }
+            for amplitude in amplitudeInstances.allObjects where amplitude.autocaptureManager.isEnabled(.elementInteractions) {
+                let elementInteractionEvent = view.eventData.elementInteractionEvent(for: "didEndEditing")
+                amplitude.track(event: elementInteractionEvent)
             }
         }
     }
@@ -200,13 +195,9 @@ extension UIApplication {
 
         // Track element interaction events only if .elementInteractions is enabled
         UIKitElementInteractions.lock.withLock {
-            for amplitude in UIKitElementInteractions.amplitudeInstances.allObjects {
-                let identifier = ObjectIdentifier(amplitude)
-                if let trackingState = UIKitElementInteractions.trackingStates[identifier],
-                   trackingState.elementInteractions {
-                    let elementInteractionEvent = control.eventData.elementInteractionEvent(for: actionEvent, from: .actionMethod, withName: NSStringFromSelector(action))
-                    amplitude.track(event: elementInteractionEvent)
-                }
+            for amplitude in UIKitElementInteractions.amplitudeInstances.allObjects where amplitude.autocaptureManager.isEnabled(.elementInteractions) {
+                let elementInteractionEvent = control.eventData.elementInteractionEvent(for: actionEvent, from: .actionMethod, withName: NSStringFromSelector(action))
+                amplitude.track(event: elementInteractionEvent)
             }
         }
 
@@ -289,13 +280,9 @@ extension UIGestureRecognizer {
 
         // Track element interaction events only if .elementInteractions is enabled
         UIKitElementInteractions.lock.withLock {
-            for amplitude in UIKitElementInteractions.amplitudeInstances.allObjects {
-                let identifier = ObjectIdentifier(amplitude)
-                if let trackingState = UIKitElementInteractions.trackingStates[identifier],
-                   trackingState.elementInteractions {
-                    let elementInteractionEvent = view.eventData.elementInteractionEvent(for: gestureAction, from: .gestureRecognizer, withName: descriptiveTypeName)
-                    amplitude.track(event: elementInteractionEvent)
-                }
+            for amplitude in UIKitElementInteractions.amplitudeInstances.allObjects where amplitude.autocaptureManager.isEnabled(.elementInteractions) {
+                let elementInteractionEvent = view.eventData.elementInteractionEvent(for: gestureAction, from: .gestureRecognizer, withName: descriptiveTypeName)
+                amplitude.track(event: elementInteractionEvent)
             }
         }
 

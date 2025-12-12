@@ -66,12 +66,11 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         ], forApiKey: apiKey)
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
-        let sessions = amplitude.sessions
-        XCTAssertFalse(sessions.trackSessionEvents, "Sessions should be off by default")
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.sessions), "Sessions should be off by default")
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertTrue(sessions.trackSessionEvents, "Sessions should be on from remote config")
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.sessions), "Sessions should be on from remote config")
     }
 
     func testSessionsTurnsOffFromRemoteConfig() {
@@ -88,12 +87,11 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         ], forApiKey: apiKey)
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.sessions]))
-        let sessions = amplitude.sessions
-        XCTAssertTrue(sessions.trackSessionEvents, "Sessions should be on by default")
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.sessions), "Sessions should be on by default")
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertFalse(sessions.trackSessionEvents, "Sessions should be off from remote config")
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.sessions), "Sessions should be off from remote config")
     }
 
 #if os(iOS)
@@ -124,11 +122,11 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.screenViews, "Screen views should be off by default")
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.screenViews), "Screen views should be off by default")
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.screenViews, "Screen views should be on from remote config")
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.screenViews), "Screen views should be on from remote config")
     }
 
     func testScreenViewsTurnsOffFromRemoteConfig() {
@@ -157,11 +155,11 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.screenViews, "Screen views should be on by default")
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.screenViews), "Screen views should be on by default")
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.screenViews, "Screen views should be off from remote config")
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.screenViews), "Screen views should be off from remote config")
     }
 
     func testElementInteractionsTurnsOnFromRemoteConfig() {
@@ -190,11 +188,11 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.elementInteractions, "Element interactions should be off by default")
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.elementInteractions), "Element interactions should be off by default")
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.elementInteractions, "Element interactions should be on from remote config")
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.elementInteractions), "Element interactions should be on from remote config")
     }
 
     func testElementInteractionsTurnsOffFromRemoteConfig() {
@@ -223,11 +221,11 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.elementInteractions, "Element interactions should be on by default")
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.elementInteractions), "Element interactions should be on by default")
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.elementInteractions, "Element interactions should be off from remote config")
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.elementInteractions), "Element interactions should be off from remote config")
     }
 
     func testFrustrationInteractionsTurnsOnFromRemoteConfig() {
@@ -272,15 +270,15 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.frustrationInteractions, "Frustration interactions should be off by default")
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.rageClick, "Rage click should be off by default")
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.deadClick, "Dead click should be off by default")
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be off by default")
+        XCTAssertFalse(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be off by default")
+        XCTAssertFalse(amplitude.autocaptureManager.deadClickEnabled, "Dead click should be off by default")
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions, "Frustration interactions should be on from remote config")
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick, "Rage click should be on from remote config")
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.deadClick, "Dead click should be off from remote config")
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be on from remote config")
+        XCTAssertTrue(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be on from remote config")
+        XCTAssertFalse(amplitude.autocaptureManager.deadClickEnabled, "Dead click should be off from remote config")
     }
 
     func testFrustrationInteractionsTurnsOffFromRemoteConfig() {
@@ -319,15 +317,15 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions, "Frustration interactions should be on by default")
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick, "Rage click should be on by default")
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick, "Dead click should be on by default")
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be on by default")
+        XCTAssertTrue(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be on by default")
+        XCTAssertTrue(amplitude.autocaptureManager.deadClickEnabled, "Dead click should be on by default")
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.frustrationInteractions, "Frustration interactions should be off from remote config")
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick, "Rage click should still be on from local config")
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick, "Dead click should still be on from local config")
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be off from remote config")
+        XCTAssertTrue(amplitude.autocaptureManager.rageClickEnabled, "Rage click should still be on from local config")
+        XCTAssertTrue(amplitude.autocaptureManager.deadClickEnabled, "Dead click should still be on from local config")
     }
 
     func testFrustrationInteractionsPartialRemoteConfig() {
@@ -371,15 +369,15 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions, "Frustration interactions should be on by default")
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick, "Rage click should be on by default")
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick, "Dead click should be on by default")
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be on by default")
+        XCTAssertTrue(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be on by default")
+        XCTAssertTrue(amplitude.autocaptureManager.deadClickEnabled, "Dead click should be on by default")
 
         wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions, "Frustration interactions should be on by default")
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.rageClick, "Rage click should be off from remote config")
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick, "Dead click should be on from local config")
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be on by default")
+        XCTAssertFalse(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be off from remote config")
+        XCTAssertTrue(amplitude.autocaptureManager.deadClickEnabled, "Dead click should be on from local config")
     }
 #endif
 #if os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)
