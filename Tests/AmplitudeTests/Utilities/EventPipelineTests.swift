@@ -22,7 +22,8 @@ final class EventPipelineTests: XCTestCase {
         storage = PersistentStorage(
             storagePrefix: "event-pipeline-tests",
             logger: nil,
-            diagonostics: Diagnostics())
+            diagonostics: Diagnostics(),
+            diagnosticsClient: FakeDiagnosticsClient())
         configuration = Configuration(
             apiKey: "testApiKey",
             flushIntervalMillis: Int(Self.FLUSH_INTERVAL_SECONDS * 1000),
@@ -203,12 +204,14 @@ final class EventPipelineTests: XCTestCase {
         ]
 
         pipeline.flush()
-        wait(for: [uploadExpectations[0], uploadExpectations[1]], timeout: 2)
+        // Expected: upload 0 (instant) + upload 1 (1s retry delay)
+        wait(for: [uploadExpectations[0], uploadExpectations[1]], timeout: 5)
 
         XCTAssertEqual(httpClient.uploadCount, 2)
         XCTAssertEqual(pipeline.configuration.offline, false)
 
-        wait(for: [uploadExpectations[2]], timeout: 3)
+        // Expected: upload 2 (2s retry delay)
+        wait(for: [uploadExpectations[2]], timeout: 5)
 
         XCTAssertEqual(httpClient.uploadCount, 3)
         XCTAssertEqual(pipeline.configuration.offline, true)
@@ -218,7 +221,7 @@ final class EventPipelineTests: XCTestCase {
         pipeline.flush {
             flushExpectation.fulfill()
         }
-        wait(for: [uploadExpectations[3], flushExpectation], timeout: 1)
+        wait(for: [uploadExpectations[3], flushExpectation], timeout: 2)
 
         XCTAssertEqual(httpClient.uploadCount, 4)
     }
@@ -255,6 +258,7 @@ final class EventPipelineTests: XCTestCase {
         }
 
         wait(for: uploadExpectations + [flushExpectation], timeout: 1)
+
         XCTAssertEqual(httpClient.uploadCount, 3)
         XCTAssertEqual(pipeline.configuration.offline, false)
     }

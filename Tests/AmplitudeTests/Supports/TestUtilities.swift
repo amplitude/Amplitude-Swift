@@ -4,6 +4,7 @@ import Network
 import XCTest
 
 @testable import AmplitudeSwift
+@_spi(Internal) import AmplitudeCore
 
 class TestEnrichmentPlugin: EnrichmentPlugin {
     let trackCompletion: (() -> Bool)?
@@ -136,6 +137,8 @@ class FakeHttpClient: HttpClient {
     var uploadExpectations: [XCTestExpectation] = []
     var uploadResults: [Result<Int, Error>] = []
 
+    let completionQueue = DispatchQueue(label: "FakeHttpClient.completionQueue")
+
     override func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void)
         -> URLSessionDataTask?
     {
@@ -149,7 +152,7 @@ class FakeHttpClient: HttpClient {
             result = uploadResults.removeFirst()
         }
 
-        DispatchQueue.global().async { [weak self] in
+        completionQueue.async { [weak self] in
             completion(result)
 
             if let self, !self.uploadExpectations.isEmpty {
@@ -333,4 +336,23 @@ class SessionsWithDelayedEventStartProcessing: Sessions {
         }
         return super.processEvent(event: event, inForeground: inForeground)
     }
+}
+
+actor FakeDiagnosticsClient: CoreDiagnostics {
+
+    init() { }
+
+    func setTag(name: String, value: String) { }
+
+    func setTags(_ tags: [String: String]) { }
+
+    func increment(name: String) { }
+
+    func increment(name: String, size: Int) { }
+
+    func recordHistogram(name: String, value: Double) { }
+
+    func recordEvent(name: String, properties: [String: any Sendable]?) { }
+
+    func flush() async {}
 }

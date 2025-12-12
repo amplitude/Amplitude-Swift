@@ -271,6 +271,7 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
         // Update from remote config
         if let enabled = options?["enabled"] as? Bool {
             optOut = !enabled
+            amplitude?.updateEnabledAutocapture(.networkTracking, enabled: enabled)
         }
         if let ignoreHosts = options?["ignoreHosts"] as? [String] {
             updatedOptions.ignoreHosts = ignoreHosts

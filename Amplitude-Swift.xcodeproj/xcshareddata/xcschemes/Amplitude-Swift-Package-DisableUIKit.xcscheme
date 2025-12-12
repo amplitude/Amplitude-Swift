@@ -15,23 +15,23 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "amplitude-swift::Amplitude-Swift"
-               BuildableName = "AmplitudeSwift.framework"
-               BlueprintName = "Amplitude-Swift"
+               BlueprintIdentifier = "EAED99F62EE7B47E00A5FC08"
+               BuildableName = "AmplitudeSwiftNoUIKit.framework"
+               BlueprintName = "Amplitude-Swift-NoUIKit"
                ReferencedContainer = "container:Amplitude-Swift.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
-      buildConfiguration = "DebugDisableUIKiit"
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
       shouldAutocreateTestPlan = "YES">
    </TestAction>
    <LaunchAction
-      buildConfiguration = "DebugDisableUIKiit"
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -42,26 +42,17 @@
       allowLocationSimulation = "YES">
    </LaunchAction>
    <ProfileAction
-      buildConfiguration = "ReleaseDisableUIKit"
+      buildConfiguration = "Release"
       shouldUseLaunchSchemeArgsEnv = "YES"
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "amplitude-swift::Amplitude-Swift"
-            BuildableName = "AmplitudeSwift.framework"
-            BlueprintName = "Amplitude-Swift"
-            ReferencedContainer = "container:Amplitude-Swift.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
-      buildConfiguration = "DebugDisableUIKiit">
+      buildConfiguration = "Debug">
    </AnalyzeAction>
    <ArchiveAction
-      buildConfiguration = "ReleaseDisableUIKit"
+      buildConfiguration = "Release"
       revealArchiveInOrganizer = "YES">
    </ArchiveAction>
 </Scheme>

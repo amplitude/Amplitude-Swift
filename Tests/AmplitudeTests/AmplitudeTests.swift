@@ -18,6 +18,7 @@ final class AmplitudeTests: XCTestCase {
     private var interceptStorageTest: TestPersistentStorage!
     private let logger = ConsoleLogger()
     private let diagonostics = Diagnostics()
+    private let diagnosticsClient = FakeDiagnosticsClient()
 
     override func setUp() {
         super.setUp()
@@ -25,8 +26,8 @@ final class AmplitudeTests: XCTestCase {
 
         configuration = Configuration(apiKey: apiKey)
 
-        storage = FakePersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics)
-        interceptStorage = FakePersistentStorage(storagePrefix: "intercept", logger: self.logger, diagonostics: self.diagonostics)
+        storage = FakePersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        interceptStorage = FakePersistentStorage(storagePrefix: "intercept", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         configurationWithFakeStorage = Configuration(
             apiKey: apiKey,
             storageProvider: storage,
@@ -40,6 +41,7 @@ final class AmplitudeTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
             enableAutoCaptureRemoteConfig: false
         )
     }
@@ -306,8 +308,8 @@ final class AmplitudeTests: XCTestCase {
 
     func testInterceptedIdentifyWithPersistentStorage() {
         let apiKey = "testApiKeyPersist"
-        storageTest = TestPersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics)
-        interceptStorageTest = TestPersistentStorage(storagePrefix: "identify", logger: self.logger, diagonostics: self.diagonostics)
+        storageTest = TestPersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        interceptStorageTest = TestPersistentStorage(storagePrefix: "identify", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         let amplitude = Amplitude(configuration: Configuration(
             apiKey: apiKey,
             storageProvider: storageTest,
@@ -577,8 +579,8 @@ final class AmplitudeTests: XCTestCase {
         )
 
         // Create storages using instance name only
-        let legacyEventStorage = PersistentStorage(storagePrefix: "storage-\(config.getNormalizeInstanceName())", logger: self.logger, diagonostics: self.diagonostics)
-        let legacyIdentityStorage = PersistentStorage(storagePrefix: "identify-\(config.getNormalizeInstanceName())", logger: self.logger, diagonostics: self.diagonostics)
+        let legacyEventStorage = PersistentStorage(storagePrefix: "storage-\(config.getNormalizeInstanceName())", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let legacyIdentityStorage = PersistentStorage(storagePrefix: "identify-\(config.getNormalizeInstanceName())", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
 
         // Init Amplitude using legacy storage
         let legacyStorageAmplitude = FakeAmplitudeWithNoInstNameOnlyMigration(
@@ -661,9 +663,9 @@ final class AmplitudeTests: XCTestCase {
                 enableAutoCaptureRemoteConfig: false
             )
 
-        // Create storages using instance name only
-        let legacyEventStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "storage-\(config.getNormalizeInstanceName())", logger: self.logger, diagonostics: self.diagonostics)
-        let legacyIdentityStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "identify-\(config.getNormalizeInstanceName())", logger: self.logger, diagonostics: self.diagonostics)
+            // Create storages using instance name only
+            let legacyEventStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "storage-\(config.getNormalizeInstanceName())", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+            let legacyIdentityStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "identify-\(config.getNormalizeInstanceName())", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
 
             // Init Amplitude using legacy storage
             let legacyStorageAmplitude = FakeAmplitudeWithNoInstNameOnlyMigration(

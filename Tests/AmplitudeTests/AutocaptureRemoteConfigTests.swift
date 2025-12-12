@@ -13,43 +13,48 @@ import XCTest
 
 class AutocaptureRemoteConfigTests: XCTestCase {
 
-    private static func swizzleUrlSessionConfiguration() {
-        let originalMethod = class_getInstanceMethod(URLSessionConfiguration.self,
-                                         #selector(getter: URLSessionConfiguration.protocolClasses))
-        let swizzledMethod = class_getInstanceMethod(URLSessionConfiguration.self,
-                                         #selector(getter: URLSessionConfiguration.amp_protocolClasses))
+    private static func swizzleEphemeral() {
+        let metaClass: AnyClass = object_getClass(URLSessionConfiguration.self)!
+        let originalSel = #selector(getter: URLSessionConfiguration.ephemeral)
+        let swizzledSel = #selector(URLSessionConfiguration.amp_ephemeral)
 
-        guard let originalMethod, let swizzledMethod else {
-            XCTFail("Unable to swizzle protocolClasses")
+        guard let original = class_getClassMethod(metaClass, originalSel),
+              let swizzled = class_getClassMethod(metaClass, swizzledSel) else {
             return
         }
 
-        method_exchangeImplementations(originalMethod, swizzledMethod)
+        method_exchangeImplementations(original, swizzled)
     }
 
     override class func setUp() {
         super.setUp()
-
-        // Inject url handler for SR client
-        swizzleUrlSessionConfiguration()
-
-    }
-
-    override func setUp() {
-        super.setUp()
-
-        // reset remote config storage
-        RemoteConfigClient.resetStorage()
+        swizzleEphemeral()
     }
 
     override class func tearDown() {
-        super.tearDown()
-
         // Swizzle again to restore original behavior
-        swizzleUrlSessionConfiguration()
+        swizzleEphemeral()
+        super.tearDown()
+    }
+
+    private func uniqueApiKey(_ function: String = #function) -> String {
+        let cleanName = function.replacingOccurrences(of: "()", with: "")
+        return "\(RemoteConfigUrlProtocol.testApiKeyPrefix)\(cleanName)"
+    }
+
+    private func uniqueInstanceName(_ function: String = #function) -> String {
+        let cleanName = function.replacingOccurrences(of: "()", with: "")
+        return "test-instance-\(cleanName)"
+    }
+
+    private func resetStorage(_ function: String = #function) {
+        let instanceName = uniqueInstanceName(function)
+        RemoteConfigClient.resetStorage(instanceName: instanceName)
     }
 
     func testSessionsTurnsOnFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
         RemoteConfigClient.setNextFetchedRemoteConfig([
             "analyticsSDK": [
                 "iosSDK": [
@@ -58,18 +63,20 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
         let sessions = amplitude.sessions
-        XCTAssertFalse(sessions.trackSessionEvents)
+        XCTAssertFalse(sessions.trackSessionEvents, "Sessions should be off by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertTrue(sessions.trackSessionEvents)
+        XCTAssertTrue(sessions.trackSessionEvents, "Sessions should be on from remote config")
     }
 
     func testSessionsTurnsOffFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
         RemoteConfigClient.setNextFetchedRemoteConfig([
             "analyticsSDK": [
                 "iosSDK": [
@@ -78,20 +85,22 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: [.sessions]))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.sessions]))
         let sessions = amplitude.sessions
-        XCTAssertTrue(sessions.trackSessionEvents)
+        XCTAssertTrue(sessions.trackSessionEvents, "Sessions should be on by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertFalse(sessions.trackSessionEvents)
+        XCTAssertFalse(sessions.trackSessionEvents, "Sessions should be off from remote config")
     }
 
 #if os(iOS)
 
     func testScreenViewsTurnsOnFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
         RemoteConfigClient.setNextFetchedRemoteConfig([
             "analyticsSDK": [
                 "iosSDK": [
@@ -100,9 +109,9 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
         amplitude.apply { plugin in
@@ -115,14 +124,16 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.screenViews)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.screenViews, "Screen views should be off by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.screenViews)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.screenViews, "Screen views should be on from remote config")
     }
 
     func testScreenViewsTurnsOffFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
         RemoteConfigClient.setNextFetchedRemoteConfig([
             "analyticsSDK": [
                 "iosSDK": [
@@ -131,9 +142,9 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: [.screenViews]))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.screenViews]))
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
         amplitude.apply { plugin in
@@ -146,14 +157,16 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.screenViews)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.screenViews, "Screen views should be on by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.screenViews)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.screenViews, "Screen views should be off from remote config")
     }
 
     func testElementInteractionsTurnsOnFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
         RemoteConfigClient.setNextFetchedRemoteConfig([
             "analyticsSDK": [
                 "iosSDK": [
@@ -162,9 +175,9 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
         amplitude.apply { plugin in
@@ -177,14 +190,16 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.elementInteractions)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.elementInteractions, "Element interactions should be off by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.elementInteractions)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.elementInteractions, "Element interactions should be on from remote config")
     }
 
     func testElementInteractionsTurnsOffFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
         RemoteConfigClient.setNextFetchedRemoteConfig([
             "analyticsSDK": [
                 "iosSDK": [
@@ -193,9 +208,9 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: [.elementInteractions]))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.elementInteractions]))
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
         amplitude.apply { plugin in
@@ -208,14 +223,16 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.elementInteractions)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.elementInteractions, "Element interactions should be on by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.elementInteractions)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.elementInteractions, "Element interactions should be off from remote config")
     }
 
     func testFrustrationInteractionsTurnsOnFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
         RemoteConfigClient.setNextFetchedRemoteConfig([
             "analyticsSDK": [
                 "iosSDK": [
@@ -232,13 +249,14 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
         let interactionsOptions = InteractionsOptions(
             rageClick: .init(enabled: false),
             deadClick: .init(enabled: false)
         )
-        let config = Configuration(apiKey: "aaa",
+        let config = Configuration(apiKey: apiKey,
+                                   instanceName: uniqueInstanceName(),
                                    autocapture: [],
                                    interactionsOptions: interactionsOptions)
         let amplitude = Amplitude(configuration: config)
@@ -254,18 +272,20 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.frustrationInteractions)
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.rageClick)
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.deadClick)
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.frustrationInteractions, "Frustration interactions should be off by default")
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.rageClick, "Rage click should be off by default")
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.deadClick, "Dead click should be off by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions)
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick)
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.deadClick)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions, "Frustration interactions should be on from remote config")
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick, "Rage click should be on from remote config")
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.deadClick, "Dead click should be off from remote config")
     }
 
     func testFrustrationInteractionsTurnsOffFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
         RemoteConfigClient.setNextFetchedRemoteConfig([
             "analyticsSDK": [
                 "iosSDK": [
@@ -276,13 +296,14 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
         let interactionsOptions = InteractionsOptions(
             rageClick: .init(enabled: true),
             deadClick: .init(enabled: true)
         )
-        let config = Configuration(apiKey: "aaa",
+        let config = Configuration(apiKey: apiKey,
+                                   instanceName: uniqueInstanceName(),
                                    autocapture: [.frustrationInteractions],
                                    interactionsOptions: interactionsOptions)
         let amplitude = Amplitude(configuration: config)
@@ -298,19 +319,21 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions)
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick)
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions, "Frustration interactions should be on by default")
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick, "Rage click should be on by default")
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick, "Dead click should be on by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.frustrationInteractions)
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick) // Local config value still true
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick) // Local config value still true
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.frustrationInteractions, "Frustration interactions should be off from remote config")
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick, "Rage click should still be on from local config")
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick, "Dead click should still be on from local config")
     }
 
     func testFrustrationInteractionsPartialRemoteConfig() {
+        resetStorage()
         // Test that missing values in remote config fall back to local config
+        let apiKey = uniqueApiKey()
         RemoteConfigClient.setNextFetchedRemoteConfig([
             "analyticsSDK": [
                 "iosSDK": [
@@ -325,13 +348,14 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
         let interactionsOptions = InteractionsOptions(
             rageClick: .init(enabled: true),
             deadClick: .init(enabled: true)
         )
-        let config = Configuration(apiKey: "aaa",
+        let config = Configuration(apiKey: apiKey,
+                                   instanceName: uniqueInstanceName(),
                                    autocapture: [.frustrationInteractions],
                                    interactionsOptions: interactionsOptions)
         let amplitude = Amplitude(configuration: config)
@@ -347,19 +371,21 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions)
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick)
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick)
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions, "Frustration interactions should be on by default")
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.rageClick, "Rage click should be on by default")
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick, "Dead click should be on by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions)
-        XCTAssertFalse(iosLifecycleMonitor.trackingState.rageClick) // Overridden by remote config
-        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick) // Falls back to local config
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.frustrationInteractions, "Frustration interactions should be on by default")
+        XCTAssertFalse(iosLifecycleMonitor.trackingState.rageClick, "Rage click should be off from remote config")
+        XCTAssertTrue(iosLifecycleMonitor.trackingState.deadClick, "Dead click should be on from local config")
     }
 #endif
 #if os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)
     func testNetworkTrackingTurnsOnFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
         RemoteConfigClient.setNextFetchedRemoteConfig([
             "analyticsSDK": [
                 "iosSDK": [
@@ -370,9 +396,9 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
 
         var networkTrackingPlugin: NetworkTrackingPlugin?
         amplitude.apply { plugin in
@@ -385,14 +411,16 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(networkTrackingPlugin.optOut)
+        XCTAssertTrue(networkTrackingPlugin.optOut, "Network tracking should be off by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertFalse(networkTrackingPlugin.optOut)
+        XCTAssertFalse(networkTrackingPlugin.optOut, "Network tracking should be on from remote config")
     }
 
     func testNetworkTrackingTurnsOffFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
         RemoteConfigClient.setNextFetchedRemoteConfig([
             "analyticsSDK": [
                 "iosSDK": [
@@ -403,9 +431,9 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: [.networkTracking]))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.networkTracking]))
 
         var networkTrackingPlugin: NetworkTrackingPlugin?
         amplitude.apply { plugin in
@@ -418,14 +446,16 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        XCTAssertFalse(networkTrackingPlugin.optOut)
+        XCTAssertFalse(networkTrackingPlugin.optOut, "Network tracking should be off by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
-        XCTAssertTrue(networkTrackingPlugin.optOut)
+        XCTAssertTrue(networkTrackingPlugin.optOut, "Network tracking should be on from remote config")
     }
 
     func testNetworkTrackingConfigSchemaFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
         RemoteConfigClient.setNextFetchedRemoteConfig([
             "analyticsSDK": [
                 "iosSDK": [
@@ -463,9 +493,9 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa", autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
 
         var networkTrackingPlugin: NetworkTrackingPlugin?
         amplitude.apply { plugin in
@@ -478,7 +508,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
         // Verify the plugin is enabled
         XCTAssertFalse(networkTrackingPlugin.optOut)
@@ -520,7 +550,9 @@ class AutocaptureRemoteConfigTests: XCTestCase {
     }
 
     func testNetworkTrackingPartialRemoteConfig() {
+        resetStorage()
         // Test that missing values in remote config fall back to local config
+        let apiKey = uniqueApiKey()
         let localOptions = NetworkTrackingOptions(
             captureRules: [
                 NetworkTrackingOptions.CaptureRule(hosts: ["local.example.com"], statusCodeRange: "500-599")
@@ -541,9 +573,10 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                     ]
                 ]
             ]
-        ])
+        ], forApiKey: apiKey)
 
-        let config = Configuration(apiKey: "aaa",
+        let config = Configuration(apiKey: apiKey,
+                                   instanceName: uniqueInstanceName(),
                                    autocapture: [.networkTracking],
                                    networkTrackingOptions: localOptions)
         let amplitude = Amplitude(configuration: config)
@@ -559,7 +592,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             return
         }
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 1)
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
 
         // Verify the plugin is enabled from remote config
         XCTAssertFalse(networkTrackingPlugin.optOut)
@@ -587,53 +620,76 @@ extension RemoteConfigClient {
         let expectation = XCTestExpectation(description: "didFetchRemote")
 
         let subscriptionHolder = SubscriptionHolder()
-        subscriptionHolder.subscription = subscribe { [weak self] _, source, _ in
-            guard source == .remote else {
-                return
-            }
+        subscriptionHolder.subscription = subscribe(deliveryMode: .waitForRemote(timeout: 1.8)) { [weak self] _, _, _ in
             if let subscription = subscriptionHolder.subscription {
                 self?.unsubscribe(subscription)
             }
-            expectation.fulfill()
+            // Add a small delay to ensure other subscription callbacks complete.
+            // Callbacks are processed asynchronously, so even though this subscription
+            // was registered after the plugin's subscription, there's no guarantee
+            // about callback execution order.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                expectation.fulfill()
+            }
         }
 
         return expectation
     }
 
-    static func setNextFetchedRemoteConfig(_ remoteConfig: RemoteConfigClient.RemoteConfig) {
-        RemoteConfigUrlProtocol.nextConfigs.append(remoteConfig)
+    static func setNextFetchedRemoteConfig(_ remoteConfig: RemoteConfigClient.RemoteConfig, forApiKey apiKey: String) {
+        RemoteConfigUrlProtocol.setConfig(remoteConfig, forApiKey: apiKey)
     }
 
-    static func resetStorage(instanceName: String? = Constants.Configuration.DEFAULT_INSTANCE) {
-        RemoteConfigClient.setNextFetchedRemoteConfig([
-            "analyticsSDK": [
-                "iosSDK": [
-                    "autocapture": [
-                        "sessions": true,
-                    ]
-                ]
-            ]
-        ])
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "aaa"))
-        XCTWaiter().wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation],
-                         timeout: 1)
+    static func resetStorage(instanceName: String) {
+        let suiteName = "com.amplitude.remoteconfig.cache.\(instanceName)"
+        UserDefaults.standard.removePersistentDomain(forName: suiteName)
     }
 }
 
 extension URLSessionConfiguration {
 
-    @objc var amp_protocolClasses: [AnyClass]? {
-        // this is swizzled, so it is not recursive
-        return [RemoteConfigUrlProtocol.self] + (self.amp_protocolClasses ?? [])
+    @objc class func amp_ephemeral() -> URLSessionConfiguration {
+        // This is swizzled, so amp_ephemeral actually calls the original ephemeral
+        let config = amp_ephemeral()
+        config.protocolClasses = [RemoteConfigUrlProtocol.self] + (config.protocolClasses ?? [])
+        return config
     }
 }
 
 class RemoteConfigUrlProtocol: URLProtocol {
 
-    static var nextConfigs: [RemoteConfigClient.RemoteConfig] = []
+    static let testApiKeyPrefix = "remote-config-test-"
+    // Configs keyed by API key for test isolation
+    static var configsByApiKey: [String: [RemoteConfigClient.RemoteConfig]] = [:]
+
+    private static let responseQueue = DispatchQueue(label: "RemoteConfigUrlProtocol.responseQueue")
+
+    static func setConfig(_ config: RemoteConfigClient.RemoteConfig, forApiKey apiKey: String) {
+        configsByApiKey[apiKey, default: []].append(config)
+    }
+
+    static func popConfig(forApiKey apiKey: String) -> RemoteConfigClient.RemoteConfig? {
+        guard var configs = configsByApiKey[apiKey], !configs.isEmpty else {
+            return nil
+        }
+        let config = configs.removeFirst()
+        configsByApiKey[apiKey] = configs
+        return config
+    }
+
+    private static func extractApiKey(from url: URL) -> String? {
+        // URL format: https://sr-client-cfg.amplitude.com/config/{apiKey}
+        return url.pathComponents.last?.components(separatedBy: "?").first
+    }
 
     override class func canInit(with request: URLRequest) -> Bool {
-        return request.url?.absoluteString.hasPrefix("https://sr-client-cfg.") ?? false
+        guard let url = request.url,
+              url.absoluteString.hasPrefix("https://sr-client-cfg."),
+              let apiKey = extractApiKey(from: url) else {
+            return false
+        }
+        // Only intercept requests with our test API key prefix
+        return apiKey.hasPrefix(testApiKeyPrefix)
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
@@ -641,12 +697,14 @@ class RemoteConfigUrlProtocol: URLProtocol {
     }
 
     override func startLoading() {
-        guard let url = request.url, !Self.nextConfigs.isEmpty else {
+        guard let url = request.url,
+              let apiKey = Self.extractApiKey(from: url),
+              let config = Self.popConfig(forApiKey: apiKey) else {
             client?.urlProtocol(self, didFailWithError: NSError(domain: NSURLErrorDomain, code: NSURLErrorUnknown))
             return
         }
 
-        let config = Self.nextConfigs.removeFirst()
+        print("RemoteConfigUrlProtocol: Starting to load \(url)")
 
         let response = HTTPURLResponse(url: url,
                                        statusCode: 200,
@@ -654,12 +712,14 @@ class RemoteConfigUrlProtocol: URLProtocol {
                                        headerFields: ["Content-Type": "application/json"])!
         let data = try? JSONSerialization.data(withJSONObject: ["configs": config])
 
-        DispatchQueue.global().asyncAfter(deadline: .now() + DispatchTimeInterval.milliseconds(200)) { [self] in
+        Self.responseQueue.asyncAfter(deadline: .now() + DispatchTimeInterval.milliseconds(500)) { [self] in
             client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
             if let data {
                 client?.urlProtocol(self, didLoad: data)
             }
             client?.urlProtocolDidFinishLoading(self)
+
+            print("RemoteConfigUrlProtocol: Finished loading \(url): \(config)")
         }
     }
 

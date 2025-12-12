@@ -24,7 +24,7 @@ class IdentityTests: XCTestCase {
 
     func testUpdateWithSameValues() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         let sendExpectation = XCTestExpectation(description: "It should not send identify")
         sendExpectation.isInverted = true
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in
@@ -53,7 +53,7 @@ class IdentityTests: XCTestCase {
 
     func testUpdateWithIdentity() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         let sendExpectation = XCTestExpectation(description: "It should send identify")
         sendExpectation.assertForOverFulfill = true
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in
@@ -74,7 +74,7 @@ class IdentityTests: XCTestCase {
 
     func testUpdateWithUserId() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         let sendExpectation = XCTestExpectation(description: "It should not send identify")
         sendExpectation.isInverted = true
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in
@@ -93,7 +93,7 @@ class IdentityTests: XCTestCase {
 
     func testUpdateWithDeviceId() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         let sendExpectation = XCTestExpectation(description: "It should not send identify")
         sendExpectation.isInverted = true
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in
@@ -112,7 +112,7 @@ class IdentityTests: XCTestCase {
 
     func testUpdateWithUserProperties() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         let sendExpectation = XCTestExpectation(description: "It should send identify")
         sendExpectation.assertForOverFulfill = true
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { event in
@@ -134,7 +134,7 @@ class IdentityTests: XCTestCase {
 
     func testSetUserId() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         let sendExpectation = XCTestExpectation(description: "It should not send identify")
         sendExpectation.isInverted = true
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in
@@ -153,7 +153,7 @@ class IdentityTests: XCTestCase {
 
     func testSetDeviceId() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         let sendExpectation = XCTestExpectation(description: "It should not send identify")
         sendExpectation.isInverted = true
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in
@@ -174,7 +174,7 @@ class IdentityTests: XCTestCase {
 
     func testIdentifySet() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in }))
 
         let identify = Identify()
@@ -189,7 +189,7 @@ class IdentityTests: XCTestCase {
 
     func testIdentifyUnset() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in }))
         amplitude.identity.userProperties = updatedIdentity.userProperties
 
@@ -207,7 +207,7 @@ class IdentityTests: XCTestCase {
 
     func testIdentifyClearAll() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in }))
 
         let identify = Identify()
@@ -219,7 +219,7 @@ class IdentityTests: XCTestCase {
 
     func testIdentifyUpdate() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         let ignorePlugin = IdentifyInterceptPlugin { _ in }
         amplitude.add(plugin: ignorePlugin)
         amplitude.identity.userProperties = updatedIdentity.userProperties
@@ -247,7 +247,7 @@ class IdentityTests: XCTestCase {
 
     func testIdentifyNoOps() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in }))
 
         let identify = Identify()
@@ -265,7 +265,7 @@ class IdentityTests: XCTestCase {
 
     func testIdentifyOrder() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in }))
 
         let existingProperties = ["foo": 1, "bar": 2]
@@ -285,7 +285,7 @@ class IdentityTests: XCTestCase {
 
     func testIdentifyNonOpProperties() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in }))
 
         let identify = IdentifyEvent()
@@ -300,7 +300,7 @@ class IdentityTests: XCTestCase {
 
     func testIdentifyEventOptionsSetsUserAndDeviceId() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         amplitude.add(plugin: IdentifyInterceptPlugin(block: { _ in }))
 
         amplitude.identify(userProperties: [:], options: EventOptions(userId: updatedIdentity.userId,
@@ -317,7 +317,7 @@ class IdentityTests: XCTestCase {
 
     func testReset() throws {
         let storage = try makeStorage()
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "", storageProvider: storage, offline: NetworkConnectivityCheckerPlugin.Disabled))
         amplitude.reset()
 
         XCTAssertEqual(amplitude.identity.userProperties as NSDictionary, NSDictionary())

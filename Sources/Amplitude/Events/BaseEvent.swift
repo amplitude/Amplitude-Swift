@@ -5,7 +5,11 @@
 //  Created by Marvin Liu on 11/3/22.
 //
 
+#if AMPLITUDE_DISABLE_UIKIT
+import AmplitudeCoreNoUIKit
+#else
 import AmplitudeCore
+#endif
 import Foundation
 
 open class BaseEvent: EventOptions, AnalyticsEvent, Codable {

@@ -7,25 +7,34 @@
 
 import Foundation
 
+#if AMPLITUDE_DISABLE_UIKIT
+@_spi(Internal) import AmplitudeCoreNoUIKit
+#else
+@_spi(Internal) import AmplitudeCore
+#endif
+
 class PersistentStorageResponseHandler: ResponseHandler {
     var configuration: Configuration
     var storage: PersistentStorage
     var eventPipeline: EventPipeline
     var eventBlock: URL
     var eventsString: String
+    let diagnosticsClient: CoreDiagnostics
 
     init(
         configuration: Configuration,
         storage: PersistentStorage,
         eventPipeline: EventPipeline,
         eventBlock: URL,
-        eventsString: String
+        eventsString: String,
+        diagnosticsClient: CoreDiagnostics
     ) {
         self.configuration = configuration
         self.storage = storage
         self.eventPipeline = eventPipeline
         self.eventBlock = eventBlock
         self.eventsString = eventsString
+        self.diagnosticsClient = diagnosticsClient
     }
 
     func handleSuccessResponse(code: Int) -> Bool {
@@ -171,6 +180,20 @@ extension PersistentStorageResponseHandler {
                 eventCallback(event, code, message)
                 storage.removeEventCallback(insertId: eventInsertId)
             }
+        }
+
+        let diagnosticsClient = self.diagnosticsClient
+        if code >= 1, code < 300 {
+            diagnosticsClient.increment(name: "analytics.events.sent", size: events.count)
+        } else {
+            diagnosticsClient.increment(name: "analytics.events.dropped", size: events.count)
+            let properties: [String: any Sendable] = [
+                "events": events.map { $0.eventType },
+                "count": events.count,
+                "code": code,
+                "message": message
+            ]
+            diagnosticsClient.recordEvent(name: "analytics.events.dropped", properties: properties)
         }
     }
 

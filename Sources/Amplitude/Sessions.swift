@@ -1,4 +1,8 @@
+#if AMPLITUDE_DISABLE_UIKIT
+import AmplitudeCoreNoUIKit
+#else
 import AmplitudeCore
+#endif
 import Foundation
 
 public class Sessions {
@@ -71,9 +75,10 @@ public class Sessions {
         if configuration.enableAutoCaptureRemoteConfig {
             remoteConfigSubscription = context
                 .remoteConfigClient
-                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self] config, _, _ in
+                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self, weak amplitude] config, _, _ in
                     if let self, let sessions = config?["sessions"] as? Bool {
                         trackSessionEvents = sessions
+                        amplitude?.updateEnabledAutocapture(.sessions, enabled: sessions)
                     }
                 }
         }

@@ -16,39 +16,39 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: macos-14
+          - runs-on: macos-15
             platform: iOS
-            xcode: 16.1
+            xcode: 16.4
             device: "iPhone 16"
             test-destination-os: latest
 
-          - runs-on: macos-14
+          - runs-on: macos-15
             platform: iOS
-            xcode: 16.1
-            test-destination-os: 17.2
-            device: "iPhone 15"
+            xcode: 16.4
+            test-destination-os: 18.5
+            device: "iPhone 16"
           
-          - runs-on: macos-14
+          - runs-on: macos-15
             platform: macOS
-            xcode: 16.1
+            xcode: 16.4
             test-destination-os: latest
 
-          - runs-on: macos-14
+          - runs-on: macos-15
             platform: tvOS
-            xcode: 16.1
+            xcode: 16.4
             test-destination-os: latest
-            device: "Apple TV 4K (3rd generation)"
+            device: "Apple TV"
 
-          - runs-on: macos-14
+          - runs-on: macos-15
             platform: watchOS
-            xcode: 16.1
+            xcode: 16.4
             test-destination-os: latest
-            device: "Apple Watch Series 10 (46mm)"
+            device: "Apple Watch Series 10 (42mm)"
 
-          - runs-on: macos-14
+          - runs-on: macos-15
             platform: visionOS
-            xcode: 16.1
-            test-destination-os: latest
+            xcode: 16.4
+            test-destination-os: 2.5
             device: "Apple Vision Pro"
     steps:
       - name: Checkout
@@ -100,17 +100,17 @@ jobs:
               ;;
           esac
   objc-example-test:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set Xcode 15
+        uses: actions/checkout@v4
+      - name: Set Xcode 16
         run: |
-          sudo xcode-select -switch /Applications/Xcode_16.1.app
+          sudo xcode-select -switch /Applications/Xcode_16.4.app
       - name: Objective-C Example Tests (iOS)
         working-directory: Examples/AmplitudeObjCExample
         run: |
           xcodebuild test \
             -scheme AmplitudeObjCExample \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16'
+            -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16'

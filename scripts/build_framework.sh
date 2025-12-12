@@ -2,12 +2,12 @@
 
 set -e
 
-SCHEME="Amplitude-Swift-Package"
+CONFIGURATION="Release"
 BUILD_DIR="./.build/artifacts"
 PLATFORMS=("iOS" "iOS Simulator" "macOS" "macOS Cataylst" "watchOS" "watchOS Simulator" "tvOS" "tvOS Simulator" "visionOS" "visionOS Simulator")
 
-build_framework_with_configuration_and_name() {
-    CONFIGURATION=${1}
+build_framework_with_schema_and_name() {
+    SCHEME=${1}
     FRAMEWORK=${2}
     OUTPUT_PATH="${BUILD_DIR}/${FRAMEWORK}.xcframework"
 
@@ -50,5 +50,5 @@ build_framework_with_configuration_and_name() {
 
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
-build_framework_with_configuration_and_name "Release" "AmplitudeSwift"
-build_framework_with_configuration_and_name "ReleaseDisableUIKit" "AmplitudeSwiftNoUIKit"
+build_framework_with_schema_and_name "Amplitude-Swift-Package" "AmplitudeSwift"
+build_framework_with_schema_and_name "Amplitude-Swift-Package-DisableUIKit" "AmplitudeSwiftNoUIKit"

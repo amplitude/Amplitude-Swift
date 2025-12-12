@@ -10,6 +10,8 @@ import Foundation
 class FakeURLProtocol: URLProtocol {
     static var mockResponses: [MockResponse] = []
 
+    private static let responseQueue = DispatchQueue(label: "FakeURLProtocol.responseQueue")
+
     struct MockResponse {
         let statusCode: Int
         let data: Data?
@@ -33,7 +35,8 @@ class FakeURLProtocol: URLProtocol {
     // MARK: - URLProtocol Overrides
 
     override class func canInit(with request: URLRequest) -> Bool {
-        return true
+        let isRemoteConfig = request.url?.absoluteString.hasPrefix("https://sr-client-cfg.") ?? false
+        return !isRemoteConfig
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
@@ -64,7 +67,7 @@ class FakeURLProtocol: URLProtocol {
 
         let delay = mockResponse.delay
 
-        DispatchQueue.global().asyncAfter(deadline: .now() + delay) { [weak self] in
+        Self.responseQueue.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self = self else { return }
 
             self.client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
@@ -79,7 +82,7 @@ class FakeURLProtocol: URLProtocol {
 
             self.client?.urlProtocolDidFinishLoading(self)
 
-            print("FakeURLProtocol: Finished loading \(url)")
+            print("FakeURLProtocol: Finished loading \(url), response: \(mockResponse)")
         }
     }
 

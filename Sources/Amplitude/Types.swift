@@ -5,7 +5,11 @@
 //  Created by Marvin Liu on 10/27/22.
 //
 
+#if AMPLITUDE_DISABLE_UIKIT
+import AmplitudeCoreNoUIKit
+#else
 import AmplitudeCore
+#endif
 import Foundation
 
 public struct Plan: Codable {
