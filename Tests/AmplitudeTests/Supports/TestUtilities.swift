@@ -137,6 +137,8 @@ class FakeHttpClient: HttpClient {
     var uploadExpectations: [XCTestExpectation] = []
     var uploadResults: [Result<Int, Error>] = []
 
+    let completionQueue = DispatchQueue(label: "FakeHttpClient.completionQueue")
+
     override func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void)
         -> URLSessionDataTask?
     {
@@ -150,7 +152,7 @@ class FakeHttpClient: HttpClient {
             result = uploadResults.removeFirst()
         }
 
-        DispatchQueue.global().async { [weak self] in
+        completionQueue.async { [weak self] in
             completion(result)
 
             if let self, !self.uploadExpectations.isEmpty {

@@ -662,6 +662,8 @@ class RemoteConfigUrlProtocol: URLProtocol {
     // Configs keyed by API key for test isolation
     static var configsByApiKey: [String: [RemoteConfigClient.RemoteConfig]] = [:]
 
+    private static let responseQueue = DispatchQueue(label: "RemoteConfigUrlProtocol.responseQueue")
+
     static func setConfig(_ config: RemoteConfigClient.RemoteConfig, forApiKey apiKey: String) {
         configsByApiKey[apiKey, default: []].append(config)
     }
@@ -710,7 +712,7 @@ class RemoteConfigUrlProtocol: URLProtocol {
                                        headerFields: ["Content-Type": "application/json"])!
         let data = try? JSONSerialization.data(withJSONObject: ["configs": config])
 
-        DispatchQueue.global().asyncAfter(deadline: .now() + DispatchTimeInterval.milliseconds(200)) { [self] in
+        Self.responseQueue.asyncAfter(deadline: .now() + DispatchTimeInterval.milliseconds(100)) { [self] in
             client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
             if let data {
                 client?.urlProtocol(self, didLoad: data)
