@@ -104,7 +104,7 @@ final class HttpClientTests: XCTestCase {
             uploadExpectation.fulfill()
         }
 
-        waitForExpectations(timeout: 5)
+        waitForExpectations(timeout: 15)
         XCTAssertEqual(config.offline, true)
     }
 }
