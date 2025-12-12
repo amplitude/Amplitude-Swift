@@ -58,6 +58,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
                                           storageProvider: storageMem,
                                           flushMaxRetries: 0,
                                           autocapture: .networkTracking,
+                                          offline: NetworkConnectivityCheckerPlugin.Disabled,
                                           networkTrackingOptions: options,
                                           enableAutoCaptureRemoteConfig: false)
         amplitude = Amplitude(configuration: configuration)

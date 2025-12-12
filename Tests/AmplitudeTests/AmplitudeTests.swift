@@ -41,6 +41,7 @@ final class AmplitudeTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
             enableAutoCaptureRemoteConfig: false
         )
     }

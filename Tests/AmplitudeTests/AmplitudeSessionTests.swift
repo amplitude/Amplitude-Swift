@@ -19,6 +19,7 @@ final class AmplitudeSessionTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             minTimeBetweenSessionsMillis: 100,
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
             enableAutoCaptureRemoteConfig: false
         )
     }
@@ -133,6 +134,7 @@ final class AmplitudeSessionTests: XCTestCase {
             identifyStorageProvider: interceptStorageMem,
             minTimeBetweenSessionsMillis: 100,
             autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
             enableAutoCaptureRemoteConfig: false
         )
         let amplitude = Amplitude(configuration: customCongiguration)
