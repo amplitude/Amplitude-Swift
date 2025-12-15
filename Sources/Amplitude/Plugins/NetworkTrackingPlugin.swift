@@ -225,7 +225,6 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
     @Atomic var optOut = true
     @Atomic var originalOptions: NetworkTrackingOptions?
     var ruleCache: [String: CompiledNetworkTrackingOptions.CaptureRule?] = [:]
-    private var remoteConfigSubscription: Any?
 
     let networkTrackingQueue = DispatchQueue(label: "com.amplitude.analytics.networkTracking", attributes: .concurrent)
 
@@ -242,21 +241,23 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
         logger?.warn(message: "NetworkTrackingPlugin is not supported on watchOS yet.")
         optOut = true
 #else
-        optOut = !amplitude.configuration.autocapture.contains(.networkTracking)
+        optOut = !amplitude.autocaptureManager.isEnabled(.networkTracking)
         originalOptions = amplitude.configuration.networkTrackingOptions
 
-        if amplitude.configuration.enableAutoCaptureRemoteConfig {
-            remoteConfigSubscription = amplitude
-                .amplitudeContext
-                .remoteConfigClient
-                .subscribe(key: Constants.RemoteConfig.Key.autocapture) { [weak self] config, _, _ in
-                    guard let self else { return }
-                    self.updateConfig(config)
-                }
-        } else {
-            if let originalOptions = originalOptions {
+        amplitude.autocaptureManager.onChange { [weak self, weak amplitude] config in
+            guard let self, let amplitude else { return }
+
+            optOut = !amplitude.autocaptureManager.isEnabled(.networkTracking)
+
+            if let config {
+                updateConfig(config)
+            } else if let originalOptions = originalOptions {
                 compileConfig(originalOptions)
             }
+        }
+
+        if let originalOptions = originalOptions {
+            compileConfig(originalOptions)
         }
 #endif
     }
@@ -267,12 +268,6 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
         }
 
         let options = config?["networkTracking"] as? [String: Any]
-
-        // Update from remote config
-        if let enabled = options?["enabled"] as? Bool {
-            optOut = !enabled
-            amplitude?.updateEnabledAutocapture(.networkTracking, enabled: enabled)
-        }
         if let ignoreHosts = options?["ignoreHosts"] as? [String] {
             updatedOptions.ignoreHosts = ignoreHosts
         }
@@ -312,11 +307,6 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
 
     override func teardown() {
         super.teardown()
-
-        if let remoteConfigSubscription {
-            amplitude?.amplitudeContext.remoteConfigClient.unsubscribe(remoteConfigSubscription)
-        }
-
         NetworkSwizzler.shared.removeListener(self)
     }
 

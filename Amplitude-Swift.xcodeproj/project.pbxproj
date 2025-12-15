@@ -70,6 +70,8 @@
 		EA28FDA42DED997900848BBB /* InteractionsOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28FDA32DED997900848BBB /* InteractionsOptions.swift */; };
 		EA2FD8862EE8A0E4002AB27E /* AmplitudeCoreFramework in Frameworks */ = {isa = PBXBuildFile; productRef = EA2FD8852EE8A0E4002AB27E /* AmplitudeCoreFramework */; };
 		EA2FD8882EE8A0EB002AB27E /* AmplitudeCoreNoUIKitFramework in Frameworks */ = {isa = PBXBuildFile; productRef = EA2FD8872EE8A0EB002AB27E /* AmplitudeCoreNoUIKitFramework */; };
+		EA2FD8932EECDD6F002AB27E /* AutocaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA2FD8922EECDD6F002AB27E /* AutocaptureManager.swift */; };
+		EA2FD8942EECDD6F002AB27E /* AutocaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA2FD8922EECDD6F002AB27E /* AutocaptureManager.swift */; };
 		EA5C95942D7A76B900DC8B3B /* NetworkSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */; };
 		EA5C95962D7A776D00DC8B3B /* MethodSwizzler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */; };
 		EA84CF0B2DF8D8E400CD1CAD /* MiscellaneousExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */; };
@@ -296,6 +298,7 @@
 		D01043602B6C5A8500F8173C /* SandboxHelperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxHelperTests.swift; sourceTree = "<group>"; };
 		EA1F2CD82D8781950096A576 /* MethodSwizzlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodSwizzlerTest.swift; sourceTree = "<group>"; };
 		EA28FDA32DED997900848BBB /* InteractionsOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractionsOptions.swift; sourceTree = "<group>"; };
+		EA2FD8922EECDD6F002AB27E /* AutocaptureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocaptureManager.swift; sourceTree = "<group>"; };
 		EA5C95932D7A76B000DC8B3B /* NetworkSwizzler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSwizzler.swift; sourceTree = "<group>"; };
 		EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodSwizzler.swift; sourceTree = "<group>"; };
 		EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiscellaneousExtension.swift; sourceTree = "<group>"; };
@@ -556,6 +559,7 @@
 		OBJ_43 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				EA2FD8922EECDD6F002AB27E /* AutocaptureManager.swift */,
 				EAE4C5F92E5F769D00FCD6E4 /* ObjectFilter.swift */,
 				EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */,
 				EA5C95952D7A776200DC8B3B /* MethodSwizzler.swift */,
@@ -901,6 +905,7 @@
 				EAED9A002EE7B47E00A5FC08 /* Constants.swift in Sources */,
 				EAED9A012EE7B47E00A5FC08 /* ObjectFilter.swift in Sources */,
 				EAED9A022EE7B47E00A5FC08 /* BaseEvent.swift in Sources */,
+				EA2FD8942EECDD6F002AB27E /* AutocaptureManager.swift in Sources */,
 				EAED9A032EE7B47E00A5FC08 /* EventOptions.swift in Sources */,
 				EAED9A042EE7B47E00A5FC08 /* GroupIdentifyEvent.swift in Sources */,
 				EAED9A052EE7B47E00A5FC08 /* Identify.swift in Sources */,
@@ -1037,6 +1042,7 @@
 				OBJ_91 /* Constants.swift in Sources */,
 				EAE4C5FA2E5F76A400FCD6E4 /* ObjectFilter.swift in Sources */,
 				OBJ_93 /* BaseEvent.swift in Sources */,
+				EA2FD8932EECDD6F002AB27E /* AutocaptureManager.swift in Sources */,
 				OBJ_94 /* EventOptions.swift in Sources */,
 				OBJ_95 /* GroupIdentifyEvent.swift in Sources */,
 				OBJ_96 /* Identify.swift in Sources */,

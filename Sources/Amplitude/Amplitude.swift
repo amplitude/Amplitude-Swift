@@ -123,8 +123,15 @@ public class Amplitude {
 
     let trackingQueue = DispatchQueue(label: "com.amplitude.analytics")
 
-    private var enabledAutocapture: AutocaptureOptions = .init(rawValue: 0)
-    private var needsSetAutocaptureDiagnostics: Bool = false
+    private(set) lazy var autocaptureManager: AutocaptureManager = {
+        AutocaptureManager(
+            context: amplitudeContext,
+            trackingQueue: trackingQueue,
+            autocapture: configuration.autocapture,
+            rageClickEnabled: configuration.interactionsOptions.rageClick.enabled,
+            deadClickEnabled: configuration.interactionsOptions.deadClick.enabled,
+            enableRemoteConfig: configuration.enableAutoCaptureRemoteConfig)
+    }()
 
     public init(
         configuration: Configuration
@@ -167,6 +174,9 @@ public class Amplitude {
                              deviceId: configuration.storageProvider.read(key: .DEVICE_ID),
                              userProperties: [:])
 
+        // Trigger lazy initialization before plugins are set up (plugins may query it during setup)
+        _ = autocaptureManager
+
         if configuration.offline != NetworkConnectivityCheckerPlugin.Disabled,
            VendorSystem.current.networkConnectivityCheckingEnabled {
             _ = add(plugin: NetworkConnectivityCheckerPlugin())
@@ -194,9 +204,7 @@ public class Amplitude {
         trackingQueue.resume()
 
         amplitudeContext.diagnosticsClient.setTag(name: "sdk.\(Constants.SDK_LIBRARY).version", value: Constants.SDK_VERSION)
-
-        enabledAutocapture = configuration.autocapture
-        updateDiagnosticsAutocaptureTags()
+        autocaptureManager.updateDiagnostics()
     }
 
     convenience init(apiKey: String, configuration: Configuration) {
@@ -660,29 +668,5 @@ extension Amplitude: AnalyticsClient {
         set {
             configuration.optOut = newValue
         }
-    }
-}
-
-extension Amplitude {
-
-    func updateEnabledAutocapture(_ options: AutocaptureOptions, enabled: Bool) {
-        trackingQueue.async {
-            if enabled {
-                self.enabledAutocapture.formUnion(options)
-            } else {
-                self.enabledAutocapture.subtract(options)
-            }
-            self.needsSetAutocaptureDiagnostics = true
-
-            self.trackingQueue.async { [weak self] in
-                guard let self, needsSetAutocaptureDiagnostics else { return }
-                needsSetAutocaptureDiagnostics = false
-                updateDiagnosticsAutocaptureTags()
-            }
-        }
-    }
-
-    func updateDiagnosticsAutocaptureTags() {
-        amplitudeContext.diagnosticsClient.setTag(name: "autocapture.enabled", value: enabledAutocapture.stringRepresentation())
     }
 }
