@@ -221,9 +221,9 @@ public struct NetworkTrackingOptions {
 
 class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
 
-    @Atomic var options: CompiledNetworkTrackingOptions?
-    @Atomic var optOut = true
-    @Atomic var originalOptions: NetworkTrackingOptions?
+    @AtomicRef var options: CompiledNetworkTrackingOptions?
+    @AtomicRef var optOut = true
+    @AtomicRef var originalOptions: NetworkTrackingOptions?
     var ruleCache: [String: CompiledNetworkTrackingOptions.CaptureRule?] = [:]
 
     let networkTrackingQueue = DispatchQueue(label: "com.amplitude.analytics.networkTracking", attributes: .concurrent)
@@ -244,20 +244,22 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
         optOut = !amplitude.autocaptureManager.isEnabled(.networkTracking)
         originalOptions = amplitude.configuration.networkTrackingOptions
 
-        amplitude.autocaptureManager.onChange { [weak self, weak amplitude] config in
-            guard let self, let amplitude else { return }
+        if amplitude.configuration.enableAutoCaptureRemoteConfig {
+            amplitude.autocaptureManager.onChange { [weak self, weak amplitude] config in
+                guard let self, let amplitude else { return }
 
-            optOut = !amplitude.autocaptureManager.isEnabled(.networkTracking)
+                optOut = !amplitude.autocaptureManager.isEnabled(.networkTracking)
 
-            if let config {
-                updateConfig(config)
-            } else if let originalOptions = originalOptions {
+                if let config {
+                    updateConfig(config)
+                } else if let originalOptions {
+                    compileConfig(originalOptions)
+                }
+            }
+        } else {
+            if let originalOptions {
                 compileConfig(originalOptions)
             }
-        }
-
-        if let originalOptions = originalOptions {
-            compileConfig(originalOptions)
         }
 #endif
     }
