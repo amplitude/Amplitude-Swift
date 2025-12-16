@@ -61,6 +61,7 @@ jobs:
           GIT_COMMITTER_NAME: amplitude-sdk-bot
           GIT_COMMITTER_EMAIL: amplitude-sdk-bot@users.noreply.github.com
         run: |
+          npm config set ignore-scripts true
           npx \
           -p lodash \
           -p semantic-release@17 \
