@@ -51,9 +51,6 @@ jobs:
         working-directory: .build/artifacts
         run: zip -r -y AmplitudeSwiftNoUIKit.xcframework.zip AmplitudeSwiftNoUIKit.xcframework
 
-      - name: Setup pnpm for semantic-release
-        uses: pnpm/action-setup@v4
-
       - name: Semantic Release --dry-run
         if: ${{ github.event.inputs.dryRun == 'true'}}
         env:
@@ -64,8 +61,15 @@ jobs:
           GIT_COMMITTER_NAME: amplitude-sdk-bot
           GIT_COMMITTER_EMAIL: amplitude-sdk-bot@users.noreply.github.com
         run: |
-          pnpm install --frozen-lockfile
-          pnpm exec semantic-release --dry-run
+          npm config set ignore-scripts true
+          npx \
+          -p lodash \
+          -p semantic-release@17 \
+          -p @semantic-release/changelog@5 \
+          -p @semantic-release/git@9 \
+          -p @google/semantic-release-replace-plugin@1.2.0 \
+          -p @semantic-release/exec@5 \
+          semantic-release --dry-run
 
       - name: Semantic Release
         if: ${{ github.event.inputs.dryRun == 'false'}}
@@ -77,5 +81,11 @@ jobs:
           GIT_COMMITTER_NAME: amplitude-sdk-bot
           GIT_COMMITTER_EMAIL: amplitude-sdk-bot@users.noreply.github.com
         run: |
-          pnpm install --frozen-lockfile
-          pnpm exec semantic-release
+          npx \
+          -p lodash \
+          -p semantic-release@17 \
+          -p @semantic-release/changelog@5 \
+          -p @semantic-release/git@9 \
+          -p @google/semantic-release-replace-plugin@1.2.0 \
+          -p @semantic-release/exec@5 \
+          semantic-release
