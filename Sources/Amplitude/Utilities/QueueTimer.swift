@@ -18,7 +18,7 @@ internal class QueueTimer {
     let queue: DispatchQueue
     let handler: () -> Void
 
-    @Atomic var state: State = .suspended
+    @AtomicRef var state: State = .suspended
 
     init(interval: TimeInterval, once: Bool = false, queue: DispatchQueue = .main, handler: @escaping () -> Void) {
         self.interval = interval

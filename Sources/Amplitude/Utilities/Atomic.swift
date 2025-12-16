@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(*, deprecated, message: "Atomic struct is not thread-safe when used as a class property. Use NSLock or OSAllocatedUnfairLock (iOS 16+) instead.")
 @propertyWrapper
 public struct Atomic<T> {
     var value: T
@@ -31,6 +32,25 @@ public struct Atomic<T> {
         lock.lock()
         defer { lock.unlock() }
         value = newValue
+    }
+}
+
+@propertyWrapper
+final class AtomicRef<T> {
+    private var value: T
+    private let lock = NSLock()
+
+    init(wrappedValue value: T) {
+        self.value = value
+    }
+
+    var wrappedValue: T {
+        get { lock.withLock { value } }
+        set { lock.withLock { value = newValue } }
+    }
+
+    func withLock<R>(_ body: (inout T) -> R) -> R {
+        lock.withLock { body(&value) }
     }
 }
 

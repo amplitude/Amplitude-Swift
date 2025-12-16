@@ -611,7 +611,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 extension RemoteConfigClient {
 
     private final class SubscriptionHolder: @unchecked Sendable {
-        @Atomic var subscription: Any?
+        @AtomicRef var subscription: Any?
     }
 
     nonisolated var didFetchRemoteExpectation: XCTestExpectation {

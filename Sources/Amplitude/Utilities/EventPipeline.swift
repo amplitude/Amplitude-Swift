@@ -16,7 +16,7 @@ public class EventPipeline {
     let logger: (any Logger)?
     let configuration: Configuration
 
-    @Atomic internal var eventCount: Int = 0
+    @AtomicRef internal var eventCount: Int = 0
     internal var flushTimer: QueueTimer?
     private let uploadsQueue = DispatchQueue(label: "uploadsQueue.amplitude.com")
 
@@ -40,7 +40,7 @@ public class EventPipeline {
         event.attempts += 1
         do {
             try storage.write(key: StorageKey.EVENTS, value: event)
-            eventCount += 1
+            _eventCount.withLock { $0 += 1 }
             if eventCount >= getFlushCount() {
                 flush()
             }

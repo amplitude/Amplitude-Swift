@@ -77,68 +77,68 @@ class AutocaptureManager {
     }
 
     private func handleRemoteConfig(_ config: [String: Any]?) {
-        guard let config else { return }
-
-        // Update enabled options from config
-        lock.withLock {
-            if let sessions = config["sessions"] as? Bool {
-                if sessions {
-                    _enabledOptions.formUnion(.sessions)
-                } else {
-                    _enabledOptions.subtract(.sessions)
-                }
-            }
-
-            if let appLifecycles = config["appLifecycles"] as? Bool {
-                if appLifecycles {
-                    _enabledOptions.formUnion(.appLifecycles)
-                } else {
-                    _enabledOptions.subtract(.appLifecycles)
-                }
-            }
-
-            if let pageViews = config["pageViews"] as? Bool {
-                if pageViews {
-                    _enabledOptions.formUnion(.screenViews)
-                } else {
-                    _enabledOptions.subtract(.screenViews)
-                }
-            }
-
-            if let elementInteractions = config["elementInteractions"] as? Bool {
-                if elementInteractions {
-                    _enabledOptions.formUnion(.elementInteractions)
-                } else {
-                    _enabledOptions.subtract(.elementInteractions)
-                }
-            }
-
-            if let frustrationInteractions = config["frustrationInteractions"] as? [String: Any] {
-                if let enabled = frustrationInteractions["enabled"] as? Bool {
-                    if enabled {
-                        _enabledOptions.formUnion(.frustrationInteractions)
+        if let config {
+            // Update enabled options from config
+            lock.withLock {
+                if let sessions = config["sessions"] as? Bool {
+                    if sessions {
+                        _enabledOptions.formUnion(.sessions)
                     } else {
-                        _enabledOptions.subtract(.frustrationInteractions)
+                        _enabledOptions.subtract(.sessions)
                     }
                 }
 
-                if let rageClick = frustrationInteractions["rageClick"] as? [String: Any],
-                   let enabled = rageClick["enabled"] as? Bool {
-                    _rageClickEnabled = enabled
+                if let appLifecycles = config["appLifecycles"] as? Bool {
+                    if appLifecycles {
+                        _enabledOptions.formUnion(.appLifecycles)
+                    } else {
+                        _enabledOptions.subtract(.appLifecycles)
+                    }
                 }
 
-                if let deadClick = frustrationInteractions["deadClick"] as? [String: Any],
-                   let enabled = deadClick["enabled"] as? Bool {
-                    _deadClickEnabled = enabled
+                if let pageViews = config["pageViews"] as? Bool {
+                    if pageViews {
+                        _enabledOptions.formUnion(.screenViews)
+                    } else {
+                        _enabledOptions.subtract(.screenViews)
+                    }
                 }
-            }
 
-            if let networkTracking = config["networkTracking"] as? [String: Any],
-               let enabled = networkTracking["enabled"] as? Bool {
-                if enabled {
-                    _enabledOptions.formUnion(.networkTracking)
-                } else {
-                    _enabledOptions.subtract(.networkTracking)
+                if let elementInteractions = config["elementInteractions"] as? Bool {
+                    if elementInteractions {
+                        _enabledOptions.formUnion(.elementInteractions)
+                    } else {
+                        _enabledOptions.subtract(.elementInteractions)
+                    }
+                }
+
+                if let frustrationInteractions = config["frustrationInteractions"] as? [String: Any] {
+                    if let enabled = frustrationInteractions["enabled"] as? Bool {
+                        if enabled {
+                            _enabledOptions.formUnion(.frustrationInteractions)
+                        } else {
+                            _enabledOptions.subtract(.frustrationInteractions)
+                        }
+                    }
+
+                    if let rageClick = frustrationInteractions["rageClick"] as? [String: Any],
+                       let enabled = rageClick["enabled"] as? Bool {
+                        _rageClickEnabled = enabled
+                    }
+
+                    if let deadClick = frustrationInteractions["deadClick"] as? [String: Any],
+                       let enabled = deadClick["enabled"] as? Bool {
+                        _deadClickEnabled = enabled
+                    }
+                }
+
+                if let networkTracking = config["networkTracking"] as? [String: Any],
+                   let enabled = networkTracking["enabled"] as? Bool {
+                    if enabled {
+                        _enabledOptions.formUnion(.networkTracking)
+                    } else {
+                        _enabledOptions.subtract(.networkTracking)
+                    }
                 }
             }
         }
