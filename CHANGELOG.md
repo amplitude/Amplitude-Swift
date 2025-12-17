@@ -1,3 +1,16 @@
+# [1.16.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.15.5...v1.16.0) (2025-12-17)
+
+
+### Bug Fixes
+
+* centralize autpcapture logic ([#341](https://github.com/amplitude/Amplitude-Swift/issues/341)) ([19faeaf](https://github.com/amplitude/Amplitude-Swift/commit/19faeaf15b7ccdb9ab6839729ab3d6d8891c1e95))
+* Incorrect implementation of the atomic wrapper ([#343](https://github.com/amplitude/Amplitude-Swift/issues/343)) ([ecce5a4](https://github.com/amplitude/Amplitude-Swift/commit/ecce5a4b0b8d744f0064ed5737e99cc40ed3a5c7))
+
+
+### Features
+
+* integrate diagnostics client ([#337](https://github.com/amplitude/Amplitude-Swift/issues/337)) ([77d0411](https://github.com/amplitude/Amplitude-Swift/commit/77d04110c9ba930971bbcf4854aece7820724a13))
+
 ## [1.15.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.15.4...v1.15.5) (2025-12-05)
 
 
