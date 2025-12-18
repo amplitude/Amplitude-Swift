@@ -14,6 +14,7 @@ import SwiftUI
 class IOSLifecycleMonitor: UtilityPlugin {
 
     private var utils: DefaultEventUtils?
+    private var sendApplicationInstalledOnDidBecomeActive = false
     private var sendApplicationOpenedOnDidBecomeActive = false
 
     override init() {
@@ -41,9 +42,10 @@ class IOSLifecycleMonitor: UtilityPlugin {
         super.setup(amplitude: amplitude)
         utils = DefaultEventUtils(amplitude: amplitude)
 
-        // If we are already in the foreground, dispatch installed / opened events now
+        let appState = IOSVendorSystem.applicationState
+        // If app state is already active, dispatch installed / opened events now
         // we want to dispatch this from the initiating thread to maintain event ordering.
-        if IOSVendorSystem.applicationState == .active {
+        if appState == .active {
             // this is added in init - launch on trackingQueue to allow identity to be set
             // prior to firing the event
             amplitude.trackingQueue.async { [self] in
@@ -51,6 +53,11 @@ class IOSLifecycleMonitor: UtilityPlugin {
                 amplitude.onEnterForeground(timestamp: currentTimestamp)
                 utils?.trackAppOpenedEvent()
             }
+        // If app state is inactive, it won't receive didFinishLaunching and willEnterForeground
+        // notifications anymore, we need to send install and opened event when become active
+        } else if appState == .inactive {
+            sendApplicationInstalledOnDidBecomeActive = true
+            sendApplicationOpenedOnDidBecomeActive = true
         }
 
         updateAutocaptureSetup()
@@ -95,14 +102,22 @@ class IOSLifecycleMonitor: UtilityPlugin {
 
     @objc
     func applicationDidBecomeActive(notification: Notification) {
-        guard sendApplicationOpenedOnDidBecomeActive else {
+        guard sendApplicationInstalledOnDidBecomeActive || sendApplicationOpenedOnDidBecomeActive else {
             return
         }
+        let sendInstall = sendApplicationInstalledOnDidBecomeActive
+        let sendOpened = sendApplicationOpenedOnDidBecomeActive
+        sendApplicationInstalledOnDidBecomeActive = false
         sendApplicationOpenedOnDidBecomeActive = false
 
-        amplitude?.onEnterForeground(timestamp: currentTimestamp)
         amplitude?.trackingQueue.async { [self] in
-            utils?.trackAppOpenedEvent()
+            if sendInstall {
+                utils?.trackAppUpdatedInstalledEvent()
+            }
+            amplitude?.onEnterForeground(timestamp: currentTimestamp)
+            if sendOpened {
+                utils?.trackAppOpenedEvent()
+            }
         }
     }
 
