@@ -40,6 +40,8 @@ final class AmplitudeIOSTests: XCTestCase {
         NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
 
         amplitude.waitForTrackingQueue()
+        // wait twice for async event generate
+        amplitude.waitForTrackingQueue()
 
         let info = Bundle.main.infoDictionary
         let currentBuild = info?["CFBundleVersion"] ?? ""
@@ -67,6 +69,8 @@ final class AmplitudeIOSTests: XCTestCase {
         try storageMem.write(key: StorageKey.APP_VERSION, value: "xyz")
         let amplitude = Amplitude(configuration: configuration)
         NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+        amplitude.waitForTrackingQueue()
+        // wait twice for async event generate
         amplitude.waitForTrackingQueue()
 
         let info = Bundle.main.infoDictionary
@@ -103,6 +107,8 @@ final class AmplitudeIOSTests: XCTestCase {
         let amplitude = Amplitude(configuration: configuration)
         NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
         amplitude.waitForTrackingQueue()
+        // wait twice for async event generate
+        amplitude.waitForTrackingQueue()
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 0)
@@ -129,6 +135,8 @@ final class AmplitudeIOSTests: XCTestCase {
         IOSVendorSystem.overrideApplicationState(.background)
         NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
 
+        amplitude.waitForTrackingQueue()
+        // wait twice for async event generate
         amplitude.waitForTrackingQueue()
 
         let events = storageMem.events()
@@ -251,6 +259,8 @@ final class AmplitudeIOSTests: XCTestCase {
         let identity = Identity(userId: "test-user", deviceId: "test-device")
         let amplitude = Amplitude(configuration: configuration)
         amplitude.identity = identity
+        amplitude.waitForTrackingQueue()
+        // wait twice for async event generate
         amplitude.waitForTrackingQueue()
 
         let events = storageMem.events()
