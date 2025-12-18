@@ -14,8 +14,8 @@ import SwiftUI
 class IOSLifecycleMonitor: UtilityPlugin {
 
     private var utils: DefaultEventUtils?
-    private var sendApplicationInstalledOnDidBecomeActive = false
-    private var sendApplicationOpenedOnDidBecomeActive = false
+    private var sendAppInstalledOnDidBecomeActive = false
+    private var sendAppOpenedOnDidBecomeActive = false
 
     override init() {
         super.init()
@@ -56,8 +56,8 @@ class IOSLifecycleMonitor: UtilityPlugin {
         // If app state is inactive, it won't receive didFinishLaunching and willEnterForeground
         // notifications anymore, we need to send install and opened event when become active
         } else if appState == .inactive {
-            sendApplicationInstalledOnDidBecomeActive = true
-            sendApplicationOpenedOnDidBecomeActive = true
+            sendAppInstalledOnDidBecomeActive = true
+            sendAppOpenedOnDidBecomeActive = true
         }
 
         updateAutocaptureSetup()
@@ -96,19 +96,19 @@ class IOSLifecycleMonitor: UtilityPlugin {
         // Pre SceneDelegate apps wil not fire a willEnterForeground notification on app launch.
         // Instead, use the initial applicationDidBecomeActive
         if !IOSVendorSystem.usesScenes {
-            sendApplicationOpenedOnDidBecomeActive = true
+            sendAppOpenedOnDidBecomeActive = true
         }
     }
 
     @objc
     func applicationDidBecomeActive(notification: Notification) {
-        guard sendApplicationInstalledOnDidBecomeActive || sendApplicationOpenedOnDidBecomeActive else {
+        guard sendAppInstalledOnDidBecomeActive || sendAppOpenedOnDidBecomeActive else {
             return
         }
-        let sendInstall = sendApplicationInstalledOnDidBecomeActive
-        let sendOpened = sendApplicationOpenedOnDidBecomeActive
-        sendApplicationInstalledOnDidBecomeActive = false
-        sendApplicationOpenedOnDidBecomeActive = false
+        let sendInstall = sendAppInstalledOnDidBecomeActive
+        let sendOpened = sendAppOpenedOnDidBecomeActive
+        sendAppInstalledOnDidBecomeActive = false
+        sendAppOpenedOnDidBecomeActive = false
 
         amplitude?.trackingQueue.async { [self] in
             if sendInstall {
