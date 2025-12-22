@@ -63,7 +63,8 @@ class StoragePrefixMigration {
             return
         }
 
-        if destination.read(key: key) == nil {
+        let destinationValue: String? = destination.read(key: key)
+        if destinationValue == nil {
             do {
                 try destination.write(key: key, value: sourceValue)
             } catch {
