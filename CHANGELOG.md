@@ -1,3 +1,10 @@
+## [1.16.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.1...v1.16.2) (2025-12-22)
+
+
+### Bug Fixes
+
+* xcode 26.2 bug causes crash on iOS 15 ([#349](https://github.com/amplitude/Amplitude-Swift/issues/349)) ([f63bd60](https://github.com/amplitude/Amplitude-Swift/commit/f63bd601261a83dd650a37d8758ad8f2d4a76f1f))
+
 ## [1.16.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.0...v1.16.1) (2025-12-17)
 
 
