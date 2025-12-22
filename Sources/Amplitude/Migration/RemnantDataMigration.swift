@@ -19,7 +19,8 @@ class RemnantDataMigration {
     }
 
     func execute() {
-        let firstRunSinceUpgrade = storage.read(key: StorageKey.LAST_EVENT_TIME) == nil
+        let lastEventTime: Int64? = storage.read(key: StorageKey.LAST_EVENT_TIME)
+        let firstRunSinceUpgrade = lastEventTime == nil
 
         moveDeviceAndUserId()
         moveSessionData()
