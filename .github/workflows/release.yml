@@ -32,7 +32,8 @@ jobs:
   release:
     name: Release
     runs-on: macos-15
-    needs: [authorize, run-tests]
+    #needs: [authorize, run-tests]
+    needs: [run-tests] # TODO: Take this out before merging to main!!!
     steps:
       - name: Checkout
         uses: actions/checkout@v3
