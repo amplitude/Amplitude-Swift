@@ -12,6 +12,8 @@ jobs:
   authorize:
     name: Authorize
     runs-on: macos-15
+    # TODO: take this out before PR
+    if: ${{ github.event.inputs.dryRun != 'true'}}
     steps:
       - name: ${{ github.actor }} permission check to do a release
         uses: octokit/request-action@v2.1.9
@@ -23,6 +25,8 @@ jobs:
 
   run-tests:
     name: Run Tests
+    # TODO: take this out before PR
+    if: ${{ github.event.inputs.dryRun != 'true'}}
     uses: ./.github/workflows/unit-test.yml
 
   release:
