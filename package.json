@@ -1,4 +1,5 @@
 {
+  "private": true,
   "dependencies": {
     "@google/semantic-release-replace-plugin": "1.2.0",
     "@semantic-release/changelog": "5.0.1",

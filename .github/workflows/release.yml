@@ -9,31 +9,26 @@ on:
         default: "true"
 
 jobs:
-  # authorize:
-  #   name: Authorize
-  #   runs-on: macos-15
-  #   # TODO: take this out before PR
-  #   if: ${{ github.event.inputs.dryRun != 'true'}}
-  #   steps:
-  #     - name: ${{ github.actor }} permission check to do a release
-  #       uses: octokit/request-action@v2.1.9
-  #       with:
-  #         route: GET /repos/:repository/collaborators/${{ github.actor }}
-  #         repository: ${{ github.repository }}
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  authorize:
+    name: Authorize
+    runs-on: macos-15
+    steps:
+      - name: ${{ github.actor }} permission check to do a release
+        uses: octokit/request-action@v2.1.9
+        with:
+          route: GET /repos/:repository/collaborators/${{ github.actor }}
+          repository: ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # run-tests:
-  #   name: Run Tests
-  #   # TODO: take this out before PR
-  #   if: ${{ github.event.inputs.dryRun != 'true'}}
-  #   uses: ./.github/workflows/unit-test.yml
+  run-tests:
+    name: Run Tests
+    uses: ./.github/workflows/unit-test.yml
 
   release:
     name: Release
     runs-on: macos-15
-    # needs: [authorize, run-tests]
-    # needs: [run-tests] # TODO: Take this out before merging to main!!!
+    needs: [authorize, run-tests]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
