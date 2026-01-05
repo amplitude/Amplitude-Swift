@@ -1,3 +1,10 @@
+## [1.16.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.2...v1.16.3) (2026-01-05)
+
+
+### Bug Fixes
+
+* app install and opened not fired at specific case ([#347](https://github.com/amplitude/Amplitude-Swift/issues/347)) ([fea1c13](https://github.com/amplitude/Amplitude-Swift/commit/fea1c137208c5eab67fac0a3817aec45fa2deb3d))
+
 ## [1.16.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.1...v1.16.2) (2025-12-22)
 
 
