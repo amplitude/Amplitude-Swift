@@ -439,10 +439,13 @@ public class Amplitude {
             } else {
                 sessionEvents = self.sessions.endCurrentSession()
             }
-            self.sessions.assignEventId(events: sessionEvents).forEach { e in
-                e.userId = e.userId ?? identity.userId
-                e.deviceId = e.deviceId ?? identity.deviceId
-                self.timeline.processEvent(event: e)
+
+            if !configuration.optOut {
+                self.sessions.assignEventId(events: sessionEvents).forEach { e in
+                    e.userId = e.userId ?? identity.userId
+                    e.deviceId = e.deviceId ?? identity.deviceId
+                    self.timeline.processEvent(event: e)
+                }
             }
         }
         return self
@@ -503,10 +506,12 @@ public class Amplitude {
         trackingQueue.async { [self, identity] in
             // set inForeground to false to represent state before event was fired
             let events = self.sessions.processEvent(event: dummySessionStartEvent, inForeground: false)
-            events.forEach { e in
-                e.userId = e.userId ?? identity.userId
-                e.deviceId = e.deviceId ?? identity.deviceId
-                self.timeline.processEvent(event: e)
+            if !configuration.optOut {
+                events.forEach { e in
+                    e.userId = e.userId ?? identity.userId
+                    e.deviceId = e.deviceId ?? identity.deviceId
+                    self.timeline.processEvent(event: e)
+                }
             }
         }
     }
