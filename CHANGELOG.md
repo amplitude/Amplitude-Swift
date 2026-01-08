@@ -1,3 +1,10 @@
+## [1.16.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.3...v1.16.4) (2026-01-08)
+
+
+### Bug Fixes
+
+* optout setting still recording session start/end events ([#352](https://github.com/amplitude/Amplitude-Swift/issues/352)) ([8102be0](https://github.com/amplitude/Amplitude-Swift/commit/8102be064d843810f5341ec35ea094abf328e184))
+
 ## [1.16.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.2...v1.16.3) (2026-01-05)
 
 
