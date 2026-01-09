@@ -1,3 +1,10 @@
+## [1.16.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.4...v1.16.5) (2026-01-09)
+
+
+### Bug Fixes
+
+* update Cocoapods/Carthage deps ([077425e](https://github.com/amplitude/Amplitude-Swift/commit/077425e2d6f860098397dc4a7e60e9de16a4ec29))
+
 ## [1.16.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.3...v1.16.4) (2026-01-08)
 
 
