@@ -99,11 +99,11 @@ jobs:
             # Compare all versions
             if [ -z "$reference_version" ] || [ -z "$carthage_version" ] || [ -z "$pod_version" ]; then
               echo "  ⚠ Warning: Could not find version in all files"
-            elif [ "$reference_version" = "$carthage_version" ] && [ "$carthage_version" = "$pod_version" ]; then
-              echo "  ✓ All versions match: $reference_version"
-            else
-              echo "  ✗ Version mismatch detected!"
+            elif [ "$reference_version" != "$carthage_version" ] || [ "$carthage_version" != "$pod_version" ]; then
+              echo "  ✗ Version mismatch between Package.swift, Cartfile, and Podspec!"
               dep_errors=1
+            elif [ $dep_errors -eq 0 ]; then
+              echo "  ✓ All versions match: $reference_version"
             fi
             echo ""
 
