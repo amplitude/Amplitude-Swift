@@ -211,22 +211,8 @@ class PersistentStorage: Storage {
         if sandboxed {
             return ""
         }
-        let appIdentifier = Bundle.main.bundleIdentifier ?? hashedExecutablePath()
+        let appIdentifier = Bundle.main.bundleIdentifier ?? (Bundle.main.executablePath ?? ProcessInfo.processInfo.processName).fnv1a64String()
         return "\(appIdentifier)/"
-    }
-
-    private static func hashedExecutablePath() -> String {
-        let path = Bundle.main.executablePath ?? ProcessInfo.processInfo.processName
-        let hash = fnv1a64(path)
-        return String(format: "%016llx", hash)
-    }
-
-    private static func fnv1a64(_ s: String) -> UInt64 {
-        let offsetBasis: UInt64 = 0xcbf29ce484222325
-        let prime: UInt64 = 0x100000001b3
-        return s.utf8.reduce(offsetBasis) { hash, byte in
-            (hash ^ UInt64(byte)) &* prime
-        }
     }
 }
 
