@@ -49,7 +49,7 @@ class PersistentStorage: Storage {
         self.diagonostics = diagonostics
         self.diagonosticsClient = diagnosticsClient
         // Make sure Amplitude data is sandboxed per app
-        self.appPath = isStorageSandboxed() ? "" : "\(Bundle.main.bundleIdentifier!)/"
+        self.appPath = Self.getAppPath(sandboxed: isStorageSandboxed())
         handleV1Files()
     }
 
@@ -205,6 +205,14 @@ class PersistentStorage: Storage {
 
     internal func isStorageSandboxed() -> Bool {
         return SandboxHelper().isSandboxEnabled()
+    }
+
+    private static func getAppPath(sandboxed: Bool) -> String {
+        if sandboxed {
+            return ""
+        }
+        let appIdentifier = Bundle.main.bundleIdentifier ?? (Bundle.main.executablePath ?? ProcessInfo.processInfo.processName).fnv1a64String()
+        return "\(appIdentifier)/"
     }
 }
 
