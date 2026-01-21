@@ -1,3 +1,10 @@
+## [1.16.6](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.5...v1.16.6) (2026-01-21)
+
+
+### Bug Fixes
+
+* crash when bundleIdentifier is nil ([#358](https://github.com/amplitude/Amplitude-Swift/issues/358)) ([0a68b73](https://github.com/amplitude/Amplitude-Swift/commit/0a68b73ae851cccdc15b3d2b92a593d8ed8a4893))
+
 ## [1.16.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.4...v1.16.5) (2026-01-09)
 
 
