@@ -40,7 +40,7 @@ open class Identify {
 
     var propertySet = Set<String>()
     var properties = [String: Any]()
-    var logger = ConsoleLogger(logLevel: LogLevelEnum.WARN.rawValue)
+    var logger = ConsoleLogger(logLevel: LogLevelEnum.warn.rawValue)
 
     // $set operation
     @discardableResult

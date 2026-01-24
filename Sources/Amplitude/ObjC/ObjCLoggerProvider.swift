@@ -18,25 +18,25 @@ class ObjCLoggerProviderWrapper: Logger, @unchecked Sendable {
     }
 
     func error(message: String) {
-        if logLevel >= LogLevelEnum.ERROR.rawValue {
+        if logLevel >= LogLevelEnum.error.rawValue {
             logProvider(logLevel, message)
         }
     }
 
     func warn(message: String) {
-        if logLevel >= LogLevelEnum.WARN.rawValue {
+        if logLevel >= LogLevelEnum.warn.rawValue {
             logProvider(logLevel, message)
         }
     }
 
     func log(message: String) {
-        if logLevel >= LogLevelEnum.LOG.rawValue {
+        if logLevel >= LogLevelEnum.log.rawValue {
             logProvider(logLevel, message)
         }
     }
 
     func debug(message: String) {
-        if logLevel >= LogLevelEnum.DEBUG.rawValue {
+        if logLevel >= LogLevelEnum.debug.rawValue {
             logProvider(logLevel, message)
         }
     }
