@@ -5,15 +5,75 @@
 //  Created by Marvin Liu on 10/27/22.
 //
 
+#if AMPLITUDE_DISABLE_UIKIT
+@_spi(Internal) import AmplitudeCoreNoUIKit
+#else
+@_spi(Internal) import AmplitudeCore
+#endif
+
 import Foundation
 
+public typealias LogLevelEnum = LogLevel
+
+public extension LogLevelEnum {
+
+    @available(*, deprecated, renamed: "LogLevel.off")
+    static let OFF = Self.off
+
+    @available(*, deprecated, renamed: "LogLevel.error")
+    static let ERROR = Self.error
+
+    @available(*, deprecated, renamed: "LogLevel.warn")
+    static let WARN = Self.warn
+
+    @available(*, deprecated, renamed: "LogLevel.log")
+    static let LOG = Self.log
+
+    @available(*, deprecated, renamed: "LogLevel.debug")
+    static let DEBUG = Self.debug
+}
+
 @objc(AMPLogLevel)
-public enum LogLevelEnum: Int, Sendable {
+public enum ObjCLogLevel: Int, Sendable {
     case OFF
     case ERROR
     case WARN
     case LOG
     case DEBUG
+
+    init(_ logLevel: LogLevelEnum) {
+        switch logLevel {
+        case .off:
+            self = .OFF
+        case .error:
+            self = .ERROR
+        case .warn:
+            self = .WARN
+        case .log:
+            self = .LOG
+        case .debug:
+            self = .DEBUG
+        @unknown default:
+            self = .OFF
+        }
+    }
+
+    var logLevel: LogLevel {
+        switch self {
+        case .OFF:
+            return .off
+        case .ERROR:
+            return .error
+        case .WARN:
+            return .warn
+        case .LOG:
+            return .log
+        case .DEBUG:
+            return .debug
+        @unknown default:
+            return .off
+        }
+    }
 }
 
 public struct Constants {

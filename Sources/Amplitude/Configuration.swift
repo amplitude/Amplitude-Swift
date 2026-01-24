@@ -20,7 +20,7 @@ public class Configuration {
         public static let flushQueueSize = Constants.Configuration.FLUSH_QUEUE_SIZE
         public static let flushIntervalMillis = Constants.Configuration.FLUSH_INTERVAL_MILLIS
         public static let flushMaxRetries = Constants.Configuration.FLUSH_MAX_RETRIES
-        public static let logLevel = LogLevelEnum.WARN
+        public static let logLevel = LogLevelEnum.warn
         public static let minTimeBetweenSessionsMillis = Constants.Configuration.MIN_TIME_BETWEEN_SESSIONS_MILLIS
         public static let identifyBatchIntervalMillis = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS
         public static let serverZone = ServerZone.US
