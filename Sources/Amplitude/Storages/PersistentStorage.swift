@@ -36,12 +36,27 @@ class PersistentStorage: Storage {
     let logger: (any Logger)?
     let diagonostics: Diagnostics
     let diagonosticsClient: CoreDiagnostics
+    let containerURL: URL?
+    let userDefaultsSuiteName: String?
 
-    init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics, diagnosticsClient: CoreDiagnostics) {
+    init(
+        storagePrefix: String,
+        logger: (any Logger)?,
+        diagonostics: Diagnostics,
+        diagnosticsClient: CoreDiagnostics,
+        containerURL: URL? = nil,
+        userDefaultsSuiteName: String? = nil
+    ) {
         self.storagePrefix = storagePrefix == PersistentStorage.DEFAULT_STORAGE_PREFIX || storagePrefix.starts(with: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-")
             ? storagePrefix
             : "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(storagePrefix)"
-        self.userDefaults = UserDefaults(suiteName: "\(PersistentStorage.AMP_STORAGE_PREFIX).\(self.storagePrefix)")
+        self.containerURL = containerURL
+        self.userDefaultsSuiteName = userDefaultsSuiteName
+        // When using custom suite name (e.g., App Group), use it as-is for sharing across app extensions
+        // Keys will be prefixed with storagePrefix to maintain multi-instance isolation
+        // When no custom suite, create unique suite per instance for backwards compatibility
+        let suiteName = userDefaultsSuiteName ?? "\(PersistentStorage.AMP_STORAGE_PREFIX).\(self.storagePrefix)"
+        self.userDefaults = UserDefaults(suiteName: suiteName)
         self.fileManager = FileManager.default
         self.eventCallbackMap = [String: EventCallback]()
         self.storageVersionKey = "\(PersistentStorage.STORAGE_VERSION).\(self.storagePrefix)"
@@ -66,7 +81,7 @@ class PersistentStorage: Storage {
                 }
             default:
                 if isBasicType(value: value) {
-                    userDefaults?.set(value, forKey: key.rawValue)
+                    userDefaults?.set(value, forKey: userDefaultsKey(for: key))
                 } else {
                     throw Exception.unsupportedType
                 }
@@ -81,7 +96,7 @@ class PersistentStorage: Storage {
             case .EVENTS:
                 result = getEventFiles() as? T
             default:
-                result = userDefaults?.object(forKey: key.rawValue) as? T
+                result = userDefaults?.object(forKey: userDefaultsKey(for: key)) as? T
             }
             return result
         }
@@ -152,10 +167,13 @@ class PersistentStorage: Storage {
     func reset() {
         syncQueue.sync {
             let urls = getEventFiles(includeUnfinished: true)
-            let keys = userDefaults?.dictionaryRepresentation().keys
-            keys?.forEach { key in
-                userDefaults?.removeObject(forKey: key)
+            // Remove storage keys using proper prefixing for multi-instance isolation
+            for storageKey in StorageKey.allCases {
+                userDefaults?.removeObject(forKey: userDefaultsKey(for: storageKey))
             }
+            // Also remove the events file index and storage version keys
+            userDefaults?.removeObject(forKey: eventsFileKey)
+            userDefaults?.removeObject(forKey: storageVersionKey)
             for url in urls {
                 try? fileManager.removeItem(atPath: url.path)
             }
@@ -201,6 +219,16 @@ class PersistentStorage: Storage {
             }
         }
         return result
+    }
+
+    /// Returns the prefixed key for UserDefaults access
+    /// When using custom suite name (e.g., App Group), prefix with storagePrefix for multi-instance isolation
+    /// When using default suite (unique per instance), no prefix needed
+    private func userDefaultsKey(for key: StorageKey) -> String {
+        if userDefaultsSuiteName != nil {
+            return "\(storagePrefix).\(key.rawValue)"
+        }
+        return key.rawValue
     }
 
     internal func isStorageSandboxed() -> Bool {
@@ -298,6 +326,15 @@ extension PersistentStorage {
     }
 
     internal func getEventsStorageDirectory(createDirectory: Bool = true) -> URL {
+        // Use custom container URL if provided (e.g., for App Groups)
+        if let customURL = containerURL {
+            let storageUrl = customURL.appendingPathComponent("amplitude/\(appPath ?? "")\(eventsFileKey)/")
+            if createDirectory {
+                try? FileManager.default.createDirectory(at: storageUrl, withIntermediateDirectories: true, attributes: nil)
+            }
+            return storageUrl
+        }
+
         // TODO: Update to use applicationSupportDirectory for all platforms (this will require a migration)
         // let searchPathDirectory = FileManager.SearchPathDirectory.applicationSupportDirectory
         // tvOS doesn't have access to document

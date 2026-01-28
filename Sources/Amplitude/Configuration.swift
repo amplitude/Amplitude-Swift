@@ -88,6 +88,11 @@ public class Configuration {
     let remoteConfigClient: RemoteConfigClient
     let diagnosticsClient: CoreDiagnostics
 
+    /// Custom container URL for file storage (e.g., App Group container for App Clips)
+    public let containerURL: URL?
+    /// Custom UserDefaults suite name (e.g., App Group identifier for App Clips)
+    public let userDefaultsSuiteName: String?
+
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
     public convenience init(
         apiKey: String,
@@ -181,7 +186,9 @@ public class Configuration {
         networkTrackingOptions: NetworkTrackingOptions = Defaults.networkTrackingOptions,
         enableAutoCaptureRemoteConfig: Bool = Defaults.enableAutoCaptureRemoteConfig,
         interactionsOptions: InteractionsOptions = Defaults.interactionsOptions,
-        enableDiagnostics: Bool = Defaults.enableDiagnostics
+        enableDiagnostics: Bool = Defaults.enableDiagnostics,
+        containerURL: URL? = nil,
+        userDefaultsSuiteName: String? = nil
     ) {
         let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
@@ -205,10 +212,26 @@ public class Configuration {
                                                    logger: self.loggerProvider,
                                                    enabled: self.enableDiagnostics,
                                                    remoteConfigClient: self.remoteConfigClient)
+        self.containerURL = containerURL
+        self.userDefaultsSuiteName = userDefaultsSuiteName
         self.storageProvider = storageProvider
-        ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        ?? PersistentStorage(
+            storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName),
+            logger: self.loggerProvider,
+            diagonostics: self.diagonostics,
+            diagnosticsClient: self.diagnosticsClient,
+            containerURL: containerURL,
+            userDefaultsSuiteName: userDefaultsSuiteName
+        )
         self.identifyStorageProvider = identifyStorageProvider
-        ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        ?? PersistentStorage(
+            storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName),
+            logger: self.loggerProvider,
+            diagonostics: self.diagonostics,
+            diagnosticsClient: self.diagnosticsClient,
+            containerURL: containerURL,
+            userDefaultsSuiteName: userDefaultsSuiteName
+        )
         self.minIdLength = minIdLength
         self.partnerId = partnerId
         self.callback = callback
