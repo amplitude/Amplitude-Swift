@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.6...v1.17.0) (2026-01-29)
+
+
+### Features
+
+* use LogLevel from Core ([81a0e07](https://github.com/amplitude/Amplitude-Swift/commit/81a0e07e54537e0002bb8f08b3b1f75d42e67c79))
+
 ## [1.16.6](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.5...v1.16.6) (2026-01-21)
 
 
