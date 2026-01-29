@@ -36,9 +36,8 @@ class HttpClient {
         var sessionTask: URLSessionDataTask?
         let backgroundTaskCompletion = VendorSystem.current.beginBackgroundTask()
         do {
-            let request = try getRequest()
-            let requestData = getRequestData(events: events)
-
+            let (requestData, isGzipEncoded) = getRequestData(events: events)
+            let request = try getRequest(isGzipEncoded: isGzipEncoded)
             sessionTask = session.uploadTask(with: request, from: requestData) { [callbackQueue, configuration, logger] data, response, error in
                 callbackQueue.async {
                     if let error = error {
@@ -86,7 +85,7 @@ class HttpClient {
         return configuration.useBatch ? Constants.BATCH_API_HOST : Constants.DEFAULT_API_HOST
     }
 
-    func getRequest() throws -> URLRequest {
+    func getRequest(isGzipEncoded: Bool) throws -> URLRequest {
         let url = getUrl()
 
         let requestUrl: URL?
@@ -107,10 +106,13 @@ class HttpClient {
         request.httpMethod = "POST"
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
+        if isGzipEncoded {
+            request.setValue("gzip", forHTTPHeaderField: "Content-Encoding")
+        }
         return request
     }
 
-    func getRequestData(events: String) -> Data? {
+    func getRequestData(events: String) -> (data: Data?, isGzipEncoded: Bool) {
         let apiKey = configuration.apiKey
         let clientUploadTime: String = dateFormatter.string(from: getDate())
         var requestPayload = """
@@ -127,7 +129,16 @@ class HttpClient {
                 """
         }
         requestPayload += "}"
-        return requestPayload.data(using: .utf8)
+        guard let data = requestPayload.data(using: .utf8) else {
+            return (nil, false)
+        }
+
+        do {
+            return (try data.gzipped(), !data.isEmpty)
+        } catch {
+            logger?.error(message: "Error compressing request body: \(error)")
+            return (data, false)
+        }
     }
 
     func getDate() -> Date {
