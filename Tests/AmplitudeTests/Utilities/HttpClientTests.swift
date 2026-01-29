@@ -35,7 +35,7 @@ final class HttpClientTests: XCTestCase {
         configuration.serverUrl = invalidUrl
         let httpClient = HttpClient(configuration: configuration, diagnostics: diagonostics)
 
-        XCTAssertThrowsError(try httpClient.getRequest()) { error in
+        XCTAssertThrowsError(try httpClient.getRequest(isGzipEncoded: false)) { error in
             guard case HttpClient.Exception.invalidUrl(let url) = error else {
                 return XCTFail("not getting invalidUrl error")
             }
@@ -51,9 +51,10 @@ final class HttpClientTests: XCTestCase {
             {"api_key":"testApiKey","client_upload_time":"2023-10-24T18:16:24.000Z","events":[\(event.toString())]}
             """.data(using: .utf8)
 
-        let result = httpClient.getRequestData(events: "[\(event.toString())]")
+        let (result, isGzipEncoded) = httpClient.getRequestData(events: "[\(event.toString())]")
 
-        XCTAssertEqual(result, expectedRequestPayload)
+        XCTAssertEqual(result?.gunzipped(), expectedRequestPayload)
+        XCTAssertTrue(isGzipEncoded)
     }
 
     func testGetResponseDataWithDiagnostic() {
@@ -63,9 +64,10 @@ final class HttpClientTests: XCTestCase {
         let expectedRequestPayload: Data? = """
             {"api_key":"testApiKey","client_upload_time":"2023-10-24T18:16:24.000Z","events":[\(event.toString())],"request_metadata":{"sdk":{"malformed_events":["malformed event"]}}}
             """.data(using: .utf8)
-        let result = httpClient.getRequestData(events: "[\(event.toString())]")
+        let (result, isGzipEncoded) = httpClient.getRequestData(events: "[\(event.toString())]")
 
-        XCTAssertEqual(result, expectedRequestPayload)
+        XCTAssertEqual(result?.gunzipped(), expectedRequestPayload)
+        XCTAssertTrue(isGzipEncoded)
     }
 
     func testUploadWithInvalidApiKey() {
@@ -106,5 +108,13 @@ final class HttpClientTests: XCTestCase {
 
         waitForExpectations(timeout: 15)
         XCTAssertEqual(config.offline, true)
+    }
+
+    func testGetRequestSetsGzipHeaderWhenEnabled() throws {
+        let httpClient = HttpClient(configuration: configuration, diagnostics: diagonostics)
+        let request = try httpClient.getRequest(isGzipEncoded: true)
+
+        let contentEncoding = request.value(forHTTPHeaderField: "Content-Encoding")
+        XCTAssertEqual(contentEncoding, "gzip")
     }
 }

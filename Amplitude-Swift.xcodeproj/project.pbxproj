@@ -14,9 +14,13 @@
 		4E27E4162DC1443F00799F24 /* AutocaptureRemoteConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E27E4152DC1443800799F24 /* AutocaptureRemoteConfigTests.swift */; };
 		4E2B646B2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E2B646A2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift */; };
 		4E3871622BB34DBC002890AB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B6DF481F2B5B45BE00B3E6AA /* PrivacyInfo.xcprivacy */; };
+		4E5F89452F2AB9B60015FBC6 /* Data+Gzip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E5F89442F2AB9A60015FBC6 /* Data+Gzip.swift */; };
 		4E654D682D97454900BCAA85 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E654D672D97454900BCAA85 /* Identity.swift */; };
 		4E654DE12D9B60E700BCAA85 /* IdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E654DE02D9B60E300BCAA85 /* IdentityTests.swift */; };
 		4EB530752CD2E46A00E961F4 /* AnalyticsConnectorFramework in Frameworks */ = {isa = PBXBuildFile; productRef = 4EB530742CD2E46A00E961F4 /* AnalyticsConnectorFramework */; };
+		4ED02BB82F299298001AE863 /* Data+Gzip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED02BB72F299280001AE863 /* Data+Gzip.swift */; };
+		4ED02BB92F299298001AE863 /* Data+Gzip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED02BB72F299280001AE863 /* Data+Gzip.swift */; };
+		4ED02BBB2F29958D001AE863 /* GzipTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED02BBA2F299583001AE863 /* GzipTests.swift */; };
 		6C04FC3F2C58973C00EA8667 /* ElementInteractionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */; };
 		6C04FC412C58974A00EA8667 /* UIKitElementInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */; };
 		6C04FC432C58976800EA8667 /* ObjCAutocaptureOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC422C58976800EA8667 /* ObjCAutocaptureOptions.swift */; };
@@ -244,8 +248,11 @@
 		4E27E4152DC1443800799F24 /* AutocaptureRemoteConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocaptureRemoteConfigTests.swift; sourceTree = "<group>"; };
 		4E2B646A2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitScreenViewsPluginTests.swift; sourceTree = "<group>"; };
 		4E44BA012DB06D200048796B /* Package@swift-5.9.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Package@swift-5.9.swift"; sourceTree = "<group>"; };
+		4E5F89442F2AB9A60015FBC6 /* Data+Gzip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Gzip.swift"; sourceTree = "<group>"; };
 		4E654D672D97454900BCAA85 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
 		4E654DE02D9B60E300BCAA85 /* IdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityTests.swift; sourceTree = "<group>"; };
+		4ED02BB72F299280001AE863 /* Data+Gzip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Gzip.swift"; sourceTree = "<group>"; };
+		4ED02BBA2F299583001AE863 /* GzipTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GzipTests.swift; sourceTree = "<group>"; };
 		6C04FC3E2C58973C00EA8667 /* ElementInteractionEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElementInteractionEvent.swift; sourceTree = "<group>"; };
 		6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitElementInteractions.swift; sourceTree = "<group>"; };
 		6C04FC422C58976800EA8667 /* ObjCAutocaptureOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCAutocaptureOptions.swift; sourceTree = "<group>"; };
@@ -559,6 +566,7 @@
 		OBJ_43 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				4ED02BB72F299280001AE863 /* Data+Gzip.swift */,
 				EA2FD8922EECDD6F002AB27E /* AutocaptureManager.swift */,
 				EAE4C5F92E5F769D00FCD6E4 /* ObjectFilter.swift */,
 				EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */,
@@ -685,6 +693,8 @@
 		OBJ_70 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				4ED02BBA2F299583001AE863 /* GzipTests.swift */,
+				4E5F89442F2AB9A60015FBC6 /* Data+Gzip.swift */,
 				EAE4C5FB2E5FA0C100FCD6E4 /* ObjectFilterTests.swift */,
 				OBJ_71 /* EventPipelineTests.swift */,
 				OBJ_72 /* HttpClientTests.swift */,
@@ -926,6 +936,7 @@
 				EAED9A142EE7B47E00A5FC08 /* InMemoryStorage.swift in Sources */,
 				EAED9A152EE7B47E00A5FC08 /* DispatchQueueHolder.swift in Sources */,
 				EAED9A162EE7B47E00A5FC08 /* DefaultEventUtils.swift in Sources */,
+				4ED02BB92F299298001AE863 /* Data+Gzip.swift in Sources */,
 				EAED9A172EE7B47E00A5FC08 /* PersistentStorage.swift in Sources */,
 				EAED9A182EE7B47E00A5FC08 /* NetworkSwizzler.swift in Sources */,
 				EAED9A192EE7B47E00A5FC08 /* IdentifyInterceptor.swift in Sources */,
@@ -1007,6 +1018,7 @@
 				6C23EF162C38AD31000DC8C8 /* UIKitUserInteractionPluginTest.swift in Sources */,
 				OBJ_153 /* TimelineTests.swift in Sources */,
 				OBJ_154 /* TypesTests.swift in Sources */,
+				4ED02BBB2F29958D001AE863 /* GzipTests.swift in Sources */,
 				OBJ_155 /* EventPipelineTests.swift in Sources */,
 				3E281B8E2B96833D009D913B /* DiagnosticsTests.swift in Sources */,
 				4E27E4162DC1443F00799F24 /* AutocaptureRemoteConfigTests.swift in Sources */,
@@ -1021,6 +1033,7 @@
 				EAE989292DA831F200835345 /* NetworkTrackingPluginTest.swift in Sources */,
 				8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */,
 				BA1EC0F62A9F63FD00C2D547 /* AmplitudeIOSTests.swift in Sources */,
+				4E5F89452F2AB9B60015FBC6 /* Data+Gzip.swift in Sources */,
 				8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */,
 				8EDEC972AEB33E4528F7FEEB /* StoragePrefixMigrationTests.swift in Sources */,
 				4E2B646B2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift in Sources */,
@@ -1063,6 +1076,7 @@
 				OBJ_111 /* InMemoryStorage.swift in Sources */,
 				3E281B912B9BCC14009D913B /* DispatchQueueHolder.swift in Sources */,
 				B605396A2BB767390027FC24 /* DefaultEventUtils.swift in Sources */,
+				4ED02BB82F299298001AE863 /* Data+Gzip.swift in Sources */,
 				OBJ_112 /* PersistentStorage.swift in Sources */,
 				EA5C95942D7A76B900DC8B3B /* NetworkSwizzler.swift in Sources */,
 				BA9BEA4B299FB43B00BC0F7C /* IdentifyInterceptor.swift in Sources */,
