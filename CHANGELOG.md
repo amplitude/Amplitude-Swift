@@ -1,3 +1,10 @@
+## [1.17.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.0...v1.17.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* gzip upload bodies ([74ff6b0](https://github.com/amplitude/Amplitude-Swift/commit/74ff6b0b193a9914a3cbd8a989ff8961cbc46e1e))
+
 # [1.17.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.16.6...v1.17.0) (2026-01-29)
 
 
