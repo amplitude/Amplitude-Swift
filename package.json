@@ -1,8 +1,8 @@
 {
   "private": true,
   "dependencies": {
-    "@google/semantic-release-replace-plugin": "1.2.0",
-    "@semantic-release/changelog": "5.0.1",
+    "semantic-release-replace-plugin": "1.2.7",
+    "@semantic-release/changelog": "6.0.3",
     "@semantic-release/exec": "7.1.0",
     "@semantic-release/git": "10.0.1",
     "semantic-release": "25.0.2"
