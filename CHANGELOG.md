@@ -1,3 +1,10 @@
+## [1.17.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.1...v1.17.2) (2026-02-07)
+
+
+### Bug Fixes
+
+* crash while getting platform string ([#368](https://github.com/amplitude/Amplitude-Swift/issues/368)) ([b96da35](https://github.com/amplitude/Amplitude-Swift/commit/b96da3593febe209a2cc1584d4f9a6f8be548666))
+
 ## [1.17.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.0...v1.17.1) (2026-01-29)
 
 
