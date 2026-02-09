@@ -117,4 +117,42 @@ final class HttpClientTests: XCTestCase {
         let contentEncoding = request.value(forHTTPHeaderField: "Content-Encoding")
         XCTAssertEqual(contentEncoding, "gzip")
     }
+
+    func testShouldCompressUploads() throws {
+        // Any default URL should use compression
+        for serverZone in [ServerZone.US, ServerZone.EU] {
+            for useBatch in [true, false] {
+                for enableRequestBodyCompression in [true, false] {
+                    let config = Configuration(apiKey: "aaa",
+                                               useBatch: useBatch,
+                                               serverZone: serverZone,
+                                               enableRequestBodyCompression: enableRequestBodyCompression)
+                    let httpClient = HttpClient(configuration: config, diagnostics: diagonostics)
+                    XCTAssertTrue(httpClient.shouldCompressUploadBody)
+
+                    let (_, isGzipEncoded) = httpClient.getRequestData(events: "events")
+                    XCTAssertTrue(isGzipEncoded)
+                }
+            }
+        }
+
+        // Custom URLs should only compress if specified
+        let enabledConfig = Configuration(apiKey: "aaa",
+                                          serverUrl: "https://www.google.com",
+                                          enableRequestBodyCompression: true)
+        let enabledHttpClient = HttpClient(configuration: enabledConfig,
+                                           diagnostics: diagonostics)
+        XCTAssertTrue(enabledHttpClient.shouldCompressUploadBody)
+        let (_, enabledRequestIsGzipEncoded) = enabledHttpClient.getRequestData(events: "events")
+        XCTAssertTrue(enabledRequestIsGzipEncoded)
+
+        let disabledConfig = Configuration(apiKey: "aaa",
+                                          serverUrl: "https://www.google.com",
+                                          enableRequestBodyCompression: false)
+        let disabledHttpClient = HttpClient(configuration: disabledConfig,
+                                           diagnostics: diagonostics)
+        XCTAssertFalse(disabledHttpClient.shouldCompressUploadBody)
+        let (_, disabledRequestIsGzipEncoded) = disabledHttpClient.getRequestData(events: "events")
+        XCTAssertFalse(disabledRequestIsGzipEncoded)
+    }
 }

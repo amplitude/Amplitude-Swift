@@ -326,4 +326,13 @@ public class ObjCConfiguration: NSObject {
     @objc public var enableAutoCaptureRemoteConfig: Bool {
         return configuration.enableAutoCaptureRemoteConfig
     }
+
+    @objc public var enableRequestBodyCompression: Bool {
+        get {
+            return configuration.enableRequestBodyCompression
+        }
+        set {
+            configuration.enableRequestBodyCompression = newValue
+        }
+    }
 }
