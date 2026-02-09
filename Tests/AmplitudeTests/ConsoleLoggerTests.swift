@@ -14,21 +14,21 @@ final class ConsoleLoggerTests: XCTestCase {
         let consoleLogger = ConsoleLogger()
         XCTAssertEqual(
             consoleLogger.logLevel,
-            LogLevelEnum.OFF.rawValue
+            LogLevelEnum.off.rawValue
         )
     }
 
     func testUpdateLogLevel() {
-        let consoleLogger = ConsoleLogger(logLevel: LogLevelEnum.LOG.rawValue)
+        let consoleLogger = ConsoleLogger(logLevel: LogLevelEnum.log.rawValue)
         XCTAssertEqual(
             consoleLogger.logLevel,
-            LogLevelEnum.LOG.rawValue
+            LogLevelEnum.log.rawValue
         )
 
-        consoleLogger.logLevel = LogLevelEnum.ERROR.rawValue
+        consoleLogger.logLevel = LogLevelEnum.error.rawValue
         XCTAssertEqual(
             consoleLogger.logLevel,
-            LogLevelEnum.ERROR.rawValue
+            LogLevelEnum.error.rawValue
         )
     }
 }

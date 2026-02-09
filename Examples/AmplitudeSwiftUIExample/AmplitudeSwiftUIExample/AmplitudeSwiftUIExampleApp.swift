@@ -74,7 +74,7 @@ extension Amplitude {
     static var testInstance = Amplitude(
         configuration: Configuration(
             apiKey: "TEST-API-KEY",
-            logLevel: LogLevelEnum.DEBUG,
+            logLevel: LogLevelEnum.debug,
             callback: { (event: BaseEvent, code: Int, message: String) -> Void in
                 print("eventcallback: \(event), code: \(code), message: \(message)")
             },

@@ -117,10 +117,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 iosLifecycleMonitor = monitor
             }
         }
-        guard let iosLifecycleMonitor else {
-            XCTFail("iOS lifecycle monitor not installed")
-            return
-        }
+        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
 
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.screenViews), "Screen views should be off by default")
 
@@ -150,10 +147,8 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 iosLifecycleMonitor = monitor
             }
         }
-        guard let iosLifecycleMonitor else {
-            XCTFail("iOS lifecycle monitor not installed")
-            return
-        }
+
+        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.screenViews), "Screen views should be on by default")
 
@@ -183,10 +178,8 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 iosLifecycleMonitor = monitor
             }
         }
-        guard let iosLifecycleMonitor else {
-            XCTFail("iOS lifecycle monitor not installed")
-            return
-        }
+
+        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
 
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.elementInteractions), "Element interactions should be off by default")
 
@@ -216,10 +209,8 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 iosLifecycleMonitor = monitor
             }
         }
-        guard let iosLifecycleMonitor else {
-            XCTFail("iOS lifecycle monitor not installed")
-            return
-        }
+
+        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.elementInteractions), "Element interactions should be on by default")
 
@@ -265,10 +256,8 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 iosLifecycleMonitor = monitor
             }
         }
-        guard let iosLifecycleMonitor else {
-            XCTFail("iOS lifecycle monitor not installed")
-            return
-        }
+
+        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
 
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be off by default")
         XCTAssertFalse(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be off by default")
@@ -312,10 +301,8 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 iosLifecycleMonitor = monitor
             }
         }
-        guard let iosLifecycleMonitor else {
-            XCTFail("iOS lifecycle monitor not installed")
-            return
-        }
+
+        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be on by default")
         XCTAssertTrue(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be on by default")
@@ -364,10 +351,8 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 iosLifecycleMonitor = monitor
             }
         }
-        guard let iosLifecycleMonitor else {
-            XCTFail("iOS lifecycle monitor not installed")
-            return
-        }
+
+        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be on by default")
         XCTAssertTrue(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be on by default")

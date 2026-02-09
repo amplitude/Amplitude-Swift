@@ -24,7 +24,7 @@ final class LegacyDatabaseStorageTests: XCTestCase {
             }
         }
 
-        storage = LegacyDatabaseStorage(tempDbUrl.path, ConsoleLogger(logLevel: LogLevelEnum.WARN.rawValue))
+        storage = LegacyDatabaseStorage(tempDbUrl.path, ConsoleLogger(logLevel: LogLevelEnum.warn.rawValue))
     }
 
     override func tearDownWithError() throws {
