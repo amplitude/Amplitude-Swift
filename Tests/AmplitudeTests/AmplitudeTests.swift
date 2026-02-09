@@ -573,7 +573,7 @@ final class AmplitudeTests: XCTestCase {
             // don't transfer any events
             flushQueueSize: 1000,
             flushIntervalMillis: 99999,
-            logLevel: LogLevelEnum.DEBUG,
+            logLevel: LogLevelEnum.debug,
             autocapture: [],
             enableAutoCaptureRemoteConfig: false
         )
@@ -658,7 +658,7 @@ final class AmplitudeTests: XCTestCase {
                 // don't transfer any events
                 flushQueueSize: 1000,
                 flushIntervalMillis: 99999,
-                logLevel: LogLevelEnum.DEBUG,
+                logLevel: LogLevelEnum.debug,
                 autocapture: [],
                 enableAutoCaptureRemoteConfig: false
             )
