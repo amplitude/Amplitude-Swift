@@ -36,6 +36,7 @@ public class Configuration {
         public static let networkTrackingOptions = NetworkTrackingOptions.default
         public static let interactionsOptions = InteractionsOptions()
         public static let enableDiagnostics = true
+        public static let enableRequestBodyCompression = false
     }
 
     public internal(set) var apiKey: String
@@ -84,6 +85,11 @@ public class Configuration {
     public let enableAutoCaptureRemoteConfig: Bool
     public var interactionsOptions: InteractionsOptions
     public var enableDiagnostics: Bool
+
+    /// Controls request body compression **only** when a custom `serverUrl` is configured.
+    /// When using the SDK's default endpoints, request bodies are always compressed
+    /// regardless of this setting.
+    public var enableRequestBodyCompression: Bool
 
     let remoteConfigClient: RemoteConfigClient
     let diagnosticsClient: CoreDiagnostics
@@ -181,7 +187,8 @@ public class Configuration {
         networkTrackingOptions: NetworkTrackingOptions = Defaults.networkTrackingOptions,
         enableAutoCaptureRemoteConfig: Bool = Defaults.enableAutoCaptureRemoteConfig,
         interactionsOptions: InteractionsOptions = Defaults.interactionsOptions,
-        enableDiagnostics: Bool = Defaults.enableDiagnostics
+        enableDiagnostics: Bool = Defaults.enableDiagnostics,
+        enableRequestBodyCompression: Bool = Defaults.enableRequestBodyCompression,
     ) {
         let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
@@ -231,6 +238,7 @@ public class Configuration {
         self.networkTrackingOptions = networkTrackingOptions
         self.enableAutoCaptureRemoteConfig = enableAutoCaptureRemoteConfig
         self.interactionsOptions = interactionsOptions
+        self.enableRequestBodyCompression = enableRequestBodyCompression
     }
 
     func isValid() -> Bool {

@@ -133,11 +133,24 @@ class HttpClient {
             return (nil, false)
         }
 
-        do {
-            return (try data.gzipped(), !data.isEmpty)
-        } catch {
-            logger?.error(message: "Error compressing request body: \(error)")
+        if shouldCompressUploadBody {
+            do {
+                return (try data.gzipped(), !data.isEmpty)
+            } catch {
+                logger?.error(message: "Error compressing request body: \(error)")
+                return (data, false)
+            }
+        } else {
             return (data, false)
+        }
+    }
+
+    var shouldCompressUploadBody: Bool {
+        // Custom servers may not support gzip compression- only enable it if opted in.
+        if let serverUrl = configuration.serverUrl, !serverUrl.isEmpty {
+            return configuration.enableRequestBodyCompression
+        } else {
+            return true
         }
     }
 
