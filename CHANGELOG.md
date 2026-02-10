@@ -1,3 +1,10 @@
+## [1.17.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.2...v1.17.3) (2026-02-10)
+
+
+### Bug Fixes
+
+* disable compression on uploads for custom server urls unless opted in. ([12bbd67](https://github.com/amplitude/Amplitude-Swift/commit/12bbd67a4d8c08b58525e6cdddd40075e7ca3b1a))
+
 ## [1.17.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.1...v1.17.2) (2026-02-07)
 
 
