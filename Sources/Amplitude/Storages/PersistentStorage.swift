@@ -298,23 +298,18 @@ extension PersistentStorage {
     }
 
     internal func getEventsStorageDirectory(createDirectory: Bool = true) -> URL {
-        // TODO: Update to use applicationSupportDirectory for all platforms (this will require a migration)
-        // let searchPathDirectory = FileManager.SearchPathDirectory.applicationSupportDirectory
-        // tvOS doesn't have access to document
-        // macOS /Documents dir might be synced with iCloud
-        #if os(tvOS) || os(macOS)
-            let searchPathDirectory = FileManager.SearchPathDirectory.cachesDirectory
-        #else
-            let searchPathDirectory = FileManager.SearchPathDirectory.documentDirectory
-        #endif
-
+        let searchPathDirectory = FileManager.SearchPathDirectory.applicationSupportDirectory
         let urls = fileManager.urls(for: searchPathDirectory, in: .userDomainMask)
         let docUrl = urls[0]
-        let storageUrl = docUrl.appendingPathComponent("amplitude/\(appPath ?? "")\(eventsFileKey)/")
+        var storageUrl = docUrl.appendingPathComponent("amplitude/\(appPath ?? "")\(eventsFileKey)/")
         if createDirectory {
             // try to create it, will fail if already exists.
             // tvOS, watchOS regularly clear out data.
-            try? FileManager.default.createDirectory(at: storageUrl, withIntermediateDirectories: true, attributes: nil)
+          var values = URLResourceValues()
+          values.isExcludedFromBackup = true
+          try? FileManager.default.createDirectory(
+              at: storageUrl, withIntermediateDirectories: true, attributes: nil)
+          try? storageUrl.setResourceValues(values)
         }
         return storageUrl
     }
