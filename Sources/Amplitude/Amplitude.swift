@@ -481,7 +481,7 @@ public class Amplitude {
             return
         }
 
-        if event.eventType == Constants.IDENTIFY_EVENT, let userProperties = event.userProperties {
+        if let userProperties = event.userProperties, !userProperties.isEmpty {
             var updatedIdentity = identity
             updatedIdentity.apply(identify: userProperties as [String: Any])
             applyIdentityUpdate(updatedIdentity, sendIdentifyIfNeeded: false)
