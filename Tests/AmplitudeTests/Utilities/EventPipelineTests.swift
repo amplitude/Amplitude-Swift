@@ -22,7 +22,7 @@ final class EventPipelineTests: XCTestCase {
         storage = PersistentStorage(
             storagePrefix: "event-pipeline-tests",
             logger: nil,
-            diagonostics: Diagnostics(),
+            diagnostics: Diagnostics(),
             diagnosticsClient: FakeDiagnosticsClient())
         configuration = Configuration(
             apiKey: "testApiKey",
@@ -31,7 +31,7 @@ final class EventPipelineTests: XCTestCase {
             offline: NetworkConnectivityCheckerPlugin.Disabled
         )
         let amplitude = Amplitude(configuration: configuration)
-        httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagonostics)
+        httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagnostics)
         pipeline = EventPipeline(amplitude: amplitude)
         pipeline.httpClient = httpClient
         pipeline.flushTimer?.suspend()

@@ -29,7 +29,7 @@ final class IdentifyInterceptorTests: XCTestCase {
         amplitude = Amplitude(configuration: configuration)
         mockPathCreation = MockPathCreation()
         amplitude.add(plugin: NetworkConnectivityCheckerPlugin(pathCreation: mockPathCreation))
-        httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagonostics)
+        httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagnostics)
         pipeline = EventPipeline(amplitude: amplitude)
         pipeline.httpClient = httpClient
         interceptor = TestIdentifyInterceptor(
