@@ -17,12 +17,12 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
     private var eventBlock: URL!
     private var eventsString: String!
     private let logger = ConsoleLogger()
-    private let diagonostics = Diagnostics()
+    private let diagnostics = Diagnostics()
     private let diagnosticsClient = FakeDiagnosticsClient()
 
     override func setUp() {
         super.setUp()
-        storage = PersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        storage = PersistentStorage(storagePrefix: "storage", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         configuration = Configuration(apiKey: "testApiKey", storageProvider: storage)
         amplitude = Amplitude(configuration: configuration)
         eventPipeline = EventPipeline(amplitude: amplitude)
@@ -54,7 +54,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
               {"event_type":"test","insert_id":"c8d58999-7539-4184-8a7d-54302697baf0","user_id":"test-user"}
             ]
             """
-        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         let handler = PersistentStorageResponseHandler(
             configuration: configuration,
             storage: fakePersistentStorage,
@@ -88,7 +88,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             ]
             """
 
-        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         let handler = PersistentStorageResponseHandler(
             configuration: configuration,
             storage: fakePersistentStorage,
@@ -114,7 +114,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             ]
             """
 
-        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         let handler = PersistentStorageResponseHandler(
             configuration: configuration,
             storage: fakePersistentStorage,
@@ -146,7 +146,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
 
         let fakePersistentStorage = FakePersistentStorage(storagePrefix: "storage",
                                                           logger: logger,
-                                                          diagonostics: diagonostics,
+                                                          diagnostics: diagnostics,
                                                           diagnosticsClient: self.diagnosticsClient)
         let handler = PersistentStorageResponseHandler(
             configuration: configuration,

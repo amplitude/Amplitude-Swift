@@ -23,7 +23,7 @@ final class DiagnosticsTests: XCTestCase {
         XCTAssertEqual(diagnostics.extractDiagnosticsToString(), "{\"error_logs\":[\"log\"]}")
     }
 
-    func testHasDiagonostics() {
+    func testHasDiagnostics() {
         let diagnostics = Diagnostics()
         XCTAssertNil(diagnostics.extractDiagnosticsToString())
         diagnostics.addMalformedEvent("event")

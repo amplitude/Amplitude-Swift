@@ -28,7 +28,7 @@ public class EventPipeline {
         logger = amplitude.logger
         configuration = amplitude.configuration
         httpClient = HttpClient(configuration: amplitude.configuration,
-                                diagnostics: amplitude.configuration.diagonostics,
+                                diagnostics: amplitude.configuration.diagnostics,
                                 callbackQueue: amplitude.trackingQueue)
         flushTimer = QueueTimer(interval: getFlushInterval(), queue: amplitude.trackingQueue) { [weak self] in
             self?.flush()
