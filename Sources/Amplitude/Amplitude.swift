@@ -121,12 +121,9 @@ public class Amplitude {
         return self.configuration.loggerProvider
     }()
 
-    private static let trackingQueueKey = DispatchSpecificKey<Bool>()
-    let trackingQueue: DispatchQueue = {
-        let queue = DispatchQueue(label: "com.amplitude.analytics")
-        queue.setSpecific(key: trackingQueueKey, value: true)
-        return queue
-    }()
+    private static let trackingQueueKey = DispatchSpecificKey<String>()
+    private let trackingQueueId = UUID().uuidString
+    let trackingQueue = DispatchQueue(label: "com.amplitude.analytics")
 
     private(set) lazy var autocaptureManager: AutocaptureManager = {
         AutocaptureManager(
@@ -141,6 +138,7 @@ public class Amplitude {
     public init(
         configuration: Configuration
     ) {
+        trackingQueue.setSpecific(key: Self.trackingQueueKey, value: trackingQueueId)
         trackingQueue.suspend()
         self.configuration = configuration
 
@@ -432,7 +430,7 @@ public class Amplitude {
     }
 
     public func getSessionId() -> Int64 {
-        if DispatchQueue.getSpecific(key: Self.trackingQueueKey) == true {
+        if DispatchQueue.getSpecific(key: Self.trackingQueueKey) == trackingQueueId {
             return sessions.sessionId
         }
         return trackingQueue.sync { sessions.sessionId }
