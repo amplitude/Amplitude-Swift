@@ -42,6 +42,15 @@ class EventCollectorPlugin: DestinationPlugin {
     }
 }
 
+class SessionCapturingPlugin: BeforePlugin {
+    var capturedSessionId: Int64?
+
+    override func execute(event: BaseEvent) -> BaseEvent? {
+        capturedSessionId = amplitude?.getSessionId()
+        return event
+    }
+}
+
 class FakeInMemoryStorage: Storage {
     typealias EventBlock = URL
 

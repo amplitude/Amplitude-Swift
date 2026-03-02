@@ -790,6 +790,75 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
+    // MARK: - getSessionId / sessionId Thread Safety Tests
+
+    func testGetSessionIdReturnsConsistentValueAfterTrack() throws {
+        let amplitude = Amplitude(configuration: configuration)
+
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 1000, eventType: "test event"))
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertEqual(amplitude.getSessionId(), 1000)
+        XCTAssertEqual(amplitude.sessionId, 1000)
+        XCTAssertEqual(amplitude.sessionId, amplitude.getSessionId())
+    }
+
+    func testGetSessionIdFromConcurrentThreadsDoesNotCrash() throws {
+        let amplitude = Amplitude(configuration: configuration)
+
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 1000, eventType: "test event"))
+        amplitude.waitForTrackingQueue()
+
+        let iterations = 100
+        let expectation = XCTestExpectation(description: "All concurrent reads complete")
+        expectation.expectedFulfillmentCount = iterations
+
+        let concurrentQueue = DispatchQueue(label: "test.concurrent", attributes: .concurrent)
+
+        for _ in 0..<iterations {
+            concurrentQueue.async {
+                let sid = amplitude.getSessionId()
+                XCTAssertTrue(sid == 1000 || sid == 2000)
+                expectation.fulfill()
+            }
+        }
+
+        amplitude.setSessionId(timestamp: 2000)
+
+        wait(for: [expectation], timeout: 10)
+    }
+
+    func testSessionIdPropertyAndGetSessionIdMethodAreEquivalent() throws {
+        let amplitude = Amplitude(configuration: configuration)
+
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 1000, eventType: "e1"))
+        amplitude.waitForTrackingQueue()
+        XCTAssertEqual(amplitude.sessionId, amplitude.getSessionId())
+
+        amplitude.setSessionId(timestamp: 5000)
+        amplitude.waitForTrackingQueue()
+        XCTAssertEqual(amplitude.sessionId, amplitude.getSessionId())
+        XCTAssertEqual(amplitude.sessionId, 5000)
+
+        amplitude.setSessionId(timestamp: -1)
+        amplitude.waitForTrackingQueue()
+        XCTAssertEqual(amplitude.sessionId, amplitude.getSessionId())
+        XCTAssertEqual(amplitude.sessionId, -1)
+    }
+
+    func testGetSessionIdFromPluginExecuteDoesNotDeadlock() throws {
+        let amplitude = Amplitude(configuration: configuration)
+
+        let sessionCapture = SessionCapturingPlugin()
+        amplitude.add(plugin: sessionCapture)
+
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 1000, eventType: "test event"))
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertEqual(sessionCapture.capturedSessionId, 1000,
+                       "Plugin should be able to call getSessionId() from execute() without deadlocking")
+    }
+
     func getDictionary(_ props: [String: Any?]) -> NSDictionary {
         return NSDictionary(dictionary: props as [AnyHashable: Any])
     }
