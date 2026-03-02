@@ -427,7 +427,7 @@ public class Amplitude {
     }
 
     public func getSessionId() -> Int64 {
-        return sessions.sessionId
+        return trackingQueue.sync { sessions.sessionId }
     }
 
     @discardableResult
