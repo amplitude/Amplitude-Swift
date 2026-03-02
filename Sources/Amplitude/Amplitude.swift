@@ -12,7 +12,7 @@ public class Amplitude {
     private var inForeground = false
 
     public var sessionId: Int64 {
-        sessions.sessionId
+        getSessionId()
     }
 
     private let identityLock = NSLock()
@@ -121,7 +121,12 @@ public class Amplitude {
         return self.configuration.loggerProvider
     }()
 
-    let trackingQueue = DispatchQueue(label: "com.amplitude.analytics")
+    private static let trackingQueueKey = DispatchSpecificKey<Bool>()
+    let trackingQueue: DispatchQueue = {
+        let queue = DispatchQueue(label: "com.amplitude.analytics")
+        queue.setSpecific(key: trackingQueueKey, value: true)
+        return queue
+    }()
 
     private(set) lazy var autocaptureManager: AutocaptureManager = {
         AutocaptureManager(
@@ -427,6 +432,9 @@ public class Amplitude {
     }
 
     public func getSessionId() -> Int64 {
+        if DispatchQueue.getSpecific(key: Self.trackingQueueKey) == true {
+            return sessions.sessionId
+        }
         return trackingQueue.sync { sessions.sessionId }
     }
 
