@@ -12,8 +12,14 @@ class ObjectFilter {
     private let blockKeyPaths: [KeyPath]
 
     init(allowList: [String] = [], blockList: [String] = []) {
-        allowKeyPaths = allowList.compactMap { $0.isEmpty ? nil : $0.components(separatedBy: "/") }
-        blockKeyPaths = blockList.compactMap { $0.isEmpty ? nil : $0.components(separatedBy: "/") }
+        allowKeyPaths = allowList.compactMap { Self.parseKeyPath($0) }
+        blockKeyPaths = blockList.compactMap { Self.parseKeyPath($0) }
+    }
+
+    private static func parseKeyPath(_ path: String) -> KeyPath? {
+        guard !path.isEmpty else { return nil }
+        let components = path.components(separatedBy: "/").filter { !$0.isEmpty }
+        return components.isEmpty ? nil : components
     }
 
     func filterd(_ object: Any?) -> Any? {

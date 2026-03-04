@@ -212,6 +212,7 @@ final class ObjectFilterMatchTests: XCTestCase {
 
         // Test patterns containing "//" (empty path segments)
         // These patterns have empty strings in the keypath array after splitting
+        // The matches() function works on raw keypaths, so empty segments still fail here
 
         // Pattern with "//" at the beginning
         XCTAssertFalse(filter.matches(["user", "name"], ["", "user", "name"]))
@@ -245,6 +246,156 @@ final class ObjectFilterMatchTests: XCTestCase {
         XCTAssertFalse(filter.matches(["user", "john", "name"], ["user", "", "name"]))
         XCTAssertFalse(filter.matches(["prefix", "user"], ["", "user"]))
     }
+
+    // MARK: - Leading and consecutive slash normalization tests
+
+    func testLeadingSlashInAllowList() throws {
+        // "/*" should be normalized to ["*"], matching all top-level keys
+        let input: [String: Any] = [
+            "name": "John",
+            "age": 30,
+            "email": "john@example.com"
+        ]
+
+        let filter = ObjectFilter(allowList: ["/*"])
+        let result = filter.filterd(input) as? [String: Any]
+
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?["name"] as? String, "John")
+        XCTAssertEqual(result?["age"] as? Int, 30)
+        XCTAssertEqual(result?["email"] as? String, "john@example.com")
+
+        // "/**" should be normalized to ["**"], matching everything at all depths
+        let nested: [String: Any] = [
+            "user": [
+                "name": "John",
+                "address": [
+                    "city": "NYC"
+                ] as [String: Any]
+            ] as [String: Any],
+            "active": true
+        ]
+
+        let filter2 = ObjectFilter(allowList: ["/**"])
+        let result2 = filter2.filterd(nested) as? [String: Any]
+
+        XCTAssertNotNil(result2)
+        XCTAssertEqual(result2?["active"] as? Bool, true)
+
+        let user = result2?["user"] as? [String: Any]
+        XCTAssertEqual(user?["name"] as? String, "John")
+
+        let address = user?["address"] as? [String: Any]
+        XCTAssertEqual(address?["city"] as? String, "NYC")
+    }
+
+    func testLeadingSlashInNestedAllowList() throws {
+        // "/user/name" should be normalized to ["user", "name"]
+        let input: [String: Any] = [
+            "user": [
+                "name": "John",
+                "password": "secret"
+            ] as [String: Any]
+        ]
+
+        let filter = ObjectFilter(allowList: ["/user/name"])
+        let result = filter.filterd(input) as? [String: Any]
+        let user = result?["user"] as? [String: Any]
+
+        XCTAssertNotNil(user)
+        XCTAssertEqual(user?["name"] as? String, "John")
+        XCTAssertNil(user?["password"])
+    }
+
+    func testConsecutiveSlashesInAllowList() throws {
+        // "*///*" should be normalized to ["*", "*"], matching all second-level keys
+        let input: [String: Any] = [
+            "user": [
+                "name": "John",
+                "age": 30
+            ] as [String: Any],
+            "product": [
+                "title": "Widget"
+            ] as [String: Any]
+        ]
+
+        let filter = ObjectFilter(allowList: ["*///*"])
+        let result = filter.filterd(input) as? [String: Any]
+
+        let user = result?["user"] as? [String: Any]
+        XCTAssertEqual(user?["name"] as? String, "John")
+        XCTAssertEqual(user?["age"] as? Int, 30)
+
+        let product = result?["product"] as? [String: Any]
+        XCTAssertEqual(product?["title"] as? String, "Widget")
+    }
+
+    func testLeadingSlashInBlockList() throws {
+        // BlockList with leading "/" should also be normalized
+        let input: [String: Any] = [
+            "user": [
+                "name": "John",
+                "password": "secret",
+                "email": "john@example.com"
+            ] as [String: Any]
+        ]
+
+        let filter = ObjectFilter(allowList: ["user/**"], blockList: ["/user/password"])
+        let result = filter.filterd(input) as? [String: Any]
+        let user = result?["user"] as? [String: Any]
+
+        XCTAssertNotNil(user)
+        XCTAssertEqual(user?["name"] as? String, "John")
+        XCTAssertEqual(user?["email"] as? String, "john@example.com")
+        XCTAssertNil(user?["password"])
+    }
+
+    func testConsecutiveSlashesInBlockList() throws {
+        let input: [String: Any] = [
+            "data": [
+                "public": "visible",
+                "secret": "hidden"
+            ] as [String: Any]
+        ]
+
+        let filter = ObjectFilter(allowList: ["data/**"], blockList: ["data///secret"])
+        let result = filter.filterd(input) as? [String: Any]
+        let data = result?["data"] as? [String: Any]
+
+        XCTAssertNotNil(data)
+        XCTAssertEqual(data?["public"] as? String, "visible")
+        XCTAssertNil(data?["secret"])
+    }
+
+    func testTrailingSlashInAllowList() throws {
+        // "user/name/" should be normalized to ["user", "name"]
+        let input: [String: Any] = [
+            "user": [
+                "name": "John",
+                "password": "secret"
+            ] as [String: Any]
+        ]
+
+        let filter = ObjectFilter(allowList: ["user/name/"])
+        let result = filter.filterd(input) as? [String: Any]
+        let user = result?["user"] as? [String: Any]
+
+        XCTAssertNotNil(user)
+        XCTAssertEqual(user?["name"] as? String, "John")
+        XCTAssertNil(user?["password"])
+    }
+
+    func testOnlySlashesReturnNil() throws {
+        // Patterns that are only slashes should be treated as empty and filtered out
+        let input: [String: Any] = ["name": "John"]
+
+        let filter = ObjectFilter(allowList: ["///"])
+        let result = filter.filterd(input)
+
+        // allowKeyPaths is empty after normalization, so filterd returns nil
+        XCTAssertNil(result)
+    }
+
 }
 
 final class ObjectFilterTests: XCTestCase {
