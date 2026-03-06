@@ -1,3 +1,10 @@
+## [1.17.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.3...v1.17.4) (2026-03-06)
+
+
+### Bug Fixes
+
+* parsing logic of slashes in body capture ([#380](https://github.com/amplitude/Amplitude-Swift/issues/380)) ([93c504b](https://github.com/amplitude/Amplitude-Swift/commit/93c504be0f96da380b6ba42241b4b33aec640123))
+
 ## [1.17.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.2...v1.17.3) (2026-02-10)
 
 
