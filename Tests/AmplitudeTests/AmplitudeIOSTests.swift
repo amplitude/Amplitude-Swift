@@ -247,18 +247,20 @@ final class AmplitudeIOSTests: XCTestCase {
     func testSetIdentityForAutoCapturedEvents() throws {
         let configuration = Configuration(
             apiKey: "api-key",
+            instanceName: #function,
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: .sessions,
             enableAutoCaptureRemoteConfig: false
         )
 
-        // force new session event to fire immediately
-        IOSVendorSystem.overrideApplicationState(.active)
+        // Start inactive so the session autocapture waits for didBecomeActive.
+        IOSVendorSystem.overrideApplicationState(.inactive)
 
         let identity = Identity(userId: "test-user", deviceId: "test-device")
         let amplitude = Amplitude(configuration: configuration)
         amplitude.identity = identity
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
         amplitude.waitForTrackingQueue()
         // wait twice for async event generate
         amplitude.waitForTrackingQueue()

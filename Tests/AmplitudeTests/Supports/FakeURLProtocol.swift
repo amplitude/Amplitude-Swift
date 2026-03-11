@@ -8,7 +8,21 @@
 import Foundation
 
 class FakeURLProtocol: URLProtocol {
-    static var mockResponses: [MockResponse] = []
+    private static let stateQueue = DispatchQueue(label: "FakeURLProtocol.stateQueue")
+    private static var _mockResponses: [MockResponse] = []
+
+    static var mockResponses: [MockResponse] {
+        get {
+            stateQueue.sync {
+                _mockResponses
+            }
+        }
+        set {
+            stateQueue.sync {
+                _mockResponses = newValue
+            }
+        }
+    }
 
     private static let responseQueue = DispatchQueue(label: "FakeURLProtocol.responseQueue")
 
@@ -51,12 +65,18 @@ class FakeURLProtocol: URLProtocol {
 
         print("FakeURLProtocol: Starting to load \(url)")
 
-        guard !Self.mockResponses.isEmpty else {
+        let mockResponse = Self.stateQueue.sync { () -> MockResponse? in
+            guard !Self._mockResponses.isEmpty else {
+                return nil
+            }
+
+            return Self._mockResponses.removeFirst()
+        }
+
+        guard let mockResponse else {
             client?.urlProtocol(self, didFailWithError: NSError(domain: "FakeURLProtocol", code: -2, userInfo: [NSLocalizedDescriptionKey: "No mock responses available"]))
             return
         }
-
-        let mockResponse = Self.mockResponses.removeFirst()
 
         let response = HTTPURLResponse(
             url: url,
@@ -91,7 +111,9 @@ class FakeURLProtocol: URLProtocol {
     }
 
     static func clearMockResponses() {
-        mockResponses.removeAll()
+        stateQueue.sync {
+            _mockResponses.removeAll()
+        }
     }
 }
 

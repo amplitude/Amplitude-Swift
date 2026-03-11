@@ -43,14 +43,17 @@ final class NetworkTrackingPluginTest: XCTestCase {
     override func setUp() {
         super.setUp()
         storageMem = FakeInMemoryStorage()
+        FakeURLProtocol.clearMockResponses()
     }
 
     override func tearDown() {
-        super.tearDown()
         eventCollector.events.removeAll()
+        FakeURLProtocol.clearMockResponses()
         // Only invalidate custom timeout sessions - shared session is reused
         customTimeoutSessions.forEach { $0.invalidateAndCancel() }
         customTimeoutSessions.removeAll()
+        amplitude = nil
+        super.tearDown()
     }
 
     func setupAmplitude(with options: NetworkTrackingOptions = NetworkTrackingOptions.default) {
@@ -184,14 +187,14 @@ final class NetworkTrackingPluginTest: XCTestCase {
         amplitude.track(eventType: "Test")
         amplitude.flush()
 
-        wait(for: 0.1)
-        networkTrackingPlugin?.waitforNetworkTrackingQueue()
-        amplitude.waitForTrackingQueue()
-        amplitude.waitForTrackingQueue()
+        XCTAssertTrue(waitForCollectedEventCount(2), "Expected the tracked event and the captured Amplitude upload request")
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2)
-        let event = events[1] as! NetworkRequestEvent
+        guard let event = events.first(where: { $0 is NetworkRequestEvent }) as? NetworkRequestEvent else {
+            XCTFail("Expected a captured Amplitude network request event")
+            return
+        }
         XCTAssertEqual(event.eventProperties?[Constants.AMP_NETWORK_URL_PROPERTY] as! String, "https://api2.amplitude.com/2/httpapi")
     }
 
@@ -1220,6 +1223,28 @@ final class NetworkTrackingPluginTest: XCTestCase {
     func wait(for interval: TimeInterval = 0.1) {
         let expectation = XCTestExpectation(description: "Wait for time interval")
         XCTWaiter().wait(for: [expectation], timeout: interval)
+    }
+
+    @discardableResult
+    func waitForCollectedEventCount(_ expectedCount: Int,
+                                    timeout: TimeInterval = 2,
+                                    pollInterval: TimeInterval = 0.01) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+
+        repeat {
+            networkTrackingPlugin?.waitforNetworkTrackingQueue()
+            amplitude.waitForTrackingQueue()
+
+            if eventCollector.events.count >= expectedCount {
+                return true
+            }
+
+            RunLoop.current.run(until: min(deadline, Date().addingTimeInterval(pollInterval)))
+        } while Date() < deadline
+
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
+        amplitude.waitForTrackingQueue()
+        return eventCollector.events.count >= expectedCount
     }
 }
 // swiftlint:enable force_cast
