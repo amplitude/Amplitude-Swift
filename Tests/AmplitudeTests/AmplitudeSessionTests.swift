@@ -125,6 +125,44 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
 
+    func testBackgroundOutOfSessionEventShouldNotCreateSessionEvents() throws {
+        let lastEventId: Int64 = 123
+        try storageMem.write(key: StorageKey.LAST_EVENT_ID, value: lastEventId)
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        let eventCollector = EventCollectorPlugin()
+        amplitude.add(plugin: eventCollector)
+
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 1000, eventType: "test event 1"))
+        amplitude.track(event: BaseEvent(userId: "user", timestamp: 2000, sessionId: -1, eventType: "out of session event"))
+        amplitude.waitForTrackingQueue()
+
+        let collectedEvents = eventCollector.events
+
+        // 3 events (not 5 as in testDistantBackgroundEventsShouldStartNewSession):
+        // out-of-session event should not trigger session_end + session_start
+        XCTAssertEqual(collectedEvents.count, 3)
+
+        var event = collectedEvents[0]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
+        XCTAssertEqual(event.sessionId, 1000)
+        XCTAssertEqual(event.timestamp, 1000)
+        XCTAssertEqual(event.eventId, lastEventId+1)
+
+        event = collectedEvents[1]
+        XCTAssertEqual(event.eventType, "test event 1")
+        XCTAssertEqual(event.sessionId, 1000)
+        XCTAssertEqual(event.timestamp, 1000)
+        XCTAssertEqual(event.eventId, lastEventId+2)
+
+        event = collectedEvents[2]
+        XCTAssertEqual(event.eventType, "out of session event")
+        XCTAssertEqual(event.sessionId, -1)
+        XCTAssertEqual(event.timestamp, 2000)
+        XCTAssertEqual(event.eventId, lastEventId+3)
+    }
+
     func testBackgroundOutOfSessionEvent() throws {
         let lastEventId: Int64 = 123
         try storageMem.write(key: StorageKey.LAST_EVENT_ID, value: lastEventId)
@@ -153,8 +191,7 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, -1)
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event")
-        // Out-of-session event at t=1000 should NOT extend session (lastEventTime stays 800).
-        // Regular event at t=1050 triggers new session since 1050-800=250 > 100ms timeout.
+        // sessionId is 1050 (not 1000) because out-of-session event doesn't extend lastEventTime
         XCTAssertEqual(event.sessionId, 1050)
         XCTAssertEqual(amplitude.getSessionId(), 1050)
     }
@@ -505,9 +542,8 @@ final class AmplitudeSessionTests: XCTestCase {
 
         let collectedEvents = eventCollector.events
 
-        // Out-of-session event (sessionId=-1) should NOT extend the session.
-        // So test event 3 at t=1100 sees lastEventTime=1000, and 1100-1000=100 >= 100ms timeout,
-        // which triggers a new session.
+        // 6 events: out-of-session event at t=1050 doesn't extend lastEventTime,
+        // so test event 3 at t=1100 triggers a new session (1100-1000=100 >= 100ms timeout)
         XCTAssertEqual(collectedEvents.count, 6)
 
         var event = collectedEvents[0]
@@ -534,7 +570,6 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.userId, "user")
         XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
-        // Session timed out: session_end for old session, session_start for new
         event = collectedEvents[3]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
         XCTAssertEqual(event.sessionId, 1000)
