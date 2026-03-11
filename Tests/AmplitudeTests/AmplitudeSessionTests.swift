@@ -153,8 +153,10 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.sessionId, -1)
         event = collectedEvents[1]
         XCTAssertEqual(event.eventType, "test event")
-        XCTAssertEqual(event.sessionId, 1000)
-        XCTAssertEqual(amplitude.getSessionId(), 1000)
+        // Out-of-session event at t=1000 should NOT extend session (lastEventTime stays 800).
+        // Regular event at t=1050 triggers new session since 1050-800=250 > 100ms timeout.
+        XCTAssertEqual(event.sessionId, 1050)
+        XCTAssertEqual(amplitude.getSessionId(), 1050)
     }
 
     func testForegroundEventsShouldNotStartNewSession() throws {
@@ -503,7 +505,10 @@ final class AmplitudeSessionTests: XCTestCase {
 
         let collectedEvents = eventCollector.events
 
-        XCTAssertEqual(collectedEvents.count, 4)
+        // Out-of-session event (sessionId=-1) should NOT extend the session.
+        // So test event 3 at t=1100 sees lastEventTime=1000, and 1100-1000=100 >= 100ms timeout,
+        // which triggers a new session.
+        XCTAssertEqual(collectedEvents.count, 6)
 
         var event = collectedEvents[0]
         XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
@@ -529,11 +534,24 @@ final class AmplitudeSessionTests: XCTestCase {
         XCTAssertEqual(event.userId, "user")
         XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
 
+        // Session timed out: session_end for old session, session_start for new
         event = collectedEvents[3]
-        XCTAssertEqual(event.eventType, "test event 3")
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_END_EVENT)
         XCTAssertEqual(event.sessionId, 1000)
-        XCTAssertEqual(event.timestamp, 1100)
+        XCTAssertEqual(event.timestamp, 1000)
         XCTAssertEqual(event.eventId, lastEventId+4)
+
+        event = collectedEvents[4]
+        XCTAssertEqual(event.eventType, Constants.AMP_SESSION_START_EVENT)
+        XCTAssertEqual(event.sessionId, 1100)
+        XCTAssertEqual(event.timestamp, 1100)
+        XCTAssertEqual(event.eventId, lastEventId+5)
+
+        event = collectedEvents[5]
+        XCTAssertEqual(event.eventType, "test event 3")
+        XCTAssertEqual(event.sessionId, 1100)
+        XCTAssertEqual(event.timestamp, 1100)
+        XCTAssertEqual(event.eventId, lastEventId+6)
         XCTAssertEqual(event.userId, "user")
         XCTAssertEqual(event.deviceId, amplitude.getDeviceId())
     }
