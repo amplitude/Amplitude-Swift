@@ -37,6 +37,16 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         super.tearDown()
     }
 
+    override func setUp() {
+        super.setUp()
+        RemoteConfigUrlProtocol.reset()
+    }
+
+    override func tearDown() {
+        RemoteConfigUrlProtocol.reset()
+        super.tearDown()
+    }
+
     private func uniqueApiKey(_ function: String = #function) -> String {
         let cleanName = function.replacingOccurrences(of: "()", with: "")
         return "\(RemoteConfigUrlProtocol.testApiKeyPrefix)\(cleanName)"
@@ -52,6 +62,12 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         RemoteConfigClient.resetStorage(instanceName: instanceName)
     }
 
+    private func waitForRemoteConfigFetch(_ amplitude: Amplitude, apiKey: String, timeout: TimeInterval = 15) {
+        let didFetchRemoteExpectation = amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation
+        RemoteConfigClient.resumeNextFetchedRemoteConfig(forApiKey: apiKey)
+        wait(for: [didFetchRemoteExpectation], timeout: timeout)
+    }
+
     func testSessionsTurnsOnFromRemoteConfig() {
         resetStorage()
         let apiKey = uniqueApiKey()
@@ -64,11 +80,12 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 ]
             ]
         ], forApiKey: apiKey)
+        RemoteConfigClient.pauseNextFetchedRemoteConfig(forApiKey: apiKey)
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.sessions), "Sessions should be off by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+        waitForRemoteConfigFetch(amplitude, apiKey: apiKey)
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.sessions), "Sessions should be on from remote config")
     }
@@ -85,11 +102,12 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 ]
             ]
         ], forApiKey: apiKey)
+        RemoteConfigClient.pauseNextFetchedRemoteConfig(forApiKey: apiKey)
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.sessions]))
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.sessions), "Sessions should be on by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+        waitForRemoteConfigFetch(amplitude, apiKey: apiKey)
 
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.sessions), "Sessions should be off from remote config")
     }
@@ -108,6 +126,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 ]
             ]
         ], forApiKey: apiKey)
+        RemoteConfigClient.pauseNextFetchedRemoteConfig(forApiKey: apiKey)
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
 
@@ -121,7 +140,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.screenViews), "Screen views should be off by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+        waitForRemoteConfigFetch(amplitude, apiKey: apiKey)
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.screenViews), "Screen views should be on from remote config")
     }
@@ -138,6 +157,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 ]
             ]
         ], forApiKey: apiKey)
+        RemoteConfigClient.pauseNextFetchedRemoteConfig(forApiKey: apiKey)
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.screenViews]))
 
@@ -152,7 +172,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.screenViews), "Screen views should be on by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+        waitForRemoteConfigFetch(amplitude, apiKey: apiKey)
 
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.screenViews), "Screen views should be off from remote config")
     }
@@ -169,6 +189,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 ]
             ]
         ], forApiKey: apiKey)
+        RemoteConfigClient.pauseNextFetchedRemoteConfig(forApiKey: apiKey)
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
 
@@ -183,7 +204,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.elementInteractions), "Element interactions should be off by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+        waitForRemoteConfigFetch(amplitude, apiKey: apiKey)
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.elementInteractions), "Element interactions should be on from remote config")
     }
@@ -200,6 +221,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 ]
             ]
         ], forApiKey: apiKey)
+        RemoteConfigClient.pauseNextFetchedRemoteConfig(forApiKey: apiKey)
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.elementInteractions]))
 
@@ -214,7 +236,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.elementInteractions), "Element interactions should be on by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+        waitForRemoteConfigFetch(amplitude, apiKey: apiKey)
 
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.elementInteractions), "Element interactions should be off from remote config")
     }
@@ -239,6 +261,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 ]
             ]
         ], forApiKey: apiKey)
+        RemoteConfigClient.pauseNextFetchedRemoteConfig(forApiKey: apiKey)
 
         let interactionsOptions = InteractionsOptions(
             rageClick: .init(enabled: false),
@@ -263,7 +286,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         XCTAssertFalse(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be off by default")
         XCTAssertFalse(amplitude.autocaptureManager.deadClickEnabled, "Dead click should be off by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+        waitForRemoteConfigFetch(amplitude, apiKey: apiKey)
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be on from remote config")
         XCTAssertTrue(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be on from remote config")
@@ -284,6 +307,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 ]
             ]
         ], forApiKey: apiKey)
+        RemoteConfigClient.pauseNextFetchedRemoteConfig(forApiKey: apiKey)
 
         let interactionsOptions = InteractionsOptions(
             rageClick: .init(enabled: true),
@@ -308,7 +332,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         XCTAssertTrue(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be on by default")
         XCTAssertTrue(amplitude.autocaptureManager.deadClickEnabled, "Dead click should be on by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+        waitForRemoteConfigFetch(amplitude, apiKey: apiKey)
 
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be off from remote config")
         XCTAssertTrue(amplitude.autocaptureManager.rageClickEnabled, "Rage click should still be on from local config")
@@ -334,6 +358,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 ]
             ]
         ], forApiKey: apiKey)
+        RemoteConfigClient.pauseNextFetchedRemoteConfig(forApiKey: apiKey)
 
         let interactionsOptions = InteractionsOptions(
             rageClick: .init(enabled: true),
@@ -358,7 +383,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         XCTAssertTrue(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be on by default")
         XCTAssertTrue(amplitude.autocaptureManager.deadClickEnabled, "Dead click should be on by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+        waitForRemoteConfigFetch(amplitude, apiKey: apiKey)
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be on by default")
         XCTAssertFalse(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be off from remote config")
@@ -380,6 +405,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 ]
             ]
         ], forApiKey: apiKey)
+        RemoteConfigClient.pauseNextFetchedRemoteConfig(forApiKey: apiKey)
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
 
@@ -396,7 +422,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         XCTAssertTrue(networkTrackingPlugin.optOut, "Network tracking should be off by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+        waitForRemoteConfigFetch(amplitude, apiKey: apiKey)
 
         XCTAssertFalse(networkTrackingPlugin.optOut, "Network tracking should be on from remote config")
     }
@@ -415,6 +441,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                 ]
             ]
         ], forApiKey: apiKey)
+        RemoteConfigClient.pauseNextFetchedRemoteConfig(forApiKey: apiKey)
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.networkTracking]))
 
@@ -431,7 +458,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         XCTAssertFalse(networkTrackingPlugin.optOut, "Network tracking should be off by default")
 
-        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+        waitForRemoteConfigFetch(amplitude, apiKey: apiKey)
 
         XCTAssertTrue(networkTrackingPlugin.optOut, "Network tracking should be on from remote config")
     }
@@ -623,6 +650,14 @@ extension RemoteConfigClient {
         RemoteConfigUrlProtocol.setConfig(remoteConfig, forApiKey: apiKey)
     }
 
+    static func pauseNextFetchedRemoteConfig(forApiKey apiKey: String) {
+        RemoteConfigUrlProtocol.pauseResponses(forApiKey: apiKey)
+    }
+
+    static func resumeNextFetchedRemoteConfig(forApiKey apiKey: String) {
+        RemoteConfigUrlProtocol.resumeResponses(forApiKey: apiKey)
+    }
+
     static func resetStorage(instanceName: String) {
         let suiteName = "com.amplitude.remoteconfig.cache.\(instanceName)"
         UserDefaults.standard.removePersistentDomain(forName: suiteName)
@@ -642,22 +677,55 @@ extension URLSessionConfiguration {
 class RemoteConfigUrlProtocol: URLProtocol {
 
     static let testApiKeyPrefix = "remote-config-test-"
-    // Configs keyed by API key for test isolation
-    static var configsByApiKey: [String: [RemoteConfigClient.RemoteConfig]] = [:]
+    private static let stateQueue = DispatchQueue(label: "RemoteConfigUrlProtocol.stateQueue")
+    private static var configsByApiKey: [String: [RemoteConfigClient.RemoteConfig]] = [:]
+    private static var pausedApiKeys: Set<String> = []
 
-    private static let responseQueue = DispatchQueue(label: "RemoteConfigUrlProtocol.responseQueue")
+    private static let responseQueue = DispatchQueue(label: "RemoteConfigUrlProtocol.responseQueue",
+                                                     attributes: .concurrent)
+    private let lifecycleLock = NSLock()
+    private var stopped = false
+
+    static func reset() {
+        stateQueue.sync {
+            configsByApiKey.removeAll()
+            pausedApiKeys.removeAll()
+        }
+    }
 
     static func setConfig(_ config: RemoteConfigClient.RemoteConfig, forApiKey apiKey: String) {
-        configsByApiKey[apiKey, default: []].append(config)
+        stateQueue.sync {
+            configsByApiKey[apiKey, default: []].append(config)
+        }
+    }
+
+    static func pauseResponses(forApiKey apiKey: String) {
+        stateQueue.sync {
+            _ = pausedApiKeys.insert(apiKey)
+        }
+    }
+
+    static func resumeResponses(forApiKey apiKey: String) {
+        stateQueue.sync {
+            _ = pausedApiKeys.remove(apiKey)
+        }
     }
 
     static func popConfig(forApiKey apiKey: String) -> RemoteConfigClient.RemoteConfig? {
-        guard var configs = configsByApiKey[apiKey], !configs.isEmpty else {
-            return nil
+        stateQueue.sync {
+            guard var configs = configsByApiKey[apiKey], !configs.isEmpty else {
+                return nil
+            }
+            let config = configs.removeFirst()
+            configsByApiKey[apiKey] = configs
+            return config
         }
-        let config = configs.removeFirst()
-        configsByApiKey[apiKey] = configs
-        return config
+    }
+
+    static func isPaused(forApiKey apiKey: String) -> Bool {
+        stateQueue.sync {
+            pausedApiKeys.contains(apiKey)
+        }
     }
 
     private static func extractApiKey(from url: URL) -> String? {
@@ -680,6 +748,10 @@ class RemoteConfigUrlProtocol: URLProtocol {
     }
 
     override func startLoading() {
+        lifecycleLock.lock()
+        stopped = false
+        lifecycleLock.unlock()
+
         guard let url = request.url,
               let apiKey = Self.extractApiKey(from: url),
               let config = Self.popConfig(forApiKey: apiKey) else {
@@ -696,17 +768,42 @@ class RemoteConfigUrlProtocol: URLProtocol {
         let data = try? JSONSerialization.data(withJSONObject: ["configs": config])
 
         Self.responseQueue.asyncAfter(deadline: .now() + DispatchTimeInterval.milliseconds(500)) { [self] in
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            if let data {
-                client?.urlProtocol(self, didLoad: data)
-            }
-            client?.urlProtocolDidFinishLoading(self)
-
-            print("RemoteConfigUrlProtocol: Finished loading \(url): \(config)")
+            deliverResponseWhenResumed(url: url, apiKey: apiKey, response: response, data: data, config: config)
         }
     }
 
     override func stopLoading() {
-        // no-op
+        lifecycleLock.lock()
+        stopped = true
+        lifecycleLock.unlock()
+    }
+
+    private func deliverResponseWhenResumed(url: URL,
+                                            apiKey: String,
+                                            response: HTTPURLResponse,
+                                            data: Data?,
+                                            config: RemoteConfigClient.RemoteConfig) {
+        lifecycleLock.lock()
+        let isStopped = stopped
+        lifecycleLock.unlock()
+
+        guard !isStopped else {
+            return
+        }
+
+        guard !Self.isPaused(forApiKey: apiKey) else {
+            Self.responseQueue.asyncAfter(deadline: .now() + DispatchTimeInterval.milliseconds(10)) { [self] in
+                deliverResponseWhenResumed(url: url, apiKey: apiKey, response: response, data: data, config: config)
+            }
+            return
+        }
+
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        if let data {
+            client?.urlProtocol(self, didLoad: data)
+        }
+        client?.urlProtocolDidFinishLoading(self)
+
+        print("RemoteConfigUrlProtocol: Finished loading \(url): \(config)")
     }
 }
