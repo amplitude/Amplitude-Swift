@@ -24,7 +24,10 @@ class FakeURLProtocol: URLProtocol {
         }
     }
 
-    private static let responseQueue = DispatchQueue(label: "FakeURLProtocol.responseQueue")
+    // Delivering all fake responses on a single serial queue can backlog unrelated requests
+    // across the test process and trip per-session timeouts on slower CI runners.
+    private static let responseQueue = DispatchQueue(label: "FakeURLProtocol.responseQueue",
+                                                     attributes: .concurrent)
     private let lifecycleLock = NSLock()
     private var stopped = false
 
