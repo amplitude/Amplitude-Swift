@@ -1,3 +1,10 @@
+## [1.17.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.4...v1.17.5) (2026-03-12)
+
+
+### Bug Fixes
+
+* out-of-session event should not extend or trigger a session ([#382](https://github.com/amplitude/Amplitude-Swift/issues/382)) ([5c790b4](https://github.com/amplitude/Amplitude-Swift/commit/5c790b481de2dbe72a6ab4d067af488d6f9c8403))
+
 ## [1.17.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.3...v1.17.4) (2026-03-06)
 
 
