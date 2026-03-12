@@ -17,14 +17,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
     private var amplitude: Amplitude!
     private var storageMem: FakeInMemoryStorage!
     private var eventCollector = EventCollectorPlugin()
-
-    // Shared session for most requests - reused across tests in this class
-    private static var sharedSession: URLSession = {
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = defaultTimeout
-        configuration.protocolClasses = [FakeURLProtocol.self]
-        return URLSession(configuration: configuration, delegate: nil, delegateQueue: nil)
-    }()
+    private var sharedSession: URLSession!
 
     // Track sessions with custom timeouts to invalidate in tearDown
     private var customTimeoutSessions: [URLSession] = []
@@ -35,7 +28,6 @@ final class NetworkTrackingPluginTest: XCTestCase {
     }
 
     static override func tearDown() {
-        sharedSession.invalidateAndCancel()
         URLSessionConfiguration.disableMockDefault()
         super.tearDown()
     }
@@ -43,13 +35,19 @@ final class NetworkTrackingPluginTest: XCTestCase {
     override func setUp() {
         super.setUp()
         storageMem = FakeInMemoryStorage()
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = Self.defaultTimeout
+        configuration.protocolClasses = [FakeURLProtocol.self]
+        sharedSession = URLSession(configuration: configuration, delegate: nil, delegateQueue: nil)
         FakeURLProtocol.clearMockResponses()
     }
 
     override func tearDown() {
         eventCollector.events.removeAll()
         FakeURLProtocol.clearMockResponses()
-        // Only invalidate custom timeout sessions - shared session is reused
+        sharedSession.invalidateAndCancel()
+        sharedSession = nil
+        // Invalidate any per-test sessions created with non-default timeouts.
         customTimeoutSessions.forEach { $0.invalidateAndCancel() }
         customTimeoutSessions.removeAll()
         amplitude = nil
@@ -91,7 +89,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         // Use shared session for default timeout, create new one only for custom timeouts
         let session: URLSession
         if timeout == Self.defaultTimeout {
-            session = Self.sharedSession
+            session = sharedSession
         } else {
             let configuration = URLSessionConfiguration.ephemeral
             configuration.timeoutIntervalForRequest = timeout
@@ -108,7 +106,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         var request = URLRequest(url: URL(string: url)!)
         request.httpMethod = method
         // Always use shared session for async requests (default timeout)
-        return try await Self.sharedSession.data(for: request)
+        return try await sharedSession.data(for: request)
     }
 
 #if !os(watchOS)
@@ -354,7 +352,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
 
-        Self.sharedSession.uploadTask(with: request, from: requestBodyData, completionHandler: { _, _, _ in
+        sharedSession.uploadTask(with: request, from: requestBodyData, completionHandler: { _, _, _ in
             expectation.fulfill()
         }).resume()
         wait(for: [expectation], timeout: 2)
@@ -383,7 +381,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
 
-        Self.sharedSession.downloadTask(with: request, completionHandler: { _, _, _ in
+        sharedSession.downloadTask(with: request, completionHandler: { _, _, _ in
             expectation.fulfill()
         }).resume()
         wait(for: [expectation], timeout: 2)
@@ -1008,7 +1006,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         let expectation = XCTestExpectation(description: "Network request finished")
 
         // Create a data task with completion handler using the shared session
-        let task = Self.sharedSession.dataTask(with: request) { _, _, _ in
+        let task = sharedSession.dataTask(with: request) { _, _, _ in
             expectation.fulfill()
         }
 
@@ -1099,7 +1097,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         let expectation = XCTestExpectation(description: "Network request finished")
 
         // Use dataTask with URL directly (not URLRequest) via shared session
-        let task = Self.sharedSession.dataTask(with: url) { _, _, _ in
+        let task = sharedSession.dataTask(with: url) { _, _, _ in
             expectation.fulfill()
         }
 

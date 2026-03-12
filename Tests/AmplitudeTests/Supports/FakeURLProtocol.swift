@@ -25,6 +25,8 @@ class FakeURLProtocol: URLProtocol {
     }
 
     private static let responseQueue = DispatchQueue(label: "FakeURLProtocol.responseQueue")
+    private let lifecycleLock = NSLock()
+    private var stopped = false
 
     struct MockResponse {
         let statusCode: Int
@@ -63,6 +65,10 @@ class FakeURLProtocol: URLProtocol {
             return
         }
 
+        lifecycleLock.withLock {
+            stopped = false
+        }
+
         print("FakeURLProtocol: Starting to load \(url)")
 
         let mockResponse = Self.stateQueue.sync { () -> MockResponse? in
@@ -87,27 +93,30 @@ class FakeURLProtocol: URLProtocol {
 
         let delay = mockResponse.delay
 
-        Self.responseQueue.asyncAfter(deadline: .now() + delay) { [weak self] in
-            guard let self = self else { return }
+        Self.responseQueue.asyncAfter(deadline: .now() + delay) { [self] in
+            let isStopped = lifecycleLock.withLock { stopped }
+            guard !isStopped else { return }
 
-            self.client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
 
             if let data = mockResponse.data {
-                self.client?.urlProtocol(self, didLoad: data)
+                client?.urlProtocol(self, didLoad: data)
             }
 
             if let error = mockResponse.error {
-                self.client?.urlProtocol(self, didFailWithError: error)
+                client?.urlProtocol(self, didFailWithError: error)
             }
 
-            self.client?.urlProtocolDidFinishLoading(self)
+            client?.urlProtocolDidFinishLoading(self)
 
             print("FakeURLProtocol: Finished loading \(url), response: \(mockResponse)")
         }
     }
 
     override func stopLoading() {
-        // Nothing to do here
+        lifecycleLock.withLock {
+            stopped = true
+        }
     }
 
     static func clearMockResponses() {
