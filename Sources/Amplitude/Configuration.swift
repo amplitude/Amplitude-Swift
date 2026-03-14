@@ -188,7 +188,7 @@ public class Configuration {
         enableAutoCaptureRemoteConfig: Bool = Defaults.enableAutoCaptureRemoteConfig,
         interactionsOptions: InteractionsOptions = Defaults.interactionsOptions,
         enableDiagnostics: Bool = Defaults.enableDiagnostics,
-        enableRequestBodyCompression: Bool = Defaults.enableRequestBodyCompression,
+        enableRequestBodyCompression: Bool = Defaults.enableRequestBodyCompression
     ) {
         let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
