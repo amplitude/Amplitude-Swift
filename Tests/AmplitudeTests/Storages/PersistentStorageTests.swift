@@ -11,11 +11,11 @@ import XCTest
 
 final class PersistentStorageTests: XCTestCase {
     let logger = ConsoleLogger()
-    let diagonostics = Diagnostics()
+    let diagnostics = Diagnostics()
     let diagnosticsClient = FakeDiagnosticsClient()
 
     func testIsBasicType() {
-        let persistentStorage = PersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = PersistentStorage(storagePrefix: "storage", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         var isValueBasicType = persistentStorage.isBasicType(value: 111)
         XCTAssertEqual(isValueBasicType, true)
 
@@ -39,7 +39,7 @@ final class PersistentStorageTests: XCTestCase {
     }
 
     func testWrite() {
-        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         try? persistentStorage.write(
             key: StorageKey.EVENTS,
             value: BaseEvent(eventType: "test1")
@@ -55,12 +55,12 @@ final class PersistentStorageTests: XCTestCase {
     }
 
     func testWriteWithTwoInstances() {
-        let persistentStorage1 = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage1 = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         try? persistentStorage1.write(
             key: StorageKey.EVENTS,
             value: BaseEvent(eventType: "test1")
         )
-        let persistentStorage2 = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage2 = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         try? persistentStorage2.write(
             key: StorageKey.EVENTS,
             value: BaseEvent(eventType: "test2")
@@ -82,7 +82,7 @@ final class PersistentStorageTests: XCTestCase {
     }
 
     func testRollover() {
-        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         let storeDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
         try? persistentStorage.write(
             key: StorageKey.EVENTS,
@@ -101,7 +101,7 @@ final class PersistentStorageTests: XCTestCase {
     }
 
     func testRemove() {
-        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         let storeDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
         try? persistentStorage.write(
             key: StorageKey.EVENTS,
@@ -117,7 +117,7 @@ final class PersistentStorageTests: XCTestCase {
     }
 
     func testSplit() {
-        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         let storeDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
         let event1 = BaseEvent(eventType: "test1")
         let event2 = BaseEvent(eventType: "test2")
@@ -146,7 +146,7 @@ final class PersistentStorageTests: XCTestCase {
     }
 
     func testDelimiterHandledGracefully() {
-        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         try? persistentStorage.write(
             key: StorageKey.EVENTS,
             value: BaseEvent(eventType: "test1\(PersistentStorage.DELMITER)")
@@ -167,7 +167,7 @@ final class PersistentStorageTests: XCTestCase {
     }
 
    func testMalformedEventInDiagnostics() {
-        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         let storeDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
         let currentFile = storeDirectory.appendingPathComponent("\(PersistentStorage.STORAGE_V2_PREFIX)\(0)")
         let event1 = BaseEvent(eventType: "test1")
@@ -184,12 +184,12 @@ final class PersistentStorageTests: XCTestCase {
         let data = try? JSONSerialization.data(withJSONObject: malformedArr, options: [])
         let expectedPartial = String(data: data!, encoding: .utf8) ?? ""
         XCTAssertEqual(decodedEvents!.count, 1)
-        XCTAssertEqual(self.diagonostics.extractDiagnosticsToString(), "{\"malformed_events\":\(expectedPartial)}")
+        XCTAssertEqual(self.diagnostics.extractDiagnosticsToString(), "{\"malformed_events\":\(expectedPartial)}")
         persistentStorage.reset()
    }
 
     func testConcurrentWriteFromMultipleThreads() {
-        let persistentStorage = PersistentStorage(storagePrefix: "xxx-concurrent-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-concurrent-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         persistentStorage.reset()
         let dispatchGroup = DispatchGroup()
         for i in 0..<100 {
@@ -224,7 +224,7 @@ final class PersistentStorageTests: XCTestCase {
         for i in 0..<100 {
             dispatchGroup.enter()
             Thread.detachNewThread {
-                let persistentStorage = PersistentStorage(storagePrefix: "xxx-multiple-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+                let persistentStorage = PersistentStorage(storagePrefix: "xxx-multiple-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
                 for d in 0..<10 {
                     try? persistentStorage.write(
                         key: StorageKey.EVENTS,
@@ -236,7 +236,7 @@ final class PersistentStorageTests: XCTestCase {
             }
         }
         dispatchGroup.wait()
-        let persistentStorage = PersistentStorage(storagePrefix: "xxx-multiple-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-multiple-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         let eventFiles: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
         var eventsCount = 0
         XCTAssertNotNil(eventFiles)
@@ -250,11 +250,11 @@ final class PersistentStorageTests: XCTestCase {
     }
 
     func testHandleEarlierVersionFiles() {
-        let persistentStorageToGetDirectory = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorageToGetDirectory = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         let storeDirectory = persistentStorageToGetDirectory.getEventsStorageDirectory(createDirectory: false)
         persistentStorageToGetDirectory.reset()
         createEarilierVersionFiles(storageDirectory: storeDirectory)
-        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         let eventFiles: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
         XCTAssertEqual(eventFiles?.count, 6)
         var eventsCount = 0
@@ -268,11 +268,11 @@ final class PersistentStorageTests: XCTestCase {
     }
 
     func testHandleEarlierVersionAndWriteEvents() {
-        let persistentStorageToGetDirectory = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorageToGetDirectory = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         let storeDirectory = persistentStorageToGetDirectory.getEventsStorageDirectory(createDirectory: false)
         persistentStorageToGetDirectory.reset()
         createEarilierVersionFiles(storageDirectory: storeDirectory)
-        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         try? persistentStorage.write(
             key: StorageKey.EVENTS,
             value: BaseEvent(eventType: "test13")
@@ -295,7 +295,7 @@ final class PersistentStorageTests: XCTestCase {
 
     #if os(macOS)
     func testMacOsStorageDirectorySandboxedWhenAppSandboxDisabled() {
-        let persistentStorage = PersistentStorage(storagePrefix: "mac-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = PersistentStorage(storagePrefix: "mac-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
 
         let bundleId = Bundle.main.bundleIdentifier!
         let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: false)
@@ -306,7 +306,7 @@ final class PersistentStorageTests: XCTestCase {
     }
 
     func testMacOsStorageDirectorySandboxedWhenAppSandboxEnabled() {
-        let persistentStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "mac-app-sandbox-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let persistentStorage = FakePersistentStorageAppSandboxEnabled(storagePrefix: "mac-app-sandbox-instance", logger: self.logger, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
 
         let bundleId = Bundle.main.bundleIdentifier!
         let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: false)

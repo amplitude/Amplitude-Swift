@@ -1,5 +1,5 @@
 //
-//  Diagonostics.swift
+//  Diagnostics.swift
 //  Amplitude-Swift
 //
 //  Created by Qingzhuo Zhen on 3/4/24.
