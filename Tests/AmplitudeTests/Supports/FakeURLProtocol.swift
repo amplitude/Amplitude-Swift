@@ -10,6 +10,7 @@ import Foundation
 class FakeURLProtocol: URLProtocol {
     private static let stateQueue = DispatchQueue(label: "FakeURLProtocol.stateQueue")
     private static var _mockResponses: [MockResponse] = []
+    private static var _interceptAmplitudeRequests = false
 
     static var mockResponses: [MockResponse] {
         get {
@@ -20,6 +21,19 @@ class FakeURLProtocol: URLProtocol {
         set {
             stateQueue.sync {
                 _mockResponses = newValue
+            }
+        }
+    }
+
+    static var interceptAmplitudeRequests: Bool {
+        get {
+            stateQueue.sync {
+                _interceptAmplitudeRequests
+            }
+        }
+        set {
+            stateQueue.sync {
+                _interceptAmplitudeRequests = newValue
             }
         }
     }
@@ -55,7 +69,17 @@ class FakeURLProtocol: URLProtocol {
 
     override class func canInit(with request: URLRequest) -> Bool {
         let isRemoteConfig = request.url?.absoluteString.hasPrefix("https://sr-client-cfg.") ?? false
-        return !isRemoteConfig
+        let isAmplitudeRequest = request.url?.host?.contains("amplitude.com") ?? false
+
+        guard !isRemoteConfig else {
+            return false
+        }
+
+        if isAmplitudeRequest && !interceptAmplitudeRequests {
+            return false
+        }
+
+        return true
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
@@ -125,6 +149,7 @@ class FakeURLProtocol: URLProtocol {
     static func clearMockResponses() {
         stateQueue.sync {
             _mockResponses.removeAll()
+            _interceptAmplitudeRequests = false
         }
     }
 }

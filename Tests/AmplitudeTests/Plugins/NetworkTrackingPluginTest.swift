@@ -40,11 +40,13 @@ final class NetworkTrackingPluginTest: XCTestCase {
         configuration.protocolClasses = [FakeURLProtocol.self]
         sharedSession = URLSession(configuration: configuration, delegate: nil, delegateQueue: nil)
         FakeURLProtocol.clearMockResponses()
+        FakeURLProtocol.interceptAmplitudeRequests = false
     }
 
     override func tearDown() {
         eventCollector.events.removeAll()
         FakeURLProtocol.clearMockResponses()
+        FakeURLProtocol.interceptAmplitudeRequests = false
         sharedSession.invalidateAndCancel()
         sharedSession = nil
         // Invalidate any per-test sessions created with non-default timeouts.
@@ -159,6 +161,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
 
     func testDefaultNetworkTrackingOptionsShouldNotCaptureAmplitude() {
         setupAmplitude()
+        FakeURLProtocol.interceptAmplitudeRequests = true
 
         FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
 
@@ -175,6 +178,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         var options = NetworkTrackingOptions.default
         options.ignoreAmplitudeRequests = false
         setupAmplitude(with: options)
+        FakeURLProtocol.interceptAmplitudeRequests = true
 
         FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
 
