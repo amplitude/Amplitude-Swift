@@ -149,7 +149,6 @@ class FakeURLProtocol: URLProtocol {
     static func clearMockResponses() {
         stateQueue.sync {
             _mockResponses.removeAll()
-            _interceptAmplitudeRequests = false
         }
     }
 }
