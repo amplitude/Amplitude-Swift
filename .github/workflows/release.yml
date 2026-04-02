@@ -14,7 +14,7 @@ jobs:
     runs-on: macos-15
     steps:
       - name: ${{ github.actor }} permission check to do a release
-        uses: octokit/request-action@v2.1.9
+        uses: octokit/request-action@89697eb6635e52c6e1e5559f15b5c91ba5100cb0 # v2.1.9
         with:
           route: GET /repos/:repository/collaborators/${{ github.actor }}
           repository: ${{ github.repository }}
@@ -31,7 +31,7 @@ jobs:
     needs: [authorize, run-tests]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
       - name: Set Xcode 16.3
         run: |

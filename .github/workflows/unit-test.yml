@@ -52,7 +52,7 @@ jobs:
             device: "Apple Vision Pro"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Set Xcode ${{ matrix.xcode }}
         run: |
           sudo xcode-select -switch /Applications/Xcode_${{ matrix.xcode }}.app
@@ -122,7 +122,7 @@ jobs:
     runs-on: macos-15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Set Xcode 16
         run: |
           sudo xcode-select -switch /Applications/Xcode_16.4.app
