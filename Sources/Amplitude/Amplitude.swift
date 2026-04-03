@@ -538,12 +538,12 @@ public class Amplitude {
         }
         configuration.loggerProvider.debug(message: "Running migrateApiKeyStorages")
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
-            let apiKeyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(configuration.apiKey)", logger: self.logger, diagonostics: configuration.diagonostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
+            let apiKeyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(configuration.apiKey)", logger: self.logger, diagnostics: configuration.diagnostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
             StoragePrefixMigration(source: apiKeyStorage, destination: persistentStorage, logger: logger).execute()
         }
 
         if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
-            let apiKeyIdentifyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(configuration.apiKey)", logger: self.logger, diagonostics: configuration.diagonostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
+            let apiKeyIdentifyStorage = PersistentStorage(storagePrefix: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(configuration.apiKey)", logger: self.logger, diagnostics: configuration.diagnostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
             StoragePrefixMigration(source: apiKeyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
     }
@@ -556,12 +556,12 @@ public class Amplitude {
         configuration.loggerProvider.debug(message: "Running migrateDefaultInstanceStorages")
         let legacyDefaultInstanceName = "default_instance"
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
-            let legacyStorage = PersistentStorage(storagePrefix: "storage-\(legacyDefaultInstanceName)", logger: self.logger, diagonostics: configuration.diagonostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
+            let legacyStorage = PersistentStorage(storagePrefix: "storage-\(legacyDefaultInstanceName)", logger: self.logger, diagnostics: configuration.diagnostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
             StoragePrefixMigration(source: legacyStorage, destination: persistentStorage, logger: logger).execute()
         }
 
         if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
-            let legacyIdentifyStorage = PersistentStorage(storagePrefix: "identify-\(legacyDefaultInstanceName)", logger: self.logger, diagonostics: configuration.diagonostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
+            let legacyIdentifyStorage = PersistentStorage(storagePrefix: "identify-\(legacyDefaultInstanceName)", logger: self.logger, diagnostics: configuration.diagnostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
             StoragePrefixMigration(source: legacyIdentifyStorage, destination: persistentIdentifyStorage, logger: logger).execute()
         }
     }
@@ -582,7 +582,7 @@ public class Amplitude {
         let instanceName = configuration.getNormalizeInstanceName()
         if let persistentStorage = configuration.storageProvider as? PersistentStorage {
             let instanceOnlyEventPrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-storage-\(instanceName)"
-            let instanceNameOnlyStorage = PersistentStorage(storagePrefix: instanceOnlyEventPrefix, logger: self.logger, diagonostics: configuration.diagonostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
+            let instanceNameOnlyStorage = PersistentStorage(storagePrefix: instanceOnlyEventPrefix, logger: self.logger, diagnostics: configuration.diagnostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
             StoragePrefixMigration(
                 source: instanceNameOnlyStorage,
                 destination: persistentStorage,
@@ -592,7 +592,7 @@ public class Amplitude {
 
         if let persistentIdentifyStorage = configuration.identifyStorageProvider as? PersistentStorage {
             let instanceOnlyIdentifyPrefix = "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-identify-\(instanceName)"
-            let instanceNameOnlyIdentifyStorage = PersistentStorage(storagePrefix: instanceOnlyIdentifyPrefix, logger: self.logger, diagonostics: configuration.diagonostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
+            let instanceNameOnlyIdentifyStorage = PersistentStorage(storagePrefix: instanceOnlyIdentifyPrefix, logger: self.logger, diagnostics: configuration.diagnostics, diagnosticsClient: self.amplitudeContext.diagnosticsClient)
             StoragePrefixMigration(
                 source: instanceNameOnlyIdentifyStorage,
                 destination: persistentIdentifyStorage,

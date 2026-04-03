@@ -79,7 +79,7 @@ public class Configuration {
     public internal(set) var autocapture: AutocaptureOptions
     public internal(set) var networkTrackingOptions: NetworkTrackingOptions
     public var offline: Bool?
-    internal let diagonostics: Diagnostics
+    internal let diagnostics: Diagnostics
     public var maxQueuedEventCount = -1
     var optOutChanged: ((Bool) -> Void)?
     public let enableAutoCaptureRemoteConfig: Bool
@@ -197,7 +197,7 @@ public class Configuration {
         self.flushIntervalMillis = flushIntervalMillis
         self.instanceName = normalizedInstanceName
         self.optOut = optOut
-        self.diagonostics = Diagnostics()
+        self.diagnostics = Diagnostics()
         self.logLevel = logLevel
         self.loggerProvider = loggerProvider
         self.serverZone = serverZone
@@ -213,9 +213,9 @@ public class Configuration {
                                                    enabled: self.enableDiagnostics,
                                                    remoteConfigClient: self.remoteConfigClient)
         self.storageProvider = storageProvider
-        ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         self.identifyStorageProvider = identifyStorageProvider
-        ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagnostics: self.diagnostics, diagnosticsClient: self.diagnosticsClient)
         self.minIdLength = minIdLength
         self.partnerId = partnerId
         self.callback = callback
