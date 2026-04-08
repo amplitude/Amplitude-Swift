@@ -540,7 +540,7 @@ final class ObjectFilterTests: XCTestCase {
 
     func testFilterdWithArray() throws {
         // Test array filtering with index
-        let filter = ObjectFilter(allowList: ["users/0", "users/1/name"])
+        let filter = ObjectFilter(allowList: ["users/0/**", "users/1/name"])
 
         let input: [String: Any] = [
             "users": [
@@ -566,7 +566,7 @@ final class ObjectFilterTests: XCTestCase {
     }
 
     func testFilterdArrayAtRoot() throws {
-        let filter = ObjectFilter(allowList: ["0/name", "1"])
+        let filter = ObjectFilter(allowList: ["0/name", "1/**"])
 
         let input: [Any] = [
             ["name": "John", "email": "john@example.com"],
@@ -705,6 +705,59 @@ final class ObjectFilterTests: XCTestCase {
         // Bool at root - should return nil
         let result3 = filter.filterd(true)
         XCTAssertNil(result3)
+    }
+
+    func testExactMatchOnPrimitiveIsCaptured() throws {
+        let filter = ObjectFilter(allowList: ["name"])
+        let input: [String: Any] = ["name": "John", "age": 30]
+        let result = filter.filterd(input) as? [String: Any]
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?["name"] as? String, "John")
+        XCTAssertNil(result?["age"])
+    }
+
+    func testExactMatchOnContainerIsNotCaptured() throws {
+        let filter = ObjectFilter(allowList: ["user"])
+        let input: [String: Any] = ["user": ["name": "John", "password": "secret"]]
+        // "user" is a container — exact match without wildcard should not return it
+        XCTAssertNil(filter.filterd(input))
+    }
+
+    func testExactMatchOnContainerVsWildcard() throws {
+        let input: [String: Any] = ["user": ["name": "John", "password": "secret"] as [String: Any]]
+
+        // "user" alone does not capture the object
+        let filter1 = ObjectFilter(allowList: ["user"])
+        XCTAssertNil(filter1.filterd(input))
+
+        // "user/**" captures the full object
+        let filter2 = ObjectFilter(allowList: ["user/**"])
+        let result2 = filter2.filterd(input) as? [String: Any]
+        let user2 = result2?["user"] as? [String: Any]
+        XCTAssertEqual(user2?["name"] as? String, "John")
+        XCTAssertEqual(user2?["password"] as? String, "secret")
+
+        // "user/*" captures direct children
+        let filter3 = ObjectFilter(allowList: ["user/*"])
+        let result3 = filter3.filterd(input) as? [String: Any]
+        let user3 = result3?["user"] as? [String: Any]
+        XCTAssertEqual(user3?["name"] as? String, "John")
+        XCTAssertEqual(user3?["password"] as? String, "secret")
+    }
+
+    func testExactMatchWithBlocklistOnDescendants() throws {
+        let filter = ObjectFilter(allowList: ["user/**"], blockList: ["user/password"])
+        let input: [String: Any] = ["user": ["name": "John", "password": "secret"] as [String: Any]]
+        let result = filter.filterd(input) as? [String: Any]
+        let user = result?["user"] as? [String: Any]
+        XCTAssertEqual(user?["name"] as? String, "John")
+        XCTAssertNil(user?["password"])
+    }
+
+    func testExactMatchOnArrayIsNotCaptured() throws {
+        let filter = ObjectFilter(allowList: ["items"])
+        let input: [String: Any] = ["items": ["a", "b", "c"]]
+        XCTAssertNil(filter.filterd(input))
     }
 
     func testFilterdNilInput() throws {

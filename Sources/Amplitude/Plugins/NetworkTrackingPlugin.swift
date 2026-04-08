@@ -83,16 +83,17 @@ public struct NetworkTrackingOptions {
 
     public struct CaptureBody: Decodable {
         public let allowlist: [String]
-        public let blocklist: [String]
+        public let excludelist: [String]
 
-        public init(allowlist: [String], blocklist: [String] = []) {
+        public init(allowlist: [String], excludelist: [String] = []) {
             self.allowlist = allowlist
-            self.blocklist = blocklist
+            self.excludelist = excludelist
         }
 
-        enum CodingKeys: String, CodingKey {
-            case allowlist
-            case blocklist = "excludelist"
+        @available(*, deprecated, renamed: "init(allowlist:excludelist:)", message: "Deprecated, use 'excludelist' instead")
+        public init(allowlist: [String], blocklist: [String] = []) {
+            self.allowlist = allowlist
+            self.excludelist = blocklist
         }
     }
 
@@ -155,7 +156,6 @@ public struct NetworkTrackingOptions {
             self.responseBody = nil
         }
 
-        @_spi(NetworkTracking)
         public init(urls: [URLPattern],
                     methods: [String] = ["*"],
                     statusCodeRange: String = "500-599",
@@ -561,7 +561,7 @@ class CompiledNetworkTrackingOptions {
         let objectFilter: ObjectFilter
 
         init(body: NetworkTrackingOptions.CaptureBody) {
-            self.objectFilter = ObjectFilter(allowList: body.allowlist, blockList: body.blocklist)
+            self.objectFilter = ObjectFilter(allowList: body.allowlist, blockList: body.excludelist)
         }
 
         func filterBody(_ body: Any) -> Any? {

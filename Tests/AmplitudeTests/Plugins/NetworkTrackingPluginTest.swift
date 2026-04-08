@@ -7,7 +7,6 @@
 
 import XCTest
 
-@_spi(NetworkTracking)
 @testable import AmplitudeSwift
 
 // swiftlint:disable force_cast

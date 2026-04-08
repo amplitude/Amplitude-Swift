@@ -74,13 +74,6 @@ class ObjectFilter {
             return isAllowed(path) ? value : nil
         }
 
-        // Return entire container for exact non-wildcard matches
-        if allowKeyPaths.contains(where: {
-            !$0.contains { $0 == "*" || $0 == "**" } && matches(path, $0) && !isBlocked(path)
-        }) {
-            return value
-        }
-
         // Return empty containers that match patterns
         if isAllowed(path) {
             if let dict = value as? [String: Any], dict.isEmpty { return value }
