@@ -1061,8 +1061,8 @@ final class NetworkTrackingPluginTest: XCTestCase {
                     responseHeaders: NetworkTrackingOptions.CaptureHeader(),
                     requestBody: nil,  // GET requests typically don't have body
                     responseBody: NetworkTrackingOptions.CaptureBody(
-                        allowlist: ["products", "total"],
-                        blocklist: ["internal_metadata"]
+                        allowlist: ["products/**", "total"],
+                        excludelist: ["internal_metadata"]
                     )
                 )
             ]

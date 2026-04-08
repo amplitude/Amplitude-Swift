@@ -91,7 +91,7 @@ public struct NetworkTrackingOptions {
         }
 
         @available(*, deprecated, renamed: "init(allowlist:excludelist:)", message: "Deprecated, use 'excludelist' instead")
-        public init(allowlist: [String], blocklist: [String] = []) {
+        public init(allowlist: [String], blocklist: [String]) {
             self.allowlist = allowlist
             self.excludelist = blocklist
         }
