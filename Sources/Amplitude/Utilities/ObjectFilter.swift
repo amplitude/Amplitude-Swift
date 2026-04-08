@@ -108,7 +108,13 @@ class ObjectFilter {
     }
 
     private func canMatchDescendants(_ path: KeyPath, _ pattern: KeyPath) -> Bool {
-        guard pattern.count > path.count else { return pattern.contains("**") }
+        guard pattern.count > path.count else {
+            for i in 0..<pattern.count {
+                if pattern[i] == "**" { return true }
+                if pattern[i] != path[i] && pattern[i] != "*" { return false }
+            }
+            return false
+        }
 
         for i in 0..<path.count {
             if pattern[i] == "**" { return true }

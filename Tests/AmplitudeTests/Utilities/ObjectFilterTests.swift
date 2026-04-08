@@ -760,6 +760,16 @@ final class ObjectFilterTests: XCTestCase {
         XCTAssertNil(filter.filterd(input))
     }
 
+    func testDoesNotDescendIntoMismatchedPrefixWithDoubleWildcard() throws {
+        let filter = ObjectFilter(allowList: ["c/**"])
+        let input: [String: Any] = [
+            "a": [
+                "nested": ["value": "ignored"] as [String: Any]
+            ] as [String: Any]
+        ]
+        XCTAssertNil(filter.filterd(input))
+    }
+
     func testFilterdNilInput() throws {
         let filter = ObjectFilter(allowList: ["user"])
 
