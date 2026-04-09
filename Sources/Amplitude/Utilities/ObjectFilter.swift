@@ -74,13 +74,6 @@ class ObjectFilter {
             return isAllowed(path) ? value : nil
         }
 
-        // Return entire container for exact non-wildcard matches
-        if allowKeyPaths.contains(where: {
-            !$0.contains { $0 == "*" || $0 == "**" } && matches(path, $0) && !isBlocked(path)
-        }) {
-            return value
-        }
-
         // Return empty containers that match patterns
         if isAllowed(path) {
             if let dict = value as? [String: Any], dict.isEmpty { return value }
@@ -115,7 +108,13 @@ class ObjectFilter {
     }
 
     private func canMatchDescendants(_ path: KeyPath, _ pattern: KeyPath) -> Bool {
-        guard pattern.count > path.count else { return pattern.contains("**") }
+        guard pattern.count > path.count else {
+            for i in 0..<pattern.count {
+                if pattern[i] == "**" { return true }
+                if pattern[i] != path[i] && pattern[i] != "*" { return false }
+            }
+            return false
+        }
 
         for i in 0..<path.count {
             if pattern[i] == "**" { return true }
