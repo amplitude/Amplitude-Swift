@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.5...v1.18.0) (2026-04-10)
+
+
+### Features
+
+* make header and body capture feature GA & fix bug for allowlist rule ([#396](https://github.com/amplitude/Amplitude-Swift/issues/396)) ([590a329](https://github.com/amplitude/Amplitude-Swift/commit/590a329a3e389dc6bcf1ccceeeed0a345d760121))
+
 ## [1.17.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.4...v1.17.5) (2026-03-12)
 
 
