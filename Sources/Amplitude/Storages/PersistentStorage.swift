@@ -99,10 +99,41 @@ class PersistentStorage: Storage {
                 return readV1File(content: content!)
             }
         } catch {
-            diagonostics.addErrorLog(error.localizedDescription)
-            logger?.error(message: error.localizedDescription)
+            diagonosticsClient.increment(name: "analytics.events.file.read.failed")
+            diagonosticsClient.recordEvent(name: "analytics.events.file.read.failed", properties: [
+                "file": eventBlock.lastPathComponent,
+                "error": error.localizedDescription
+            ])
+            logger?.error(message: "Could not read events file \(eventBlock.lastPathComponent): \(error.localizedDescription)")
+            // Quarantine the unreadable file so the upload pipeline can make progress.
+            // Without this, the same file blocks every subsequent flush forever.
+            quarantineUnreadableFile(eventBlock)
         }
         return content
+    }
+
+    private func quarantineUnreadableFile(_ file: URL) {
+        syncQueue.sync {
+            guard fileManager.fileExists(atPath: file.path) else { return }
+            let directory = file.deletingLastPathComponent()
+            let timestamp = Int(Date().timeIntervalSince1970)
+            // Leading "." makes the file hidden; getEventFiles uses skipsHiddenFiles so
+            // the quarantined file drops out of the upload queue automatically while
+            // staying on disk for diagnostics.
+            let quarantineName = ".\(file.lastPathComponent).corrupt.\(timestamp)"
+            let target = directory.appendingPathComponent(quarantineName)
+            do {
+                try fileManager.moveItem(at: file, to: target)
+                logger?.error(message: "Quarantined unreadable events file: \(file.lastPathComponent) -> \(quarantineName)")
+            } catch {
+                diagonosticsClient.increment(name: "analytics.events.file.quarantine.failed")
+                diagonosticsClient.recordEvent(name: "analytics.events.file.quarantine.failed", properties: [
+                    "file": file.lastPathComponent,
+                    "error": error.localizedDescription
+                ])
+                logger?.error(message: "Unable to quarantine unreadable events file \(file.lastPathComponent): \(error.localizedDescription)")
+            }
+        }
     }
 
     func remove(eventBlock: EventBlock) {

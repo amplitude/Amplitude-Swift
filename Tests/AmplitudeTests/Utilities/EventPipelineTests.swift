@@ -226,6 +226,40 @@ final class EventPipelineTests: XCTestCase {
         XCTAssertEqual(httpClient.uploadCount, 4)
     }
 
+    func testFlushSkipsMultipleUnreadableFiles() throws {
+        let storeDirectory = storage.getEventsStorageDirectory(createDirectory: false)
+
+        // Create three finalized event files.
+        for i in 0..<3 {
+            try? pipeline.storage?.write(
+                key: StorageKey.EVENTS,
+                value: BaseEvent(userId: "u", deviceId: "d", eventType: "event-\(i)")
+            )
+            pipeline.storage?.rollover()
+        }
+
+        let initialFiles = (try FileManager.default.contentsOfDirectory(at: storeDirectory, includingPropertiesForKeys: nil))
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        XCTAssertEqual(initialFiles.count, 3)
+
+        // Corrupt the first two files. The third remains a valid event block.
+        let invalidUTF8 = Data([0xFF, 0xFE, 0xFD, 0xFC, 0xC0, 0xC1, 0xF5])
+        try invalidUTF8.write(to: initialFiles[0])
+        try invalidUTF8.write(to: initialFiles[1])
+
+        let flushExpectation = expectation(description: "flush")
+        pipeline.flush {
+            flushExpectation.fulfill()
+        }
+        wait(for: [flushExpectation], timeout: 2)
+
+        // Pipeline must have walked past the two corrupt files and uploaded the third.
+        XCTAssertEqual(httpClient.uploadCount, 1, "Pipeline should not stall on corrupt files")
+        let uploaded = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[0])
+        XCTAssertEqual(uploaded?.count, 1)
+        XCTAssertEqual(uploaded?[0].eventType, "event-2")
+    }
+
     func testContinuesHandledFailure() {
         pipeline.configuration.offline = false
         pipeline.configuration.flushMaxRetries = 1

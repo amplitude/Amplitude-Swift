@@ -100,6 +100,47 @@ final class PersistentStorageTests: XCTestCase {
         persistentStorage.reset()
     }
 
+    func testQuarantineUnreadableEventFile() throws {
+        let persistentStorage = PersistentStorage(storagePrefix: "quarantine-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let storeDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
+        try? persistentStorage.write(
+            key: StorageKey.EVENTS,
+            value: BaseEvent(eventType: "test1")
+        )
+        persistentStorage.rollover()
+        let eventFiles = try XCTUnwrap(persistentStorage.read(key: StorageKey.EVENTS) as [URL]?)
+        XCTAssertEqual(eventFiles.count, 1)
+        let corruptFile = eventFiles[0]
+
+        // Overwrite finalized file with bytes that are invalid UTF-8, mimicking the
+        // iOS 26 corruption report where String(contentsOf:encoding:) throws.
+        let invalidUTF8 = Data([0xFF, 0xFE, 0xFD, 0xFC, 0xC0, 0xC1, 0xF5])
+        try invalidUTF8.write(to: corruptFile)
+
+        let result = persistentStorage.getEventsString(eventBlock: corruptFile)
+        XCTAssertNil(result, "Unreadable file should return nil")
+
+        // Original file must be gone (quarantined) so the next flush advances past it.
+        XCTAssertFalse(FileManager.default.fileExists(atPath: corruptFile.path), "Corrupt file should be renamed away")
+
+        // read(key: .EVENTS) must no longer return the corrupt file — otherwise the
+        // EventPipeline stays stuck on it.
+        let remaining: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
+        XCTAssertTrue(remaining?.isEmpty ?? true, "Upload queue should no longer surface the corrupt file")
+
+        // Quarantined file stays on disk (hidden) for diagnostics.
+        let allOnDisk = try FileManager.default.contentsOfDirectory(atPath: storeDirectory.path)
+        let quarantined = allOnDisk.filter { $0.hasPrefix(".\(corruptFile.lastPathComponent).corrupt.") }
+        XCTAssertEqual(quarantined.count, 1, "Quarantine file should exist on disk for diagnostics")
+
+        persistentStorage.reset()
+        // reset() uses skipsHiddenFiles so the quarantine file is intentionally left behind;
+        // clean it up manually to keep the test directory tidy.
+        for hidden in quarantined {
+            try? FileManager.default.removeItem(atPath: storeDirectory.appendingPathComponent(hidden).path)
+        }
+    }
+
     func testRemove() {
         let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         let storeDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
