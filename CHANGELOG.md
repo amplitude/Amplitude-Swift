@@ -1,3 +1,10 @@
+## [1.18.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.0...v1.18.1) (2026-04-17)
+
+
+### Bug Fixes
+
+* quarantine unreadable event files and recover from unopenable ones ([#398](https://github.com/amplitude/Amplitude-Swift/issues/398)) ([9b69807](https://github.com/amplitude/Amplitude-Swift/commit/9b69807c004313273ea4e8d398b9d20172fee875))
+
 # [1.18.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.5...v1.18.0) (2026-04-10)
 
 
