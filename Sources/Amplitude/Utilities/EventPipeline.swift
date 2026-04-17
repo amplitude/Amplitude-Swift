@@ -137,7 +137,7 @@ public class EventPipeline {
                             return
                         }
                         self.currentUpload = nil
-                        self.sendNextEventFile(failures: failures)
+                        self.sendNextEventFile(failures: failures, skipFiles: skipFiles)
                     }
 
                     if failures == 0 || handled {

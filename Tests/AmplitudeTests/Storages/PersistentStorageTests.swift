@@ -128,17 +128,15 @@ final class PersistentStorageTests: XCTestCase {
         let remaining: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
         XCTAssertTrue(remaining?.isEmpty ?? true, "Upload queue should no longer surface the corrupt file")
 
-        // Quarantined file stays on disk (hidden) for diagnostics.
-        let allOnDisk = try FileManager.default.contentsOfDirectory(atPath: storeDirectory.path)
-        let quarantined = allOnDisk.filter { $0.hasPrefix(".\(corruptFile.lastPathComponent).corrupt.") }
-        XCTAssertEqual(quarantined.count, 1, "Quarantine file should exist on disk for diagnostics")
+        // Quarantined file lives inside the hidden .quarantine subfolder for diagnostics.
+        let quarantineDir = storeDirectory.appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
+        let quarantined = (try? FileManager.default.contentsOfDirectory(atPath: quarantineDir.path)) ?? []
+        XCTAssertEqual(quarantined.count, 1, "Quarantine file should exist in quarantine subfolder for diagnostics")
+        XCTAssertTrue(quarantined[0].hasPrefix("\(corruptFile.lastPathComponent)."))
 
+        // reset() should now sweep the quarantine directory too.
         persistentStorage.reset()
-        // reset() uses skipsHiddenFiles so the quarantine file is intentionally left behind;
-        // clean it up manually to keep the test directory tidy.
-        for hidden in quarantined {
-            try? FileManager.default.removeItem(atPath: storeDirectory.appendingPathComponent(hidden).path)
-        }
+        XCTAssertFalse(FileManager.default.fileExists(atPath: quarantineDir.path), "reset() should remove the quarantine directory")
     }
 
     func testRemove() {

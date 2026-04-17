@@ -115,16 +115,16 @@ class PersistentStorage: Storage {
     private func quarantineUnreadableFile(_ file: URL) {
         syncQueue.sync {
             guard fileManager.fileExists(atPath: file.path) else { return }
-            let directory = file.deletingLastPathComponent()
+            let quarantineDir = getQuarantineDirectory()
             let timestamp = Int(Date().timeIntervalSince1970)
-            // Leading "." makes the file hidden; getEventFiles uses skipsHiddenFiles so
-            // the quarantined file drops out of the upload queue automatically while
-            // staying on disk for diagnostics.
-            let quarantineName = ".\(file.lastPathComponent).corrupt.\(timestamp)"
-            let target = directory.appendingPathComponent(quarantineName)
+            let target = quarantineDir.appendingPathComponent("\(file.lastPathComponent).\(timestamp)")
             do {
+                try fileManager.createDirectory(at: quarantineDir, withIntermediateDirectories: true, attributes: nil)
                 try fileManager.moveItem(at: file, to: target)
-                logger?.error(message: "Quarantined unreadable events file: \(file.lastPathComponent) -> \(quarantineName)")
+                logger?.error(message: "Quarantined unreadable events file: \(file.lastPathComponent) -> \(PersistentStorage.QUARANTINE_DIR_NAME)/\(target.lastPathComponent)")
+                if let contents = try? fileManager.contentsOfDirectory(atPath: quarantineDir.path) {
+                    diagonosticsClient.recordHistogram(name: "analytics.events.file.quarantined.count", value: Double(contents.count))
+                }
             } catch {
                 diagonosticsClient.increment(name: "analytics.events.file.quarantine.failed")
                 diagonosticsClient.recordEvent(name: "analytics.events.file.quarantine.failed", properties: [
@@ -134,6 +134,11 @@ class PersistentStorage: Storage {
                 logger?.error(message: "Unable to quarantine unreadable events file \(file.lastPathComponent): \(error.localizedDescription)")
             }
         }
+    }
+
+    private func getQuarantineDirectory() -> URL {
+        return getEventsStorageDirectory(createDirectory: false)
+            .appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
     }
 
     func remove(eventBlock: EventBlock) {
@@ -190,6 +195,7 @@ class PersistentStorage: Storage {
             for url in urls {
                 try? fileManager.removeItem(atPath: url.path)
             }
+            try? fileManager.removeItem(at: getQuarantineDirectory())
         }
     }
 
@@ -255,6 +261,10 @@ extension PersistentStorage {
     static let DELMITER = "\u{0000}"
     static let STORAGE_VERSION = "amplitude.events.storage.version"
     static let STORAGE_V2_PREFIX = "v2-"
+    // Leading "." keeps the quarantine folder hidden so contentsOfDirectory
+    // with skipsHiddenFiles (the default in getEventFiles and
+    // getCurrentEventFile) ignores it without any explicit filtering.
+    static let QUARANTINE_DIR_NAME = ".quarantine"
 
     enum Exception: Error {
         case unsupportedType
