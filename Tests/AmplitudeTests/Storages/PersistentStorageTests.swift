@@ -139,6 +139,45 @@ final class PersistentStorageTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: quarantineDir.path), "reset() should remove the quarantine directory")
     }
 
+    func testWriteRecoversFromUnopenableFile() throws {
+        let persistentStorage = PersistentStorage(storagePrefix: "unopenable-write", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.reset()
+        let storeDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: true)
+
+        // Pre-create the first .tmp path as a *directory* so FileHandle(forWritingTo:)
+        // will throw. This mimics the production scenario where the existing .tmp
+        // cannot be opened for append (e.g., Data Protection locked, permissions).
+        let blockedTmp = storeDirectory.appendingPathComponent("v2-0.tmp")
+        try FileManager.default.createDirectory(at: blockedTmp, withIntermediateDirectories: false)
+
+        // Write an event. Without the recovery path, outputStream would stay nil and
+        // the event would be silently dropped via optional chaining at outputStream?.write.
+        try persistentStorage.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "after-recovery"))
+        persistentStorage.rollover()
+
+        // Blocked tmp should be renamed out of the .tmp namespace (same rename()
+        // used by rollover — moves "v2-0.tmp" -> "v2-0").
+        XCTAssertFalse(FileManager.default.fileExists(atPath: blockedTmp.path))
+
+        // read(key:.EVENTS) must surface both the new file (with the event we
+        // just wrote) and the blocked one as an unreadable candidate.
+        let eventFiles = try XCTUnwrap(persistentStorage.read(key: StorageKey.EVENTS) as [URL]?)
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        XCTAssertEqual(eventFiles.count, 2)
+        XCTAssertEqual(eventFiles[0].lastPathComponent, "v2-0")
+        XCTAssertTrue(eventFiles[1].lastPathComponent.hasPrefix("v2-1"))
+
+        // Reading the blocked entry triggers quarantine; reading the new file
+        // returns the event that otherwise would have been lost.
+        _ = persistentStorage.getEventsString(eventBlock: eventFiles[0])
+        let recoveredString = persistentStorage.getEventsString(eventBlock: eventFiles[1])
+        let recoveredEvents = BaseEvent.fromArrayString(jsonString: recoveredString ?? "")
+        XCTAssertEqual(recoveredEvents?.count, 1)
+        XCTAssertEqual(recoveredEvents?[0].eventType, "after-recovery")
+
+        persistentStorage.reset()
+    }
+
     func testRemove() {
         let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         let storeDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
