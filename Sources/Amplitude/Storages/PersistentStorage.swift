@@ -99,10 +99,46 @@ class PersistentStorage: Storage {
                 return readV1File(content: content!)
             }
         } catch {
-            diagonostics.addErrorLog(error.localizedDescription)
-            logger?.error(message: error.localizedDescription)
+            diagonosticsClient.increment(name: "analytics.events.file.read.failed")
+            diagonosticsClient.recordEvent(name: "analytics.events.file.read.failed", properties: [
+                "file": eventBlock.lastPathComponent,
+                "error": error.localizedDescription
+            ])
+            logger?.error(message: "Could not read events file \(eventBlock.lastPathComponent): \(error.localizedDescription)")
+            // Quarantine the unreadable file so the upload pipeline can make progress.
+            // Without this, the same file blocks every subsequent flush forever.
+            quarantineUnreadableFile(eventBlock)
         }
         return content
+    }
+
+    private func quarantineUnreadableFile(_ file: URL) {
+        syncQueue.sync {
+            guard fileManager.fileExists(atPath: file.path) else { return }
+            let quarantineDir = getQuarantineDirectory()
+            let timestamp = Int(Date().timeIntervalSince1970)
+            let target = quarantineDir.appendingPathComponent("\(file.lastPathComponent).\(timestamp)")
+            do {
+                try fileManager.createDirectory(at: quarantineDir, withIntermediateDirectories: true, attributes: nil)
+                try fileManager.moveItem(at: file, to: target)
+                logger?.error(message: "Quarantined unreadable events file: \(file.lastPathComponent) -> \(PersistentStorage.QUARANTINE_DIR_NAME)/\(target.lastPathComponent)")
+                if let contents = try? fileManager.contentsOfDirectory(atPath: quarantineDir.path) {
+                    diagonosticsClient.recordHistogram(name: "analytics.events.file.quarantined.count", value: Double(contents.count))
+                }
+            } catch {
+                diagonosticsClient.increment(name: "analytics.events.file.quarantine.failed")
+                diagonosticsClient.recordEvent(name: "analytics.events.file.quarantine.failed", properties: [
+                    "file": file.lastPathComponent,
+                    "error": error.localizedDescription
+                ])
+                logger?.error(message: "Unable to quarantine unreadable events file \(file.lastPathComponent): \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func getQuarantineDirectory() -> URL {
+        return getEventsStorageDirectory(createDirectory: false)
+            .appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
     }
 
     func remove(eventBlock: EventBlock) {
@@ -159,6 +195,7 @@ class PersistentStorage: Storage {
             for url in urls {
                 try? fileManager.removeItem(atPath: url.path)
             }
+            try? fileManager.removeItem(at: getQuarantineDirectory())
         }
     }
 
@@ -224,6 +261,10 @@ extension PersistentStorage {
     static let DELMITER = "\u{0000}"
     static let STORAGE_VERSION = "amplitude.events.storage.version"
     static let STORAGE_V2_PREFIX = "v2-"
+    // Leading "." keeps the quarantine folder hidden so contentsOfDirectory
+    // with skipsHiddenFiles (the default in getEventFiles and
+    // getCurrentEventFile) ignores it without any explicit filtering.
+    static let QUARANTINE_DIR_NAME = ".quarantine"
 
     enum Exception: Error {
         case unsupportedType
@@ -329,6 +370,22 @@ extension PersistentStorage {
             open(file: storeFile)
         }
 
+        // If the file still can't be opened for writing (e.g., Data Protection
+        // locked, permissions, filesystem error), roll the unopenable file out
+        // of the .tmp namespace and start a fresh one. Without this, the
+        // optional chaining at outputStream?.write below silently drops every
+        // new event into the void.
+        if outputStream == nil {
+            diagonosticsClient.increment(name: "analytics.events.file.open.failed")
+            diagonosticsClient.recordEvent(name: "analytics.events.file.open.failed", properties: [
+                "file": storeFile.lastPathComponent
+            ])
+            logger?.error(message: "Could not open events file for writing \(storeFile.lastPathComponent); rolling over to a fresh file.")
+            forceAdvanceToNewFile(storeFile)
+            storeFile = getCurrentEventFile()
+            start(file: storeFile)
+        }
+
         // Verify file size isn't too large
         if let attributes = try? fileManager.attributesOfItem(atPath: storeFile.path),
             let fileSize = attributes[FileAttributeKey.size] as? UInt64,
@@ -376,27 +433,33 @@ extension PersistentStorage {
     }
 
     private func start(file: URL) {
+        // Only assign outputStream after both the init AND the create/open
+        // succeed. Otherwise a throw from create() leaves a half-initialized
+        // stream with a nil fileHandle — which would pass the "outputStream ==
+        // nil" guard in storeEvent while still silently dropping writes via
+        // optional chaining at outputStream?.write.
         do {
-            outputStream = try OutputFileStream(fileURL: file)
-            try outputStream?.create()
+            let stream = try OutputFileStream(fileURL: file)
+            try stream.create()
+            outputStream = stream
         } catch {
             diagonostics.addErrorLog(error.localizedDescription)
             logger?.error(message: error.localizedDescription)
+            outputStream = nil
         }
     }
 
     private func open(file: URL) {
-        if outputStream == nil {
-            // this can happen if an instance was terminated before finishing a file.
-            do {
-                outputStream = try OutputFileStream(fileURL: file)
-                if let outputStream = outputStream {
-                    try outputStream.open()
-                }
-            } catch {
-                diagonostics.addErrorLog(error.localizedDescription)
-                logger?.error(message: error.localizedDescription)
-            }
+        guard outputStream == nil else { return }
+        // this can happen if an instance was terminated before finishing a file.
+        do {
+            let stream = try OutputFileStream(fileURL: file)
+            try stream.open()
+            outputStream = stream
+        } catch {
+            diagonostics.addErrorLog(error.localizedDescription)
+            logger?.error(message: error.localizedDescription)
+            outputStream = nil
         }
     }
 
@@ -413,6 +476,14 @@ extension PersistentStorage {
         }
         self.outputStream = nil
 
+        forceAdvanceToNewFile(file)
+    }
+
+    // Rolls `file` out of the .tmp namespace and bumps the stored file index so
+    // the next getCurrentEventFile() call returns a fresh path. Used both by
+    // finish() on normal rollover and by storeEvent() when the current file
+    // can't be opened for writing.
+    private func forceAdvanceToNewFile(_ file: URL) {
         rename(file)
         let currentFileIndex: Int = (getCurrentEventFileIndex() ?? 0) + 1
         userDefaults?.set(currentFileIndex, forKey: eventsFileKey)
