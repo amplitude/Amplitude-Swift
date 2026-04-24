@@ -36,6 +36,7 @@ class PersistentStorage: Storage {
     let logger: (any Logger)?
     let diagonostics: Diagnostics
     let diagonosticsClient: CoreDiagnostics
+    private var didExcludeStorageFromBackup = false
 
     init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics, diagnosticsClient: CoreDiagnostics) {
         self.storagePrefix = storagePrefix == PersistentStorage.DEFAULT_STORAGE_PREFIX || storagePrefix.starts(with: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-")
@@ -50,6 +51,8 @@ class PersistentStorage: Storage {
         self.diagonosticsClient = diagnosticsClient
         // Make sure Amplitude data is sandboxed per app
         self.appPath = Self.getAppPath(sandboxed: isStorageSandboxed())
+
+        migrateLegacyStorageDirectories()
         handleV1Files()
     }
 
@@ -196,6 +199,7 @@ class PersistentStorage: Storage {
                 try? fileManager.removeItem(atPath: url.path)
             }
             try? fileManager.removeItem(at: getQuarantineDirectory())
+            didExcludeStorageFromBackup = false
         }
     }
 
@@ -319,7 +323,7 @@ extension PersistentStorage {
         finish(file: currentFile)
 
         let allFiles = try? fileManager.contentsOfDirectory(
-            at: getEventsStorageDirectory(),
+            at: eventsStorageDirectory,
             includingPropertiesForKeys: [],
             options: .skipsHiddenFiles
         )
@@ -338,9 +342,86 @@ extension PersistentStorage {
         return result
     }
 
+    private func migrateLegacyStorageDirectories() {
+        syncQueue.sync {
+            let legacyStorageDirectory = getLegacyEventsStorageDirectory(createDirectory: false)
+            guard fileManager.fileExists(atPath: legacyStorageDirectory.path) else {
+                return
+            }
+
+            defer {
+                // Clean up directory if it is empty
+                let remainingLegacyFiles = try? fileManager.contentsOfDirectory(
+                    at: legacyStorageDirectory,
+                    includingPropertiesForKeys: [],
+                    options: []
+                )
+                if remainingLegacyFiles?.isEmpty == true {
+                    try? fileManager.removeItem(at: legacyStorageDirectory)
+                }
+            }
+
+            // Remove anything in legacy quarantine directory
+            let legacyQuarantineDirectory = legacyStorageDirectory
+                .appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
+            if fileManager.fileExists(atPath: legacyQuarantineDirectory.path) {
+                try? fileManager.removeItem(at: legacyQuarantineDirectory)
+            }
+
+            // Move event files
+            let legacyFiles = (try? fileManager.contentsOfDirectory(
+                at: legacyStorageDirectory,
+                includingPropertiesForKeys: [],
+                options: .skipsHiddenFiles
+            )) ?? []
+
+            guard !legacyFiles.isEmpty else {
+                return
+            }
+
+            let storageDirectory = getEventsStorageDirectory(createDirectory: true)
+            for legacyFile in legacyFiles {
+                var destinationFile = storageDirectory.appendingPathComponent(legacyFile.lastPathComponent)
+                if legacyFile.pathExtension == PersistentStorage.TEMP_FILE_EXTENSION {
+                    destinationFile = destinationFile.deletingPathExtension()
+                }
+                if fileManager.fileExists(atPath: destinationFile.path) {
+                    let suffix = "-\(Date().timeIntervalSince1970)-\(Int.random(in: 0..<1000))"
+                    destinationFile = destinationFile.appendFileNameSuffix(suffix: suffix)
+                }
+                do {
+                    try fileManager.moveItem(at: legacyFile, to: destinationFile)
+                } catch {
+                    diagonostics.addErrorLog(error.localizedDescription)
+                    logger?.error(message: "Unable to migrate legacy event file: \(legacyFile.path)")
+                }
+            }
+        }
+    }
+
     internal func getEventsStorageDirectory(createDirectory: Bool = true) -> URL {
-        // TODO: Update to use applicationSupportDirectory for all platforms (this will require a migration)
-        // let searchPathDirectory = FileManager.SearchPathDirectory.applicationSupportDirectory
+        let storageUrl = getEventsStorageDirectory(searchPathDirectory: .applicationSupportDirectory,
+                                                  createDirectory: createDirectory)
+
+        // This call is prohibitively expensive to be called at each event, run it once per instance lifetime.
+        if createDirectory, !didExcludeStorageFromBackup {
+            var mutableStorageUrl = storageUrl
+            do {
+                var resourceValues = URLResourceValues()
+                resourceValues.isExcludedFromBackup = true
+                try mutableStorageUrl.setResourceValues(resourceValues)
+                didExcludeStorageFromBackup = true
+            } catch {
+                let nsError = error as NSError
+                diagonostics.addErrorLog("Unable to exclude storage directory from backup: \(nsError.domain)#\(nsError.code)")
+                logger?.error(message: "Unable to exclude storage directory from backup: \(storageUrl.path)")
+            }
+        }
+
+        return storageUrl
+    }
+
+    internal func getLegacyEventsStorageDirectory(createDirectory: Bool = true) -> URL {
         // tvOS doesn't have access to document
         // macOS /Documents dir might be synced with iCloud
         #if os(tvOS) || os(macOS)
@@ -348,7 +429,10 @@ extension PersistentStorage {
         #else
             let searchPathDirectory = FileManager.SearchPathDirectory.documentDirectory
         #endif
+        return getEventsStorageDirectory(searchPathDirectory: searchPathDirectory, createDirectory: createDirectory)
+    }
 
+    private func getEventsStorageDirectory(searchPathDirectory: FileManager.SearchPathDirectory, createDirectory: Bool) -> URL {
         let urls = fileManager.urls(for: searchPathDirectory, in: .userDomainMask)
         let docUrl = urls[0]
         let storageUrl = docUrl.appendingPathComponent("amplitude/\(appPath ?? "")\(eventsFileKey)/")

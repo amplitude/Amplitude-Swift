@@ -371,6 +371,186 @@ final class PersistentStorageTests: XCTestCase {
         persistentStorage.reset()
     }
 
+    func testDefaultStorageDirectoryUsesApplicationSupport() {
+        let persistentStorage = PersistentStorage(storagePrefix: "application-support-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.reset()
+
+        let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: false)
+        let applicationSupportUrl = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+
+        XCTAssertTrue(storageUrl.path.hasPrefix(applicationSupportUrl.path))
+        persistentStorage.reset()
+    }
+
+    func testStorageDirectoryIsExcludedFromBackupWhenCreated() throws {
+        let persistentStorage = PersistentStorage(storagePrefix: "excluded-from-backup-instance-\(UUID().uuidString)", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.reset()
+
+        let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: true)
+        let resourceValues = try storageUrl.resourceValues(forKeys: [.isExcludedFromBackupKey])
+
+        XCTAssertEqual(resourceValues.isExcludedFromBackup, true)
+        persistentStorage.reset()
+    }
+
+    func testStorageDirectoryBackupExclusionIsOnlySetOncePerInstance() throws {
+        let persistentStorage = PersistentStorage(storagePrefix: "excluded-from-backup-once-instance-\(UUID().uuidString)", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.reset()
+
+        let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: true)
+        var resourceValues = try storageUrl.resourceValues(forKeys: [.isExcludedFromBackupKey])
+        XCTAssertEqual(resourceValues.isExcludedFromBackup, true)
+
+        var mutableStorageUrl = storageUrl
+        resourceValues.isExcludedFromBackup = false
+        try mutableStorageUrl.setResourceValues(resourceValues)
+
+        _ = persistentStorage.getEventsStorageDirectory(createDirectory: true)
+        let updatedResourceValues = try storageUrl.resourceValues(forKeys: [.isExcludedFromBackupKey])
+
+        XCTAssertEqual(updatedResourceValues.isExcludedFromBackup, false)
+        persistentStorage.reset()
+    }
+
+    func testMigratesLegacyEventFilesToCurrentStorageDirectory() {
+        let storagePrefix = "legacy-directory-instance"
+        let persistentStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.reset()
+
+        let storageDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
+        let legacyStorageDirectory = persistentStorage.getLegacyEventsStorageDirectory(createDirectory: true)
+        let legacyFile = legacyStorageDirectory.appendingPathComponent("\(PersistentStorage.STORAGE_V2_PREFIX)0")
+        writeContent(file: legacyFile, content: "\(BaseEvent(eventType: "legacy-event").toString())\(PersistentStorage.DELMITER)")
+
+        let migratedStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let eventFiles: [URL]? = migratedStorage.read(key: StorageKey.EVENTS)
+        let migratedFile = storageDirectory.appendingPathComponent(legacyFile.lastPathComponent)
+        XCTAssertEqual(eventFiles?.count, 1)
+        XCTAssertEqual(eventFiles?.first, migratedFile)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyFile.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyStorageDirectory.path))
+
+        let eventString = migratedStorage.getEventsString(eventBlock: migratedFile)
+        let decodedEvents = BaseEvent.fromArrayString(jsonString: eventString ?? "")
+        XCTAssertEqual(decodedEvents?.count, 1)
+        XCTAssertEqual(decodedEvents?.first?.eventType, "legacy-event")
+
+        migratedStorage.reset()
+    }
+
+    func testQuarantinesLegacyUnreadableEventFilesInCurrentStorageDirectory() throws {
+        let storagePrefix = "legacy-quarantine-directory-instance"
+        let persistentStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.reset()
+
+        let storageDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
+        let legacyStorageDirectory = persistentStorage.getLegacyEventsStorageDirectory(createDirectory: true)
+        let legacyFile = legacyStorageDirectory.appendingPathComponent("\(PersistentStorage.STORAGE_V2_PREFIX)0")
+        let invalidUTF8 = Data([0xFF, 0xFE, 0xFD, 0xFC, 0xC0, 0xC1, 0xF5])
+        try invalidUTF8.write(to: legacyFile)
+
+        let migratedStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let eventFiles = try XCTUnwrap(migratedStorage.read(key: StorageKey.EVENTS) as [URL]?)
+        XCTAssertEqual(eventFiles.count, 1)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyFile.path))
+
+        let result = migratedStorage.getEventsString(eventBlock: eventFiles[0])
+        XCTAssertNil(result)
+
+        let currentQuarantineDir = storageDirectory.appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
+        let legacyQuarantineDir = legacyStorageDirectory.appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
+        let quarantined = (try? FileManager.default.contentsOfDirectory(atPath: currentQuarantineDir.path)) ?? []
+        XCTAssertEqual(quarantined.count, 1)
+        XCTAssertTrue(quarantined[0].hasPrefix("\(eventFiles[0].lastPathComponent)."))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyQuarantineDir.path))
+
+        migratedStorage.reset()
+    }
+
+    func testRemovesLegacyQuarantineDirectoryDuringMigration() throws {
+        let storagePrefix = "legacy-remove-quarantine-directory-instance-\(UUID().uuidString)"
+        let persistentStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.reset()
+
+        let legacyStorageDirectory = persistentStorage.getLegacyEventsStorageDirectory(createDirectory: true)
+        let legacyFile = legacyStorageDirectory.appendingPathComponent("\(PersistentStorage.STORAGE_V2_PREFIX)0")
+        let legacyQuarantineDirectory = legacyStorageDirectory.appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
+        try FileManager.default.createDirectory(at: legacyQuarantineDirectory, withIntermediateDirectories: true)
+        writeContent(file: legacyFile, content: "\(BaseEvent(eventType: "legacy-event").toString())\(PersistentStorage.DELMITER)")
+        writeContent(file: legacyQuarantineDirectory.appendingPathComponent("quarantined-event"), content: "unreadable")
+
+        let migratedStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let eventFiles: [URL]? = migratedStorage.read(key: StorageKey.EVENTS)
+
+        XCTAssertEqual(eventFiles?.count, 1)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyQuarantineDirectory.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyStorageDirectory.path))
+
+        migratedStorage.reset()
+    }
+
+    func testRemovesLegacyQuarantineDirectoryWithoutLegacyEventFiles() throws {
+        let storagePrefix = "legacy-remove-only-quarantine-directory-instance-\(UUID().uuidString)"
+        let persistentStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.reset()
+
+        let legacyStorageDirectory = persistentStorage.getLegacyEventsStorageDirectory(createDirectory: true)
+        let legacyQuarantineDirectory = legacyStorageDirectory.appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
+        try FileManager.default.createDirectory(at: legacyQuarantineDirectory, withIntermediateDirectories: true)
+        writeContent(file: legacyQuarantineDirectory.appendingPathComponent("quarantined-event"), content: "unreadable")
+
+        let migratedStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let eventFiles: [URL]? = migratedStorage.read(key: StorageKey.EVENTS)
+
+        XCTAssertTrue(eventFiles?.isEmpty ?? false)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyQuarantineDirectory.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyStorageDirectory.path))
+
+        migratedStorage.reset()
+    }
+
+    func testMigratesLegacyUnfinishedEventFilesToCurrentStorageDirectory() {
+        let storagePrefix = "legacy-unfinished-directory-instance"
+        let persistentStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.reset()
+
+        let storageDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: false)
+        let legacyStorageDirectory = persistentStorage.getLegacyEventsStorageDirectory(createDirectory: true)
+        let legacyTempFile = legacyStorageDirectory.appendingPathComponent("\(PersistentStorage.STORAGE_V2_PREFIX)0").appendingPathExtension(PersistentStorage.TEMP_FILE_EXTENSION)
+        writeContent(file: legacyTempFile, content: "\(BaseEvent(eventType: "legacy-unfinished-event").toString())\(PersistentStorage.DELMITER)")
+
+        let migratedStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        let eventFiles: [URL]? = migratedStorage.read(key: StorageKey.EVENTS)
+        let migratedFile = storageDirectory.appendingPathComponent(legacyTempFile.deletingPathExtension().lastPathComponent)
+        XCTAssertEqual(eventFiles?.count, 1)
+        XCTAssertEqual(eventFiles?.first, migratedFile)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyTempFile.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyStorageDirectory.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: migratedFile.path))
+
+        let eventString = migratedStorage.getEventsString(eventBlock: migratedFile)
+        let decodedEvents = BaseEvent.fromArrayString(jsonString: eventString ?? "")
+        XCTAssertEqual(decodedEvents?.count, 1)
+        XCTAssertEqual(decodedEvents?.first?.eventType, "legacy-unfinished-event")
+
+        migratedStorage.reset()
+    }
+
+    func testDoesNotFinalizeStaleUnfinishedEventFilesFromCurrentStorageDirectory() {
+        let persistentStorage = PersistentStorage(storagePrefix: "current-unfinished-directory-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.reset()
+
+        let storageDirectory = persistentStorage.getEventsStorageDirectory(createDirectory: true)
+        let tempFile = storageDirectory.appendingPathComponent("\(PersistentStorage.STORAGE_V2_PREFIX)0").appendingPathExtension(PersistentStorage.TEMP_FILE_EXTENSION)
+        writeContent(file: tempFile, content: "\(BaseEvent(eventType: "current-unfinished-event").toString())\(PersistentStorage.DELMITER)")
+
+        let eventFiles: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
+        XCTAssertTrue(eventFiles?.isEmpty ?? false)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: tempFile.path))
+
+        persistentStorage.reset()
+    }
+
     #if os(macOS)
     func testMacOsStorageDirectorySandboxedWhenAppSandboxDisabled() {
         let persistentStorage = PersistentStorage(storagePrefix: "mac-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
