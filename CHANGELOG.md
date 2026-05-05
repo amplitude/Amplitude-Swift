@@ -1,3 +1,11 @@
+## [1.18.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.1...v1.18.2) (2026-05-05)
+
+
+### Bug Fixes
+
+* update AmplitudeCore min version ([4645020](https://github.com/amplitude/Amplitude-Swift/commit/4645020ab6e5b93994717fde4329af53adf79cef))
+* Use Application Support for event storage ([f4594d0](https://github.com/amplitude/Amplitude-Swift/commit/f4594d034aa8f06f15e9d16c07edb3c35910de12))
+
 ## [1.18.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.0...v1.18.1) (2026-04-17)
 
 
