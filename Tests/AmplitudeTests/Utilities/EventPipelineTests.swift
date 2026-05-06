@@ -16,18 +16,22 @@ final class EventPipelineTests: XCTestCase {
     private var pipeline: EventPipeline!
     private var httpClient: FakeHttpClient!
     private var storage: PersistentStorage!
+    private var storagePrefix: String!
 
     override func setUp() {
         super.setUp()
+        storagePrefix = "event-pipeline-tests-\(UUID().uuidString)"
         storage = PersistentStorage(
-            storagePrefix: "event-pipeline-tests",
+            storagePrefix: storagePrefix,
             logger: nil,
             diagonostics: Diagnostics(),
             diagnosticsClient: FakeDiagnosticsClient())
         configuration = Configuration(
             apiKey: "testApiKey",
             flushIntervalMillis: Int(Self.FLUSH_INTERVAL_SECONDS * 1000),
+            instanceName: storagePrefix,
             storageProvider: storage,
+            logLevel: .off,
             offline: NetworkConnectivityCheckerPlugin.Disabled
         )
         let amplitude = Amplitude(configuration: configuration)
@@ -39,8 +43,13 @@ final class EventPipelineTests: XCTestCase {
     }
 
     override func tearDown() {
-        super.tearDown()
         storage.reset()
+        storage = nil
+        storagePrefix = nil
+        httpClient = nil
+        pipeline = nil
+        configuration = nil
+        super.tearDown()
     }
 
     func testInit() {
@@ -193,9 +202,6 @@ final class EventPipelineTests: XCTestCase {
         let testEvent = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
         try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
 
-        let uploadExpectations = (0..<4).map { i in expectation(description: "httpresponse-\(i)") }
-        httpClient.uploadExpectations = uploadExpectations
-
         httpClient.uploadResults = [
             .failure(NSError(domain: "unknown", code: 0, userInfo: nil)), // instant failure
             .failure(NSError(domain: "unknown", code: 0, userInfo: nil)), // +1s failure
@@ -204,14 +210,16 @@ final class EventPipelineTests: XCTestCase {
         ]
 
         pipeline.flush()
-        // Expected: upload 0 (instant) + upload 1 (1s retry delay)
-        wait(for: [uploadExpectations[0], uploadExpectations[1]], timeout: 5)
+        XCTAssertTrue(waitForCondition(timeout: 3) {
+            self.httpClient.uploadCount == 2 && self.pipeline.configuration.offline == false
+        }, "Expected 2 upload attempts before the pipeline goes offline")
 
         XCTAssertEqual(httpClient.uploadCount, 2)
         XCTAssertEqual(pipeline.configuration.offline, false)
 
-        // Expected: upload 2 (2s retry delay)
-        wait(for: [uploadExpectations[2]], timeout: 5)
+        XCTAssertTrue(waitForCondition(timeout: 4) {
+            self.httpClient.uploadCount == 3 && self.pipeline.configuration.offline == true
+        }, "Expected the third upload attempt to mark the pipeline offline")
 
         XCTAssertEqual(httpClient.uploadCount, 3)
         XCTAssertEqual(pipeline.configuration.offline, true)
@@ -221,7 +229,10 @@ final class EventPipelineTests: XCTestCase {
         pipeline.flush {
             flushExpectation.fulfill()
         }
-        wait(for: [uploadExpectations[3], flushExpectation], timeout: 2)
+        wait(for: [flushExpectation], timeout: 2)
+        XCTAssertTrue(waitForCondition(timeout: 1) {
+            self.httpClient.uploadCount == 4
+        }, "Expected a final successful upload after re-enabling the pipeline")
 
         XCTAssertEqual(httpClient.uploadCount, 4)
     }
@@ -402,5 +413,21 @@ final class EventPipelineTests: XCTestCase {
 
         XCTAssertEqual(httpClient.uploadCount, 3)
         XCTAssertEqual(pipeline.configuration.offline, false)
+    }
+
+    @discardableResult
+    private func waitForCondition(timeout: TimeInterval,
+                                  pollInterval: TimeInterval = 0.01,
+                                  condition: @escaping () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+
+        repeat {
+            if condition() {
+                return true
+            }
+            RunLoop.current.run(until: min(deadline, Date().addingTimeInterval(pollInterval)))
+        } while Date() < deadline
+
+        return condition()
     }
 }

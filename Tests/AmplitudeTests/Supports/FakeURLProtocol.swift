@@ -8,9 +8,42 @@
 import Foundation
 
 class FakeURLProtocol: URLProtocol {
-    static var mockResponses: [MockResponse] = []
+    private static let stateQueue = DispatchQueue(label: "FakeURLProtocol.stateQueue")
+    private static var _mockResponses: [MockResponse] = []
+    private static var _interceptAmplitudeRequests = false
 
-    private static let responseQueue = DispatchQueue(label: "FakeURLProtocol.responseQueue")
+    static var mockResponses: [MockResponse] {
+        get {
+            stateQueue.sync {
+                _mockResponses
+            }
+        }
+        set {
+            stateQueue.sync {
+                _mockResponses = newValue
+            }
+        }
+    }
+
+    static var interceptAmplitudeRequests: Bool {
+        get {
+            stateQueue.sync {
+                _interceptAmplitudeRequests
+            }
+        }
+        set {
+            stateQueue.sync {
+                _interceptAmplitudeRequests = newValue
+            }
+        }
+    }
+
+    // Delivering all fake responses on a single serial queue can backlog unrelated requests
+    // across the test process and trip per-session timeouts on slower CI runners.
+    private static let responseQueue = DispatchQueue(label: "FakeURLProtocol.responseQueue",
+                                                     attributes: .concurrent)
+    private let lifecycleLock = NSLock()
+    private var stopped = false
 
     struct MockResponse {
         let statusCode: Int
@@ -36,7 +69,17 @@ class FakeURLProtocol: URLProtocol {
 
     override class func canInit(with request: URLRequest) -> Bool {
         let isRemoteConfig = request.url?.absoluteString.hasPrefix("https://sr-client-cfg.") ?? false
-        return !isRemoteConfig
+        let isAmplitudeRequest = request.url?.host?.contains("amplitude.com") ?? false
+
+        guard !isRemoteConfig else {
+            return false
+        }
+
+        if isAmplitudeRequest && !interceptAmplitudeRequests {
+            return false
+        }
+
+        return true
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
@@ -49,14 +92,24 @@ class FakeURLProtocol: URLProtocol {
             return
         }
 
+        lifecycleLock.withLock {
+            stopped = false
+        }
+
         print("FakeURLProtocol: Starting to load \(url)")
 
-        guard !Self.mockResponses.isEmpty else {
+        let mockResponse = Self.stateQueue.sync { () -> MockResponse? in
+            guard !Self._mockResponses.isEmpty else {
+                return nil
+            }
+
+            return Self._mockResponses.removeFirst()
+        }
+
+        guard let mockResponse else {
             client?.urlProtocol(self, didFailWithError: NSError(domain: "FakeURLProtocol", code: -2, userInfo: [NSLocalizedDescriptionKey: "No mock responses available"]))
             return
         }
-
-        let mockResponse = Self.mockResponses.removeFirst()
 
         let response = HTTPURLResponse(
             url: url,
@@ -67,31 +120,37 @@ class FakeURLProtocol: URLProtocol {
 
         let delay = mockResponse.delay
 
-        Self.responseQueue.asyncAfter(deadline: .now() + delay) { [weak self] in
-            guard let self = self else { return }
+        Self.responseQueue.asyncAfter(deadline: .now() + delay) { [self] in
+            let isStopped = lifecycleLock.withLock { stopped }
+            guard !isStopped else { return }
 
-            self.client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
 
             if let data = mockResponse.data {
-                self.client?.urlProtocol(self, didLoad: data)
+                client?.urlProtocol(self, didLoad: data)
             }
 
             if let error = mockResponse.error {
-                self.client?.urlProtocol(self, didFailWithError: error)
+                client?.urlProtocol(self, didFailWithError: error)
             }
 
-            self.client?.urlProtocolDidFinishLoading(self)
+            client?.urlProtocolDidFinishLoading(self)
 
             print("FakeURLProtocol: Finished loading \(url), response: \(mockResponse)")
         }
     }
 
     override func stopLoading() {
-        // Nothing to do here
+        lifecycleLock.withLock {
+            stopped = true
+        }
     }
 
     static func clearMockResponses() {
-        mockResponses.removeAll()
+        stateQueue.sync {
+            _mockResponses.removeAll()
+            _interceptAmplitudeRequests = false
+        }
     }
 }
 
