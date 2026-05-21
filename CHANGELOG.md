@@ -1,3 +1,10 @@
+## [1.18.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.2...v1.18.3) (2026-05-21)
+
+
+### Bug Fixes
+
+* dedup frustration interactions ([c7ce6c5](https://github.com/amplitude/Amplitude-Swift/commit/c7ce6c57ae6e03cc4bdd5c11530cb87a9efdaafa))
+
 ## [1.18.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.1...v1.18.2) (2026-05-05)
 
 
