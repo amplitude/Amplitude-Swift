@@ -132,37 +132,84 @@ class UIKitElementInteractions {
         }
     }
 
-    fileprivate static func processFrustrationInteractionForView(_ view: UIView,
-                                                                 location: CGPoint,
-                                                                 action: String,
-                                                                 source: EventData.Source?,
-                                                                 sourceName: String?) {
-        let clickData = FrustrationClickData(
-            time: Date(),
-            eventData: view.eventData,
-            location: location,
-            action: action,
-            source: source,
-            sourceName: sourceName
-        )
+    private static let physicalTapDedupDistanceThreshold: CGFloat = 12
+    private static var physicalTapDedupCandidates: [PhysicalTapDedupCandidate] = []
+    private static var physicalTapDedupClearWorkItem: DispatchWorkItem?
 
+    private final class PhysicalTapDedupCandidate {
+        weak var window: UIWindow?
+        let location: CGPoint
+
+        init(view: UIView, location: CGPoint) {
+            self.window = view.window
+            self.location = location
+        }
+    }
+
+    fileprivate static func processFrustrationInteractionForView(_ view: UIView,
+                                                                 clickData: FrustrationClickData,
+                                                                 includeRageClick: Bool,
+                                                                 includeDeadClick: Bool) {
         lock.withLock {
+            guard !isDuplicatePhysicalTap(view: view, location: clickData.location) else {
+                return
+            }
+
             for amplitude in amplitudeInstances.allObjects {
                 let identifier = ObjectIdentifier(amplitude)
 
                 // Check if rage click detector exists (enabled via remote config or local config)
-                if let rageClickDetector = rageClickDetectors[identifier],
-                   !view.amp_ignoreRageClick {
+                if includeRageClick, let rageClickDetector = rageClickDetectors[identifier] {
                     rageClickDetector.processClick(clickData)
                 }
 
                 // Check if dead click detector exists (enabled via remote config or local config)
-                if let deadClickDetector = deadClickDetectors[identifier],
-                   !view.amp_ignoreDeadClick {
+                if includeDeadClick, let deadClickDetector = deadClickDetectors[identifier] {
                     deadClickDetector.processClick(clickData)
                 }
             }
         }
+    }
+
+    private static func isDuplicatePhysicalTap(view: UIView, location: CGPoint) -> Bool {
+        physicalTapDedupCandidates.removeAll { $0.window == nil }
+
+        let duplicate = physicalTapDedupCandidates.contains { candidate in
+            guard isWithinPhysicalTapDedupDistance(candidate.location, location) else {
+                return false
+            }
+
+            return isSameWindow(candidate.window, view.window)
+        }
+
+        if !duplicate {
+            physicalTapDedupCandidates.append(PhysicalTapDedupCandidate(view: view, location: location))
+        }
+        schedulePhysicalTapDedupClearIfNeeded()
+
+        return duplicate
+    }
+
+    private static func schedulePhysicalTapDedupClearIfNeeded() {
+        guard physicalTapDedupClearWorkItem == nil else { return }
+
+        let workItem = DispatchWorkItem {
+            lock.withLock {
+                physicalTapDedupCandidates.removeAll()
+                physicalTapDedupClearWorkItem = nil
+            }
+        }
+        physicalTapDedupClearWorkItem = workItem
+        DispatchQueue.main.async(execute: workItem)
+    }
+
+    private static func isWithinPhysicalTapDedupDistance(_ point1: CGPoint, _ point2: CGPoint) -> Bool {
+        return hypot(point1.x - point2.x, point1.y - point2.y) <= physicalTapDedupDistanceThreshold
+    }
+
+    private static func isSameWindow(_ window1: UIWindow?, _ window2: UIWindow?) -> Bool {
+        guard let window1, let window2 else { return false }
+        return window1 === window2
     }
 }
 
@@ -201,7 +248,10 @@ extension UIApplication {
             }
         }
 
-        if actionEvent == "touch", !control.amp_ignoreRageClick || !control.amp_ignoreDeadClick {
+        let shouldProcessRageClick = !control.amp_ignoreRageClick
+        let shouldProcessDeadClick = !control.amp_ignoreDeadClick
+
+        if actionEvent == "touch", shouldProcessRageClick || shouldProcessDeadClick {
             var location = CGPoint.zero
 
             if let event = event, let touch = event.allTouches?.first {
@@ -220,7 +270,20 @@ extension UIApplication {
                 }
             }
 
-            UIKitElementInteractions.processFrustrationInteractionForView(control, location: location, action: actionEvent, source: .actionMethod, sourceName: NSStringFromSelector(action))
+            let clickData = FrustrationClickData(
+                eventData: control.eventData,
+                location: location,
+                action: actionEvent,
+                source: .actionMethod,
+                sourceName: NSStringFromSelector(action)
+            )
+
+            UIKitElementInteractions.processFrustrationInteractionForView(
+                control,
+                clickData: clickData,
+                includeRageClick: shouldProcessRageClick,
+                includeDeadClick: shouldProcessDeadClick
+            )
         }
 
         return sendActionResult
@@ -246,10 +309,16 @@ extension UIGestureRecognizer {
 #endif
         }
 
+        var isTap = false
         let gestureAction: String?
         switch self {
-        case is UITapGestureRecognizer:
+        case let tapGestureRecognizer as UITapGestureRecognizer:
             gestureAction = "tap"
+#if !os(tvOS)
+            isTap = tapGestureRecognizer.numberOfTapsRequired == 1 && tapGestureRecognizer.numberOfTouchesRequired == 1
+#else
+            isTap = tapGestureRecognizer.numberOfTapsRequired == 1
+#endif
         case is UISwipeGestureRecognizer:
             gestureAction = "swipe"
         case is UIPanGestureRecognizer:
@@ -286,9 +355,23 @@ extension UIGestureRecognizer {
             }
         }
 
-        if !view.amp_ignoreDeadClick || !view.amp_ignoreRageClick {
-            let location = self.location(in: nil)
-            UIKitElementInteractions.processFrustrationInteractionForView(view, location: location, action: gestureAction, source: .gestureRecognizer, sourceName: descriptiveTypeName)
+        let shouldProcessRageClick = !view.amp_ignoreRageClick
+        let shouldProcessDeadClick = !view.amp_ignoreDeadClick
+
+        if isTap, shouldProcessDeadClick || shouldProcessRageClick {
+            let clickData = FrustrationClickData(
+                eventData: view.eventData,
+                location: location(in: nil),
+                action: gestureAction,
+                source: .gestureRecognizer,
+                sourceName: descriptiveTypeName)
+
+            UIKitElementInteractions.processFrustrationInteractionForView(
+                view,
+                clickData: clickData,
+                includeRageClick: shouldProcessRageClick,
+                includeDeadClick: shouldProcessDeadClick
+            )
         }
     }
 }

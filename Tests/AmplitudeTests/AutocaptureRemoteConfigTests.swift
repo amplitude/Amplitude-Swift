@@ -524,11 +524,11 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             // Verify body configuration
             XCTAssertNotNil(captureRule.requestBody)
             XCTAssertEqual(captureRule.requestBody?.allowlist, ["userId", "eventType"])
-            XCTAssertEqual(captureRule.requestBody?.blocklist, ["password", "token"])
+            XCTAssertEqual(captureRule.requestBody?.excludelist, ["password", "token"])
 
             XCTAssertNotNil(captureRule.responseBody)
             XCTAssertEqual(captureRule.responseBody?.allowlist, ["status", "message"])
-            XCTAssertEqual(captureRule.responseBody?.blocklist, ["secret"])
+            XCTAssertEqual(captureRule.responseBody?.excludelist, ["secret"])
         }
     }
 

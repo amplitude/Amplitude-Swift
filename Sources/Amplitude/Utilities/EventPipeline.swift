@@ -69,7 +69,7 @@ public class EventPipeline {
         }
     }
 
-    private func sendNextEventFile(failures: Int = 0) {
+    private func sendNextEventFile(failures: Int = 0, skipFiles: Set<URL> = []) {
         autoreleasepool {
             guard currentUpload == nil else {
                 logger?.log(message: "Existing upload in progress, skipping...")
@@ -78,7 +78,7 @@ public class EventPipeline {
 
             guard let storage = storage,
                   let eventFiles: [URL] = storage.read(key: StorageKey.EVENTS),
-                  let nextEventFile = eventFiles.first else {
+                  let nextEventFile = eventFiles.first(where: { !skipFiles.contains($0) }) else {
                 flushCompletions.forEach { $0() }
                 flushCompletions.removeAll()
                 logger?.debug(message: "No event files to upload")
@@ -93,6 +93,15 @@ public class EventPipeline {
             guard let eventsString = storage.getEventsString(eventBlock: nextEventFile),
                   !eventsString.isEmpty else {
                 logger?.log(message: "Could not read events file: \(nextEventFile)")
+                // Storage quarantines unreadable files inside getEventsString. Add the
+                // file to skipFiles so this flush chain continues to later files even
+                // if the quarantine rename itself failed, and so we don't revisit it
+                // within the same flush.
+                var newSkipFiles = skipFiles
+                newSkipFiles.insert(nextEventFile)
+                uploadsQueue.async { [weak self] in
+                    self?.sendNextEventFile(failures: failures, skipFiles: newSkipFiles)
+                }
                 return
             }
 
@@ -128,7 +137,7 @@ public class EventPipeline {
                             return
                         }
                         self.currentUpload = nil
-                        self.sendNextEventFile(failures: failures)
+                        self.sendNextEventFile(failures: failures, skipFiles: skipFiles)
                     }
 
                     if failures == 0 || handled {

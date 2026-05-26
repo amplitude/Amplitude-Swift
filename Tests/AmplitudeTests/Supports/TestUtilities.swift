@@ -340,11 +340,21 @@ class SessionsWithDelayedEventStartProcessing: Sessions {
 
 actor FakeDiagnosticsClient: CoreDiagnostics {
 
+    let didLastRunCrash = false
+
     init() { }
 
     func setTag(name: String, value: String) { }
 
     func setTags(_ tags: [String: String]) { }
+
+    func getTag(name: String) async -> String? {
+        return nil
+    }
+
+    func getTags() async -> [String: String] {
+        return [:]
+    }
 
     func increment(name: String) { }
 

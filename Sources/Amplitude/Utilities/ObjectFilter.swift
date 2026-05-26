@@ -12,8 +12,14 @@ class ObjectFilter {
     private let blockKeyPaths: [KeyPath]
 
     init(allowList: [String] = [], blockList: [String] = []) {
-        allowKeyPaths = allowList.compactMap { $0.isEmpty ? nil : $0.components(separatedBy: "/") }
-        blockKeyPaths = blockList.compactMap { $0.isEmpty ? nil : $0.components(separatedBy: "/") }
+        allowKeyPaths = allowList.compactMap { Self.parseKeyPath($0) }
+        blockKeyPaths = blockList.compactMap { Self.parseKeyPath($0) }
+    }
+
+    private static func parseKeyPath(_ path: String) -> KeyPath? {
+        guard !path.isEmpty else { return nil }
+        let components = path.components(separatedBy: "/").filter { !$0.isEmpty }
+        return components.isEmpty ? nil : components
     }
 
     func filterd(_ object: Any?) -> Any? {
@@ -68,13 +74,6 @@ class ObjectFilter {
             return isAllowed(path) ? value : nil
         }
 
-        // Return entire container for exact non-wildcard matches
-        if allowKeyPaths.contains(where: {
-            !$0.contains { $0 == "*" || $0 == "**" } && matches(path, $0) && !isBlocked(path)
-        }) {
-            return value
-        }
-
         // Return empty containers that match patterns
         if isAllowed(path) {
             if let dict = value as? [String: Any], dict.isEmpty { return value }
@@ -109,7 +108,13 @@ class ObjectFilter {
     }
 
     private func canMatchDescendants(_ path: KeyPath, _ pattern: KeyPath) -> Bool {
-        guard pattern.count > path.count else { return pattern.contains("**") }
+        guard pattern.count > path.count else {
+            for i in 0..<pattern.count {
+                if pattern[i] == "**" { return true }
+                if pattern[i] != path[i] && pattern[i] != "*" { return false }
+            }
+            return false
+        }
 
         for i in 0..<path.count {
             if pattern[i] == "**" { return true }

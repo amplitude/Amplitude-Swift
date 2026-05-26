@@ -93,7 +93,7 @@ public class Sessions {
             }
         } else if event.eventType == Constants.AMP_SESSION_END_EVENT {
             // do nothing
-        } else {
+        } else if event.sessionId != -1 {
             sessionEvents = self.startNewSessionIfNeeded(timestamp: eventTimeStamp, inForeground: inForeground)
         }
 

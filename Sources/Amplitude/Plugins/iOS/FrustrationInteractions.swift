@@ -10,7 +10,7 @@ import UIKit
 import AmplitudeCore
 
 struct FrustrationClickData {
-    let time: Date
+    let time: Date = Date()
     let eventData: UIKitElementInteractions.EventData
     let location: CGPoint
     let action: String
@@ -182,7 +182,10 @@ class RageClickDetector {
 
             debounceTimer?.invalidate()
             debounceTimer = Timer.scheduledTimer(withTimeInterval: timeoutInterval, repeats: false) { [weak self] _ in
-                self?.triggerRageClick()
+                guard let self else { return }
+                lock.withLock {
+                    self.triggerRageClick()
+                }
             }
         }
     }

@@ -1,3 +1,46 @@
+## [1.18.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.2...v1.18.3) (2026-05-21)
+
+
+### Bug Fixes
+
+* dedup frustration interactions ([c7ce6c5](https://github.com/amplitude/Amplitude-Swift/commit/c7ce6c57ae6e03cc4bdd5c11530cb87a9efdaafa))
+
+## [1.18.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.1...v1.18.2) (2026-05-05)
+
+
+### Bug Fixes
+
+* update AmplitudeCore min version ([4645020](https://github.com/amplitude/Amplitude-Swift/commit/4645020ab6e5b93994717fde4329af53adf79cef))
+* Use Application Support for event storage ([f4594d0](https://github.com/amplitude/Amplitude-Swift/commit/f4594d034aa8f06f15e9d16c07edb3c35910de12))
+
+## [1.18.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.0...v1.18.1) (2026-04-17)
+
+
+### Bug Fixes
+
+* quarantine unreadable event files and recover from unopenable ones ([#398](https://github.com/amplitude/Amplitude-Swift/issues/398)) ([9b69807](https://github.com/amplitude/Amplitude-Swift/commit/9b69807c004313273ea4e8d398b9d20172fee875))
+
+# [1.18.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.5...v1.18.0) (2026-04-10)
+
+
+### Features
+
+* make header and body capture feature GA & fix bug for allowlist rule ([#396](https://github.com/amplitude/Amplitude-Swift/issues/396)) ([590a329](https://github.com/amplitude/Amplitude-Swift/commit/590a329a3e389dc6bcf1ccceeeed0a345d760121))
+
+## [1.17.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.4...v1.17.5) (2026-03-12)
+
+
+### Bug Fixes
+
+* out-of-session event should not extend or trigger a session ([#382](https://github.com/amplitude/Amplitude-Swift/issues/382)) ([5c790b4](https://github.com/amplitude/Amplitude-Swift/commit/5c790b481de2dbe72a6ab4d067af488d6f9c8403))
+
+## [1.17.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.3...v1.17.4) (2026-03-06)
+
+
+### Bug Fixes
+
+* parsing logic of slashes in body capture ([#380](https://github.com/amplitude/Amplitude-Swift/issues/380)) ([93c504b](https://github.com/amplitude/Amplitude-Swift/commit/93c504be0f96da380b6ba42241b4b33aec640123))
+
 ## [1.17.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.17.2...v1.17.3) (2026-02-10)
 
 

@@ -1,4 +1,4 @@
-amplitude_version = "1.17.3" # Version is managed automatically by semantic-release, please don't change it manually
+amplitude_version = "1.18.3" # Version is managed automatically by semantic-release, please don't change it manually
 
 Pod::Spec.new do |s|
   s.name                   = "AmplitudeSwift"
@@ -32,7 +32,7 @@ Pod::Spec.new do |s|
   s.visionos.resource_bundle    = { 'Amplitude': ['Sources/Amplitude/PrivacyInfo.xcprivacy'] }
 
   s.dependency 'AnalyticsConnector', '~> 1.3.0'
-  s.dependency 'AmplitudeCore', '>=1.4.1', '<2.0.0'
+  s.dependency 'AmplitudeCore', '>=1.4.2', '<2.0.0'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
 end
