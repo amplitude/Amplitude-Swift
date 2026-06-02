@@ -1,3 +1,10 @@
+## [1.18.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.3...v1.18.4) (2026-06-02)
+
+
+### Bug Fixes
+
+* update AmplitudeCore to 1.4.6 to fix libswiftCore notarization error ([#406](https://github.com/amplitude/Amplitude-Swift/issues/406)) ([f4da9c9](https://github.com/amplitude/Amplitude-Swift/commit/f4da9c96514177a0067094fbb5d0a5d71bb248d8)), closes [amplitude/AmplitudeCore-Swift#81](https://github.com/amplitude/AmplitudeCore-Swift/issues/81)
+
 ## [1.18.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.2...v1.18.3) (2026-05-21)
 
 
