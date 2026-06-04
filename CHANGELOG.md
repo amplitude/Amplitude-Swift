@@ -1,3 +1,10 @@
+## [1.18.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.4...v1.18.5) (2026-06-04)
+
+
+### Bug Fixes
+
+* increase tap dedup timeout ([d3834c4](https://github.com/amplitude/Amplitude-Swift/commit/d3834c4c5a3297a0eb4c4b71d1597a4209725c16))
+
 ## [1.18.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.3...v1.18.4) (2026-06-02)
 
 
