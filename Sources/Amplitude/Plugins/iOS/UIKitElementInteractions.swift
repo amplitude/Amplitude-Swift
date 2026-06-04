@@ -133,16 +133,18 @@ class UIKitElementInteractions {
     }
 
     private static let physicalTapDedupDistanceThreshold: CGFloat = 12
+    private static let physicalTapDedupTimeThreshold: TimeInterval = 0.005
     private static var physicalTapDedupCandidates: [PhysicalTapDedupCandidate] = []
-    private static var physicalTapDedupClearWorkItem: DispatchWorkItem?
 
     private final class PhysicalTapDedupCandidate {
         weak var window: UIWindow?
         let location: CGPoint
+        let timestamp: TimeInterval
 
-        init(view: UIView, location: CGPoint) {
+        init(view: UIView, location: CGPoint, timestamp: TimeInterval) {
             self.window = view.window
             self.location = location
+            self.timestamp = timestamp
         }
     }
 
@@ -171,8 +173,12 @@ class UIKitElementInteractions {
         }
     }
 
-    private static func isDuplicatePhysicalTap(view: UIView, location: CGPoint) -> Bool {
-        physicalTapDedupCandidates.removeAll { $0.window == nil }
+    static func isDuplicatePhysicalTap(view: UIView,
+                                       location: CGPoint,
+                                       timestamp: TimeInterval = ProcessInfo.processInfo.systemUptime) -> Bool {
+        physicalTapDedupCandidates.removeAll { candidate in
+            candidate.window == nil || timestamp - candidate.timestamp > physicalTapDedupTimeThreshold
+        }
 
         let duplicate = physicalTapDedupCandidates.contains { candidate in
             guard isWithinPhysicalTapDedupDistance(candidate.location, location) else {
@@ -183,24 +189,10 @@ class UIKitElementInteractions {
         }
 
         if !duplicate {
-            physicalTapDedupCandidates.append(PhysicalTapDedupCandidate(view: view, location: location))
+            physicalTapDedupCandidates.append(PhysicalTapDedupCandidate(view: view, location: location, timestamp: timestamp))
         }
-        schedulePhysicalTapDedupClearIfNeeded()
 
         return duplicate
-    }
-
-    private static func schedulePhysicalTapDedupClearIfNeeded() {
-        guard physicalTapDedupClearWorkItem == nil else { return }
-
-        let workItem = DispatchWorkItem {
-            lock.withLock {
-                physicalTapDedupCandidates.removeAll()
-                physicalTapDedupClearWorkItem = nil
-            }
-        }
-        physicalTapDedupClearWorkItem = workItem
-        DispatchQueue.main.async(execute: workItem)
     }
 
     private static func isWithinPhysicalTapDedupDistance(_ point1: CGPoint, _ point2: CGPoint) -> Bool {
@@ -210,6 +202,10 @@ class UIKitElementInteractions {
     private static func isSameWindow(_ window1: UIWindow?, _ window2: UIWindow?) -> Bool {
         guard let window1, let window2 else { return false }
         return window1 === window2
+    }
+
+    static func resetPhysicalTapDedupCandidates() {
+        physicalTapDedupCandidates.removeAll()
     }
 }
 
