@@ -5,6 +5,16 @@ import XCTest
 #if os(iOS)
 
 class UIKitElementInteractionsTests: XCTestCase {
+    override func setUp() {
+        super.setUp()
+        UIKitElementInteractions.resetPhysicalTapDedupCandidates()
+    }
+
+    override func tearDown() {
+        UIKitElementInteractions.resetPhysicalTapDedupCandidates()
+        super.tearDown()
+    }
+
     func testExtractDataForUIButton() {
         let mockVC = UIViewController()
         mockVC.title = "Mock VC Title"
@@ -59,6 +69,40 @@ class UIKitElementInteractionsTests: XCTestCase {
 
         class ConstrainedGenericView<T: UIView>: UIView {}
         XCTAssertEqual(ConstrainedGenericView<UIButton>().descriptiveTypeName, "ConstrainedGenericView<UIButton>")
+    }
+
+    func testPhysicalTapDedupSuppressesDuplicateWithinFiveMilliseconds() {
+        let window = UIWindow()
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+        window.addSubview(view)
+
+        XCTAssertFalse(UIKitElementInteractions.isDuplicatePhysicalTap(
+            view: view,
+            location: CGPoint(x: 20, y: 20),
+            timestamp: 100
+        ))
+        XCTAssertTrue(UIKitElementInteractions.isDuplicatePhysicalTap(
+            view: view,
+            location: CGPoint(x: 25, y: 25),
+            timestamp: 100.0049
+        ))
+    }
+
+    func testPhysicalTapDedupAllowsSameLocationAfterFiveMilliseconds() {
+        let window = UIWindow()
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+        window.addSubview(view)
+
+        XCTAssertFalse(UIKitElementInteractions.isDuplicatePhysicalTap(
+            view: view,
+            location: CGPoint(x: 20, y: 20),
+            timestamp: 100
+        ))
+        XCTAssertFalse(UIKitElementInteractions.isDuplicatePhysicalTap(
+            view: view,
+            location: CGPoint(x: 20, y: 20),
+            timestamp: 100.0051
+        ))
     }
 }
 
