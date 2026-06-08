@@ -7,7 +7,7 @@ let package = Package(
     name: "Amplitude-Swift",
     platforms: [
         .macOS("10.15"),
-        .iOS("13.0"),
+        .iOS("15.0"),
         .tvOS("13.0"),
         .watchOS("7.0"),
         .visionOS("1.0"),
