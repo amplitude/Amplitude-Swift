@@ -1,3 +1,10 @@
+## [1.18.6](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.5...v1.18.6) (2026-07-08)
+
+
+### Bug Fixes
+
+* require AmplitudeCore 1.4.8 and AnalyticsConnector 1.3.2 ([#418](https://github.com/amplitude/Amplitude-Swift/issues/418)) ([f20e866](https://github.com/amplitude/Amplitude-Swift/commit/f20e8660b8439672df2ba1dba36012e2b9f8eb1f))
+
 ## [1.18.5](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.4...v1.18.5) (2026-06-04)
 
 
