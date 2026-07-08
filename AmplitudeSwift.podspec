@@ -31,8 +31,8 @@ Pod::Spec.new do |s|
   s.visionos.source_files      = 'Sources/Amplitude/**/*.{h,swift}'
   s.visionos.resource_bundle    = { 'Amplitude': ['Sources/Amplitude/PrivacyInfo.xcprivacy'] }
 
-  s.dependency 'AnalyticsConnector', '~> 1.3.0'
-  s.dependency 'AmplitudeCore', '>=1.4.6', '<2.0.0'
+  s.dependency 'AnalyticsConnector', '~> 1.3.2'
+  s.dependency 'AmplitudeCore', '>=1.4.8', '<2.0.0'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
 end
