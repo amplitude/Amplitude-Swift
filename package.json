@@ -1,10 +1,17 @@
 {
   "private": true,
   "dependencies": {
-    "semantic-release-replace-plugin": "1.2.7",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/exec": "7.1.0",
     "@semantic-release/git": "10.0.1",
-    "semantic-release": "25.0.2"
+    "semantic-release": "25.0.2",
+    "semantic-release-replace-plugin": "1.2.7"
+  },
+  "devDependencies": {
+    "@size-limit/file": "12.1.0",
+    "size-limit": "12.1.0"
+  },
+  "scripts": {
+    "size-limit": "size-limit"
   }
 }
