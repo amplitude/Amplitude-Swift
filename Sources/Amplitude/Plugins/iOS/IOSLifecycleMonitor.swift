@@ -143,7 +143,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
             return
         }
         amplitude.onExitForeground(timestamp: currentTimestamp)
-        if amplitude.autocaptureManager.isEnabled(.appLifecycles) {
+        if amplitude.autocaptureManager.isEnabled(.foregroundLifecycle) {
             amplitude.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
         }
     }

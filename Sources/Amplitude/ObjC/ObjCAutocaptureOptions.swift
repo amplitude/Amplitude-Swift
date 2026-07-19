@@ -35,7 +35,8 @@ public final class ObjCAutocaptureOptions: NSObject, @unchecked Sendable {
     public static let sessions = ObjCAutocaptureOptions(options: .sessions)
 
     @objc
-    public static let appLifecycles = ObjCAutocaptureOptions(options: .appLifecycles)
+    @available(*, deprecated, message: "Please use `installLifecycle` and `foregroundLifecycle` instead.")
+    public static let appLifecycles = ObjCAutocaptureOptions(options: .legacyAppLifecycles)
 
     @objc
     public static let screenViews = ObjCAutocaptureOptions(options: .screenViews)
@@ -48,6 +49,12 @@ public final class ObjCAutocaptureOptions: NSObject, @unchecked Sendable {
 
     @objc
     public static let frustrationInteractions = ObjCAutocaptureOptions(options: .frustrationInteractions)
+
+    @objc
+    public static let installLifecycle = ObjCAutocaptureOptions(options: .installLifecycle)
+
+    @objc
+    public static let foregroundLifecycle = ObjCAutocaptureOptions(options: .foregroundLifecycle)
 
     @objc
     public static let all: ObjCAutocaptureOptions = ObjCAutocaptureOptions(options: .all)

@@ -402,7 +402,7 @@ final class AmplitudeTests: XCTestCase {
         let configuration = Configuration(apiKey: "api-key")
         let amplitude = Amplitude(configuration: configuration)
         let autocapture = amplitude.configuration.autocapture
-        XCTAssertFalse(autocapture.contains(.appLifecycles))
+        XCTAssertFalse(autocapture.contains(.legacyAppLifecycles))
         XCTAssertFalse(autocapture.contains(.screenViews))
         XCTAssertFalse(autocapture.contains(.elementInteractions))
         XCTAssertTrue(autocapture.contains(.sessions))
@@ -831,7 +831,7 @@ final class AmplitudeTests: XCTestCase {
     func testConcurrentAccess() {
         let amplitude = Amplitude(configuration: Configuration(apiKey: "test-api-key",
                                                                storageProvider: InMemoryStorage(),
-                                                               autocapture: [.sessions, .appLifecycles]))
+                                                               autocapture: [.sessions, .legacyAppLifecycles]))
         let eventCollector = EventCollectorPlugin()
         amplitude.add(plugin: eventCollector)
         let sessionID = Int64(Date().timeIntervalSince1970 * 1000)

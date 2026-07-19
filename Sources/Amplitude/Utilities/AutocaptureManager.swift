@@ -41,7 +41,7 @@ class AutocaptureManager {
          enableRemoteConfig: Bool) {
         self.context = context
         self.trackingQueue = trackingQueue
-        self._enabledOptions = autocapture
+        self._enabledOptions = autocapture.withNormalizedAppLifecycles()
         self._rageClickEnabled = rageClickEnabled
         self._deadClickEnabled = deadClickEnabled
 
@@ -90,9 +90,9 @@ class AutocaptureManager {
 
                 if let appLifecycles = config["appLifecycles"] as? Bool {
                     if appLifecycles {
-                        _enabledOptions.formUnion(.appLifecycles)
+                        _enabledOptions.formUnion([.installLifecycle, .foregroundLifecycle])
                     } else {
-                        _enabledOptions.subtract(.appLifecycles)
+                        _enabledOptions.subtract([.installLifecycle, .foregroundLifecycle])
                     }
                 }
 
@@ -138,6 +138,22 @@ class AutocaptureManager {
                         _enabledOptions.formUnion(.networkTracking)
                     } else {
                         _enabledOptions.subtract(.networkTracking)
+                    }
+                }
+
+                if let installLifecycle = config["installLifecycle"] as? Bool {
+                    if installLifecycle {
+                        _enabledOptions.formUnion(.installLifecycle)
+                    } else {
+                        _enabledOptions.subtract(.installLifecycle)
+                    }
+                }
+
+                if let foregroundLifecycle = config["foregroundLifecycle"] as? Bool {
+                    if foregroundLifecycle {
+                        _enabledOptions.formUnion(.foregroundLifecycle)
+                    } else {
+                        _enabledOptions.subtract(.foregroundLifecycle)
                     }
                 }
             }

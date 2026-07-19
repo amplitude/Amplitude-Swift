@@ -37,7 +37,7 @@ public class DefaultTrackingOptions {
     var autocaptureOptions: AutocaptureOptions {
         return [
             sessions ? .sessions : [],
-            appLifecycles ? .appLifecycles : [],
+            appLifecycles ? .legacyAppLifecycles : [],
             screenViews ? .screenViews : []
         ].reduce(into: []) { $0.formUnion($1) }
     }
