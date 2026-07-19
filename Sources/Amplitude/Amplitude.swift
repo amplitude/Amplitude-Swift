@@ -77,7 +77,7 @@ public class Amplitude {
             }
         }
 
-        if sendIdentifyIfNeeded, userPropertiesChanged {
+        if sendIdentifyIfNeeded, userPropertiesChanged, !identity.userProperties.isEmpty {
             identify(userProperties: identity.userProperties)
         }
     }

@@ -824,6 +824,25 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertNotEqual(amplitude.getDeviceId(), "originalDeviceId")
     }
 
+    func testResetDoesNotTriggerAnyEventIncludingIdentify() {
+        let amplitude = Amplitude(configuration: configurationWithFakeMemoryStorage)
+        let eventCollector = EventCollectorPlugin()
+        amplitude.add(plugin: eventCollector)
+        amplitude.setUserId(userId: "originalUserId")
+        amplitude.setDeviceId(deviceId: "originalDeviceId")
+        amplitude.identify(userProperties: ["property": "value"])
+        amplitude.waitForTrackingQueue()
+        eventCollector.events.removeAll()
+
+        amplitude.reset()
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertTrue(
+            eventCollector.events.isEmpty,
+            "Expected reset() not to trigger events, but got: \(eventCollector.events.map(\.eventType))"
+        )
+    }
+
     func testInit_Offline() {
         XCTAssertEqual(Amplitude(configuration: configuration).configuration.offline, false)
     }
