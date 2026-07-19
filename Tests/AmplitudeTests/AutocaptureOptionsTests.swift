@@ -17,12 +17,39 @@ final class AutocaptureOptionsTests: XCTestCase {
     func testCustom() {
         let options: AutocaptureOptions = [.appLifecycles, .screenViews, .elementInteractions]
         XCTAssertTrue(options.contains(.appLifecycles))
+        XCTAssertTrue(options.contains(.installLifecycle))
+        XCTAssertTrue(options.contains(.foregroundLifecycle))
         XCTAssertTrue(options.contains(.screenViews))
         XCTAssertFalse(options.contains(.sessions))
         XCTAssertTrue(options.contains(.elementInteractions))
 #if !os(watchOS)
         XCTAssertFalse(options.contains(.networkTracking))
 #endif
+    }
+
+    func testAppLifecyclesContainsBothLifecycleOptions() {
+        XCTAssertEqual(AutocaptureOptions.appLifecycles, [.installLifecycle, .foregroundLifecycle])
+    }
+
+    func testAllIncludesDistinctLifecycleOptions() {
+        XCTAssertTrue(AutocaptureOptions.all.contains(.installLifecycle))
+        XCTAssertTrue(AutocaptureOptions.all.contains(.foregroundLifecycle))
+    }
+
+    func testDistinctLifecycleOptionsStringRepresentation() {
+        XCTAssertEqual(AutocaptureOptions.installLifecycle.stringRepresentation(), "installLifecycle")
+        XCTAssertEqual(AutocaptureOptions.foregroundLifecycle.stringRepresentation(), "foregroundLifecycle")
+        XCTAssertEqual(
+            AutocaptureOptions([.installLifecycle, .foregroundLifecycle]).stringRepresentation(),
+            "appLifecycles"
+        )
+    }
+
+    func testObjCLifecycleOptions() {
+        XCTAssertTrue(ObjCAutocaptureOptions.installLifecycle.contains(.installLifecycle))
+        XCTAssertTrue(ObjCAutocaptureOptions.foregroundLifecycle.contains(.foregroundLifecycle))
+        XCTAssertFalse(ObjCAutocaptureOptions.installLifecycle.contains(.foregroundLifecycle))
+        XCTAssertFalse(ObjCAutocaptureOptions.foregroundLifecycle.contains(.installLifecycle))
     }
 
     func testDefaultTrackingOptionChangesReflectInAutocapture() {

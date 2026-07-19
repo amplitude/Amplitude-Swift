@@ -212,6 +212,53 @@ final class AmplitudeIOSTests: XCTestCase {
         XCTAssertNil(events[0].eventProperties)
     }
 
+    func testInstallLifecycleDoesNotTrackForegroundLifecycleEvents() {
+        let configuration = Configuration(
+            apiKey: "api-key",
+            instanceName: #function,
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            autocapture: .installLifecycle,
+            enableAutoCaptureRemoteConfig: false
+        )
+
+        let amplitude = Amplitude(configuration: configuration)
+        NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+        NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertEqual(storageMem.events().map(\.eventType), [
+            Constants.AMP_APPLICATION_INSTALLED_EVENT,
+        ])
+    }
+
+    func testForegroundLifecycleDoesNotTrackInstallLifecycleEvents() {
+        let configuration = Configuration(
+            apiKey: "api-key",
+            instanceName: #function,
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            autocapture: .foregroundLifecycle,
+            enableAutoCaptureRemoteConfig: false
+        )
+
+        let amplitude = Amplitude(configuration: configuration)
+        NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+        NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertEqual(storageMem.events().map(\.eventType), [
+            Constants.AMP_APPLICATION_OPENED_EVENT,
+            Constants.AMP_APPLICATION_BACKGROUNDED_EVENT,
+        ])
+    }
+
     func testSetupWhileAppInactive() {
         let configuration = Configuration(
             apiKey: "api-key",

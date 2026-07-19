@@ -94,6 +94,140 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.sessions), "Sessions should be off from remote config")
     }
 
+    func testAppLifecyclesTurnsOffAllLifecycleOptionsFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
+        RemoteConfigClient.setNextFetchedRemoteConfig([
+            "analyticsSDK": [
+                "iosSDK": [
+                    "autocapture": [
+                        "appLifecycles": false,
+                    ]
+                ]
+            ]
+        ], forApiKey: apiKey)
+
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: apiKey,
+            instanceName: uniqueInstanceName(),
+            autocapture: [.installLifecycle, .foregroundLifecycle]
+        ))
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.installLifecycle))
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.foregroundLifecycle))
+
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.installLifecycle))
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.foregroundLifecycle))
+    }
+
+    func testAppLifecyclesTurnsOnAllLifecycleOptionsFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
+        RemoteConfigClient.setNextFetchedRemoteConfig([
+            "analyticsSDK": [
+                "iosSDK": [
+                    "autocapture": [
+                        "appLifecycles": true,
+                    ]
+                ]
+            ]
+        ], forApiKey: apiKey)
+
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: apiKey,
+            instanceName: uniqueInstanceName(),
+            autocapture: []
+        ))
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.installLifecycle))
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.foregroundLifecycle))
+
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.installLifecycle))
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.foregroundLifecycle))
+    }
+
+    func testDistinctLifecycleOptionsUpdateIndependentlyFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
+        RemoteConfigClient.setNextFetchedRemoteConfig([
+            "analyticsSDK": [
+                "iosSDK": [
+                    "autocapture": [
+                        "installLifecycle": true,
+                        "foregroundLifecycle": false,
+                    ]
+                ]
+            ]
+        ], forApiKey: apiKey)
+
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: apiKey,
+            instanceName: uniqueInstanceName(),
+            autocapture: .foregroundLifecycle
+        ))
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.installLifecycle))
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.foregroundLifecycle))
+
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.installLifecycle))
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.foregroundLifecycle))
+    }
+
+    func testInstallLifecycleOverridesAppLifecyclesFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
+        RemoteConfigClient.setNextFetchedRemoteConfig([
+            "analyticsSDK": [
+                "iosSDK": [
+                    "autocapture": [
+                        "appLifecycles": true,
+                        "installLifecycle": false,
+                    ]
+                ]
+            ]
+        ], forApiKey: apiKey)
+
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: apiKey,
+            instanceName: uniqueInstanceName(),
+            autocapture: []
+        ))
+
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.installLifecycle))
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.foregroundLifecycle))
+    }
+
+    func testForegroundLifecycleOverridesAppLifecyclesFromRemoteConfig() {
+        resetStorage()
+        let apiKey = uniqueApiKey()
+        RemoteConfigClient.setNextFetchedRemoteConfig([
+            "analyticsSDK": [
+                "iosSDK": [
+                    "autocapture": [
+                        "appLifecycles": false,
+                        "foregroundLifecycle": true,
+                    ]
+                ]
+            ]
+        ], forApiKey: apiKey)
+
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: apiKey,
+            instanceName: uniqueInstanceName(),
+            autocapture: .appLifecycles
+        ))
+
+        wait(for: [amplitude.amplitudeContext.remoteConfigClient.didFetchRemoteExpectation], timeout: 15)
+
+        XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.installLifecycle))
+        XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.foregroundLifecycle))
+    }
+
 #if os(iOS)
 
     func testScreenViewsTurnsOnFromRemoteConfig() {

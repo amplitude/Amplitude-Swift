@@ -96,6 +96,22 @@ class AutocaptureManager {
                     }
                 }
 
+                if let installLifecycle = config["installLifecycle"] as? Bool {
+                    if installLifecycle {
+                        _enabledOptions.formUnion(.installLifecycle)
+                    } else {
+                        _enabledOptions.subtract(.installLifecycle)
+                    }
+                }
+
+                if let foregroundLifecycle = config["foregroundLifecycle"] as? Bool {
+                    if foregroundLifecycle {
+                        _enabledOptions.formUnion(.foregroundLifecycle)
+                    } else {
+                        _enabledOptions.subtract(.foregroundLifecycle)
+                    }
+                }
+
                 if let pageViews = config["pageViews"] as? Bool {
                     if pageViews {
                         _enabledOptions.formUnion(.screenViews)

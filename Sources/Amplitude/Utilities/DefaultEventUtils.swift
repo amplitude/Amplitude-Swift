@@ -7,8 +7,12 @@ public class DefaultEventUtils {
 
     private weak var amplitude: Amplitude?
 
-    private var trackAppLifecycles: Bool {
-        amplitude?.autocaptureManager.isEnabled(.appLifecycles) ?? false
+    private var trackInstallLifecycle: Bool {
+        amplitude?.autocaptureManager.isEnabled(.installLifecycle) ?? false
+    }
+
+    private var trackForegroundLifecycle: Bool {
+        amplitude?.autocaptureManager.isEnabled(.foregroundLifecycle) ?? false
     }
 
     public init(amplitude: Amplitude) {
@@ -33,7 +37,7 @@ public class DefaultEventUtils {
             try? amplitude.storage.write(key: StorageKey.APP_VERSION, value: currentVersion)
         }
 
-        guard trackAppLifecycles else {
+        guard trackInstallLifecycle else {
             return
         }
 
@@ -68,7 +72,7 @@ public class DefaultEventUtils {
     }
 
     func trackAppOpenedEvent(fromBackground: Bool = false) {
-        guard let amplitude = amplitude, trackAppLifecycles else {
+        guard let amplitude = amplitude, trackForegroundLifecycle else {
             return
         }
 
