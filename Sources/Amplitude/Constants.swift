@@ -83,6 +83,8 @@ public struct Constants {
     public static let EU_DEFAULT_API_HOST = "https://api.eu.amplitude.com/2/httpapi"
     static let BATCH_API_HOST = "https://api2.amplitude.com/batch"
     static let EU_BATCH_API_HOST = "https://api.eu.amplitude.com/batch"
+    static let DELAYED_API_HOST = "https://api2.amplitude.com/2/httpapi/delayed"
+    static let EU_DELAYED_API_HOST = "https://api.eu.amplitude.com/2/httpapi/delayed"
     static let IDENTIFY_EVENT = "$identify"
     static let GROUP_IDENTIFY_EVENT = "$groupidentify"
     static let MAX_PROPERTY_KEYS = 1024
