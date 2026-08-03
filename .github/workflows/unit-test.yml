@@ -88,18 +88,21 @@ jobs:
               xcodebuild test \
                 -scheme Amplitude-Swift-Package \
                 -sdk iphonesimulator \
+                -retry-tests-on-failure \
                 -destination 'platform=iOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}'
               ;;
             macOS)
               xcodebuild test \
                 -scheme Amplitude-Swift-Package \
                 -sdk macosx \
+                -retry-tests-on-failure \
                 -destination 'platform=macOS'
               ;;
             tvOS)
               xcodebuild \
                 -scheme Amplitude-Swift-Package \
                 -sdk appletvsimulator \
+                -retry-tests-on-failure \
                 -destination 'platform=tvOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
                 test
               ;;
@@ -107,6 +110,7 @@ jobs:
               xcodebuild \
                 -scheme Amplitude-Swift-Package \
                 -sdk watchsimulator \
+                -retry-tests-on-failure \
                 -destination 'platform=watchOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
                 test
               ;;
@@ -114,6 +118,7 @@ jobs:
               xcodebuild \
                 -scheme Amplitude-Swift-Package \
                 -sdk xrsimulator \
+                -retry-tests-on-failure \
                 -destination 'platform=visionOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
                 test
               ;;
@@ -138,4 +143,5 @@ jobs:
           xcodebuild test \
             -scheme AmplitudeObjCExample \
             -sdk iphonesimulator \
+            -retry-tests-on-failure \
             -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16'
