@@ -400,8 +400,13 @@ extension PersistentStorage {
     }
 
     internal func getEventsStorageDirectory(createDirectory: Bool = true) -> URL {
-        let storageUrl = getEventsStorageDirectory(searchPathDirectory: .applicationSupportDirectory,
-                                                  createDirectory: createDirectory)
+        #if os(tvOS)
+            let searchPathDirectory = FileManager.SearchPathDirectory.cachesDirectory
+        #else
+            let searchPathDirectory = FileManager.SearchPathDirectory.applicationSupportDirectory
+        #endif
+        let storageUrl = getEventsStorageDirectory(searchPathDirectory: searchPathDirectory,
+                                                   createDirectory: createDirectory)
 
         // This call is prohibitively expensive to be called at each event, run it once per instance lifetime.
         if createDirectory, !didExcludeStorageFromBackup {
@@ -422,9 +427,12 @@ extension PersistentStorage {
     }
 
     internal func getLegacyEventsStorageDirectory(createDirectory: Bool = true) -> URL {
-        // tvOS doesn't have access to document
+        // tvOS used Application Support briefly in 1.18.2-1.18.6. Earlier
+        // versions already used Caches, which is now the active directory.
+        #if os(tvOS)
+            let searchPathDirectory = FileManager.SearchPathDirectory.applicationSupportDirectory
         // macOS /Documents dir might be synced with iCloud
-        #if os(tvOS) || os(macOS)
+        #elseif os(macOS)
             let searchPathDirectory = FileManager.SearchPathDirectory.cachesDirectory
         #else
             let searchPathDirectory = FileManager.SearchPathDirectory.documentDirectory

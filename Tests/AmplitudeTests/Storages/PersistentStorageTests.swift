@@ -371,16 +371,39 @@ final class PersistentStorageTests: XCTestCase {
         persistentStorage.reset()
     }
 
-    func testDefaultStorageDirectoryUsesApplicationSupport() {
+    func testDefaultStorageDirectoryUsesPlatformAppropriateLocation() {
         let persistentStorage = PersistentStorage(storagePrefix: "application-support-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         persistentStorage.reset()
 
         let storageUrl = persistentStorage.getEventsStorageDirectory(createDirectory: false)
+        #if os(tvOS)
+        let expectedStorageUrl = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        #else
         let applicationSupportUrl = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let expectedStorageUrl = applicationSupportUrl
+        #endif
 
-        XCTAssertTrue(storageUrl.path.hasPrefix(applicationSupportUrl.path))
+        XCTAssertTrue(storageUrl.path.hasPrefix(expectedStorageUrl.path))
         persistentStorage.reset()
     }
+
+    #if os(tvOS)
+    func testTVOSWritesEventsToCachesDirectory() throws {
+        let persistentStorage = PersistentStorage(storagePrefix: "tvos-caches-instance-\(UUID().uuidString)", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.reset()
+        defer { persistentStorage.reset() }
+
+        try persistentStorage.write(key: StorageKey.EVENTS, value: BaseEvent(eventType: "tvos-event"))
+
+        let eventFiles = persistentStorage.getEventFiles()
+        let eventFile = try XCTUnwrap(eventFiles.first)
+        let cachesUrl = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        XCTAssertTrue(eventFile.path.hasPrefix(cachesUrl.path))
+
+        let eventString = try XCTUnwrap(persistentStorage.getEventsString(eventBlock: eventFile))
+        XCTAssertEqual(BaseEvent.fromArrayString(jsonString: eventString)?.first?.eventType, "tvos-event")
+    }
+    #endif
 
     func testStorageDirectoryIsExcludedFromBackupWhenCreated() throws {
         let persistentStorage = PersistentStorage(storagePrefix: "excluded-from-backup-instance-\(UUID().uuidString)", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
