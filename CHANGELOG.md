@@ -1,3 +1,11 @@
+## [1.18.7](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.6...v1.18.7) (2026-08-04)
+
+
+### Bug Fixes
+
+* **identity:** stop sending empty identify when properties are cleared ([8735171](https://github.com/amplitude/Amplitude-Swift/commit/8735171cc875ebadd435f0a797004214ccb4aba6))
+* tvOS should use cache directory for storage ([631c591](https://github.com/amplitude/Amplitude-Swift/commit/631c5910858be4c07c4620ef813d2f9e947df212))
+
 ## [1.18.6](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.5...v1.18.6) (2026-07-08)
 
 
