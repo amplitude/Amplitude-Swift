@@ -15,17 +15,39 @@ extension UIView {
     private static var amp_ignoreRageClickKey: UInt8 = 0
     private static var amp_ignoreDeadClickKey: UInt8 = 0
 
+    // The flags are looked up on the view and on every view it is inside of, because the view the
+    // SDK checks is rarely the view an app can mark. Interactions are attributed to the gesture
+    // recognizer's view, and inside a `WKWebView` that is the private `WKContentView`, two levels
+    // below the web view itself:
+    //
+    //     WKContentView -> WKScrollView -> WKWebView
+    //
+    // A leaf-only lookup therefore made `webView.amp_ignoreInteractionEvent()` a silent no-op — the
+    // flag landed on the `WKWebView` and was never read. The same held for any container: marking a
+    // view did not cover the subviews the taps actually land on.
+    //
+    // Marking is monotonic: once a view is ignored, nothing inside it can opt back in. Re-enabling a
+    // subtree would need to tell "never set" apart from "set to false", which the `Bool` associated
+    // object cannot express.
+
     var amp_ignoreRageClick: Bool {
-        return objc_getAssociatedObject(self, &UIView.amp_ignoreRageClickKey) as? Bool ?? false
+        return sequence(first: self, next: \.superview).contains {
+            objc_getAssociatedObject($0, &UIView.amp_ignoreRageClickKey) as? Bool ?? false
+        }
     }
 
     var amp_ignoreDeadClick: Bool {
-        return objc_getAssociatedObject(self, &UIView.amp_ignoreDeadClickKey) as? Bool ?? false
+        return sequence(first: self, next: \.superview).contains {
+            objc_getAssociatedObject($0, &UIView.amp_ignoreDeadClickKey) as? Bool ?? false
+        }
     }
 
-    /// Mark this view to be ignored for specific interaction events
-    /// - Parameter rageClick: Whether to ignore rage click detection for this view
-    /// - Parameter deadClick: Whether to ignore dead click detection for this view
+    /// Mark this view, and everything inside it, to be ignored for specific interaction events.
+    ///
+    /// Marking a view controller's root view therefore covers a whole screen, and marking a
+    /// `WKWebView` covers the web content inside it.
+    /// - Parameter rageClick: Whether to ignore rage click detection for this view and its subviews
+    /// - Parameter deadClick: Whether to ignore dead click detection for this view and its subviews
     @objc public func amp_ignoreInteractionEvent(rageClick: Bool = true, deadClick: Bool = true) {
         objc_setAssociatedObject(self, &UIView.amp_ignoreRageClickKey, rageClick, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         objc_setAssociatedObject(self, &UIView.amp_ignoreDeadClickKey, deadClick, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)

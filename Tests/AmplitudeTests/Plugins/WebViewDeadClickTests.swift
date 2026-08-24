@@ -207,33 +207,143 @@ final class WebViewDeadClickTests: XCTestCase {
                        "The positive control must produce a dead click")
     }
 
-    // MARK: - Known gap: the public ignore hook does not reach a webview's recognizer view
+    /// The ancestor lookup only matters if the capture path consults it. Every other ignore-hook
+    /// test reads the flags or the helpers directly and would stay green if the wiring were
+    /// reverted; this one drives the real swizzled `setState:` and checks what the SDK emits.
+    func testGesturePathEmitsNoRageClickWhenTheWebViewIsIgnored() throws {
+        let (amplitude, collector) = makeAmplitude()
+        defer { UIKitElementInteractions.unregister(amplitude) }
 
-    /// `amp_ignoreRageClick` / `amp_ignoreDeadClick` read an associated object on *that view only*.
-    /// Inside a `WKWebView` the recognizers belong to `WKContentView`, two levels below the
-    /// `WKWebView` an app can actually reach, so the documented workaround
-    /// `webView.amp_ignoreInteractionEvent(...)` never reaches the view the SDK checks.
-    /// This test pins the current behaviour; it should be inverted when the lookup walks ancestors.
-    func testIgnoreHookOnWebViewDoesNotReachTheRecognizerView() throws {
+        let webView = WKWebView(frame: window.bounds)
+        window.addSubview(webView)
+        let nestedInWebView = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+        webView.addSubview(nestedInWebView)
+
+        let plainView = UIView(frame: CGRect(x: 0, y: 600, width: 100, height: 100))
+        window.addSubview(plainView)
+        window.makeKeyAndVisible()
+        amplitude.waitForTrackingQueue()
+
+        // What a customer would write to silence one noisy web view.
+        webView.amp_ignoreInteractionEvent(rageClick: true, deadClick: false)
+
+        // Four rapid taps on web content the customer marked: enough to cross the rage threshold.
+        for _ in 0..<4 {
+            fireTap(on: nestedInWebView, at: CGPoint(x: 50, y: 50))
+            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+        }
+        RunLoop.current.run(until: Date().addingTimeInterval(1.3))
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertEqual(events(in: collector, ofType: Constants.AMP_RAGE_CLICK_EVENT).count, 0,
+                       "The marked web view must produce no rage click")
+
+        // Positive control: the same taps on an unmarked view still do, proving the detector was
+        // live and the taps really reached the swizzled path.
+        for _ in 0..<4 {
+            fireTap(on: plainView, at: CGPoint(x: 50, y: 650))
+            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+        }
+        RunLoop.current.run(until: Date().addingTimeInterval(1.3))
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertEqual(events(in: collector, ofType: Constants.AMP_RAGE_CLICK_EVENT).count, 1,
+                       "The unmarked view must still produce a rage click")
+    }
+
+    // MARK: - The ignore hook reaches the view the SDK actually checks
+
+    /// The reason the hook exists: an app can only reach the `WKWebView`, while the SDK attributes
+    /// interactions to the private `WKContentView` two levels below it. Before the lookup walked
+    /// ancestors, `webView.amp_ignoreInteractionEvent()` was a silent no-op.
+    func testIgnoreHookOnWebViewReachesTheRecognizerView() throws {
         let webView = try loadedWebView("<html><body style='font-size:64px'><p>tap here</p></body></html>")
         RunLoop.current.run(until: Date().addingTimeInterval(1.0))
 
-        webView.amp_ignoreInteractionEvent(rageClick: true, deadClick: true)
-        XCTAssertTrue(webView.amp_ignoreDeadClick, "The flag is set on the WKWebView itself")
-
         let qualifying = allRecognizers(in: webView).filter { qualifiesAsPhysicalTap($0.recognizer) }
         XCTAssertFalse(qualifying.isEmpty)
+
+        // Rage click only, which is what a customer suppressing a noisy web view would ask for.
+        webView.amp_ignoreInteractionEvent(rageClick: true, deadClick: false)
 
         for (view, recognizer) in qualifying {
             let chain = sequence(first: view, next: \.superview).map { $0.descriptiveTypeName }
                 .joined(separator: " -> ")
             print("=== \(recognizer.descriptiveTypeName): \(chain)")
 
-            XCTAssertFalse(view.amp_ignoreDeadClick,
-                           "Known gap: the flag set on WKWebView does not reach \(view.descriptiveTypeName)")
-            XCTAssertFalse(view.amp_ignoreRageClick,
-                           "Known gap: the flag set on WKWebView does not reach \(view.descriptiveTypeName)")
+            XCTAssertTrue(view.amp_ignoreRageClick,
+                          "The flag set on WKWebView must reach \(view.descriptiveTypeName)")
+            XCTAssertFalse(UIKitElementInteractions.shouldProcessRageClick(for: view),
+                           "rage click must be suppressed for \(view.descriptiveTypeName)")
+            // `deadClick: false` was passed, so nothing here marks dead click — it is suppressed
+            // only because this is web content.
+            XCTAssertFalse(view.amp_ignoreDeadClick)
         }
+    }
+
+    /// Marking a view controller's root view covers the whole screen — the shape a customer would
+    /// use to silence one noisy surface such as a webview-hosting view controller.
+    func testIgnoreOnAViewControllerRootViewCoversTheWholeScreen() {
+        let viewController = UIViewController()
+        viewController.title = "Noisy Screen"
+        window.rootViewController = viewController
+        window.makeKeyAndVisible()
+
+        let webView = WKWebView(frame: viewController.view.bounds)
+        viewController.view.addSubview(webView)
+        let nestedInWebView = UIView()
+        webView.addSubview(nestedInWebView)
+        let nativeButton = UIButton(type: .system)
+        viewController.view.addSubview(nativeButton)
+
+        viewController.view.amp_ignoreInteractionEvent(rageClick: true, deadClick: false)
+
+        for view in [viewController.view!, webView, nestedInWebView, nativeButton] {
+            XCTAssertTrue(view.amp_ignoreRageClick,
+                          "\(view.descriptiveTypeName) is on the ignored screen")
+            XCTAssertFalse(UIKitElementInteractions.shouldProcessRageClick(for: view))
+        }
+    }
+
+    /// The gap was never webview-specific: marking any container has to cover the subviews the taps
+    /// actually land on.
+    func testIgnoreOnAContainerCoversItsSubviews() {
+        let container = UIView(frame: window.bounds)
+        window.addSubview(container)
+
+        var leaf: UIView = container
+        for _ in 0..<5 {
+            let next = UIView()
+            leaf.addSubview(next)
+            leaf = next
+        }
+
+        let sibling = UIView()
+        window.addSubview(sibling)
+
+        container.amp_ignoreInteractionEvent(rageClick: true, deadClick: true)
+
+        XCTAssertTrue(leaf.amp_ignoreRageClick, "A descendant five levels down is covered")
+        XCTAssertTrue(leaf.amp_ignoreDeadClick)
+        XCTAssertFalse(UIKitElementInteractions.shouldProcessRageClick(for: leaf))
+
+        XCTAssertFalse(sibling.amp_ignoreRageClick, "A view outside the marked subtree is not")
+        XCTAssertTrue(UIKitElementInteractions.shouldProcessRageClick(for: sibling))
+    }
+
+    /// Marking is monotonic: a subview cannot opt back in, because the stored `Bool` cannot tell
+    /// "never set" from "set to false". This pins that decision.
+    func testASubviewCannotOptBackIntoAnIgnoredSubtree() {
+        let container = UIView(frame: window.bounds)
+        window.addSubview(container)
+        let child = UIView()
+        container.addSubview(child)
+
+        container.amp_ignoreInteractionEvent(rageClick: true, deadClick: true)
+        child.amp_ignoreInteractionEvent(rageClick: false, deadClick: false)
+
+        XCTAssertTrue(child.amp_ignoreRageClick, "The ancestor's marking still wins")
+        XCTAssertTrue(child.amp_ignoreDeadClick)
     }
 
     // MARK: - Helpers
