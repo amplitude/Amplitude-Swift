@@ -30,6 +30,16 @@ extension UIView {
         objc_setAssociatedObject(self, &UIView.amp_ignoreRageClickKey, rageClick, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         objc_setAssociatedObject(self, &UIView.amp_ignoreDeadClickKey, deadClick, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
+
+    /// Whether this view is a web view, or lives inside one.
+    ///
+    /// `WKWebView` is resolved by name so that the SDK does not have to link WebKit, and per call
+    /// rather than cached so that WebKit loaded late (a lazily loaded feature framework) is still
+    /// found. On platforms without WKWebView the lookup returns nil and behaviour is unchanged.
+    var amp_isInsideWebView: Bool {
+        guard let webViewClass = NSClassFromString("WKWebView") else { return false }
+        return sequence(first: self, next: \.superview).contains { $0.isKind(of: webViewClass) }
+    }
 }
 
 // MARK: - Frustration Click Ignore Extension for SwiftUI
