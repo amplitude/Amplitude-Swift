@@ -26,6 +26,8 @@ final class WebViewDeadClickTests: XCTestCase {
     private var window: UIWindow!
     /// `WKWebView.navigationDelegate` is weak; the delegate must outlive the navigation.
     private var navigationDelegate: NavigationDelegate?
+    /// `Amplitude.interfaceSignalProvider` is weak too.
+    private var interfaceSignalProvider: FakeInterfaceSignalProvider?
 
     override func setUp() {
         super.setUp()
@@ -37,11 +39,18 @@ final class WebViewDeadClickTests: XCTestCase {
     override func tearDown() {
         UIKitElementInteractions.resetPhysicalTapDedupCandidates()
         navigationDelegate = nil
+        interfaceSignalProvider = nil
         window = nil
         super.tearDown()
     }
 
-    // MARK: - What a web view looks like to the SDK
+    // MARK: - Finding the recognizers a tap on web content actually reaches
+    //
+    // WebKit installs five single-tap recognizers on the same `WKContentView`, all of which pass
+    // the SDK's physical-tap gate. Measured with real touches on an iPhone 16 Pro Max, two of them
+    // fire per tap — `WKSyntheticTapGestureRecognizer` and `UITextTapRecognizer`, in either order,
+    // 0.10-2.64 ms apart. That is not asserted here: it is an Apple implementation detail that a
+    // future iOS may change without any Amplitude regression.
 
     /// Replicates the SDK's gate in `UIGestureRecognizer.amp_setState`.
     private func qualifiesAsPhysicalTap(_ recognizer: UIGestureRecognizer) -> Bool {
@@ -58,27 +67,6 @@ final class WebViewDeadClickTests: XCTestCase {
             result.append(contentsOf: allRecognizers(in: subview))
         }
         return result
-    }
-
-    /// WebKit installs several single-tap recognizers on the same `WKContentView`, all of which pass
-    /// the SDK's physical-tap gate. Measured with a real touch, two of them fire per tap
-    /// (`WKSyntheticTapGestureRecognizer` then `UITextTapRecognizer`, under a millisecond apart).
-    func testWebKitInstallsMultipleQualifyingTapRecognizersOnSameView() throws {
-        let webView = try loadedWebView(
-            "<html><body style='font-size:64px'><p>tap here</p>"
-            + "<div id='btn' onclick='void 0'>BUTTON</div></body></html>")
-
-        // Give WebKit a beat to install its text/selection interactions.
-        RunLoop.current.run(until: Date().addingTimeInterval(1.0))
-
-        let qualifying = allRecognizers(in: webView).filter { qualifiesAsPhysicalTap($0.recognizer) }
-        print("=== recognizers the SDK would treat as a physical tap: \(qualifying.count) ===")
-        for (view, recognizer) in qualifying {
-            print(" - \(recognizer.descriptiveTypeName) on \(view.descriptiveTypeName)")
-        }
-
-        XCTAssertGreaterThan(qualifying.count, 1,
-                             "Expected WebKit to install more than one single-tap recognizer")
     }
 
     // MARK: - Dead click is suppressed inside web views
@@ -167,7 +155,11 @@ final class WebViewDeadClickTests: XCTestCase {
         let (amplitude, collector) = makeAmplitude()
         defer { UIKitElementInteractions.unregister(amplitude) }
 
+        // `Amplitude.interfaceSignalProvider` is weak; without a strong reference here ARC may
+        // release the provider immediately, `isProviding` goes nil, and the positive control fails
+        // for a reason unrelated to the feature.
         let provider = FakeInterfaceSignalProvider()
+        interfaceSignalProvider = provider
         amplitude.interfaceSignalProvider = provider
         defer { amplitude.interfaceSignalProvider = nil }
 
@@ -251,6 +243,39 @@ final class WebViewDeadClickTests: XCTestCase {
                        "The unmarked view must still produce a rage click")
     }
 
+    /// The other capture path, `UIApplication.amp_sendAction`, gates on the same two helpers. Its
+    /// inputs are pinned here; the call site itself is not, and cannot be from this target — the
+    /// unit test bundle has no `UIApplication`, so `sendActions(for:)` never reaches the swizzled
+    /// `sendAction:`. That wiring is exercised by the Frustration Interactions screen in the
+    /// Session Replay example app, which runs in a real application process.
+    ///
+    /// The subject is deliberately a native `UIButton` hosted inside the web view's scroll view:
+    /// the case the subtree-wide suppression knowingly gives up. It is native and would raise a
+    /// real interface signal, and it still loses dead click detection.
+    func testNativeControlInsideAWebViewIsNotEligibleForDeadClick() {
+        let webView = WKWebView(frame: window.bounds)
+        window.addSubview(webView)
+        let buttonInWebView = UIButton(type: .system)
+        webView.scrollView.addSubview(buttonInWebView)
+
+        let plainButton = UIButton(type: .system)
+        window.addSubview(plainButton)
+
+        XCTAssertTrue(buttonInWebView.amp_isInsideWebView)
+        XCTAssertFalse(UIKitElementInteractions.shouldProcessDeadClick(for: buttonInWebView),
+                       "A native control inside a web view loses dead click, by design")
+        XCTAssertTrue(UIKitElementInteractions.shouldProcessRageClick(for: buttonInWebView),
+                      "but keeps rage click")
+
+        XCTAssertTrue(UIKitElementInteractions.shouldProcessDeadClick(for: plainButton))
+        XCTAssertTrue(UIKitElementInteractions.shouldProcessRageClick(for: plainButton))
+
+        // The ignore flag reaches a control through its container on this path too.
+        window.amp_ignoreInteractionEvent(rageClick: true, deadClick: true)
+        XCTAssertFalse(UIKitElementInteractions.shouldProcessRageClick(for: plainButton))
+        XCTAssertFalse(UIKitElementInteractions.shouldProcessDeadClick(for: plainButton))
+    }
+
     // MARK: - The ignore hook reaches the view the SDK actually checks
 
     /// The reason the hook exists: an app can only reach the `WKWebView`, while the SDK attributes
@@ -269,10 +294,10 @@ final class WebViewDeadClickTests: XCTestCase {
         for (view, recognizer) in qualifying {
             let chain = sequence(first: view, next: \.superview).map { $0.descriptiveTypeName }
                 .joined(separator: " -> ")
-            print("=== \(recognizer.descriptiveTypeName): \(chain)")
 
             XCTAssertTrue(view.amp_ignoreRageClick,
-                          "The flag set on WKWebView must reach \(view.descriptiveTypeName)")
+                          "The flag set on WKWebView must reach \(recognizer.descriptiveTypeName) "
+                          + "on \(chain)")
             XCTAssertFalse(UIKitElementInteractions.shouldProcessRageClick(for: view),
                            "rage click must be suppressed for \(view.descriptiveTypeName)")
             // `deadClick: false` was passed, so nothing here marks dead click — it is suppressed

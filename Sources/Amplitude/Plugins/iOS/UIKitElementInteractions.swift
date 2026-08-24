@@ -215,11 +215,21 @@ class UIKitElementInteractions {
     }
 
     /// Dead click detection needs to know whether the interface responded to what the user touched.
-    /// Session Replay does not capture web content — `Snapshotter` never walks into a `WKWebView`'s
-    /// layer subtree — and `InterfaceChangeSignal` carries no region, only a timestamp. So inside a
-    /// web view a tap is reported dead whenever nothing else in the app happens to change within the
-    /// timeout, and cleared whenever something unrelated does. Suppress it there until web content
-    /// can be observed. Rage click does not depend on interface signals and stays enabled.
+    /// Inside a `WKWebView` no such signal exists, for two independent reasons:
+    ///
+    /// - Session Replay's snapshotter never walks into a web view's layer subtree, so web content
+    ///   never moves the native layer tree whose diff produces an interface signal.
+    /// - Web content *is* captured when Session Replay is configured to do so, but it arrives as
+    ///   rrweb events on a separate channel that only stores them — it never notifies interface
+    ///   signal receivers. And `InterfaceChangeSignal` carries no region, only a timestamp, so even
+    ///   if it did, a signal could not be tied to the view that was touched.
+    ///
+    /// So inside a web view a tap is reported dead whenever nothing else in the app happens to
+    /// change within the timeout, and cleared whenever something unrelated does. Suppress it there
+    /// until web content changes can raise an interface signal of their own — wiring the web view
+    /// event channel into that notification is what makes this suppression unnecessary.
+    ///
+    /// Rage click does not depend on interface signals and stays enabled.
     static func shouldProcessDeadClick(for view: UIView) -> Bool {
         return !view.amp_ignoreDeadClick && !view.amp_isInsideWebView
     }

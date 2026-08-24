@@ -29,6 +29,10 @@ extension UIView {
     // Marking is monotonic: once a view is ignored, nothing inside it can opt back in. Re-enabling a
     // subtree would need to tell "never set" apart from "set to false", which the `Bool` associated
     // object cannot express.
+    //
+    // The lookup runs at interaction time against the live hierarchy, so marking a view before or
+    // after it is added to a superview both work, and a view that has been detached by the time it
+    // is checked no longer sees its former ancestors' marks.
 
     var amp_ignoreRageClick: Bool {
         return sequence(first: self, next: \.superview).contains {
