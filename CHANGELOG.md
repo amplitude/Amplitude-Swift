@@ -1,3 +1,10 @@
+## [1.18.8](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.7...v1.18.8) (2026-08-25)
+
+
+### Bug Fixes
+
+* **frustration-interactions:** suppress dead clicks in web views and apply ignore flags to subviews ([#430](https://github.com/amplitude/Amplitude-Swift/issues/430)) ([fe1f862](https://github.com/amplitude/Amplitude-Swift/commit/fe1f862457f41f61d15272ba2fc1edb668729ae8))
+
 ## [1.18.7](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.6...v1.18.7) (2026-08-04)
 
 
