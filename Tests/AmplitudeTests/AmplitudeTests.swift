@@ -284,6 +284,89 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(storage.haveBeenCalledWith.last, "write(key: \(StorageKey.DEVICE_ID.rawValue), test-device)")
     }
 
+    func testConfiguredIdentityIsAppliedDuringInitAndPersisted() {
+        let configuration = Configuration(
+            apiKey: "test-api-key",
+            instanceName: #function,
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            userId: "configured-user",
+            deviceId: "configured-device"
+        )
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        XCTAssertEqual(amplitude.getUserId(), "configured-user")
+        // ContextPlugin.initializeDeviceId runs during setup; it must leave a
+        // configured device id alone rather than replacing it with a random UUID.
+        XCTAssertEqual(amplitude.getDeviceId(), "configured-device")
+        // Written back, so a later launch without the configured values keeps them.
+        XCTAssertEqual(storageMem.read(key: StorageKey.USER_ID), "configured-user")
+        XCTAssertEqual(storageMem.read(key: StorageKey.DEVICE_ID), "configured-device")
+    }
+
+    func testConfiguredIdentityOverridesPersistedIdentity() throws {
+        try storageMem.write(key: StorageKey.USER_ID, value: "persisted-user")
+        try storageMem.write(key: StorageKey.DEVICE_ID, value: "persisted-device")
+
+        let configuration = Configuration(
+            apiKey: "test-api-key",
+            instanceName: #function,
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            userId: "configured-user",
+            deviceId: "configured-device"
+        )
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        XCTAssertEqual(amplitude.getUserId(), "configured-user")
+        XCTAssertEqual(amplitude.getDeviceId(), "configured-device")
+    }
+
+    func testPersistedIdentityIsKeptWhenNotConfigured() throws {
+        try storageMem.write(key: StorageKey.USER_ID, value: "persisted-user")
+        try storageMem.write(key: StorageKey.DEVICE_ID, value: "persisted-device")
+
+        let configuration = Configuration(
+            apiKey: "test-api-key",
+            instanceName: #function,
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem
+        )
+
+        let amplitude = Amplitude(configuration: configuration)
+
+        XCTAssertEqual(amplitude.getUserId(), "persisted-user")
+        XCTAssertEqual(amplitude.getDeviceId(), "persisted-device")
+    }
+
+    func testConfiguredIdentityIsOnTheFirstEvent() {
+        let configuration = Configuration(
+            apiKey: "test-api-key",
+            instanceName: #function,
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            userId: "configured-user",
+            deviceId: "configured-device"
+        )
+
+        let amplitude = Amplitude(configuration: configuration)
+        let collector = EventCollectorPlugin()
+        amplitude.add(plugin: collector)
+        amplitude.track(event: BaseEvent(eventType: "test-event"))
+        amplitude.waitForTrackingQueue()
+
+        // The default autocapture is .sessions, so a session_start is generated
+        // ahead of the tracked event. Both must carry the configured identity --
+        // session_start is the one a post-init setUserId cannot reliably reach.
+        XCTAssertEqual(collector.events.map(\.eventType), [Constants.AMP_SESSION_START_EVENT, "test-event"])
+        for event in collector.events {
+            XCTAssertEqual(event.userId, "configured-user")
+            XCTAssertEqual(event.deviceId, "configured-device")
+        }
+    }
+
     func testInterceptedIdentifyIsSentOnFlush() {
         let amplitude = Amplitude(configuration: configurationWithFakeMemoryStorage)
 

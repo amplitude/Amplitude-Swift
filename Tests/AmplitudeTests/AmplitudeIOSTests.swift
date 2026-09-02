@@ -250,15 +250,15 @@ final class AmplitudeIOSTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: .sessions,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            userId: "test-user",
+            deviceId: "test-device"
         )
 
         // force new session event to fire immediately
         IOSVendorSystem.overrideApplicationState(.active)
 
-        let identity = Identity(userId: "test-user", deviceId: "test-device")
         let amplitude = Amplitude(configuration: configuration)
-        amplitude.identity = identity
         amplitude.waitForTrackingQueue()
         // wait twice for async event generate
         amplitude.waitForTrackingQueue()
@@ -266,8 +266,8 @@ final class AmplitudeIOSTests: XCTestCase {
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
         for event in events {
-            XCTAssertEqual(event.userId, identity.userId)
-            XCTAssertEqual(event.deviceId, identity.deviceId)
+            XCTAssertEqual(event.userId, "test-user")
+            XCTAssertEqual(event.deviceId, "test-device")
         }
     }
 

@@ -335,4 +335,22 @@ public class ObjCConfiguration: NSObject {
             configuration.enableRequestBodyCompression = newValue
         }
     }
+
+    @objc public var userId: String? {
+        get {
+            configuration.userId
+        }
+        set {
+            configuration.userId = newValue
+        }
+    }
+
+    @objc public var deviceId: String? {
+        get {
+            configuration.deviceId
+        }
+        set {
+            configuration.deviceId = newValue
+        }
+    }
 }
