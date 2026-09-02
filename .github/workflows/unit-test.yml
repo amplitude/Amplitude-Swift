@@ -1,11 +1,45 @@
 name: Unit Test
 
+# REPRO BRANCH -- do not merge.
+#
+# Differences from main, all in service of reproducing the UT flakiness:
+#   1. `-retry-tests-on-failure` removed from every leg, so a flake shows up as
+#      a red run instead of being papered over by the retry.
+#   2. The test bundle can be run N times per leg, stopping at the first
+#      failure, via TEST_ITERATIONS below.
+#   3. A "Runner info" step dumps the runner's hardware/OS/toolchain and some
+#      micro benchmarks (scripts/ci_runner_info.sh), so we can try to mirror the
+#      runner locally.
+#   4. Every leg writes an .xcresult bundle and uploads it, so a failure can be
+#      inspected (per-test timings, attachments, os_log) after the fact.
+#
+# How to get runs out of this branch: open a draft PR, which makes every push
+# trigger `pull_request`, then `gh run rerun <id>` to replay the same commit as
+# many times as you like. Note that `workflow_dispatch` and its inputs are only
+# offered by GitHub once the workflow file is on the *default* branch, so the
+# input below is unusable from here -- use the `vars` fallback instead:
+#
+#   gh variable set TEST_ITERATIONS --body 25 --repo amplitude/Amplitude-Swift
+#   gh variable delete TEST_ITERATIONS --repo amplitude/Amplitude-Swift
+#
+# main's copy of this workflow does not read that variable, so setting it only
+# affects this branch.
+
 on:
   pull_request:
   push:
     branches:
       - main
   workflow_call:
+  workflow_dispatch:
+    inputs:
+      test_iterations:
+        description: "Run the test bundle this many times per leg, stopping at the first failure (1 = normal single run)"
+        required: false
+        default: "1"
+
+env:
+  TEST_ITERATIONS: ${{ inputs.test_iterations || vars.TEST_ITERATIONS || '1' }}
 
 jobs:
   unit-test:
@@ -27,7 +61,7 @@ jobs:
             xcode: 16.4
             test-destination-os: 18.5
             device: "iPhone 16"
-          
+
           - runs-on: macos-15
             platform: macOS
             xcode: 16.4
@@ -81,28 +115,48 @@ jobs:
       - name: List Project Configuration
         run: |
           xcodebuild -list
+      - name: Runner info
+        # Deliberately the last step before the tests: the simulator runtimes
+        # are installed by now and the load/thermal snapshot reflects the state
+        # the test bundle actually starts in.
+        run: |
+          scripts/ci_runner_info.sh runner-info
       - name: ${{ matrix.platform }} Tests
         run: |
+          # -retry-tests-on-failure is deliberately absent -- see header.
+          # -run-tests-until-failure stops at the first failing iteration, which
+          # is what we want when hunting a flake.
+          echo "TEST_ITERATIONS=${TEST_ITERATIONS:-1}"
+          EXTRA_FLAGS=()
+          if [ "${TEST_ITERATIONS:-1}" -gt 1 ]; then
+            EXTRA_FLAGS+=(-test-iterations "$TEST_ITERATIONS" -run-tests-until-failure)
+          fi
+          RESULT_BUNDLE="results/${{ matrix.platform }}-${{ matrix.test-destination-os }}.xcresult"
+          mkdir -p results
+
           case "${{ matrix.platform }}" in
             iOS)
               xcodebuild test \
                 -scheme Amplitude-Swift-Package \
                 -sdk iphonesimulator \
-                -retry-tests-on-failure \
+                -resultBundlePath "$RESULT_BUNDLE" \
+                "${EXTRA_FLAGS[@]}" \
                 -destination 'platform=iOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}'
               ;;
             macOS)
               xcodebuild test \
                 -scheme Amplitude-Swift-Package \
                 -sdk macosx \
-                -retry-tests-on-failure \
+                -resultBundlePath "$RESULT_BUNDLE" \
+                "${EXTRA_FLAGS[@]}" \
                 -destination 'platform=macOS'
               ;;
             tvOS)
               xcodebuild \
                 -scheme Amplitude-Swift-Package \
                 -sdk appletvsimulator \
-                -retry-tests-on-failure \
+                -resultBundlePath "$RESULT_BUNDLE" \
+                "${EXTRA_FLAGS[@]}" \
                 -destination 'platform=tvOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
                 test
               ;;
@@ -110,7 +164,8 @@ jobs:
               xcodebuild \
                 -scheme Amplitude-Swift-Package \
                 -sdk watchsimulator \
-                -retry-tests-on-failure \
+                -resultBundlePath "$RESULT_BUNDLE" \
+                "${EXTRA_FLAGS[@]}" \
                 -destination 'platform=watchOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
                 test
               ;;
@@ -118,11 +173,38 @@ jobs:
               xcodebuild \
                 -scheme Amplitude-Swift-Package \
                 -sdk xrsimulator \
-                -retry-tests-on-failure \
+                -resultBundlePath "$RESULT_BUNDLE" \
+                "${EXTRA_FLAGS[@]}" \
                 -destination 'platform=visionOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
                 test
               ;;
           esac
+      - name: Runner info (post-test)
+        if: always()
+        run: |
+          # Second snapshot: load, free disk and thermals after the bundle ran,
+          # so we can tell a leg that was starved from one that was not.
+          echo "::group::load / disk / thermals after tests"
+          sysctl -n vm.loadavg
+          df -h /
+          vm_stat
+          pmset -g therm || true
+          echo "::endgroup::"
+      - name: Upload runner info
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: runner-info-${{ matrix.platform }}-${{ matrix.test-destination-os }}
+          path: runner-info/
+          if-no-files-found: warn
+      - name: Upload xcresult bundle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: xcresult-${{ matrix.platform }}-${{ matrix.test-destination-os }}
+          path: results/
+          if-no-files-found: warn
+
   objc-example-test:
     runs-on: macos-15
     steps:
@@ -137,11 +219,35 @@ jobs:
           # https://github.com/actions/runner-images/issues/12862#issuecomment-3239326872
           xcrun simctl list > /dev/null
           sudo xcodebuild -downloadPlatform iOS
+      - name: Runner info
+        run: |
+          scripts/ci_runner_info.sh runner-info
       - name: Objective-C Example Tests (iOS)
         working-directory: Examples/AmplitudeObjCExample
         run: |
+          # -retry-tests-on-failure deliberately absent -- see header.
+          EXTRA_FLAGS=()
+          if [ "${TEST_ITERATIONS:-1}" -gt 1 ]; then
+            EXTRA_FLAGS+=(-test-iterations "$TEST_ITERATIONS" -run-tests-until-failure)
+          fi
+          mkdir -p "$GITHUB_WORKSPACE/results"
           xcodebuild test \
             -scheme AmplitudeObjCExample \
             -sdk iphonesimulator \
-            -retry-tests-on-failure \
+            -resultBundlePath "$GITHUB_WORKSPACE/results/objc-example.xcresult" \
+            "${EXTRA_FLAGS[@]}" \
             -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16'
+      - name: Upload runner info
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: runner-info-objc-example
+          path: runner-info/
+          if-no-files-found: warn
+      - name: Upload xcresult bundle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: xcresult-objc-example
+          path: results/
+          if-no-files-found: warn
