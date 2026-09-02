@@ -212,25 +212,31 @@ jobs:
             echo "no test output captured"
             exit 0
           fi
-          # xcodebuild prints exactly one of these per iteration.
+          # xcodebuild prints exactly one 'All tests' marker per iteration.
           total="$(grep -cE "Test Suite 'All tests' (passed|failed)" "$LOG" || true)"
+          # Two metrics, because they disagree: run 33670018561's iOS 18.5 leg
+          # logged two failing test cases but only one red 'All tests' marker,
+          # so the marker is a floor on how many iterations were bad. The
+          # test-case count is the reliable signal of how often a given test
+          # misbehaves.
           red="$(grep -cE "Test Suite 'All tests' failed" "$LOG" || true)"
+          cases="$(grep -cE "Test Case '-\[.*\]' failed" "$LOG" || true)"
           {
             echo "### ${{ matrix.platform }} ${{ matrix.test-destination-os }}"
             echo
-            echo "| iterations | red | flake rate |"
-            echo "|---:|---:|---:|"
+            echo "| iterations | red iterations | flake rate | failing test cases |"
+            echo "|---:|---:|---:|---:|"
             if [ "${total:-0}" -gt 0 ]; then
               # Values via -v, not interpolated into the program: the runner's
               # /bin/bash is 3.2, which mis-parses an escaped double quote
               # inside $( ) inside a double-quoted string and silently hands
               # awk a truncated program.
               rate="$(awk -v r="$red" -v t="$total" 'BEGIN{ printf "%.1f%%", r * 100 / t }')"
-              echo "| $total | $red | $rate |"
+              echo "| $total | $red | $rate | $cases |"
             else
-              echo "| 0 | 0 | n/a — bundle never ran |"
+              echo "| 0 | 0 | n/a — no iteration markers found | $cases |"
             fi
-            if [ "${red:-0}" -gt 0 ]; then
+            if [ "${cases:-0}" -gt 0 ]; then
               echo
               echo "Failures by test (count over $total iterations):"
               echo
