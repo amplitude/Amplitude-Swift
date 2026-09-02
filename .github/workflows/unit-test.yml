@@ -221,7 +221,12 @@ jobs:
             echo "| iterations | red | flake rate |"
             echo "|---:|---:|---:|"
             if [ "${total:-0}" -gt 0 ]; then
-              echo "| $total | $red | $(awk "BEGIN{printf \"%.1f%%\", $red * 100 / $total}") |"
+              # Values via -v, not interpolated into the program: the runner's
+              # /bin/bash is 3.2, which mis-parses an escaped double quote
+              # inside $( ) inside a double-quoted string and silently hands
+              # awk a truncated program.
+              rate="$(awk -v r="$red" -v t="$total" 'BEGIN{ printf "%.1f%%", r * 100 / t }')"
+              echo "| $total | $red | $rate |"
             else
               echo "| 0 | 0 | n/a — bundle never ran |"
             fi
