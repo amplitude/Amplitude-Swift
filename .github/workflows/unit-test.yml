@@ -5,8 +5,8 @@ name: Unit Test
 # Differences from main, all in service of reproducing the UT flakiness:
 #   1. `-retry-tests-on-failure` removed from every leg, so a flake shows up as
 #      a red run instead of being papered over by the retry.
-#   2. The test bundle can be run N times per leg, stopping at the first
-#      failure, via TEST_ITERATIONS below.
+#   2. The test bundle can be run N independent times per leg via
+#      TEST_ITERATIONS below, to measure a flake rate.
 #   3. A "Runner info" step dumps the runner's hardware/OS/toolchain and some
 #      micro benchmarks (scripts/ci_runner_info.sh), so we can try to mirror the
 #      runner locally.
@@ -34,7 +34,7 @@ on:
   workflow_dispatch:
     inputs:
       test_iterations:
-        description: "Run the test bundle this many times per leg, stopping at the first failure (1 = normal single run)"
+        description: "Run the test bundle this many independent times per leg to measure a flake rate (1 = normal single run)"
         required: false
         default: "1"
 
@@ -45,6 +45,9 @@ jobs:
   unit-test:
     name: Unit ${{ matrix.platform }} - Xcode ${{ matrix.xcode }} - OS ${{ matrix.test-destination-os }}
     runs-on: ${{ matrix.runs-on }}
+    # A high TEST_ITERATIONS run is long by design; cap it well under the 6h
+    # default so a hung simulator does not hold a runner all day.
+    timeout-minutes: 180
 
     strategy:
       fail-fast: false
@@ -124,16 +127,37 @@ jobs:
       - name: ${{ matrix.platform }} Tests
         run: |
           # -retry-tests-on-failure is deliberately absent -- see header.
-          # -run-tests-until-failure stops at the first failing iteration, which
-          # is what we want when hunting a flake.
           echo "TEST_ITERATIONS=${TEST_ITERATIONS:-1}"
           EXTRA_FLAGS=()
           if [ "${TEST_ITERATIONS:-1}" -gt 1 ]; then
-            EXTRA_FLAGS+=(-test-iterations "$TEST_ITERATIONS" -run-tests-until-failure)
+            # Every iteration runs to completion. -run-tests-until-failure would
+            # stop at the first red one, measuring time-to-first-failure rather
+            # than a rate.
+            #
+            # -test-repetition-relaunch-enabled YES gives each iteration a fresh
+            # process, making it an independent sample of what one real CI run
+            # does. Without it iterations share a process, the suite's static
+            # state (e.g. DefaultEventUtils.instanceNamesThatSentAppUpdated-
+            # Installed) carries across them, and 2..N stop resembling a real
+            # run.
+            #
+            # Diagnostics off: on-failure collects a sysdiagnose per failure,
+            # which is why the two red legs uploaded 66 MB and 38 MB bundles.
+            # Times 25 iterations that is unmanageable, and for a rate we only
+            # need the counts.
+            EXTRA_FLAGS+=(
+              -test-iterations "$TEST_ITERATIONS"
+              -test-repetition-relaunch-enabled YES
+              -collect-test-diagnostics never
+            )
           fi
           RESULT_BUNDLE="results/${{ matrix.platform }}-${{ matrix.test-destination-os }}.xcresult"
           mkdir -p results
 
+          # tee so the flake summary step can count iterations; pipefail so a
+          # test failure still fails this step.
+          set -o pipefail
+          {
           case "${{ matrix.platform }}" in
             iOS)
               xcodebuild test \
@@ -179,6 +203,39 @@ jobs:
                 test
               ;;
           esac
+          } 2>&1 | tee results/test-output.log
+      - name: Flake summary
+        if: always()
+        run: |
+          LOG="results/test-output.log"
+          if [ ! -f "$LOG" ]; then
+            echo "no test output captured"
+            exit 0
+          fi
+          # xcodebuild prints exactly one of these per iteration.
+          total="$(grep -cE "Test Suite 'All tests' (passed|failed)" "$LOG" || true)"
+          red="$(grep -cE "Test Suite 'All tests' failed" "$LOG" || true)"
+          {
+            echo "### ${{ matrix.platform }} ${{ matrix.test-destination-os }}"
+            echo
+            echo "| iterations | red | flake rate |"
+            echo "|---:|---:|---:|"
+            if [ "${total:-0}" -gt 0 ]; then
+              echo "| $total | $red | $(awk "BEGIN{printf \"%.1f%%\", $red * 100 / $total}") |"
+            else
+              echo "| 0 | 0 | n/a — bundle never ran |"
+            fi
+            if [ "${red:-0}" -gt 0 ]; then
+              echo
+              echo "Failures by test (count over $total iterations):"
+              echo
+              echo '```'
+              grep -oE "Test Case '-\[[A-Za-z_.]+ [A-Za-z_0-9]+\]' failed" "$LOG" \
+                | sed -E "s/Test Case '-\[(.*)\]' failed/\1/" \
+                | sort | uniq -c | sort -rn
+              echo '```'
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Runner info (post-test)
         if: always()
         run: |
@@ -228,7 +285,11 @@ jobs:
           # -retry-tests-on-failure deliberately absent -- see header.
           EXTRA_FLAGS=()
           if [ "${TEST_ITERATIONS:-1}" -gt 1 ]; then
-            EXTRA_FLAGS+=(-test-iterations "$TEST_ITERATIONS" -run-tests-until-failure)
+            EXTRA_FLAGS+=(
+              -test-iterations "$TEST_ITERATIONS"
+              -test-repetition-relaunch-enabled YES
+              -collect-test-diagnostics never
+            )
           fi
           mkdir -p "$GITHUB_WORKSPACE/results"
           xcodebuild test \
