@@ -155,9 +155,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
         wait(for: [expectation], timeout: 30)
 
-        wait()
-        networkTrackingPlugin?.waitforNetworkTrackingQueue()
-        amplitude.waitForTrackingQueue()
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 0, "Should not capture network request event with status code 200")
@@ -166,14 +164,17 @@ final class NetworkTrackingPluginTest: XCTestCase {
     func testDefaultNetworkTrackingOptionsShouldNotCaptureAmplitude() throws {
         setupAmplitude()
 
+        // A 500 would be captured if the upload were not ignored, so this test only proves
+        // anything once that upload has actually been answered.
         FakeURLProtocol.amplitudeResponses = [.init(statusCode: 500)]
+        let uploaded = expectAmplitudeUpload()
 
         amplitude.track(eventType: "Test")
         amplitude.flush()
 
+        wait(for: [uploaded], timeout: 30)
         try waitForCollectedEvents(1)
-        networkTrackingPlugin?.waitforNetworkTrackingQueue()
-        amplitude.waitForTrackingQueue()
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1)
@@ -193,6 +194,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         amplitude.track(eventType: "Test")
         amplitude.flush()
         try waitForCollectedEvents(2)
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2)
@@ -217,8 +219,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
         wait(for: expectations, timeout: 30)
 
-        amplitude.waitForTrackingQueue()
-        wait()
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 0)
@@ -278,8 +279,8 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
         wait(for: expectations, timeout: 30)
 
-        amplitude.waitForTrackingQueue()
         try waitForCollectedEvents(2)
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2, "Should capture two network requests")
@@ -606,9 +607,8 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 30)
-        networkTrackingPlugin?.waitforNetworkTrackingQueue()
-        amplitude.waitForTrackingQueue()
         try waitForCollectedEvents(3)
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 3, "Should capture only regex matching URLs")
@@ -790,8 +790,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
 
         wait(for: expectations, timeout: 30)
         try waitForCollectedEvents(2)
-        networkTrackingPlugin?.waitforNetworkTrackingQueue()
-        amplitude.waitForTrackingQueue()
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2, "Should capture only GET and POST requests")
@@ -936,8 +935,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
 
         wait(for: expectations, timeout: 30)
         try waitForCollectedEvents(2)
-        networkTrackingPlugin?.waitforNetworkTrackingQueue()
-        amplitude.waitForTrackingQueue()
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2, "Should capture only requests matching both URL and method criteria")
@@ -1203,8 +1201,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
 
         wait(for: expectations, timeout: 30)
         try waitForCollectedEvents(3)
-        networkTrackingPlugin?.waitforNetworkTrackingQueue()
-        amplitude.waitForTrackingQueue()
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 3, "Should capture requests matching any of the rules")
@@ -1221,12 +1218,35 @@ final class NetworkTrackingPluginTest: XCTestCase {
     }
 #endif
 
-    /// Fixed sleep. Only for asserting that *nothing* was captured -- a sleep that is too short
-    /// can make such a test pass wrongly, but cannot make it fail. For "N events captured" use
-    /// `waitForCollectedEvents`.
+    /// Fixed sleep. Only needed for requests a test expects NOT to be captured -- a sleep
+    /// that is too short can make such an assertion pass wrongly, but cannot make it fail. For
+    /// "N events captured" use `waitForCollectedEvents`; a test that has both waits for the N
+    /// first and then calls `settleUncapturedRequests`.
     func wait(for interval: TimeInterval = 0.1) {
         let expectation = XCTestExpectation(description: "Wait for time interval")
         XCTWaiter().wait(for: [expectation], timeout: interval)
+    }
+
+    /// Call before asserting that some request was NOT captured. The plugin records a request
+    /// from its `setState(.completed)` hook, and URLSession runs that after the completion
+    /// handler that fulfilled the test's expectation -- so when every expected event has
+    /// arrived, the event for a wrongly captured request may still be a few hops away. The
+    /// queue drains alone cannot help (they only flush work already enqueued); the sleep
+    /// gives that work time to be enqueued, the drains then push it through to the collector.
+    func settleUncapturedRequests() {
+        wait()
+        networkTrackingPlugin?.waitforNetworkTrackingQueue()
+        amplitude.waitForTrackingQueue()
+    }
+
+    /// Expectation fulfilled once the mock has answered the SDK's own upload to api2. A test
+    /// asserting that this upload was NOT captured must wait for it first: before the request
+    /// has completed, "no network event yet" proves nothing.
+    func expectAmplitudeUpload() -> XCTestExpectation {
+        let uploaded = XCTestExpectation(description: "amplitude upload answered")
+        uploaded.assertForOverFulfill = false
+        FakeURLProtocol.onAmplitudeRequestFinished = { _ in uploaded.fulfill() }
+        return uploaded
     }
 
     private struct CollectedEventsTimeout: Error {}

@@ -57,15 +57,13 @@ class EventCollectorPlugin: DestinationPlugin {
     override func execute(event: BaseEvent) -> BaseEvent? {
         lock.lock()
         _events.append(event)
-        let count = _events.count
-        let callback = onCollected
-        lock.unlock()
-
-        if let callback, callback(count) {
-            lock.lock()
+        // The callback only fulfils an expectation, so it can run under the lock. Clearing it in
+        // the same critical section means a callback the test registers in the meantime can
+        // never be wiped by this one's clean-up.
+        if let callback = onCollected, callback(_events.count) {
             onCollected = nil
-            lock.unlock()
         }
+        lock.unlock()
         return event
     }
 

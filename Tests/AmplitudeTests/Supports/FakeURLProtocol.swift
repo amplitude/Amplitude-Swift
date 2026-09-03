@@ -43,6 +43,22 @@ class FakeURLProtocol: URLProtocol {
         }
     }
 
+    /// Called, off the main thread, once a response to an SDK upload has been fully delivered.
+    /// A test that asserts its upload was *not* captured has to wait for this first: until the
+    /// request has completed, "no network event yet" proves nothing.
+    static var onAmplitudeRequestFinished: ((URL) -> Void)? {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return _onAmplitudeRequestFinished
+        }
+        set {
+            lock.lock()
+            defer { lock.unlock() }
+            _onAmplitudeRequestFinished = newValue
+        }
+    }
+
     private static let amplitudeHosts: Set<String> = ["api2.amplitude.com", "api.eu.amplitude.com"]
     private static let defaultAmplitudeResponse = MockResponse(statusCode: 200)
 
@@ -51,6 +67,7 @@ class FakeURLProtocol: URLProtocol {
     private static let lock = NSLock()
     private static var _mockResponses: [MockResponse] = []
     private static var _amplitudeResponses: [MockResponse] = []
+    private static var _onAmplitudeRequestFinished: ((URL) -> Void)?
 
     private static let responseQueue = DispatchQueue(label: "FakeURLProtocol.responseQueue")
 
@@ -133,6 +150,10 @@ class FakeURLProtocol: URLProtocol {
             self.client?.urlProtocolDidFinishLoading(self)
 
             print("FakeURLProtocol: Finished loading \(url), response: \(mockResponse)")
+
+            if Self.amplitudeHosts.contains(url.host ?? "") {
+                Self.onAmplitudeRequestFinished?(url)
+            }
         }
     }
 
@@ -141,12 +162,13 @@ class FakeURLProtocol: URLProtocol {
     }
 
     /// Call from tearDown: responses a test queued but never consumed would otherwise be served
-    /// to the next test's requests.
+    /// to the next test's requests, and its upload hook would fire for the next test's uploads.
     static func clearMockResponses() {
         lock.lock()
         defer { lock.unlock() }
         _mockResponses.removeAll()
         _amplitudeResponses.removeAll()
+        _onAmplitudeRequestFinished = nil
     }
 }
 
