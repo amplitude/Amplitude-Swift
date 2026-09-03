@@ -12,6 +12,12 @@ import XCTest
 final class EventPipelineTests: XCTestCase {
     private static let FLUSH_INTERVAL_SECONDS = 10.0
 
+    // Wait budgets here are deliberately loose (10 s; 15 s where the SDK's own 1 s + 2 s retry
+    // backoff is being waited out). Everything goes through FakeHttpClient in-process, so a
+    // green run returns as soon as the expectation fires; the budget only decides how long a
+    // genuinely broken run takes to report. The original 1-2 s budgets were exceeded on a
+    // 3-vCPU CI simulator, and the indexing that followed turned that into a bundle crash.
+
     private var configuration: Configuration!
     private var pipeline: EventPipeline!
     private var httpClient: FakeHttpClient!
@@ -56,12 +62,12 @@ final class EventPipelineTests: XCTestCase {
         }
         XCTAssertEqual(testEvent.attempts, 1)
 
-        let waitResult = XCTWaiter.wait(for: [eventExpectation], timeout: 1)
+        let waitResult = XCTWaiter.wait(for: [eventExpectation], timeout: 10)
         XCTAssertNotEqual(waitResult, .timedOut)
         XCTAssertEqual(pipeline.eventCount, 1)
     }
 
-    func testFlush() {
+    func testFlush() throws {
         let testEvent = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
         try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
 
@@ -69,12 +75,12 @@ final class EventPipelineTests: XCTestCase {
         pipeline.flush {
             flushExpectation.fulfill()
         }
-        let waitResult = XCTWaiter.wait(for: [flushExpectation], timeout: 1)
+        let waitResult = XCTWaiter.wait(for: [flushExpectation], timeout: 10)
         XCTAssertNotEqual(waitResult, .timedOut)
         XCTAssertEqual(httpClient.uploadCount, 1)
-        let uploadedEvents = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[0])
+        let uploadedEvents = BaseEvent.fromArrayString(jsonString: try XCTUnwrap(httpClient.uploadedEvents.first))
         XCTAssertEqual(uploadedEvents?.count, 1)
-        XCTAssertEqual(uploadedEvents![0].eventType, "testEvent")
+        XCTAssertEqual(uploadedEvents?.first?.eventType, "testEvent")
     }
 
     func testFlushWhenOffline() {
@@ -93,7 +99,7 @@ final class EventPipelineTests: XCTestCase {
         XCTAssertEqual(httpClient.uploadCount, 0, "There should be no uploads when offline")
     }
 
-    func testSimultaneousFlush() {
+    func testSimultaneousFlush() throws {
         let testEvent = BaseEvent(userId: "unit-test", deviceId: "unit-test-machine", eventType: "testEvent")
         try? pipeline.storage?.write(key: StorageKey.EVENTS, value: testEvent)
 
@@ -108,13 +114,13 @@ final class EventPipelineTests: XCTestCase {
             return expectation
         }
 
-        wait(for: flushExpectations, timeout: 1)
-        wait(for: [httpResponseExpectation], timeout: 1)
+        wait(for: flushExpectations, timeout: 10)
+        wait(for: [httpResponseExpectation], timeout: 10)
 
         XCTAssertEqual(httpClient.uploadCount, 1)
-        let uploadedEvents = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[0])
+        let uploadedEvents = BaseEvent.fromArrayString(jsonString: try XCTUnwrap(httpClient.uploadedEvents.first))
         XCTAssertEqual(uploadedEvents?.count, 1)
-        XCTAssertEqual(uploadedEvents![0].eventType, "testEvent")
+        XCTAssertEqual(uploadedEvents?.first?.eventType, "testEvent")
     }
 
     func testOneUploadAtATime() {
@@ -137,16 +143,16 @@ final class EventPipelineTests: XCTestCase {
             flushExpectation.fulfill()
         }
 
-        wait(for: [httpResponseExpectation1], timeout: 1)
+        wait(for: [httpResponseExpectation1], timeout: 10)
 
         httpResponseExpectation2.isInverted = false
 
-        wait(for: [httpResponseExpectation2, flushExpectation], timeout: 1)
+        wait(for: [httpResponseExpectation2, flushExpectation], timeout: 10)
 
         XCTAssertEqual(httpClient.uploadCount, 2)
     }
 
-    func testInvalidEventUpload() {
+    func testInvalidEventUpload() throws {
         let invalidResponseData = "{\"events_with_invalid_fields\": {\"user_id\": [0]}}".data(using: .utf8)!
 
         httpClient.uploadResults = [
@@ -165,24 +171,24 @@ final class EventPipelineTests: XCTestCase {
         pipeline.flush {
             flushExpectation1.fulfill()
         }
-        wait(for: [uploadExpectations[0], flushExpectation1], timeout: 1)
+        wait(for: [uploadExpectations[0], flushExpectation1], timeout: 10)
 
         let flushExpectation2 = expectation(description: "flush-2")
         pipeline.flush {
             flushExpectation2.fulfill()
         }
-        wait(for: [uploadExpectations[1], flushExpectation2], timeout: 1)
+        wait(for: [uploadExpectations[1], flushExpectation2], timeout: 10)
 
         XCTAssertEqual(httpClient.uploadCount, 2)
 
-        let uploadedEvents0 = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[0])
+        let uploadedEvents0 = BaseEvent.fromArrayString(jsonString: try XCTUnwrap(httpClient.uploadedEvents[safe: 0]))
         XCTAssertEqual(uploadedEvents0?.count, 2)
-        XCTAssertEqual(uploadedEvents0?[0].eventType, "testEvent-0")
-        XCTAssertEqual(uploadedEvents0?[1].eventType, "testEvent-1")
+        XCTAssertEqual(uploadedEvents0?[safe: 0]?.eventType, "testEvent-0")
+        XCTAssertEqual(uploadedEvents0?[safe: 1]?.eventType, "testEvent-1")
 
-        let uploadedEvents1 = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[1])
+        let uploadedEvents1 = BaseEvent.fromArrayString(jsonString: try XCTUnwrap(httpClient.uploadedEvents[safe: 1]))
         XCTAssertEqual(uploadedEvents1?.count, 1)
-        XCTAssertEqual(uploadedEvents1?[0].eventType, "testEvent-1")
+        XCTAssertEqual(uploadedEvents1?[safe: 0]?.eventType, "testEvent-1")
     }
 
     // test continues to fail until the event is uploaded
@@ -205,13 +211,13 @@ final class EventPipelineTests: XCTestCase {
 
         pipeline.flush()
         // Expected: upload 0 (instant) + upload 1 (1s retry delay)
-        wait(for: [uploadExpectations[0], uploadExpectations[1]], timeout: 5)
+        wait(for: [uploadExpectations[0], uploadExpectations[1]], timeout: 15)
 
         XCTAssertEqual(httpClient.uploadCount, 2)
         XCTAssertEqual(pipeline.configuration.offline, false)
 
         // Expected: upload 2 (2s retry delay)
-        wait(for: [uploadExpectations[2]], timeout: 5)
+        wait(for: [uploadExpectations[2]], timeout: 15)
 
         XCTAssertEqual(httpClient.uploadCount, 3)
         XCTAssertEqual(pipeline.configuration.offline, true)
@@ -221,7 +227,7 @@ final class EventPipelineTests: XCTestCase {
         pipeline.flush {
             flushExpectation.fulfill()
         }
-        wait(for: [uploadExpectations[3], flushExpectation], timeout: 2)
+        wait(for: [uploadExpectations[3], flushExpectation], timeout: 10)
 
         XCTAssertEqual(httpClient.uploadCount, 4)
     }
@@ -256,13 +262,13 @@ final class EventPipelineTests: XCTestCase {
         pipeline.flush {
             flushExpectation.fulfill()
         }
-        wait(for: [flushExpectation], timeout: 2)
+        wait(for: [flushExpectation], timeout: 10)
 
         // Pipeline must have walked past the two corrupt files and uploaded the third.
         XCTAssertEqual(httpClient.uploadCount, 1, "Pipeline should not stall on corrupt files")
-        let uploaded = BaseEvent.fromArrayString(jsonString: httpClient.uploadedEvents[0])
+        let uploaded = BaseEvent.fromArrayString(jsonString: try XCTUnwrap(httpClient.uploadedEvents.first))
         XCTAssertEqual(uploaded?.count, 1)
-        XCTAssertEqual(uploaded?[0].eventType, "marker-2")
+        XCTAssertEqual(uploaded?.first?.eventType, "marker-2")
     }
 
     func testFlushKeepsSkippingUnreadableFilesAfterUpload() throws {
@@ -342,11 +348,11 @@ final class EventPipelineTests: XCTestCase {
         spyPipeline.flush {
             flushExpectation.fulfill()
         }
-        wait(for: [flushExpectation], timeout: 2)
+        wait(for: [flushExpectation], timeout: 10)
 
         XCTAssertEqual(spyHttp.uploadCount, 2, "Both good files should upload exactly once")
-        let uploaded0 = BaseEvent.fromArrayString(jsonString: spyHttp.uploadedEvents[0])
-        let uploaded1 = BaseEvent.fromArrayString(jsonString: spyHttp.uploadedEvents[1])
+        let uploaded0 = BaseEvent.fromArrayString(jsonString: try XCTUnwrap(spyHttp.uploadedEvents[safe: 0]))
+        let uploaded1 = BaseEvent.fromArrayString(jsonString: try XCTUnwrap(spyHttp.uploadedEvents[safe: 1]))
         XCTAssertEqual(uploaded0?.first?.eventType, "marker-1")
         XCTAssertEqual(uploaded1?.first?.eventType, "marker-3")
 
@@ -398,7 +404,7 @@ final class EventPipelineTests: XCTestCase {
             flushExpectation.fulfill()
         }
 
-        wait(for: uploadExpectations + [flushExpectation], timeout: 1)
+        wait(for: uploadExpectations + [flushExpectation], timeout: 10)
 
         XCTAssertEqual(httpClient.uploadCount, 3)
         XCTAssertEqual(pipeline.configuration.offline, false)

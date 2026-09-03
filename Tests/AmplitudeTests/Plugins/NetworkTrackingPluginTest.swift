@@ -108,7 +108,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
     }
 
 #if !os(watchOS)
-    func testDefaultNetworkTrackingOptionsShouldCapture500() {
+    func testDefaultNetworkTrackingOptionsShouldCapture500() throws {
         setupAmplitude()
         FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
 
@@ -118,7 +118,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
         wait(for: [expectation], timeout: 2)
 
-        wait()
+        try waitForCollectedEvents(1)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
 
@@ -156,7 +156,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertEqual(events.count, 0, "Should not capture network request event with status code 200")
     }
 
-    func testDefaultNetworkTrackingOptionsShouldNotCaptureAmplitude() {
+    func testDefaultNetworkTrackingOptionsShouldNotCaptureAmplitude() throws {
         setupAmplitude()
 
         FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
@@ -164,7 +164,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         amplitude.track(eventType: "Test")
         amplitude.flush()
 
-        wait()
+        try waitForCollectedEvents(1)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
 
@@ -182,17 +182,10 @@ final class NetworkTrackingPluginTest: XCTestCase {
 
         // Two events reach the collector: the tracked "Test" event, then the network event for
         // the flush that uploads it (ignoreAmplitudeRequests is off; flushMaxRetries is 0, so
-        // exactly one request). Wait for both rather than sleeping -- this used to be
-        // `wait(for: 0.1)` followed by `events[1] as!`, which on a slow runner found one event
-        // and took the whole test bundle down with an index-out-of-range trap.
-        let collected = expectation(description: "test event and network event collected")
-        collected.expectedFulfillmentCount = 2
-        collected.assertForOverFulfill = false
-        eventCollector.onEvent = { _ in collected.fulfill() }
-
+        // exactly one request).
         amplitude.track(eventType: "Test")
         amplitude.flush()
-        wait(for: [collected], timeout: 10)
+        try waitForCollectedEvents(2)
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2)
@@ -224,7 +217,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertEqual(events.count, 0)
     }
 
-    func testNetworkTrackingOptionsCaptureHosts() {
+    func testNetworkTrackingOptionsCaptureHosts() throws {
         var options = NetworkTrackingOptions.default
         options.captureRules = [.init(hosts: ["*.example.com", "example2.com"])]
         setupAmplitude(with: options)
@@ -245,7 +238,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         wait(for: expectations, timeout: 2)
 
         amplitude.waitForTrackingQueue()
-        wait()
+        try waitForCollectedEvents(2)
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2, "Should capture two network requests")
@@ -258,7 +251,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertTrue(urls.contains(url1), "Should capture requests to the specified hosts")
     }
 
-    func testNetworkTrackingOptionsCaptureStatusCode() {
+    func testNetworkTrackingOptionsCaptureStatusCode() throws {
         var options = NetworkTrackingOptions.default
         options.captureRules = [.init(hosts: ["*"], statusCodeRange: "413,500-599")]
         setupAmplitude(with: options)
@@ -279,7 +272,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         wait(for: expectations, timeout: 2)
 
         amplitude.waitForTrackingQueue()
-        wait()
+        try waitForCollectedEvents(2)
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2, "Should capture two network requests")
@@ -292,7 +285,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertTrue(statusCodes.contains(500), "Should capture requests with status codes inside the specified range")
     }
 
-    func testNetworkTrackingOptionsCaptureLocalError() {
+    func testNetworkTrackingOptionsCaptureLocalError() throws {
         var options = NetworkTrackingOptions.default
         options.captureRules = [.init(hosts: ["*"], statusCodeRange: "0")]
         setupAmplitude(with: options)
@@ -306,7 +299,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         wait(for: [expectation], timeout: 2)
 
         amplitude.waitForTrackingQueue()
-        wait()
+        try waitForCollectedEvents(1)
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1)
@@ -318,7 +311,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertEqual(event.eventProperties?[Constants.AMP_NETWORK_ERROR_MESSAGE_PROPERTY] as! String, "The request timed out.")
     }
 
-    func testCapturingAsyncTasks() {
+    func testCapturingAsyncTasks() throws {
         setupAmplitude()
         FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
 
@@ -329,10 +322,8 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }
         wait(for: [expectation], timeout: 2)
 
-        wait() // Wait for Autocapture works
+        try waitForCollectedEvents(1)
         amplitude.waitForTrackingQueue()
-
-        wait(for: 1)
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1)
@@ -346,7 +337,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertTrue(event.eventProperties?[Constants.AMP_DURATION_PROPERTY] as! Int64 > 0)
     }
 
-    func testCapturingUploadTask() {
+    func testCapturingUploadTask() throws {
         setupAmplitude()
         let responseBodyData = "Bar".data(using: .utf8)!
         FakeURLProtocol.mockResponses = [.init(statusCode: 500, data: responseBodyData)]
@@ -362,7 +353,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }).resume()
         wait(for: [expectation], timeout: 2)
 
-        wait() // Wait for Autocapture works
+        try waitForCollectedEvents(1)
         amplitude.waitForTrackingQueue()
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1)
@@ -375,7 +366,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertEqual(event.eventProperties?[Constants.AMP_NETWORK_RESPONSE_BODY_SIZE_PROPERTY] as! Int64, Int64(responseBodyData.count))
     }
 
-    func testCapturingDownloadTask() {
+    func testCapturingDownloadTask() throws {
         setupAmplitude()
 
         let responseBodyData = "Bar".data(using: .utf8)!
@@ -391,7 +382,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }).resume()
         wait(for: [expectation], timeout: 2)
 
-        wait() // Wait for Autocapture works
+        try waitForCollectedEvents(1)
         amplitude.waitForTrackingQueue()
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1)
@@ -401,7 +392,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertEqual(event.eventProperties?[Constants.AMP_NETWORK_RESPONSE_BODY_SIZE_PROPERTY] as! Int64, Int64(responseBodyData.count))
     }
 
-    func testRuleForHost() {
+    func testRuleForHost() throws {
         let options = NetworkTrackingOptions(captureRules: [
             .init(hosts: ["*.example.com"], statusCodeRange: "0,500-599"),
             .init(hosts: ["api.example.com"], statusCodeRange: "400-499"),
@@ -450,7 +441,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
         wait(for: [expectation3], timeout: 2)
 
-        wait()
+        try waitForCollectedEvents(2)
         plugin.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
 
@@ -466,7 +457,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertEqual(event2.eventProperties?[Constants.AMP_NETWORK_STATUS_CODE_PROPERTY] as! Int, 500)
     }
 
-    func testCaptureHeaderFields() {
+    func testCaptureHeaderFields() throws {
         let requestHeaders = ["custom-header-1": "value1", "custom-header-2": "value2", "other-header": "value-other"]
         let responseHeaders = ["custom-header-3": "value3", "custom-header-4": "value4", "other-header": "value-other"]
         let expectedRequestHeaders = requestHeaders.filter { ["custom-header-1", "custom-header-2"].contains($0.key) }
@@ -486,7 +477,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
         wait(for: [expectation], timeout: 2)
 
-        wait() // Wait for Autocapture works
+        try waitForCollectedEvents(1)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
         let events = eventCollector.events
@@ -509,7 +500,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
 
     // MARK: - URL Pattern Matching Tests
 
-    func testURLExactMatching() {
+    func testURLExactMatching() throws {
         var options = NetworkTrackingOptions.default
         options.captureRules = [
             .init(
@@ -545,7 +536,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         wait(for: expectations, timeout: 2)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
-        wait()
+        try waitForCollectedEvents(1)
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1, "Should capture only matching URLs")
@@ -559,7 +550,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }
     }
 
-    func testURLRegexMatching() {
+    func testURLRegexMatching() throws {
         var options = NetworkTrackingOptions.default
         options.captureRules = [
             .init(
@@ -610,7 +601,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         wait(for: expectations, timeout: 2)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
-        wait()
+        try waitForCollectedEvents(3)
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 3, "Should capture only regex matching URLs")
@@ -624,7 +615,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertTrue(capturedURLs.contains("https://monitoring.example.com/health/status"))
     }
 
-    func testURLRegexAnchors() {
+    func testURLRegexAnchors() throws {
         // Test regex patterns with ^ (start) and $ (end) anchors
         var options = NetworkTrackingOptions.default
         options.captureRules = [
@@ -686,7 +677,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         wait(for: expectations, timeout: 2)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
-        wait()
+        try waitForCollectedEvents(4)
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 4, "Should capture only URLs matching the anchored regex patterns")
@@ -708,7 +699,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertFalse(capturedURLs.contains("https://other.exact.example.com/path"), "Should not match different subdomain")
     }
 
-    func testURLPatternPriority() {
+    func testURLPatternPriority() throws {
         // Test that URL patterns take priority over host patterns when both are specified
         var options = NetworkTrackingOptions.default
         options.captureRules = [
@@ -737,7 +728,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
-        wait()
+        try waitForCollectedEvents(1)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
 
@@ -750,7 +741,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
 
     // MARK: - HTTP Method Matching Tests
 
-    func testHTTPMethodMatching() {
+    func testHTTPMethodMatching() throws {
         var options = NetworkTrackingOptions.default
         options.captureRules = [
             .init(
@@ -791,7 +782,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
-        wait()
+        try waitForCollectedEvents(2)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
 
@@ -806,7 +797,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertTrue(capturedMethods.contains("POST"))
     }
 
-    func testHTTPMethodWildcard() {
+    func testHTTPMethodWildcard() throws {
         var options = NetworkTrackingOptions.default
         options.captureRules = [
             .init(
@@ -839,7 +830,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
-        wait()
+        try waitForCollectedEvents(3)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
 
@@ -847,7 +838,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertEqual(events.count, 3, "Should capture all HTTP methods with wildcard")
     }
 
-    func testHTTPMethodCaseInsensitive() {
+    func testHTTPMethodCaseInsensitive() throws {
         var options = NetworkTrackingOptions.default
         options.captureRules = [
             .init(
@@ -880,7 +871,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
-        wait()
+        try waitForCollectedEvents(3)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
 
@@ -888,7 +879,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertEqual(events.count, 3, "Method matching should be case-insensitive")
     }
 
-    func testCombinedURLAndMethodFiltering() {
+    func testCombinedURLAndMethodFiltering() throws {
         var options = NetworkTrackingOptions.default
         options.captureRules = [
             .init(
@@ -937,7 +928,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
-        wait()
+        try waitForCollectedEvents(2)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
 
@@ -958,7 +949,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertTrue(capturedRequests.contains { $0.url == "https://store.example.com/products/123" && $0.method == "PUT" })
     }
 
-    func testResponseBodyCapture() {
+    func testResponseBodyCapture() throws {
         // Setup network tracking with response body capture
         let options = NetworkTrackingOptions(
             captureRules: [
@@ -1018,7 +1009,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         task.resume()
 
         wait(for: [expectation], timeout: 2.0)
-        wait(for: 0.2)
+        try waitForCollectedEvents(1)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
 
@@ -1056,7 +1047,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }
     }
 
-    func testResponseBodyCaptureWithURL() {
+    func testResponseBodyCaptureWithURL() throws {
         // Test response body capture with dataTask(with: URL, completionHandler:)
         let options = NetworkTrackingOptions(
             captureRules: [
@@ -1109,7 +1100,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         task.resume()
 
         wait(for: [expectation], timeout: 2.0)
-        wait()
+        try waitForCollectedEvents(1)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
 
@@ -1151,7 +1142,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }
     }
 
-    func testMultipleRulesWithDifferentPatterns() {
+    func testMultipleRulesWithDifferentPatterns() throws {
         var options = NetworkTrackingOptions.default
         options.captureRules = [
             // Rule 1: Specific API endpoints with POST only
@@ -1204,7 +1195,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 2)
-        wait()
+        try waitForCollectedEvents(3)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
 
@@ -1223,9 +1214,32 @@ final class NetworkTrackingPluginTest: XCTestCase {
     }
 #endif
 
+    /// Fixed sleep. Only for asserting that *nothing* was captured -- a sleep that is too short
+    /// can make such a test pass wrongly, but cannot make it fail. For "N events captured" use
+    /// `waitForCollectedEvents`.
     func wait(for interval: TimeInterval = 0.1) {
         let expectation = XCTestExpectation(description: "Wait for time interval")
         XCTWaiter().wait(for: [expectation], timeout: interval)
+    }
+
+    private struct CollectedEventsTimeout: Error {}
+
+    /// Waits until the collector holds at least `count` events, then returns. On timeout it
+    /// records a failure and throws, so the caller never reaches `events[i]` with too few
+    /// events. This replaces the fixed `wait()` sleeps that, on a slow CI runner, let a test
+    /// index past the end of the array and take the whole bundle down.
+    func waitForCollectedEvents(_ count: Int,
+                                timeout: TimeInterval = 10,
+                                file: StaticString = #filePath,
+                                line: UInt = #line) throws {
+        let collected = XCTestExpectation(description: "\(count) events collected")
+        eventCollector.fulfill(collected, whenCollected: count)
+        guard XCTWaiter().wait(for: [collected], timeout: timeout) == .completed else {
+            XCTFail("Timed out after \(timeout)s waiting for \(count) collected events; have \(eventCollector.events.count)",
+                    file: file,
+                    line: line)
+            throw CollectedEventsTimeout()
+        }
     }
 }
 // swiftlint:enable force_cast

@@ -34,15 +34,68 @@ class OutputReaderPlugin: DestinationPlugin {
 }
 
 class EventCollectorPlugin: DestinationPlugin {
-    var events: [BaseEvent] = Array()
-    /// Called on the tracking queue after each event is appended, so a test can wait
-    /// on a signal for "N events arrived" instead of sleeping and hoping.
-    var onEvent: ((BaseEvent) -> Void)?
+    private let lock = NSLock()
+    private var _events: [BaseEvent] = []
+    /// Returns true once it has fulfilled its expectation, so `execute` can drop it.
+    private var onCollected: ((Int) -> Bool)?
+
+    /// Appended on the tracking queue, read from wherever the test is -- so both go through
+    /// the lock.
+    var events: [BaseEvent] {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return _events
+        }
+        set {
+            lock.lock()
+            defer { lock.unlock() }
+            _events = newValue
+        }
+    }
 
     override func execute(event: BaseEvent) -> BaseEvent? {
-        events.append(event)
-        onEvent?(event)
+        lock.lock()
+        _events.append(event)
+        let count = _events.count
+        let callback = onCollected
+        lock.unlock()
+
+        if let callback, callback(count) {
+            lock.lock()
+            onCollected = nil
+            lock.unlock()
+        }
         return event
+    }
+
+    /// Fulfils `expectation` once at least `count` events have been collected: immediately if
+    /// they already have, otherwise from the tracking queue as they arrive. The check and the
+    /// registration happen under one lock, so an event landing in between cannot be missed.
+    /// Lets a test wait on "N events arrived" instead of sleeping and hoping.
+    func fulfill(_ expectation: XCTestExpectation, whenCollected count: Int) {
+        lock.lock()
+        if _events.count >= count {
+            lock.unlock()
+            expectation.fulfill()
+            return
+        }
+        onCollected = { collected in
+            guard collected >= count else {
+                return false
+            }
+            expectation.fulfill()
+            return true
+        }
+        lock.unlock()
+    }
+}
+
+extension Array {
+    /// nil instead of a trap when `index` is out of range -- for assertions on arrays whose
+    /// length is itself under test, so a wrong length fails the test rather than the bundle.
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }
 
