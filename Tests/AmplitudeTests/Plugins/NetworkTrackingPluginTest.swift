@@ -450,8 +450,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         wait(for: [expectation3], timeout: 30)
 
         try waitForCollectedEvents(2)
-        plugin.waitforNetworkTrackingQueue()
-        amplitude.waitForTrackingQueue()
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2)
@@ -542,9 +541,8 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 30)
-        networkTrackingPlugin?.waitforNetworkTrackingQueue()
-        amplitude.waitForTrackingQueue()
         try waitForCollectedEvents(1)
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1, "Should capture only matching URLs")
@@ -682,9 +680,8 @@ final class NetworkTrackingPluginTest: XCTestCase {
         }.resume()
 
         wait(for: expectations, timeout: 30)
-        networkTrackingPlugin?.waitforNetworkTrackingQueue()
-        amplitude.waitForTrackingQueue()
         try waitForCollectedEvents(4)
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 4, "Should capture only URLs matching the anchored regex patterns")
@@ -736,8 +733,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
 
         wait(for: expectations, timeout: 30)
         try waitForCollectedEvents(1)
-        networkTrackingPlugin?.waitforNetworkTrackingQueue()
-        amplitude.waitForTrackingQueue()
+        settleUncapturedRequests()
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 1, "URL patterns should take priority over host patterns")
