@@ -73,7 +73,7 @@ final class WebViewDeadClickTests: XCTestCase {
 
     func testDeadClickSuppressedInsideWebViewWhileRageClickStaysOn() throws {
         let webView = try loadedWebView("<html><body style='font-size:64px'><p>tap here</p></body></html>")
-        RunLoop.current.run(until: Date().addingTimeInterval(1.0))
+        waitForTapRecognizers(in: webView)
 
         XCTAssertTrue(webView.amp_isInsideWebView, "The web view itself counts as web content")
         XCTAssertFalse(UIKitElementInteractions.shouldProcessDeadClick(for: webView))
@@ -283,7 +283,7 @@ final class WebViewDeadClickTests: XCTestCase {
     /// ancestors, `webView.amp_ignoreInteractionEvent()` was a silent no-op.
     func testIgnoreHookOnWebViewReachesTheRecognizerView() throws {
         let webView = try loadedWebView("<html><body style='font-size:64px'><p>tap here</p></body></html>")
-        RunLoop.current.run(until: Date().addingTimeInterval(1.0))
+        waitForTapRecognizers(in: webView)
 
         let qualifying = allRecognizers(in: webView).filter { qualifiesAsPhysicalTap($0.recognizer) }
         XCTAssertFalse(qualifying.isEmpty)
@@ -416,6 +416,13 @@ final class WebViewDeadClickTests: XCTestCase {
         return (amplitude, collector)
     }
 
+    /// How long a load may take before the test gives up. A warm load finishes in ~0.4 s and a
+    /// cold one (first WebContent process of the test run) in ~1.3 s, on CI and locally alike --
+    /// but on a starved 3-vCPU CI simulator the same load has been seen to exceed 10 s, both
+    /// cold and warm, and load speed is not something any test here asserts. Generous on
+    /// purpose: a green run never comes near it, a red one stops being red for the wrong reason.
+    private static let loadTimeout: TimeInterval = 60
+
     private func loadedWebView(_ html: String) throws -> WKWebView {
         let webView = WKWebView(frame: window.bounds)
         window.addSubview(webView)
@@ -426,8 +433,21 @@ final class WebViewDeadClickTests: XCTestCase {
         navigationDelegate = delegate
         webView.navigationDelegate = delegate
         webView.loadHTMLString(html, baseURL: nil)
-        wait(for: [loaded], timeout: 10)
+        wait(for: [loaded], timeout: Self.loadTimeout)
         return webView
+    }
+
+    /// WebKit attaches its tap recognizers to `WKContentView` asynchronously, some time after
+    /// `didFinish`. Poll for the first qualifying one instead of sleeping a fixed second; the
+    /// caller's `XCTAssertFalse(qualifying.isEmpty)` still reports clearly if they never appear.
+    private func waitForTapRecognizers(in webView: WKWebView, timeout: TimeInterval = 30) {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if allRecognizers(in: webView).contains(where: { qualifiesAsPhysicalTap($0.recognizer) }) {
+                return
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+        }
     }
 
     private final class NavigationDelegate: NSObject, WKNavigationDelegate {

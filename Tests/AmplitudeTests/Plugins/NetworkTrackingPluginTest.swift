@@ -173,25 +173,32 @@ final class NetworkTrackingPluginTest: XCTestCase {
         XCTAssertFalse(events[0] is NetworkRequestEvent)
     }
 
-    func testNetworkTrackingOptionsIgnoreAmplitudeRequestsFalse() {
+    func testNetworkTrackingOptionsIgnoreAmplitudeRequestsFalse() throws {
         var options = NetworkTrackingOptions.default
         options.ignoreAmplitudeRequests = false
         setupAmplitude(with: options)
 
         FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
 
+        // Two events reach the collector: the tracked "Test" event, then the network event for
+        // the flush that uploads it (ignoreAmplitudeRequests is off; flushMaxRetries is 0, so
+        // exactly one request). Wait for both rather than sleeping -- this used to be
+        // `wait(for: 0.1)` followed by `events[1] as!`, which on a slow runner found one event
+        // and took the whole test bundle down with an index-out-of-range trap.
+        let collected = expectation(description: "test event and network event collected")
+        collected.expectedFulfillmentCount = 2
+        collected.assertForOverFulfill = false
+        eventCollector.onEvent = { _ in collected.fulfill() }
+
         amplitude.track(eventType: "Test")
         amplitude.flush()
-
-        wait(for: 0.1)
-        networkTrackingPlugin?.waitforNetworkTrackingQueue()
-        amplitude.waitForTrackingQueue()
-        amplitude.waitForTrackingQueue()
+        wait(for: [collected], timeout: 10)
 
         let events = eventCollector.events
         XCTAssertEqual(events.count, 2)
-        let event = events[1] as! NetworkRequestEvent
-        XCTAssertEqual(event.eventProperties?[Constants.AMP_NETWORK_URL_PROPERTY] as! String, "https://api2.amplitude.com/2/httpapi")
+        let event = try XCTUnwrap(events.compactMap { $0 as? NetworkRequestEvent }.first)
+        XCTAssertEqual(event.eventProperties?[Constants.AMP_NETWORK_URL_PROPERTY] as? String,
+                       "https://api2.amplitude.com/2/httpapi")
     }
 
     func testNetworkTrackingOptionsIgnoreHosts() {

@@ -35,9 +35,13 @@ class OutputReaderPlugin: DestinationPlugin {
 
 class EventCollectorPlugin: DestinationPlugin {
     var events: [BaseEvent] = Array()
+    /// Called on the tracking queue after each event is appended, so a test can wait
+    /// on a signal for "N events arrived" instead of sleeping and hoping.
+    var onEvent: ((BaseEvent) -> Void)?
 
     override func execute(event: BaseEvent) -> BaseEvent? {
         events.append(event)
+        onEvent?(event)
         return event
     }
 }
