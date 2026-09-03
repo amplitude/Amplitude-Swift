@@ -211,6 +211,7 @@
 		OBJ_150 /* RevenueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* RevenueTests.swift */; };
 		OBJ_151 /* PersistentStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_65 /* PersistentStorageTests.swift */; };
 		OBJ_152 /* TestUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_67 /* TestUtilities.swift */; };
+		A7C0FF1E2E6F0001000000A2 /* RemoteConfigMockServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C0FF1E2E6F0001000000A1 /* RemoteConfigMockServer.swift */; };
 		OBJ_153 /* TimelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_68 /* TimelineTests.swift */; };
 		OBJ_154 /* TypesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_69 /* TypesTests.swift */; };
 		OBJ_155 /* EventPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_71 /* EventPipelineTests.swift */; };
@@ -367,6 +368,7 @@
 		OBJ_63 /* RevenueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevenueTests.swift; sourceTree = "<group>"; };
 		OBJ_65 /* PersistentStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentStorageTests.swift; sourceTree = "<group>"; };
 		OBJ_67 /* TestUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtilities.swift; sourceTree = "<group>"; };
+		A7C0FF1E2E6F0001000000A1 /* RemoteConfigMockServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteConfigMockServer.swift; sourceTree = "<group>"; };
 		OBJ_68 /* TimelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineTests.swift; sourceTree = "<group>"; };
 		OBJ_69 /* TypesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypesTests.swift; sourceTree = "<group>"; };
 		OBJ_71 /* EventPipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPipelineTests.swift; sourceTree = "<group>"; };
@@ -661,6 +663,7 @@
 			children = (
 				EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */,
 				OBJ_67 /* TestUtilities.swift */,
+				A7C0FF1E2E6F0001000000A1 /* RemoteConfigMockServer.swift */,
 			);
 			path = Supports;
 			sourceTree = "<group>";
@@ -1018,6 +1021,7 @@
 				OBJ_151 /* PersistentStorageTests.swift in Sources */,
 				4E654DE12D9B60E700BCAA85 /* IdentityTests.swift in Sources */,
 				OBJ_152 /* TestUtilities.swift in Sources */,
+				A7C0FF1E2E6F0001000000A2 /* RemoteConfigMockServer.swift in Sources */,
 				6C23EF162C38AD31000DC8C8 /* UIKitUserInteractionPluginTest.swift in Sources */,
 				AB03FE202E58AC34000DC8CA /* WebViewDeadClickTests.swift in Sources */,
 				OBJ_153 /* TimelineTests.swift in Sources */,
