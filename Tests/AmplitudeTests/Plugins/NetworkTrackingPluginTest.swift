@@ -47,6 +47,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
     override func tearDown() {
         super.tearDown()
         eventCollector.events.removeAll()
+        FakeURLProtocol.clearMockResponses()
         // Only invalidate custom timeout sessions - shared session is reused
         customTimeoutSessions.forEach { $0.invalidateAndCancel() }
         customTimeoutSessions.removeAll()
@@ -159,7 +160,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
     func testDefaultNetworkTrackingOptionsShouldNotCaptureAmplitude() throws {
         setupAmplitude()
 
-        FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
+        FakeURLProtocol.amplitudeResponses = [.init(statusCode: 500)]
 
         amplitude.track(eventType: "Test")
         amplitude.flush()
@@ -178,7 +179,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         options.ignoreAmplitudeRequests = false
         setupAmplitude(with: options)
 
-        FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
+        FakeURLProtocol.amplitudeResponses = [.init(statusCode: 500)]
 
         // Two events reach the collector: the tracked "Test" event, then the network event for
         // the flush that uploads it (ignoreAmplitudeRequests is off; flushMaxRetries is 0, so
