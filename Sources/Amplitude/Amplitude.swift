@@ -170,9 +170,23 @@ public class Amplitude {
         }
         migrateInstanceOnlyStorages()
 
-        _identity = Identity(userId: configuration.storageProvider.read(key: .USER_ID),
-                             deviceId: configuration.storageProvider.read(key: .DEVICE_ID),
-                             userProperties: [:])
+        // Establish identity before any plugin is added, so that events generated
+        // during setup -- a session start, or app installed / opened when the app
+        // is already active -- are stamped with it. An explicitly configured id
+        // wins over the persisted one; both are written back so they persist like
+        // any other identity update.
+        var initialIdentity = Identity(userId: configuration.storageProvider.read(key: .USER_ID),
+                                       deviceId: configuration.storageProvider.read(key: .DEVICE_ID),
+                                       userProperties: [:])
+        if let configuredUserId = configuration.userId, configuredUserId != initialIdentity.userId {
+            initialIdentity.userId = configuredUserId
+            try? configuration.storageProvider.write(key: .USER_ID, value: configuredUserId)
+        }
+        if let configuredDeviceId = configuration.deviceId, configuredDeviceId != initialIdentity.deviceId {
+            initialIdentity.deviceId = configuredDeviceId
+            try? configuration.storageProvider.write(key: .DEVICE_ID, value: configuredDeviceId)
+        }
+        _identity = initialIdentity
 
         // Trigger lazy initialization before plugins are set up (plugins may query it during setup)
         _ = autocaptureManager

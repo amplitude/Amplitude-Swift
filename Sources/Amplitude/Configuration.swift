@@ -43,6 +43,24 @@ public class Configuration {
     public var flushQueueSize: Int
     public var flushIntervalMillis: Int
     public internal(set) var instanceName: String
+
+    /// User id to identify events with, applied before any autocaptured event is
+    /// generated. Prefer this over calling `setUserId` after `init` when the id is
+    /// already known: `init` may generate events (a session start, or app
+    /// installed / opened when the app is already active), and those events are
+    /// stamped with whatever identity exists at the moment they are created --
+    /// which is before a post-`init` `setUserId` can run.
+    ///
+    /// Takes precedence over a previously persisted user id.
+    public var userId: String?
+
+    /// Device id to identify events with, applied before any autocaptured event is
+    /// generated. See ``userId`` for why this is preferable to `setDeviceId` after
+    /// `init`. When nil, the SDK reuses the persisted device id, falling back to
+    /// the IDFV or a random UUID.
+    ///
+    /// Takes precedence over a previously persisted device id.
+    public var deviceId: String?
     public var optOut: Bool {
         didSet {
             optOutChanged?(optOut)
@@ -189,6 +207,8 @@ public class Configuration {
         interactionsOptions: InteractionsOptions = Defaults.interactionsOptions,
         enableDiagnostics: Bool = Defaults.enableDiagnostics,
         enableRequestBodyCompression: Bool = Defaults.enableRequestBodyCompression,
+        userId: String? = nil,
+        deviceId: String? = nil,
     ) {
         let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
@@ -239,6 +259,8 @@ public class Configuration {
         self.enableAutoCaptureRemoteConfig = enableAutoCaptureRemoteConfig
         self.interactionsOptions = interactionsOptions
         self.enableRequestBodyCompression = enableRequestBodyCompression
+        self.userId = userId
+        self.deviceId = deviceId
     }
 
     func isValid() -> Bool {
