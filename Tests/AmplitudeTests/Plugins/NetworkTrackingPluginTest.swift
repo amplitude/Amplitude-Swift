@@ -12,7 +12,13 @@ import XCTest
 // swiftlint:disable force_cast
 final class NetworkTrackingPluginTest: XCTestCase {
 
-    private static let defaultTimeout: TimeInterval = 2
+    // Request timeout for the shared session, and the budget every test gives its requests to
+    // complete. Loose on purpose: the mock answers in ~10 ms, so a green run never waits, but on
+    // a 3-vCPU CI simulator the URL loading system has stalled for over 2 s mid-test -- the
+    // session then timed the requests out, the error events carried no status code, matched no
+    // capture rule, and the test came up short. The one test that needs a timeout to fire passes
+    // its own short value to taskForRequest, which builds a separate session.
+    private static let defaultTimeout: TimeInterval = 30
     private var amplitude: Amplitude!
     private var storageMem: FakeInMemoryStorage!
     private var eventCollector = EventCollectorPlugin()
@@ -117,7 +123,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         taskForRequest("https://example.com?test=1#hash") { _, _, _ in
             expectation.fulfill()
         }.resume()
-        wait(for: [expectation], timeout: 2)
+        wait(for: [expectation], timeout: 30)
 
         try waitForCollectedEvents(1)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
@@ -147,7 +153,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         taskForRequest { _, _, _ in
             expectation.fulfill()
         }.resume()
-        wait(for: [expectation], timeout: 2)
+        wait(for: [expectation], timeout: 30)
 
         wait()
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
@@ -209,7 +215,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         taskForRequest("https://example2.com/api") { _, _, _ in
             expectations[1].fulfill()
         }.resume()
-        wait(for: expectations, timeout: 2)
+        wait(for: expectations, timeout: 30)
 
         amplitude.waitForTrackingQueue()
         wait()
@@ -236,7 +242,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         taskForRequest(url1) { _, _, _ in
             expectations[1].fulfill()
         }.resume()
-        wait(for: expectations, timeout: 2)
+        wait(for: expectations, timeout: 30)
 
         amplitude.waitForTrackingQueue()
         try waitForCollectedEvents(2)
@@ -270,7 +276,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         taskForRequest { _, _, _ in
             expectations[2].fulfill()
         }.resume()
-        wait(for: expectations, timeout: 2)
+        wait(for: expectations, timeout: 30)
 
         amplitude.waitForTrackingQueue()
         try waitForCollectedEvents(2)
@@ -297,7 +303,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         taskForRequest(timeout: 0.1) { _, _, _ in
             expectation.fulfill()
         }.resume()
-        wait(for: [expectation], timeout: 2)
+        wait(for: [expectation], timeout: 30)
 
         amplitude.waitForTrackingQueue()
         try waitForCollectedEvents(1)
@@ -321,7 +327,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
             try await request("https://example.com")
             expectation.fulfill()
         }
-        wait(for: [expectation], timeout: 2)
+        wait(for: [expectation], timeout: 30)
 
         try waitForCollectedEvents(1)
         amplitude.waitForTrackingQueue()
@@ -352,7 +358,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         Self.sharedSession.uploadTask(with: request, from: requestBodyData, completionHandler: { _, _, _ in
             expectation.fulfill()
         }).resume()
-        wait(for: [expectation], timeout: 2)
+        wait(for: [expectation], timeout: 30)
 
         try waitForCollectedEvents(1)
         amplitude.waitForTrackingQueue()
@@ -381,7 +387,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         Self.sharedSession.downloadTask(with: request, completionHandler: { _, _, _ in
             expectation.fulfill()
         }).resume()
-        wait(for: [expectation], timeout: 2)
+        wait(for: [expectation], timeout: 30)
 
         try waitForCollectedEvents(1)
         amplitude.waitForTrackingQueue()
@@ -424,7 +430,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         taskForRequest("https://api.example.com") { _, _, _ in
             expectation1.fulfill()
         }.resume()
-        wait(for: [expectation1], timeout: 2)
+        wait(for: [expectation1], timeout: 30)
 
         // Request 2: api.example.com with 500 -> should NOT be captured (rule only allows 400-499)
         FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
@@ -432,7 +438,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         taskForRequest("https://api.example.com") { _, _, _ in
             expectation2.fulfill()
         }.resume()
-        wait(for: [expectation2], timeout: 2)
+        wait(for: [expectation2], timeout: 30)
 
         // Request 3: api2.example.com with 500 -> should be captured (matches wildcard rule for 0,500-599)
         FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
@@ -440,7 +446,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         taskForRequest("https://api2.example.com") { _, _, _ in
             expectation3.fulfill()
         }.resume()
-        wait(for: [expectation3], timeout: 2)
+        wait(for: [expectation3], timeout: 30)
 
         try waitForCollectedEvents(2)
         plugin.waitforNetworkTrackingQueue()
@@ -476,7 +482,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
         taskForRequest("https://example.com?test=1#hash", requestHeaders: requestHeaders) { _, _, _ in
             expectation.fulfill()
         }.resume()
-        wait(for: [expectation], timeout: 2)
+        wait(for: [expectation], timeout: 30)
 
         try waitForCollectedEvents(1)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
@@ -534,7 +540,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
             expectations[2].fulfill()
         }.resume()
 
-        wait(for: expectations, timeout: 2)
+        wait(for: expectations, timeout: 30)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
         try waitForCollectedEvents(1)
@@ -599,7 +605,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
             expectations[4].fulfill()
         }.resume()
 
-        wait(for: expectations, timeout: 2)
+        wait(for: expectations, timeout: 30)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
         try waitForCollectedEvents(3)
@@ -675,7 +681,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
             expectations[7].fulfill()
         }.resume()
 
-        wait(for: expectations, timeout: 2)
+        wait(for: expectations, timeout: 30)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
         try waitForCollectedEvents(4)
@@ -728,7 +734,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
             expectations[1].fulfill()
         }.resume()
 
-        wait(for: expectations, timeout: 2)
+        wait(for: expectations, timeout: 30)
         try waitForCollectedEvents(1)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
@@ -782,7 +788,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
             expectations[3].fulfill()
         }.resume()
 
-        wait(for: expectations, timeout: 2)
+        wait(for: expectations, timeout: 30)
         try waitForCollectedEvents(2)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
@@ -830,7 +836,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
             expectations[2].fulfill()
         }.resume()
 
-        wait(for: expectations, timeout: 2)
+        wait(for: expectations, timeout: 30)
         try waitForCollectedEvents(3)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
@@ -871,7 +877,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
             expectations[2].fulfill()
         }.resume()
 
-        wait(for: expectations, timeout: 2)
+        wait(for: expectations, timeout: 30)
         try waitForCollectedEvents(3)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
@@ -928,7 +934,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
             expectations[5].fulfill()
         }.resume()
 
-        wait(for: expectations, timeout: 2)
+        wait(for: expectations, timeout: 30)
         try waitForCollectedEvents(2)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
@@ -1009,7 +1015,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
 
         task.resume()
 
-        wait(for: [expectation], timeout: 2.0)
+        wait(for: [expectation], timeout: 30)
         try waitForCollectedEvents(1)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
@@ -1100,7 +1106,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
 
         task.resume()
 
-        wait(for: [expectation], timeout: 2.0)
+        wait(for: [expectation], timeout: 30)
         try waitForCollectedEvents(1)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
@@ -1195,7 +1201,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
             expectations[4].fulfill()
         }.resume()
 
-        wait(for: expectations, timeout: 2)
+        wait(for: expectations, timeout: 30)
         try waitForCollectedEvents(3)
         networkTrackingPlugin?.waitforNetworkTrackingQueue()
         amplitude.waitForTrackingQueue()
