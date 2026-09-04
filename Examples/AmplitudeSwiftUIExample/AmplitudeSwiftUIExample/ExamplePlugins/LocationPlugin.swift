@@ -74,4 +74,20 @@ class LocationPlugin: NSObject, Plugin, CLLocationManagerDelegate {
         let status = locationManager?.authorizationStatus
         return status == .authorizedAlways || status == .authorizedWhenInUse
     }
+
+    func onUserIdChanged(_ userId: String?) {
+        // no-op
+    }
+
+    func onDeviceIdChanged(_ deviceId: String?) {
+        // no-op
+    }
+
+    func onSessionIdChanged(_ sessionId: Int64) {
+        // no-op
+    }
+
+    func onOptOutChanged(_ optOut: Bool) {
+        // no-op
+    }
 }

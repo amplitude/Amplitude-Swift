@@ -17,6 +17,7 @@
 		3A3036482A4B45780004CF0B /* TroubleShootingPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3036472A4B45780004CF0B /* TroubleShootingPlugin.swift */; };
 		3A42EB922B87CDE30044FD45 /* FilterPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A42EB912B87CDE30044FD45 /* FilterPlugin.swift */; };
 		3A4E19BD2941D885002EA8BC /* IDFACollectionPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4E19BC2941D86E002EA8BC /* IDFACollectionPlugin.swift */; };
+		4E15DDC42D3040F30061D89B /* WebViewSyncPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E15DDC32D3040EE0061D89B /* WebViewSyncPlugin.swift */; };
 		58324F75294BF7CF00C71E2E /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 58324F74294BF7CF00C71E2E /* WidgetKit.framework */; };
 		58324F77294BF7CF00C71E2E /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 58324F76294BF7CF00C71E2E /* SwiftUI.framework */; };
 		58324F7A294BF7CF00C71E2E /* iOSWidgetExampleBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58324F79294BF7CF00C71E2E /* iOSWidgetExampleBundle.swift */; };
@@ -91,6 +92,7 @@
 		3A3036472A4B45780004CF0B /* TroubleShootingPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TroubleShootingPlugin.swift; sourceTree = "<group>"; };
 		3A42EB912B87CDE30044FD45 /* FilterPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterPlugin.swift; sourceTree = "<group>"; };
 		3A4E19BC2941D86E002EA8BC /* IDFACollectionPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDFACollectionPlugin.swift; sourceTree = "<group>"; };
+		4E15DDC32D3040EE0061D89B /* WebViewSyncPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewSyncPlugin.swift; sourceTree = "<group>"; };
 		58324F73294BF7CF00C71E2E /* iOSWidgetExampleExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = iOSWidgetExampleExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		58324F74294BF7CF00C71E2E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		58324F76294BF7CF00C71E2E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -205,6 +207,7 @@
 		3A4E19BB2941D86E002EA8BC /* ExamplePlugins */ = {
 			isa = PBXGroup;
 			children = (
+				4E15DDC32D3040EE0061D89B /* WebViewSyncPlugin.swift */,
 				BA541E9A2A8B587E0088D841 /* LocationPlugin.swift */,
 				3A4E19BC2941D86E002EA8BC /* IDFACollectionPlugin.swift */,
 				3A3036472A4B45780004CF0B /* TroubleShootingPlugin.swift */,
@@ -397,6 +400,7 @@
 				3A4E19BD2941D885002EA8BC /* IDFACollectionPlugin.swift in Sources */,
 				58324F84294BF7CF00C71E2E /* iOSWidgetExample.intentdefinition in Sources */,
 				3A3036482A4B45780004CF0B /* TroubleShootingPlugin.swift in Sources */,
+				4E15DDC42D3040F30061D89B /* WebViewSyncPlugin.swift in Sources */,
 				3A42EB922B87CDE30044FD45 /* FilterPlugin.swift in Sources */,
 				BA541E9B2A8B587E0088D841 /* LocationPlugin.swift in Sources */,
 			);
