@@ -11,6 +11,8 @@ jobs:
   unit-test:
     name: Unit ${{ matrix.platform }} - Xcode ${{ matrix.xcode }} - OS ${{ matrix.test-destination-os }}
     runs-on: ${{ matrix.runs-on }}
+    # A leg takes 10-15 minutes; three attempts of the test step fit comfortably, a hung test does not.
+    timeout-minutes: 60
 
     strategy:
       fail-fast: false
@@ -79,52 +81,60 @@ jobs:
         run: |
           xcrun simctl list
       - name: List Project Configuration
+        # Informational only. Package resolution runs here too and has failed on a bad release
+        # download; the test step retries that case, this step must not fail the job by itself.
+        continue-on-error: true
         run: |
           xcodebuild -list
       - name: ${{ matrix.platform }} Tests
+        env:
+          XCODEBUILD_LOG_DIR: ${{ runner.temp }}/xcodebuild-logs
         run: |
+          # No -retry-tests-on-failure: a failing test fails the leg. The script retries only
+          # runner failures (package download, test host launch, xcodebuild aborting) -- see its
+          # header for the exact signatures.
           case "${{ matrix.platform }}" in
             iOS)
-              xcodebuild test \
+              scripts/ci_xcodebuild_test.sh test \
                 -scheme Amplitude-Swift-Package \
                 -sdk iphonesimulator \
-                -retry-tests-on-failure \
                 -destination 'platform=iOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}'
               ;;
             macOS)
-              xcodebuild test \
+              scripts/ci_xcodebuild_test.sh test \
                 -scheme Amplitude-Swift-Package \
                 -sdk macosx \
-                -retry-tests-on-failure \
                 -destination 'platform=macOS'
               ;;
             tvOS)
-              xcodebuild \
+              scripts/ci_xcodebuild_test.sh test \
                 -scheme Amplitude-Swift-Package \
                 -sdk appletvsimulator \
-                -retry-tests-on-failure \
-                -destination 'platform=tvOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
-                test
+                -destination 'platform=tvOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}'
               ;;
             watchOS)
-              xcodebuild \
+              scripts/ci_xcodebuild_test.sh test \
                 -scheme Amplitude-Swift-Package \
                 -sdk watchsimulator \
-                -retry-tests-on-failure \
-                -destination 'platform=watchOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
-                test
+                -destination 'platform=watchOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}'
               ;;
             visionOS)
-              xcodebuild \
+              scripts/ci_xcodebuild_test.sh test \
                 -scheme Amplitude-Swift-Package \
                 -sdk xrsimulator \
-                -retry-tests-on-failure \
-                -destination 'platform=visionOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}' \
-                test
+                -destination 'platform=visionOS Simulator,OS=${{ matrix.test-destination-os }},name=${{ matrix.device }}'
               ;;
           esac
+      - name: Upload xcodebuild logs
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: xcodebuild-logs-${{ matrix.platform }}-${{ matrix.test-destination-os }}
+          path: ${{ runner.temp }}/xcodebuild-logs
+          if-no-files-found: ignore
   objc-example-test:
     runs-on: macos-15
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -139,9 +149,17 @@ jobs:
           sudo xcodebuild -downloadPlatform iOS
       - name: Objective-C Example Tests (iOS)
         working-directory: Examples/AmplitudeObjCExample
+        env:
+          XCODEBUILD_LOG_DIR: ${{ runner.temp }}/xcodebuild-logs
         run: |
-          xcodebuild test \
+          "$GITHUB_WORKSPACE/scripts/ci_xcodebuild_test.sh" test \
             -scheme AmplitudeObjCExample \
             -sdk iphonesimulator \
-            -retry-tests-on-failure \
             -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16'
+      - name: Upload xcodebuild logs
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: xcodebuild-logs-objc-example
+          path: ${{ runner.temp }}/xcodebuild-logs
+          if-no-files-found: ignore
