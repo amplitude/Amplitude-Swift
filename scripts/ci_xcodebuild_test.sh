@@ -15,11 +15,16 @@
 #     AmplitudeCore.zip' ... already exists in file system" (binary target, stale SwiftPM
 #     artifact cache), exit 74 -- run 33817758147, tvOS and visionOS legs. The cache is
 #     cleared before the retry.
-#   - test host launch: DTServiceHub "Failed to send signal 19 to process N: 3" (errno 3 is
-#     ESRCH), after which xcodebuild itself dies with SIGSEGV, exit 139 -- run 33712638521, objc.
-#   - xcodebuild aborting with SIGABRT, exit 134, after every test case had passed
-#     (DVTAssertions failure inside DVTiPhoneSimulator) -- run 33819412376, objc, and once before.
+#   - xcodebuild dying by signal with no test-side result in the log: SIGSEGV (exit 139) after a
+#     test host failed to launch -- run 33712638521, objc; SIGABRT (exit 134) after every test
+#     case had passed, from a DVTAssertions failure inside DVTiPhoneSimulator -- runs 33791256663
+#     and 33819412376, objc. Recognised by the exit code, not by a log string.
 # Anything else non-zero is reported and not retried, so a new failure mode is seen, not hidden.
+#
+# Deliberately not a signature: DTServiceHub's "Failed to send signal 19 to process N: 3". It
+# reads like the launch failure above and is not one. It appears in 5 of the 11 objc job logs from
+# the measurement runs, and 4 of those 5 jobs passed, with "** TEST SUCCEEDED **" and exit 0.
+# Matching it would retry any objc failure that happened to carry the line.
 #
 # Usage:  scripts/ci_xcodebuild_test.sh test -scheme <scheme> -destination <dest> [...]
 #         Do not pass -resultBundlePath; the script sets one per attempt under the log dir.
@@ -60,10 +65,11 @@ fi
 # build-failure banners (`xcodebuild test` prints "** TEST BUILD FAILED **").
 TEST_FAILURE_PATTERN="Test [Cc]ase '.*' failed|\.(swift|m|mm|h|c|cc|cpp)(:[0-9]+){1,2}: error:|Restarting after unexpected exit|\*\* (TEST )?BUILD FAILED \*\*|error: linker command failed|Undefined symbols for architecture|Failed to load the test bundle"
 
-# The observed runner failures and nothing generic. "Could not resolve package dependencies" is
-# also what a wrong version requirement prints, and "Failed to launch the test host" is also what
-# a crashing example app prints, so neither is here.
-RUNNER_FAILURE_PATTERN="failed downloading .*/releases/download/|Failed to send signal [0-9]+ to process [0-9]+"
+# One observed runner failure that the exit code alone cannot identify, and nothing generic.
+# "Could not resolve package dependencies" is also what a wrong version requirement prints,
+# "Failed to launch the test host" is also what a crashing example app prints, and DTServiceHub's
+# "Failed to send signal" appears in passing jobs (see the header), so none of those are here.
+RUNNER_FAILURE_PATTERN="failed downloading .*/releases/download/"
 
 # xcodebuild itself dying is a runner failure when the log carries no test-side result: 134 is
 # SIGABRT, 139 is SIGSEGV. Exit 74 (package resolution) is deliberately not here: a wrong version
