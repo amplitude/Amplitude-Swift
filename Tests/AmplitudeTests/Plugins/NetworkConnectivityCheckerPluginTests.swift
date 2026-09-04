@@ -17,7 +17,12 @@ final class NetworkConnectivityCheckerPluginTests: XCTestCase {
     override func setUp() {
         super.setUp()
         mockPathCreation = MockPathCreation()
-        amplitude = Amplitude(configuration: Configuration(apiKey: "test-api-key"))
+        // Disabled keeps Amplitude.init from installing its own NetworkConnectivityCheckerPlugin,
+        // whose real NWPathMonitor also writes configuration.offline from the tracking queue --
+        // a second writer racing the mock-driven plugin under test, which on a busy runner
+        // flipped the value back between simulateNetworkChange and the assertion.
+        amplitude = Amplitude(configuration: Configuration(apiKey: "test-api-key",
+                                                           offline: NetworkConnectivityCheckerPlugin.Disabled))
         plugin = NetworkConnectivityCheckerPlugin(pathCreation: mockPathCreation)
         plugin.setup(amplitude: amplitude)
     }

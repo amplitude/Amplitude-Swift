@@ -24,9 +24,7 @@ import UIKit.UIGestureRecognizerSubclass
 final class WebViewDeadClickTests: XCTestCase {
 
     private var window: UIWindow!
-    /// `WKWebView.navigationDelegate` is weak; the delegate must outlive the navigation.
-    private var navigationDelegate: NavigationDelegate?
-    /// `Amplitude.interfaceSignalProvider` is weak too.
+    /// `Amplitude.interfaceSignalProvider` is weak; the provider must outlive the test body.
     private var interfaceSignalProvider: FakeInterfaceSignalProvider?
 
     override func setUp() {
@@ -38,7 +36,6 @@ final class WebViewDeadClickTests: XCTestCase {
 
     override func tearDown() {
         UIKitElementInteractions.resetPhysicalTapDedupCandidates()
-        navigationDelegate = nil
         interfaceSignalProvider = nil
         window = nil
         super.tearDown()
@@ -72,8 +69,7 @@ final class WebViewDeadClickTests: XCTestCase {
     // MARK: - Dead click is suppressed inside web views
 
     func testDeadClickSuppressedInsideWebViewWhileRageClickStaysOn() throws {
-        let webView = try loadedWebView("<html><body style='font-size:64px'><p>tap here</p></body></html>")
-        RunLoop.current.run(until: Date().addingTimeInterval(1.0))
+        let webView = try attachedWebView()
 
         XCTAssertTrue(webView.amp_isInsideWebView, "The web view itself counts as web content")
         XCTAssertFalse(UIKitElementInteractions.shouldProcessDeadClick(for: webView))
@@ -175,13 +171,13 @@ final class WebViewDeadClickTests: XCTestCase {
 
         // Four rapid taps inside the web view: rage click must still fire, dead click must not,
         // even though no interface change signal ever arrives.
-        for _ in 0..<4 {
-            fireTap(on: nestedInWebView)
-            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
-        }
+        let burstEnd = try fireRageClickBurst(on: nestedInWebView)
 
-        // Past the rage debounce (1 s) and the dead click timeout (3.5 s).
-        RunLoop.current.run(until: Date().addingTimeInterval(4.2))
+        // The rage click is reported by the detector's 1 s debounce timer: wait for the event, not
+        // for a fixed time. Then stay past the dead click timeout (3.5 s after the tap) so a dead
+        // click, had one been reported, would be in the collector as well.
+        runLoop(until: collector, has: 1, ofType: Constants.AMP_RAGE_CLICK_EVENT)
+        RunLoop.current.run(until: burstEnd.addingTimeInterval(4.2))
         amplitude.waitForTrackingQueue()
 
         XCTAssertEqual(events(in: collector, ofType: Constants.AMP_RAGE_CLICK_EVENT).count, 1,
@@ -192,7 +188,7 @@ final class WebViewDeadClickTests: XCTestCase {
         // Positive control: the same tap on a plain view IS reported dead, proving the detector
         // and provider wiring in this test are live.
         fireTap(on: plainView)
-        RunLoop.current.run(until: Date().addingTimeInterval(4.2))
+        runLoop(until: collector, has: 1, ofType: Constants.AMP_DEAD_CLICK_EVENT)
         amplitude.waitForTrackingQueue()
 
         XCTAssertEqual(events(in: collector, ofType: Constants.AMP_DEAD_CLICK_EVENT).count, 1,
@@ -220,11 +216,9 @@ final class WebViewDeadClickTests: XCTestCase {
         webView.amp_ignoreInteractionEvent(rageClick: true, deadClick: false)
 
         // Four rapid taps on web content the customer marked: enough to cross the rage threshold.
-        for _ in 0..<4 {
-            fireTap(on: nestedInWebView, at: CGPoint(x: 50, y: 50))
-            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
-        }
-        RunLoop.current.run(until: Date().addingTimeInterval(1.3))
+        let burstEnd = try fireRageClickBurst(on: nestedInWebView, at: CGPoint(x: 50, y: 50))
+        // Past the 1 s debounce, so a rage click, had one been detected, would have been reported.
+        RunLoop.current.run(until: burstEnd.addingTimeInterval(1.5))
         amplitude.waitForTrackingQueue()
 
         XCTAssertEqual(events(in: collector, ofType: Constants.AMP_RAGE_CLICK_EVENT).count, 0,
@@ -232,11 +226,8 @@ final class WebViewDeadClickTests: XCTestCase {
 
         // Positive control: the same taps on an unmarked view still do, proving the detector was
         // live and the taps really reached the swizzled path.
-        for _ in 0..<4 {
-            fireTap(on: plainView, at: CGPoint(x: 50, y: 650))
-            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
-        }
-        RunLoop.current.run(until: Date().addingTimeInterval(1.3))
+        try fireRageClickBurst(on: plainView, at: CGPoint(x: 50, y: 650))
+        runLoop(until: collector, has: 1, ofType: Constants.AMP_RAGE_CLICK_EVENT)
         amplitude.waitForTrackingQueue()
 
         XCTAssertEqual(events(in: collector, ofType: Constants.AMP_RAGE_CLICK_EVENT).count, 1,
@@ -282,8 +273,7 @@ final class WebViewDeadClickTests: XCTestCase {
     /// interactions to the private `WKContentView` two levels below it. Before the lookup walked
     /// ancestors, `webView.amp_ignoreInteractionEvent()` was a silent no-op.
     func testIgnoreHookOnWebViewReachesTheRecognizerView() throws {
-        let webView = try loadedWebView("<html><body style='font-size:64px'><p>tap here</p></body></html>")
-        RunLoop.current.run(until: Date().addingTimeInterval(1.0))
+        let webView = try attachedWebView()
 
         let qualifying = allRecognizers(in: webView).filter { qualifiesAsPhysicalTap($0.recognizer) }
         XCTAssertFalse(qualifying.isEmpty)
@@ -396,6 +386,50 @@ final class WebViewDeadClickTests: XCTestCase {
         view.removeGestureRecognizer(recognizer)
     }
 
+    /// Four taps on `view`, 10 ms apart: past the SDK's 5 ms physical-tap dedup window and well
+    /// inside the rage click detector's 1 s window. Click timestamps are taken synchronously in
+    /// `amp_setState`, so the spacing is exactly this loop's pacing and no run-loop turn is needed
+    /// between taps. Turning the run loop there let unrelated work (WebKit IPC, layout) stretch a
+    /// burst past 1 s on a loaded CI runner, and the detector then correctly saw no rage click.
+    /// Returns when the last tap was fired. Skips the test if the host stalled so badly that even
+    /// this burst exceeded the window: the SDK was then never given four taps within a second.
+    @discardableResult
+    private func fireRageClickBurst(on view: UIView,
+                                    at location: CGPoint = CGPoint(x: 50, y: 50),
+                                    file: StaticString = #filePath,
+                                    line: UInt = #line) throws -> Date {
+        let start = Date()
+        for i in 0..<4 {
+            if i > 0 {
+                Thread.sleep(forTimeInterval: 0.01)
+            }
+            fireTap(on: view, at: location)
+        }
+        let end = Date()
+        let elapsed = end.timeIntervalSince(start)
+        if elapsed > 0.9 {
+            throw XCTSkip("Host stalled: four taps took \(elapsed) s, longer than the 1 s rage click window",
+                          file: file, line: line)
+        }
+        return end
+    }
+
+    /// Turns the main run loop until `collector` holds `count` events of `eventType`, or `timeout`
+    /// passes. The detectors report from main-run-loop timers (rage click 1 s after the last tap,
+    /// dead click 3.5 s after the tap), so the loop has to turn while waiting; a fixed turn read
+    /// the collector before a late timer had fired on a loaded CI runner. The caller's assertion
+    /// still reports a missing event; this only removes the fixed budget.
+    private func runLoop(until collector: EventCollectorPlugin,
+                         has count: Int,
+                         ofType eventType: String,
+                         timeout: TimeInterval = 15) {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline, events(in: collector, ofType: eventType).count < count {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+            Thread.sleep(forTimeInterval: 0.01)
+        }
+    }
+
     private func events(in collector: EventCollectorPlugin, ofType eventType: String) -> [BaseEvent] {
         return collector.events.filter { $0.eventType == eventType }
     }
@@ -416,28 +450,42 @@ final class WebViewDeadClickTests: XCTestCase {
         return (amplitude, collector)
     }
 
-    private func loadedWebView(_ html: String) throws -> WKWebView {
+    /// A web view in the key window with WebKit's tap recognizers attached to its `WKContentView`.
+    ///
+    /// Nothing is loaded into it. The tests using this only inspect the view hierarchy WebKit
+    /// builds in this process, and `WKContentView` gets its recognizers in `didMoveToWindow`, so
+    /// they are present within milliseconds of `addSubview` (measured 0.1-6 ms on an iPhone 16 Pro
+    /// simulator). Earlier versions loaded an HTML string and waited for `didFinish`, which made
+    /// these tests depend on WebKit's WebContent and GPU processes launching. On a CI simulator
+    /// that has taken over six minutes (`GPU process took 366 seconds to launch`), so every load
+    /// timed out whatever the budget, while nothing here ever asserted on page content.
+    private func attachedWebView() throws -> WKWebView {
         let webView = WKWebView(frame: window.bounds)
         window.addSubview(webView)
         window.makeKeyAndVisible()
-
-        let loaded = expectation(description: "html loaded")
-        let delegate = NavigationDelegate { loaded.fulfill() }
-        navigationDelegate = delegate
-        webView.navigationDelegate = delegate
-        webView.loadHTMLString(html, baseURL: nil)
-        wait(for: [loaded], timeout: 10)
+        try waitForTapRecognizers(in: webView)
         return webView
     }
 
-    private final class NavigationDelegate: NSObject, WKNavigationDelegate {
-        private let onFinish: () -> Void
-        init(onFinish: @escaping () -> Void) {
-            self.onFinish = onFinish
+    private struct TapRecognizersMissing: Error {}
+
+    /// Polls for the first recognizer that passes the SDK's physical-tap gate. Fails and throws if
+    /// none appears, so a caller never reaches its assertions with an empty hierarchy.
+    private func waitForTapRecognizers(in webView: WKWebView,
+                                       timeout: TimeInterval = 10,
+                                       file: StaticString = #filePath,
+                                       line: UInt = #line) throws {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if allRecognizers(in: webView).contains(where: { qualifiesAsPhysicalTap($0.recognizer) }) {
+                return
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
         }
-        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            onFinish()
-        }
+        let present = allRecognizers(in: webView).map { "\($0.recognizer.descriptiveTypeName) on \($0.view.descriptiveTypeName)" }
+        XCTFail("No single-tap recognizer appeared on the web view within \(timeout)s; present: \(present)",
+                file: file, line: line)
+        throw TapRecognizersMissing()
     }
 }
 
