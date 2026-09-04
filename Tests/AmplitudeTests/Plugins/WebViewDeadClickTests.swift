@@ -171,13 +171,13 @@ final class WebViewDeadClickTests: XCTestCase {
 
         // Four rapid taps inside the web view: rage click must still fire, dead click must not,
         // even though no interface change signal ever arrives.
-        for _ in 0..<4 {
-            fireTap(on: nestedInWebView)
-            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
-        }
+        let burstEnd = try fireRageClickBurst(on: nestedInWebView)
 
-        // Past the rage debounce (1 s) and the dead click timeout (3.5 s).
-        RunLoop.current.run(until: Date().addingTimeInterval(4.2))
+        // The rage click is reported by the detector's 1 s debounce timer: wait for the event, not
+        // for a fixed time. Then stay past the dead click timeout (3.5 s after the tap) so a dead
+        // click, had one been reported, would be in the collector as well.
+        runLoop(until: collector, has: 1, ofType: Constants.AMP_RAGE_CLICK_EVENT)
+        RunLoop.current.run(until: burstEnd.addingTimeInterval(4.2))
         amplitude.waitForTrackingQueue()
 
         XCTAssertEqual(events(in: collector, ofType: Constants.AMP_RAGE_CLICK_EVENT).count, 1,
@@ -188,7 +188,7 @@ final class WebViewDeadClickTests: XCTestCase {
         // Positive control: the same tap on a plain view IS reported dead, proving the detector
         // and provider wiring in this test are live.
         fireTap(on: plainView)
-        RunLoop.current.run(until: Date().addingTimeInterval(4.2))
+        runLoop(until: collector, has: 1, ofType: Constants.AMP_DEAD_CLICK_EVENT)
         amplitude.waitForTrackingQueue()
 
         XCTAssertEqual(events(in: collector, ofType: Constants.AMP_DEAD_CLICK_EVENT).count, 1,
@@ -216,11 +216,9 @@ final class WebViewDeadClickTests: XCTestCase {
         webView.amp_ignoreInteractionEvent(rageClick: true, deadClick: false)
 
         // Four rapid taps on web content the customer marked: enough to cross the rage threshold.
-        for _ in 0..<4 {
-            fireTap(on: nestedInWebView, at: CGPoint(x: 50, y: 50))
-            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
-        }
-        RunLoop.current.run(until: Date().addingTimeInterval(1.3))
+        let burstEnd = try fireRageClickBurst(on: nestedInWebView, at: CGPoint(x: 50, y: 50))
+        // Past the 1 s debounce, so a rage click, had one been detected, would have been reported.
+        RunLoop.current.run(until: burstEnd.addingTimeInterval(1.5))
         amplitude.waitForTrackingQueue()
 
         XCTAssertEqual(events(in: collector, ofType: Constants.AMP_RAGE_CLICK_EVENT).count, 0,
@@ -228,11 +226,8 @@ final class WebViewDeadClickTests: XCTestCase {
 
         // Positive control: the same taps on an unmarked view still do, proving the detector was
         // live and the taps really reached the swizzled path.
-        for _ in 0..<4 {
-            fireTap(on: plainView, at: CGPoint(x: 50, y: 650))
-            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
-        }
-        RunLoop.current.run(until: Date().addingTimeInterval(1.3))
+        try fireRageClickBurst(on: plainView, at: CGPoint(x: 50, y: 650))
+        runLoop(until: collector, has: 1, ofType: Constants.AMP_RAGE_CLICK_EVENT)
         amplitude.waitForTrackingQueue()
 
         XCTAssertEqual(events(in: collector, ofType: Constants.AMP_RAGE_CLICK_EVENT).count, 1,
@@ -389,6 +384,50 @@ final class WebViewDeadClickTests: XCTestCase {
         view.addGestureRecognizer(recognizer)
         recognizer.fireEnded()
         view.removeGestureRecognizer(recognizer)
+    }
+
+    /// Four taps on `view`, 10 ms apart: past the SDK's 5 ms physical-tap dedup window and well
+    /// inside the rage click detector's 1 s window. Click timestamps are taken synchronously in
+    /// `amp_setState`, so the spacing is exactly this loop's pacing and no run-loop turn is needed
+    /// between taps. Turning the run loop there let unrelated work (WebKit IPC, layout) stretch a
+    /// burst past 1 s on a loaded CI runner, and the detector then correctly saw no rage click.
+    /// Returns when the last tap was fired. Skips the test if the host stalled so badly that even
+    /// this burst exceeded the window: the SDK was then never given four taps within a second.
+    @discardableResult
+    private func fireRageClickBurst(on view: UIView,
+                                    at location: CGPoint = CGPoint(x: 50, y: 50),
+                                    file: StaticString = #filePath,
+                                    line: UInt = #line) throws -> Date {
+        let start = Date()
+        for i in 0..<4 {
+            if i > 0 {
+                Thread.sleep(forTimeInterval: 0.01)
+            }
+            fireTap(on: view, at: location)
+        }
+        let end = Date()
+        let elapsed = end.timeIntervalSince(start)
+        if elapsed > 0.9 {
+            throw XCTSkip("Host stalled: four taps took \(elapsed) s, longer than the 1 s rage click window",
+                          file: file, line: line)
+        }
+        return end
+    }
+
+    /// Turns the main run loop until `collector` holds `count` events of `eventType`, or `timeout`
+    /// passes. The detectors report from main-run-loop timers (rage click 1 s after the last tap,
+    /// dead click 3.5 s after the tap), so the loop has to turn while waiting; a fixed turn read
+    /// the collector before a late timer had fired on a loaded CI runner. The caller's assertion
+    /// still reports a missing event; this only removes the fixed budget.
+    private func runLoop(until collector: EventCollectorPlugin,
+                         has count: Int,
+                         ofType eventType: String,
+                         timeout: TimeInterval = 15) {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline, events(in: collector, ofType: eventType).count < count {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+            Thread.sleep(forTimeInterval: 0.01)
+        }
     }
 
     private func events(in collector: EventCollectorPlugin, ofType eventType: String) -> [BaseEvent] {
