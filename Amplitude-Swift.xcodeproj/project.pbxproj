@@ -112,7 +112,6 @@
 		EAED9A112EE7B47E00A5FC08 /* IOSLifecycleMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* IOSLifecycleMonitor.swift */; };
 		EAED9A122EE7B47E00A5FC08 /* WatchOSLifecycleMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* WatchOSLifecycleMonitor.swift */; };
 		EAED9A132EE7B47E00A5FC08 /* ObjCNetworkConnectivityCheckerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CCC6CC2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift */; };
-		EAED9A142EE7B47E00A5FC08 /* InMemoryStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* InMemoryStorage.swift */; };
 		EAED9A152EE7B47E00A5FC08 /* DispatchQueueHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E281B902B9BCC14009D913B /* DispatchQueueHolder.swift */; };
 		EAED9A162EE7B47E00A5FC08 /* DefaultEventUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60539692BB767390027FC24 /* DefaultEventUtils.swift */; };
 		EAED9A172EE7B47E00A5FC08 /* PersistentStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* PersistentStorage.swift */; };
@@ -177,6 +176,7 @@
 		EAF7B54B2E09446F00E6E61A /* FrustrationInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */; };
 		EAF7B5512E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5502E0CAEAE00E6E61A /* FrustrationIgnoreExtensions.swift */; };
 		EAF7B5582E0F1C1D00E6E61A /* ObjCInteractionsOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5572E0F1C1000E6E61A /* ObjCInteractionsOptions.swift */; };
+		F01A983E30448A32008A7D79 /* InMemoryStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* InMemoryStorage.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
 		OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* AmplitudeDestinationPlugin.swift */; };
 		OBJ_102 /* ContextPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ContextPlugin.swift */; };
@@ -187,7 +187,6 @@
 		OBJ_107 /* VendorSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* VendorSystem.swift */; };
 		OBJ_108 /* IOSLifecycleMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* IOSLifecycleMonitor.swift */; };
 		OBJ_109 /* WatchOSLifecycleMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* WatchOSLifecycleMonitor.swift */; };
-		OBJ_111 /* InMemoryStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* InMemoryStorage.swift */; };
 		OBJ_112 /* PersistentStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* PersistentStorage.swift */; };
 		OBJ_113 /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_40 /* Timeline.swift */; };
 		OBJ_114 /* TrackingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_41 /* TrackingOptions.swift */; };
@@ -562,7 +561,6 @@
 		OBJ_37 /* Storages */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_38 /* InMemoryStorage.swift */,
 				OBJ_39 /* PersistentStorage.swift */,
 			);
 			path = Storages;
@@ -662,6 +660,7 @@
 			isa = PBXGroup;
 			children = (
 				EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */,
+				OBJ_38 /* InMemoryStorage.swift */,
 				OBJ_67 /* TestUtilities.swift */,
 				A7C0FF1E2E6F0001000000A1 /* RemoteConfigMockServer.swift */,
 			);
@@ -939,7 +938,6 @@
 				EAED9A112EE7B47E00A5FC08 /* IOSLifecycleMonitor.swift in Sources */,
 				EAED9A122EE7B47E00A5FC08 /* WatchOSLifecycleMonitor.swift in Sources */,
 				EAED9A132EE7B47E00A5FC08 /* ObjCNetworkConnectivityCheckerPlugin.swift in Sources */,
-				EAED9A142EE7B47E00A5FC08 /* InMemoryStorage.swift in Sources */,
 				EAED9A152EE7B47E00A5FC08 /* DispatchQueueHolder.swift in Sources */,
 				EAED9A162EE7B47E00A5FC08 /* DefaultEventUtils.swift in Sources */,
 				4ED02BB92F299298001AE863 /* Data+Gzip.swift in Sources */,
@@ -1040,6 +1038,7 @@
 				OBJ_158 /* UrlExtensionTests.swift in Sources */,
 				EAE989292DA831F200835345 /* NetworkTrackingPluginTest.swift in Sources */,
 				8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */,
+				F01A983E30448A32008A7D79 /* InMemoryStorage.swift in Sources */,
 				BA1EC0F62A9F63FD00C2D547 /* AmplitudeIOSTests.swift in Sources */,
 				4E5F89452F2AB9B60015FBC6 /* Data+Gzip.swift in Sources */,
 				8EDEC14255F82E24CEE00B36 /* AmplitudeSessionTests.swift in Sources */,
@@ -1081,7 +1080,6 @@
 				OBJ_108 /* IOSLifecycleMonitor.swift in Sources */,
 				OBJ_109 /* WatchOSLifecycleMonitor.swift in Sources */,
 				B6CCC6CD2B6B14510004B203 /* ObjCNetworkConnectivityCheckerPlugin.swift in Sources */,
-				OBJ_111 /* InMemoryStorage.swift in Sources */,
 				3E281B912B9BCC14009D913B /* DispatchQueueHolder.swift in Sources */,
 				B605396A2BB767390027FC24 /* DefaultEventUtils.swift in Sources */,
 				4ED02BB82F299298001AE863 /* Data+Gzip.swift in Sources */,
