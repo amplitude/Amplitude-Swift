@@ -1,3 +1,15 @@
+# [1.19.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.8...v1.19.0) (2026-09-10)
+
+
+### Bug Fixes
+
+* remove bundled SwiftPM development scheme ([bd13696](https://github.com/amplitude/Amplitude-Swift/commit/bd1369612c6e60042ada96feb28a292fc58fdce4))
+
+
+### Features
+
+* set user id and device id from Configuration ([#435](https://github.com/amplitude/Amplitude-Swift/issues/435)) ([b22922e](https://github.com/amplitude/Amplitude-Swift/commit/b22922e57f891d5bbed89ca66377c96bc7602cda)), closes [#295](https://github.com/amplitude/Amplitude-Swift/issues/295) [#286](https://github.com/amplitude/Amplitude-Swift/issues/286) [#295](https://github.com/amplitude/Amplitude-Swift/issues/295)
+
 ## [1.18.8](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.7...v1.18.8) (2026-08-25)
 
 
