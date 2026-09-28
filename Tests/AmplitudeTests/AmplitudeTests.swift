@@ -87,7 +87,12 @@ final class AmplitudeTests: XCTestCase {
         XCTAssertEqual(lastEvent?.deviceManufacturer, "Apple")
         XCTAssertEqual(lastEvent?.deviceModel!.isEmpty, false)
         XCTAssertEqual(lastEvent?.ip, "$remote")
-        XCTAssertEqual(lastEvent?.idfv!.isEmpty, false)
+        // No idfv where the OS has none to give, e.g. macOS 27+, which redacts the MAC address.
+        if VendorSystem.current.identifierForVendor != nil {
+            XCTAssertEqual(lastEvent?.idfv?.isEmpty, false)
+        } else {
+            XCTAssertNil(lastEvent?.idfv)
+        }
         XCTAssertNil(lastEvent?.country)
         XCTAssertEqual(lastEvent?.platform!.isEmpty, false)
         XCTAssertEqual(lastEvent?.language!.isEmpty, false)
