@@ -150,12 +150,21 @@ class ContextPlugin: BeforePlugin {
     }
 
     func initializeDeviceId(forceReset: Bool = false) {
-        var deviceId = forceReset ? nil : amplitude?.identity.deviceId
-        if isValidDeviceId(deviceId) {
-            return
+        if !forceReset, let currentDeviceId = amplitude?.identity.deviceId {
+            if isValidDeviceId(currentDeviceId) {
+                return
+            }
+            // Amplitude.init re-applies a configured device id on every launch, so replacing
+            // it here would mint a new device each time. Keep what the app asked for.
+            if currentDeviceId == amplitude?.configuration.deviceId {
+                amplitude?.logger?.warn(
+                    message: "Configured deviceId \(currentDeviceId) is a known invalid value shared by many devices")
+                return
+            }
         }
-        if deviceId == nil, amplitude?.configuration.trackingOptions.shouldTrackIDFV() ?? false {
-            if let idfv = staticContext["idfv"] as? String, idfv != "00000000-0000-0000-0000-000000000000" {
+        var deviceId: String?
+        if amplitude?.configuration.trackingOptions.shouldTrackIDFV() ?? false {
+            if let idfv = staticContext["idfv"] as? String, isValidDeviceId(idfv) {
                 deviceId = idfv
             }
         }
@@ -166,11 +175,24 @@ class ContextPlugin: BeforePlugin {
     }
 
     func isValidDeviceId(_ deviceId: String?) -> Bool {
-        if deviceId == nil || deviceId == "e3f5536a141811db40efd6400f1d0a4e"
-            || deviceId == "04bab7ee75b9a58d39b8dc54e8851084"
-        {
+        guard let deviceId else {
             return false
         }
-        return true
+        return !ContextPlugin.invalidDeviceIds.contains(deviceId)
     }
+
+    private static let invalidDeviceIds: Set<String> = [
+        // Legacy Amplitude-iOS (2013) derived the device id as md5(MAC address), so these
+        // were shared by many devices and are still replaced if found in storage:
+        // md5("020000000000"), the MAC address iOS 7+ redacts to on every device
+        "e3f5536a141811db40efd6400f1d0a4e",
+        // md5("if_nametoindex failure"), the error string returned when there was no en0
+        "04bab7ee75b9a58d39b8dc54e8851084",
+        // all-zero UUID, occasionally seen from identifierForVendor and rejected by the server
+        "00000000-0000-0000-0000-000000000000",
+        // redacted MAC address macOS 27+ returns on every device, as formatted by
+        // this SDK and by the legacy Amplitude-iOS SDK (carried over by RemnantDataMigration)
+        "02:00:00:00:00:00",
+        "020000000000",
+    ]
 }
