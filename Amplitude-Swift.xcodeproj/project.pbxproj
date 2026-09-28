@@ -1501,7 +1501,7 @@
 			repositoryURL = "https://github.com/amplitude/AmplitudeCore-Swift";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.4.8;
+				minimumVersion = 1.5.3;
 			};
 		};
 		4EB530762CD2EB9700E961F4 /* XCRemoteSwiftPackageReference "analytics-connector-ios" */ = {
