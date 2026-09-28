@@ -182,9 +182,13 @@ class ContextPlugin: BeforePlugin {
     }
 
     private static let invalidDeviceIds: Set<String> = [
+        // Legacy Amplitude-iOS (2013) derived the device id as md5(MAC address), so these
+        // were shared by many devices and are still replaced if found in storage:
+        // md5("020000000000"), the MAC address iOS 7+ redacts to on every device
         "e3f5536a141811db40efd6400f1d0a4e",
+        // md5("if_nametoindex failure"), the error string returned when there was no en0
         "04bab7ee75b9a58d39b8dc54e8851084",
-        // zeroed IDFV, returned while the device is locked or restricted
+        // all-zero UUID, occasionally seen from identifierForVendor and rejected by the server
         "00000000-0000-0000-0000-000000000000",
         // redacted MAC address macOS 27+ returns on every device, as formatted by
         // this SDK and by the legacy Amplitude-iOS SDK (carried over by RemnantDataMigration)
