@@ -54,7 +54,7 @@ class ContextPlugin: BeforePlugin {
         let device = self.device
         staticContext["device_manufacturer"] = device.manufacturer
         staticContext["device_model"] = device.model
-        staticContext["idfv"] = device.identifierForVendor.flatMap { invalidDeviceIds.contains($0) ? nil : $0 }
+        staticContext["idfv"] = device.identifierForVendor
         staticContext["os_name"] = device.os_name
         staticContext["os_version"] = device.os_version
         staticContext["platform"] = device.platform

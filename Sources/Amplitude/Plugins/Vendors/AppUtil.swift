@@ -224,7 +224,7 @@ import Foundation
             return getDeviceModel(platform: platform)
         }
 
-        internal func macAddress(bsd: String) -> String? {
+        func macAddress(bsd: String) -> String? {
             let MAC_ADDRESS_LENGTH = 6
             let separator = ":"
 

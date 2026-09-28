@@ -84,13 +84,6 @@ final class ContextPluginDeviceIdTests: XCTestCase {
         assertIsRandomUUID(amplitude.getDeviceId())
     }
 
-    func testRedactedMacAddressIsNotSentAsIdfv() {
-        let amplitude = launch(idfv: VendorSystem.redactedMacAddress)
-        let event = trackedEvent(amplitude)
-        XCTAssertNotNil(event)
-        XCTAssertNil(event?.idfv)
-    }
-
     func testValidIdfvIsSentAsIdfv() {
         let amplitude = launch(idfv: Self.validIdfv)
         XCTAssertEqual(trackedEvent(amplitude)?.idfv, Self.validIdfv)
