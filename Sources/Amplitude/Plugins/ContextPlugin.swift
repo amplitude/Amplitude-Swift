@@ -54,7 +54,7 @@ class ContextPlugin: BeforePlugin {
         let device = self.device
         staticContext["device_manufacturer"] = device.manufacturer
         staticContext["device_model"] = device.model
-        staticContext["idfv"] = device.identifierForVendor
+        staticContext["idfv"] = device.identifierForVendor.flatMap { invalidDeviceIds.contains($0) ? nil : $0 }
         staticContext["os_name"] = device.os_name
         staticContext["os_version"] = device.os_version
         staticContext["platform"] = device.platform
@@ -150,12 +150,21 @@ class ContextPlugin: BeforePlugin {
     }
 
     func initializeDeviceId(forceReset: Bool = false) {
-        var deviceId = forceReset ? nil : amplitude?.identity.deviceId
-        if isValidDeviceId(deviceId) {
-            return
+        if !forceReset, let currentDeviceId = amplitude?.identity.deviceId {
+            if isValidDeviceId(currentDeviceId) {
+                return
+            }
+            // Amplitude.init re-applies a configured device id on every launch, so replacing
+            // it here would mint a new device each time. Keep what the app asked for.
+            if currentDeviceId == amplitude?.configuration.deviceId {
+                amplitude?.logger?.warn(
+                    message: "Configured deviceId \(currentDeviceId) is a known invalid value shared by many devices")
+                return
+            }
         }
-        if deviceId == nil, amplitude?.configuration.trackingOptions.shouldTrackIDFV() ?? false {
-            if let idfv = staticContext["idfv"] as? String, idfv != "00000000-0000-0000-0000-000000000000" {
+        var deviceId: String?
+        if amplitude?.configuration.trackingOptions.shouldTrackIDFV() ?? false {
+            if let idfv = staticContext["idfv"] as? String, isValidDeviceId(idfv) {
                 deviceId = idfv
             }
         }
@@ -166,11 +175,20 @@ class ContextPlugin: BeforePlugin {
     }
 
     func isValidDeviceId(_ deviceId: String?) -> Bool {
-        if deviceId == nil || deviceId == "e3f5536a141811db40efd6400f1d0a4e"
-            || deviceId == "04bab7ee75b9a58d39b8dc54e8851084"
-        {
+        guard let deviceId else {
             return false
         }
-        return true
+        return !ContextPlugin.invalidDeviceIds.contains(deviceId)
     }
+
+    private static let invalidDeviceIds: Set<String> = [
+        "e3f5536a141811db40efd6400f1d0a4e",
+        "04bab7ee75b9a58d39b8dc54e8851084",
+        // zeroed IDFV, returned while the device is locked or restricted
+        "00000000-0000-0000-0000-000000000000",
+        // redacted MAC address macOS 27+ returns on every device, as formatted by
+        // this SDK and by the legacy Amplitude-iOS SDK (carried over by RemnantDataMigration)
+        VendorSystem.redactedMacAddress,
+        "020000000000",
+    ]
 }

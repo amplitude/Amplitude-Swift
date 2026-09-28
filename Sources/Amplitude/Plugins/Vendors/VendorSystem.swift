@@ -8,6 +8,9 @@
 internal typealias BackgroundTaskCompletionCallback = () -> Void
 
 internal class VendorSystem {
+    // What macOS 27+ returns in place of every interface's real MAC address.
+    static let redactedMacAddress = "02:00:00:00:00:00"
+
     var manufacturer: String {
         return "unknown"
     }

@@ -179,7 +179,12 @@ import Foundation
         override var identifierForVendor: String? {
             // apple suggested to use this for receipt validation
             // in MAS, works for this too.
-            return macAddress(bsd: "en0")
+            // macOS 27+ redacts MAC addresses to 02:00:00:00:00:00 on every device, which no
+            // longer identifies anything, so treat it as unavailable.
+            guard let macAddress = macAddress(bsd: "en0"), macAddress != VendorSystem.redactedMacAddress else {
+                return nil
+            }
+            return macAddress
         }
 
         override var os_name: String {
@@ -219,7 +224,7 @@ import Foundation
             return getDeviceModel(platform: platform)
         }
 
-        private func macAddress(bsd: String) -> String? {
+        internal func macAddress(bsd: String) -> String? {
             let MAC_ADDRESS_LENGTH = 6
             let separator = ":"
 
@@ -251,9 +256,15 @@ import Foundation
 
             let infoData = Data(bytes: buffer, count: length)
             let indexAfterMsghdr = MemoryLayout<if_msghdr>.stride + 1
-            let rangeOfToken = infoData[indexAfterMsghdr...].range(of: bsdData)!
+            guard indexAfterMsghdr < infoData.endIndex,
+                  let rangeOfToken = infoData[indexAfterMsghdr...].range(of: bsdData) else {
+                return nil
+            }
             let lower = rangeOfToken.upperBound
             let upper = lower + MAC_ADDRESS_LENGTH
+            guard upper <= infoData.endIndex else {
+                return nil
+            }
             let macAddressData = infoData[lower..<upper]
             let addressBytes = macAddressData.map { String(format: "%02x", $0) }
             return addressBytes.joined(separator: separator)
