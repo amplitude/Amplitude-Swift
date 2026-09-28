@@ -2,6 +2,10 @@ import XCTest
 
 @testable import AmplitudeSwift
 
+// Placeholder macOS 27+ returns instead of a real MAC address. Kept independent of the SDK's
+// literals, so a wrong value there fails these tests.
+private let redactedMacAddress = "02:00:00:00:00:00"
+
 final class ContextPluginDeviceIdTests: XCTestCase {
 
     private class StubVendorSystem: VendorSystem {
@@ -80,7 +84,7 @@ final class ContextPluginDeviceIdTests: XCTestCase {
 
     // macOS 27 redacts MAC addresses to 02:00:00:00:00:00 on every device (#446).
     func testRedactedMacAddressIdfvFallsBackToRandomUUID() {
-        let amplitude = launch(idfv: VendorSystem.redactedMacAddress)
+        let amplitude = launch(idfv: redactedMacAddress)
         assertIsRandomUUID(amplitude.getDeviceId())
     }
 
@@ -90,7 +94,7 @@ final class ContextPluginDeviceIdTests: XCTestCase {
     }
 
     func testResetWithRedactedMacAddressRotatesToRandomUUID() {
-        let amplitude = launch(idfv: VendorSystem.redactedMacAddress)
+        let amplitude = launch(idfv: redactedMacAddress)
         let first = amplitude.getDeviceId()
         amplitude.reset()
         assertIsRandomUUID(amplitude.getDeviceId())
@@ -107,11 +111,11 @@ final class ContextPluginDeviceIdTests: XCTestCase {
 
     // Installs that already persisted the redacted MAC as their device id must be repaired once, then stay stable.
     func testPersistedRedactedMacAddressIsReplacedOnceThenStable() {
-        let repaired = launch(idfv: VendorSystem.redactedMacAddress,
-                              persistedDeviceId: VendorSystem.redactedMacAddress).getDeviceId()
+        let repaired = launch(idfv: redactedMacAddress,
+                              persistedDeviceId: redactedMacAddress).getDeviceId()
         assertIsRandomUUID(repaired)
 
-        let relaunched = launch(idfv: VendorSystem.redactedMacAddress).getDeviceId()
+        let relaunched = launch(idfv: redactedMacAddress).getDeviceId()
         XCTAssertEqual(relaunched, repaired)
     }
 
@@ -128,13 +132,13 @@ final class ContextPluginDeviceIdTests: XCTestCase {
 
     func testPersistedInvalidDeviceIdIsReplacedWithRandomUUIDWhenIdfvDisabled() {
         let amplitude = launch(idfv: Self.validIdfv,
-                               persistedDeviceId: VendorSystem.redactedMacAddress,
+                               persistedDeviceId: redactedMacAddress,
                                trackingOptions: TrackingOptions().disableTrackIDFV())
         assertIsRandomUUID(amplitude.getDeviceId())
     }
 
     func testPersistedValidDeviceIdIsKept() {
-        let amplitude = launch(idfv: VendorSystem.redactedMacAddress, persistedDeviceId: "a0:b1:c2:d3:e4:f5")
+        let amplitude = launch(idfv: redactedMacAddress, persistedDeviceId: "a0:b1:c2:d3:e4:f5")
         XCTAssertEqual(amplitude.getDeviceId(), "a0:b1:c2:d3:e4:f5")
     }
 
@@ -164,8 +168,8 @@ final class MacOSVendorSystemDeviceIdTests: XCTestCase {
         print("macOS \(ProcessInfo.processInfo.operatingSystemVersionString): "
               + "en0 MAC = \(rawMacAddress ?? "nil"), identifierForVendor = \(identifierForVendor ?? "nil")")
 
-        XCTAssertNotEqual(identifierForVendor, VendorSystem.redactedMacAddress)
-        if rawMacAddress == VendorSystem.redactedMacAddress {
+        XCTAssertNotEqual(identifierForVendor, redactedMacAddress)
+        if rawMacAddress == redactedMacAddress {
             XCTAssertNil(identifierForVendor)
         } else {
             XCTAssertEqual(identifierForVendor, rawMacAddress)
@@ -183,7 +187,7 @@ final class MacOSVendorSystemDeviceIdTests: XCTestCase {
         print("fresh install deviceId = \(amplitude.getDeviceId() ?? "nil")")
 
         XCTAssertNotNil(amplitude.getDeviceId())
-        XCTAssertNotEqual(amplitude.getDeviceId(), VendorSystem.redactedMacAddress)
+        XCTAssertNotEqual(amplitude.getDeviceId(), redactedMacAddress)
     }
 }
 #endif

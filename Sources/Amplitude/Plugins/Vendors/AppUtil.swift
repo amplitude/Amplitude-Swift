@@ -181,7 +181,7 @@ import Foundation
             // in MAS, works for this too.
             // macOS 27+ redacts MAC addresses to 02:00:00:00:00:00 on every device, which no
             // longer identifies anything, so treat it as unavailable.
-            guard let macAddress = macAddress(bsd: "en0"), macAddress != VendorSystem.redactedMacAddress else {
+            guard let macAddress = macAddress(bsd: "en0"), macAddress != "02:00:00:00:00:00" else {
                 return nil
             }
             return macAddress

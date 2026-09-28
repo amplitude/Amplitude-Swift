@@ -8,10 +8,6 @@
 internal typealias BackgroundTaskCompletionCallback = () -> Void
 
 internal class VendorSystem {
-    // Placeholder Apple returns instead of a real MAC address (iOS 7+, macOS 27+).
-    // Lives on the base class because ContextPlugin's cross-platform invalid-id set uses it too.
-    static let redactedMacAddress = "02:00:00:00:00:00"
-
     var manufacturer: String {
         return "unknown"
     }

@@ -192,7 +192,7 @@ class ContextPlugin: BeforePlugin {
         "00000000-0000-0000-0000-000000000000",
         // redacted MAC address macOS 27+ returns on every device, as formatted by
         // this SDK and by the legacy Amplitude-iOS SDK (carried over by RemnantDataMigration)
-        VendorSystem.redactedMacAddress,
+        "02:00:00:00:00:00",
         "020000000000",
     ]
 }
