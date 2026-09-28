@@ -1,3 +1,11 @@
+## [1.19.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.19.0...v1.19.1) (2026-09-28)
+
+
+### Bug Fixes
+
+* **deps:** require AmplitudeCore 1.5.3 so crash tracking no longer kills apps on SIGPIPE ([#448](https://github.com/amplitude/Amplitude-Swift/issues/448)) ([6d8eafe](https://github.com/amplitude/Amplitude-Swift/commit/6d8eafe365f9cb753295baeed11a424a3a453eae)), closes [#445](https://github.com/amplitude/Amplitude-Swift/issues/445)
+* **macos:** ignore redacted MAC address as device id on macOS 27 ([#447](https://github.com/amplitude/Amplitude-Swift/issues/447)) ([3678f0d](https://github.com/amplitude/Amplitude-Swift/commit/3678f0d45f30299813f593cfee0d3f85de3ef2a1)), closes [#446](https://github.com/amplitude/Amplitude-Swift/issues/446)
+
 # [1.19.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.18.8...v1.19.0) (2026-09-10)
 
 
