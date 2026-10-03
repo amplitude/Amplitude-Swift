@@ -7,6 +7,8 @@
 
 import Foundation
 
+@testable import AmplitudeSwift
+
 class InMemoryStorage: Storage {
     typealias EventBlock = URL
 
@@ -44,6 +46,6 @@ class InMemoryStorage: Storage {
         eventBlock: EventBlock,
         eventsString: String
     ) -> ResponseHandler {
-        abort()
+        fatalError()
     }
 }
