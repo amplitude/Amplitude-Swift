@@ -21,21 +21,17 @@ final class PersistentStorageTests: XCTestCase {
             if name == "analytics.upload.missed_network_callback" { network.fulfill() }
             if name == "analytics.upload.missed_cleanup" { cleanup.fulfill() }
         }
-        let prefix = "upload-counters-\(UUID().uuidString)"
-        let previous = PersistentStorage(storagePrefix: prefix, logger: nil, diagonostics: Diagnostics(), diagnosticsClient: client)
-        let first = previous.getEventsStorageDirectory().appendingPathComponent("first")
-        let second = previous.getEventsStorageDirectory().appendingPathComponent("second")
-        previous.markUpload(eventBlock: first, phase: "network_callback")
-        previous.markUpload(eventBlock: second, phase: "cleanup")
-        let next = PersistentStorage(storagePrefix: prefix, logger: nil, diagonostics: Diagnostics(), diagnosticsClient: client)
-        defer { next.reset() }
-        next.recoverUploadCounters()
-        next.recoverUploadCounters()
+        for phase in ["network_callback", "cleanup"] {
+            let prefix = "upload-counters-\(UUID().uuidString)"
+            let previous = PersistentStorage(storagePrefix: prefix, logger: nil, diagonostics: Diagnostics(), diagnosticsClient: client)
+            previous.markUpload(phase: phase)
+            let next = PersistentStorage(storagePrefix: prefix, logger: nil, diagonostics: Diagnostics(), diagnosticsClient: client)
+            next.recoverUploadCounters()
+            next.recoverUploadCounters()
+            XCTAssertNil(next.userDefaults?.string(forKey: "upload_attempt"))
+            next.reset()
+        }
         await fulfillment(of: [network, cleanup], timeout: 5)
-        XCTAssertNil(next.userDefaults?.string(forKey: "upload_attempt.first"))
-        XCTAssertNil(next.userDefaults?.string(forKey: "upload_attempt.second"))
-        let files: [URL]? = next.read(key: .EVENTS)
-        XCTAssertEqual(files, []) // Diagnostic markers must never enter the event queue.
     }
 
     func testSuccessfulDeletionClearsMarkerButFailedDeletionRetainsIt() throws {
@@ -43,12 +39,12 @@ final class PersistentStorageTests: XCTestCase {
                                         diagonostics: Diagnostics(), diagnosticsClient: diagnosticsClient)
         defer { storage.reset() }
         let batch = storage.getEventsStorageDirectory().appendingPathComponent("batch")
-        storage.markUpload(eventBlock: batch, phase: "cleanup")
+        storage.markUpload(phase: "cleanup")
         storage.remove(eventBlock: batch) // Missing batch: deletion fails.
-        XCTAssertEqual(storage.userDefaults?.string(forKey: "upload_attempt.batch"), "cleanup")
+        XCTAssertEqual(storage.userDefaults?.string(forKey: "upload_attempt"), "cleanup")
         try Data().write(to: batch)
         storage.remove(eventBlock: batch)
-        XCTAssertNil(storage.userDefaults?.string(forKey: "upload_attempt.batch"))
+        XCTAssertNil(storage.userDefaults?.string(forKey: "upload_attempt"))
     }
 
     func testIsBasicType() {

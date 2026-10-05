@@ -145,36 +145,33 @@ class PersistentStorage: Storage {
             .appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
     }
 
-    private static let uploadMarkerPrefix = "upload_attempt."
+    private static let uploadMarkerKey = "upload_attempt"
 
     // Assumes one initialization per instance name per process. Called on the upload queue.
     func recoverUploadCounters() {
         syncQueue.sync {
             guard !didRecoverUploadCounters else { return }
             didRecoverUploadCounters = true
-            for (key, value) in userDefaults?.dictionaryRepresentation() ?? [:]
-                where key.hasPrefix(Self.uploadMarkerPrefix) {
-                if let phase = value as? String, phase == "network_callback" || phase == "cleanup" {
-                    diagonosticsClient.increment(name: "analytics.upload.missed_\(phase)")
-                }
-                userDefaults?.removeObject(forKey: key)
+            if let phase = userDefaults?.string(forKey: Self.uploadMarkerKey),
+               phase == "network_callback" || phase == "cleanup" {
+                diagonosticsClient.increment(name: "analytics.upload.missed_\(phase)")
             }
+            userDefaults?.removeObject(forKey: Self.uploadMarkerKey)
         }
     }
 
-    func markUpload(eventBlock: EventBlock, phase: String?) {
+    func markUpload(phase: String?) {
         syncQueue.sync {
-            setUploadMarker(eventBlock: eventBlock, phase: phase)
+            setUploadMarker(phase: phase)
         }
     }
 
     // Caller holds syncQueue. UserDefaults persistence is deferred, so recovery is best effort.
-    private func setUploadMarker(eventBlock: EventBlock, phase: String?) {
-        let key = Self.uploadMarkerPrefix + eventBlock.lastPathComponent
+    private func setUploadMarker(phase: String?) {
         if let phase {
-            userDefaults?.set(phase, forKey: key)
+            userDefaults?.set(phase, forKey: Self.uploadMarkerKey)
         } else {
-            userDefaults?.removeObject(forKey: key)
+            userDefaults?.removeObject(forKey: Self.uploadMarkerKey)
         }
     }
 
@@ -182,7 +179,7 @@ class PersistentStorage: Storage {
         syncQueue.sync {
             do {
                 try fileManager.removeItem(atPath: eventBlock.path)
-                setUploadMarker(eventBlock: eventBlock, phase: nil)
+                setUploadMarker(phase: nil)
             } catch {
                 diagonostics.addErrorLog(error.localizedDescription)
                 logger?.error(message: error.localizedDescription)

@@ -50,14 +50,14 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
         batch = try XCTUnwrap(files.first)
         let payload = try XCTUnwrap(storage.getEventsString(eventBlock: batch))
-        storage.markUpload(eventBlock: batch, phase: "network_callback")
+        storage.markUpload(phase: "network_callback")
         let handler = PersistentStorageResponseHandler(configuration: configuration, storage: storage,
             eventPipeline: eventPipeline, eventBlock: batch, eventsString: payload, diagnosticsClient: diagnosticsClient)
         let handled: Bool = handler.handle(result: .success(200))
         XCTAssertTrue(handled)
         XCTAssertEqual(callbacks, ["global", "event"])
         XCTAssertNil(storage.getEventCallback(insertId: try XCTUnwrap(event.insertId)))
-        XCTAssertNil(storage.userDefaults?.string(forKey: "upload_attempt.\(batch.lastPathComponent)"))
+        XCTAssertNil(storage.userDefaults?.string(forKey: "upload_attempt"))
     }
 
     func testFailureResponseClearsPendingNetworkMarker() {
@@ -65,12 +65,12 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
                                         diagonostics: diagonostics, diagnosticsClient: diagnosticsClient)
         defer { storage.reset() }
         let batch = storage.getEventsStorageDirectory().appendingPathComponent("batch")
-        storage.markUpload(eventBlock: batch, phase: "network_callback")
+        storage.markUpload(phase: "network_callback")
         let handler = PersistentStorageResponseHandler(configuration: configuration, storage: storage,
             eventPipeline: eventPipeline, eventBlock: batch, eventsString: "[]", diagnosticsClient: diagnosticsClient)
         let handled: Bool = handler.handle(result: .failure(HttpClient.Exception.httpError(code: 500, data: nil)))
         XCTAssertFalse(handled)
-        XCTAssertNil(storage.userDefaults?.string(forKey: "upload_attempt.batch"))
+        XCTAssertNil(storage.userDefaults?.string(forKey: "upload_attempt"))
     }
 
     func testInit() {

@@ -110,7 +110,7 @@ public class EventPipeline {
             }
 
             if configuration.enableDiagnostics {
-                (storage as? PersistentStorage)?.markUpload(eventBlock: nextEventFile, phase: "network_callback")
+                (storage as? PersistentStorage)?.markUpload(phase: "network_callback")
             }
             currentUpload = httpClient.upload(events: eventsString) { [self] result in
                 let responseHandler = storage.getResponseHandler(
