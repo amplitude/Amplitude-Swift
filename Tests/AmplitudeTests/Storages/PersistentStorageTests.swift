@@ -14,6 +14,44 @@ final class PersistentStorageTests: XCTestCase {
     let diagonostics = Diagnostics()
     let diagnosticsClient = FakeDiagnosticsClient()
 
+    func testRecoverUploadCountersCountsAndClearsPhasesOnce() async throws {
+        let network = expectation(description: "missed network callback")
+        let cleanup = expectation(description: "missed cleanup")
+        let client = FakeDiagnosticsClient { name in
+            if name == "analytics.upload.missed_network_callback" { network.fulfill() }
+            if name == "analytics.upload.missed_cleanup" { cleanup.fulfill() }
+        }
+        let prefix = "upload-counters-\(UUID().uuidString)"
+        let previous = PersistentStorage(storagePrefix: prefix, logger: nil, diagonostics: Diagnostics(), diagnosticsClient: client)
+        let first = previous.getEventsStorageDirectory().appendingPathComponent("first")
+        let second = previous.getEventsStorageDirectory().appendingPathComponent("second")
+        previous.markUpload(eventBlock: first, phase: "network_callback")
+        previous.markUpload(eventBlock: second, phase: "cleanup")
+        let next = PersistentStorage(storagePrefix: prefix, logger: nil, diagonostics: Diagnostics(), diagnosticsClient: client)
+        defer { next.reset() }
+        next.recoverUploadCounters()
+        next.recoverUploadCounters()
+        await fulfillment(of: [network, cleanup], timeout: 5)
+        let markers = next.getEventsStorageDirectory().appendingPathComponent(".upload-attempts")
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: markers.path), [])
+        let files: [URL]? = next.read(key: .EVENTS)
+        XCTAssertEqual(files, []) // Hidden marker directory must never be uploaded.
+    }
+
+    func testSuccessfulDeletionClearsMarkerButFailedDeletionRetainsIt() throws {
+        let storage = PersistentStorage(storagePrefix: "upload-cleanup-\(UUID().uuidString)", logger: nil,
+                                        diagonostics: Diagnostics(), diagnosticsClient: diagnosticsClient)
+        defer { storage.reset() }
+        let batch = storage.getEventsStorageDirectory().appendingPathComponent("batch")
+        let marker = storage.getEventsStorageDirectory().appendingPathComponent(".upload-attempts/batch")
+        storage.markUpload(eventBlock: batch, phase: "cleanup")
+        storage.remove(eventBlock: batch) // Missing batch: deletion fails.
+        XCTAssertTrue(FileManager.default.fileExists(atPath: marker.path))
+        try Data().write(to: batch)
+        storage.remove(eventBlock: batch)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: marker.path))
+    }
+
     func testIsBasicType() {
         let persistentStorage = PersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         var isValueBasicType = persistentStorage.isBasicType(value: 111)

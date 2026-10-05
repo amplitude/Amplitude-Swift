@@ -38,13 +38,12 @@ class PersistentStorageResponseHandler: ResponseHandler {
     }
 
     func handleSuccessResponse(code: Int) -> Bool {
+        storage.remove(eventBlock: eventBlock)
         guard let events = BaseEvent.fromArrayString(jsonString: eventsString) else {
-            storage.remove(eventBlock: eventBlock)
             removeEventCallbackByEventsString(eventsString: eventsString)
             return true
         }
         triggerEventsCallback(events: events, code: code, message: "Successfully send event")
-        storage.remove(eventBlock: eventBlock)
         return true
     }
 
@@ -141,9 +140,15 @@ class PersistentStorageResponseHandler: ResponseHandler {
     func handle(result: Result<Int, Error>) -> Bool {
         switch result {
         case .success(let code):
+            if configuration.enableDiagnostics {
+                storage.markUpload(eventBlock: eventBlock, phase: "cleanup")
+            }
             // We don't care about the data when success
             return handleSuccessResponse(code: code)
         case .failure(let error):
+            if configuration.enableDiagnostics {
+                storage.markUpload(eventBlock: eventBlock, phase: nil)
+            }
             switch error {
             case HttpClient.Exception.httpError(let code, let data):
                 var json = [String: Any]()

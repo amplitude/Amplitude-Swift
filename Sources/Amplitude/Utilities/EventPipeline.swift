@@ -76,6 +76,10 @@ public class EventPipeline {
                 return
             }
 
+            if configuration.enableDiagnostics {
+                (storage as? PersistentStorage)?.recoverUploadCounters()
+            }
+
             guard let storage = storage,
                   let eventFiles: [URL] = storage.read(key: StorageKey.EVENTS),
                   let nextEventFile = eventFiles.first(where: { !skipFiles.contains($0) }) else {
@@ -105,6 +109,9 @@ public class EventPipeline {
                 return
             }
 
+            if configuration.enableDiagnostics {
+                (storage as? PersistentStorage)?.markUpload(eventBlock: nextEventFile, phase: "network_callback")
+            }
             currentUpload = httpClient.upload(events: eventsString) { [self] result in
                 let responseHandler = storage.getResponseHandler(
                     configuration: self.configuration,
