@@ -32,10 +32,10 @@ final class PersistentStorageTests: XCTestCase {
         next.recoverUploadCounters()
         next.recoverUploadCounters()
         await fulfillment(of: [network, cleanup], timeout: 5)
-        let markers = next.getEventsStorageDirectory().appendingPathComponent(".upload-attempts")
-        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: markers.path), [])
+        XCTAssertNil(next.userDefaults?.string(forKey: "upload_attempt.first"))
+        XCTAssertNil(next.userDefaults?.string(forKey: "upload_attempt.second"))
         let files: [URL]? = next.read(key: .EVENTS)
-        XCTAssertEqual(files, []) // Hidden marker directory must never be uploaded.
+        XCTAssertEqual(files, []) // Diagnostic markers must never enter the event queue.
     }
 
     func testSuccessfulDeletionClearsMarkerButFailedDeletionRetainsIt() throws {
@@ -43,13 +43,12 @@ final class PersistentStorageTests: XCTestCase {
                                         diagonostics: Diagnostics(), diagnosticsClient: diagnosticsClient)
         defer { storage.reset() }
         let batch = storage.getEventsStorageDirectory().appendingPathComponent("batch")
-        let marker = storage.getEventsStorageDirectory().appendingPathComponent(".upload-attempts/batch")
         storage.markUpload(eventBlock: batch, phase: "cleanup")
         storage.remove(eventBlock: batch) // Missing batch: deletion fails.
-        XCTAssertTrue(FileManager.default.fileExists(atPath: marker.path))
+        XCTAssertEqual(storage.userDefaults?.string(forKey: "upload_attempt.batch"), "cleanup")
         try Data().write(to: batch)
         storage.remove(eventBlock: batch)
-        XCTAssertFalse(FileManager.default.fileExists(atPath: marker.path))
+        XCTAssertNil(storage.userDefaults?.string(forKey: "upload_attempt.batch"))
     }
 
     func testIsBasicType() {

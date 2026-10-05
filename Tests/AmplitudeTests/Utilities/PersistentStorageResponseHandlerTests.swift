@@ -57,8 +57,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         XCTAssertTrue(handled)
         XCTAssertEqual(callbacks, ["global", "event"])
         XCTAssertNil(storage.getEventCallback(insertId: try XCTUnwrap(event.insertId)))
-        let marker = storage.getEventsStorageDirectory().appendingPathComponent(".upload-attempts/\(batch.lastPathComponent)")
-        XCTAssertFalse(FileManager.default.fileExists(atPath: marker.path))
+        XCTAssertNil(storage.userDefaults?.string(forKey: "upload_attempt.\(batch.lastPathComponent)"))
     }
 
     func testFailureResponseClearsPendingNetworkMarker() {
@@ -71,8 +70,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             eventPipeline: eventPipeline, eventBlock: batch, eventsString: "[]", diagnosticsClient: diagnosticsClient)
         let handled: Bool = handler.handle(result: .failure(HttpClient.Exception.httpError(code: 500, data: nil)))
         XCTAssertFalse(handled)
-        let marker = storage.getEventsStorageDirectory().appendingPathComponent(".upload-attempts/batch")
-        XCTAssertFalse(FileManager.default.fileExists(atPath: marker.path))
+        XCTAssertNil(storage.userDefaults?.string(forKey: "upload_attempt.batch"))
     }
 
     func testInit() {

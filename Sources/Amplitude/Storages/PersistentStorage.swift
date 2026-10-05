@@ -145,28 +145,19 @@ class PersistentStorage: Storage {
             .appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
     }
 
-    private var uploadMarkersDirectory: URL {
-        getEventsStorageDirectory(createDirectory: false).appendingPathComponent(".upload-attempts")
-    }
+    private static let uploadMarkerPrefix = "upload_attempt."
 
     // Assumes one initialization per instance name per process. Called on the upload queue.
     func recoverUploadCounters() {
         syncQueue.sync {
             guard !didRecoverUploadCounters else { return }
             didRecoverUploadCounters = true
-            guard let markers = try? fileManager.contentsOfDirectory(
-                at: uploadMarkersDirectory, includingPropertiesForKeys: nil
-            ) else { return }
-            for marker in markers {
-                do {
-                    let phase = try String(contentsOf: marker, encoding: .utf8)
-                    if phase == "network_callback" || phase == "cleanup" {
-                        diagonosticsClient.increment(name: "analytics.upload.missed_\(phase)")
-                    }
-                    try fileManager.removeItem(at: marker)
-                } catch {
-                    logger?.error(message: "Could not recover upload diagnostic marker: \(error.localizedDescription)")
+            for (key, value) in userDefaults?.dictionaryRepresentation() ?? [:]
+                where key.hasPrefix(Self.uploadMarkerPrefix) {
+                if let phase = value as? String, phase == "network_callback" || phase == "cleanup" {
+                    diagonosticsClient.increment(name: "analytics.upload.missed_\(phase)")
                 }
+                userDefaults?.removeObject(forKey: key)
             }
         }
     }
@@ -177,18 +168,13 @@ class PersistentStorage: Storage {
         }
     }
 
-    // Caller holds syncQueue. Marker writes are synchronous, atomic file replacements.
+    // Caller holds syncQueue. UserDefaults persistence is deferred, so recovery is best effort.
     private func setUploadMarker(eventBlock: EventBlock, phase: String?) {
-        let marker = uploadMarkersDirectory.appendingPathComponent(eventBlock.lastPathComponent)
-        do {
-            if let phase {
-                try fileManager.createDirectory(at: uploadMarkersDirectory, withIntermediateDirectories: true)
-                try phase.write(to: marker, atomically: true, encoding: .utf8)
-            } else if fileManager.fileExists(atPath: marker.path) {
-                try fileManager.removeItem(at: marker)
-            }
-        } catch {
-            logger?.error(message: "Could not persist upload diagnostic marker: \(error.localizedDescription)")
+        let key = Self.uploadMarkerPrefix + eventBlock.lastPathComponent
+        if let phase {
+            userDefaults?.set(phase, forKey: key)
+        } else {
+            userDefaults?.removeObject(forKey: key)
         }
     }
 
@@ -248,7 +234,6 @@ class PersistentStorage: Storage {
                 try? fileManager.removeItem(atPath: url.path)
             }
             try? fileManager.removeItem(at: getQuarantineDirectory())
-            try? fileManager.removeItem(at: uploadMarkersDirectory)
             didExcludeStorageFromBackup = false
         }
     }
