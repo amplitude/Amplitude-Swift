@@ -14,37 +14,21 @@ final class PersistentStorageTests: XCTestCase {
     let diagonostics = Diagnostics()
     let diagnosticsClient = FakeDiagnosticsClient()
 
-    func testRecoverUploadCountersCountsAndClearsPhasesOnce() async throws {
-        let network = expectation(description: "missed network callback")
-        let cleanup = expectation(description: "missed cleanup")
-        let client = FakeDiagnosticsClient { name in
-            if name == "analytics.upload.missed_network_callback" { network.fulfill() }
-            if name == "analytics.upload.missed_cleanup" { cleanup.fulfill() }
-        }
-        for phase in ["network_callback", "cleanup"] {
-            let prefix = "upload-counters-\(UUID().uuidString)"
-            let previous = PersistentStorage(storagePrefix: prefix, logger: nil, diagonostics: Diagnostics(), diagnosticsClient: client)
-            previous.markUpload(phase: phase)
-            let next = PersistentStorage(storagePrefix: prefix, logger: nil, diagonostics: Diagnostics(), diagnosticsClient: client)
-            next.recoverUploadCounters()
-            next.recoverUploadCounters()
-            XCTAssertNil(next.userDefaults?.string(forKey: "upload_attempt"))
-            next.reset()
-        }
-        await fulfillment(of: [network, cleanup], timeout: 5)
-    }
-
-    func testSuccessfulDeletionClearsMarkerButFailedDeletionRetainsIt() throws {
-        let storage = PersistentStorage(storagePrefix: "upload-cleanup-\(UUID().uuidString)", logger: nil,
-                                        diagonostics: Diagnostics(), diagnosticsClient: diagnosticsClient)
+    func testPendingUploadPersistsIndependentlyOfFileDeletion() throws {
+        let prefix = "pending-upload-\(UUID().uuidString)"
+        let storage = PersistentStorage(storagePrefix: prefix, logger: nil, diagonostics: diagonostics,
+                                        diagnosticsClient: diagnosticsClient)
         defer { storage.reset() }
+        storage.uploadRequestPending = true
+        let reopened = PersistentStorage(storagePrefix: prefix, logger: nil, diagonostics: diagonostics,
+                                         diagnosticsClient: diagnosticsClient)
+        XCTAssertTrue(reopened.uploadRequestPending)
         let batch = storage.getEventsStorageDirectory().appendingPathComponent("batch")
-        storage.markUpload(phase: "cleanup")
-        storage.remove(eventBlock: batch) // Missing batch: deletion fails.
-        XCTAssertEqual(storage.userDefaults?.string(forKey: "upload_attempt"), "cleanup")
         try Data().write(to: batch)
         storage.remove(eventBlock: batch)
-        XCTAssertNil(storage.userDefaults?.string(forKey: "upload_attempt"))
+        XCTAssertTrue(storage.uploadRequestPending)
+        reopened.uploadRequestPending = false
+        XCTAssertFalse(storage.uploadRequestPending)
     }
 
     func testIsBasicType() {

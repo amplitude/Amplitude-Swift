@@ -13,7 +13,7 @@ import Foundation
 @_spi(Internal) import AmplitudeCore
 #endif
 
-class PersistentStorage: Storage {
+class PersistentStorage: Storage, UploadRequestStateStorage {
     typealias EventBlock = URL
 
     static internal func getEventStoragePrefix(_ apiKey: String, _ instanceName: String) -> String {
@@ -37,7 +37,6 @@ class PersistentStorage: Storage {
     let diagonostics: Diagnostics
     let diagonosticsClient: CoreDiagnostics
     private var didExcludeStorageFromBackup = false
-    private var didRecoverUploadCounters = false
 
     init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics, diagnosticsClient: CoreDiagnostics) {
         self.storagePrefix = storagePrefix == PersistentStorage.DEFAULT_STORAGE_PREFIX || storagePrefix.starts(with: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-")
@@ -145,33 +144,17 @@ class PersistentStorage: Storage {
             .appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
     }
 
-    private static let uploadMarkerKey = "upload_attempt"
-
-    // Assumes one initialization per instance name per process. Called on the upload queue.
-    func recoverUploadCounters() {
-        syncQueue.sync {
-            guard !didRecoverUploadCounters else { return }
-            didRecoverUploadCounters = true
-            if let phase = userDefaults?.string(forKey: Self.uploadMarkerKey),
-               phase == "network_callback" || phase == "cleanup" {
-                diagonosticsClient.increment(name: "analytics.upload.missed_\(phase)")
+    // Reuse the instance-scoped suite. UserDefaults persistence is best effort.
+    var uploadRequestPending: Bool {
+        get { syncQueue.sync { userDefaults?.bool(forKey: "upload_request_pending") ?? false } }
+        set {
+            syncQueue.sync {
+                if newValue {
+                    userDefaults?.set(true, forKey: "upload_request_pending")
+                } else {
+                    userDefaults?.removeObject(forKey: "upload_request_pending")
+                }
             }
-            userDefaults?.removeObject(forKey: Self.uploadMarkerKey)
-        }
-    }
-
-    func markUpload(phase: String?) {
-        syncQueue.sync {
-            setUploadMarker(phase: phase)
-        }
-    }
-
-    // Caller holds syncQueue. UserDefaults persistence is deferred, so recovery is best effort.
-    private func setUploadMarker(phase: String?) {
-        if let phase {
-            userDefaults?.set(phase, forKey: Self.uploadMarkerKey)
-        } else {
-            userDefaults?.removeObject(forKey: Self.uploadMarkerKey)
         }
     }
 
@@ -179,7 +162,6 @@ class PersistentStorage: Storage {
         syncQueue.sync {
             do {
                 try fileManager.removeItem(atPath: eventBlock.path)
-                setUploadMarker(phase: nil)
             } catch {
                 diagonostics.addErrorLog(error.localizedDescription)
                 logger?.error(message: error.localizedDescription)

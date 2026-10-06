@@ -140,15 +140,9 @@ class PersistentStorageResponseHandler: ResponseHandler {
     func handle(result: Result<Int, Error>) -> Bool {
         switch result {
         case .success(let code):
-            if configuration.enableDiagnostics {
-                storage.markUpload(phase: "cleanup")
-            }
             // We don't care about the data when success
             return handleSuccessResponse(code: code)
         case .failure(let error):
-            if configuration.enableDiagnostics {
-                storage.markUpload(phase: nil)
-            }
             switch error {
             case HttpClient.Exception.httpError(let code, let data):
                 var json = [String: Any]()

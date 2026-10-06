@@ -33,6 +33,7 @@ final class EventPipelineTests: XCTestCase {
         configuration = Configuration(
             apiKey: "testApiKey",
             flushIntervalMillis: Int(Self.FLUSH_INTERVAL_SECONDS * 1000),
+            instanceName: UUID().uuidString,
             storageProvider: storage,
             offline: NetworkConnectivityCheckerPlugin.Disabled
         )
@@ -47,6 +48,65 @@ final class EventPipelineTests: XCTestCase {
     override func tearDown() {
         super.tearDown()
         storage.reset()
+    }
+
+    func testRecoveryDoesNotRequirePersistentEventStorage() {
+        let name = UUID().uuidString
+        class StateStorage: InMemoryStorage, UploadRequestStateStorage {
+            var uploadRequestPending = true
+        }
+        let stateStorage = StateStorage()
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: "test", instanceName: name, storageProvider: stateStorage,
+            identifyStorageProvider: InMemoryStorage(), autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false))
+        let pipeline = EventPipeline(amplitude: amplitude)
+        pipeline.flushTimer?.suspend()
+        let firstScan = expectation(description: "recover previous request")
+        pipeline.flush { firstScan.fulfill() }
+        wait(for: [firstScan], timeout: 10)
+        XCTAssertFalse(stateStorage.uploadRequestPending)
+
+        stateStorage.uploadRequestPending = true
+        let secondScan = expectation(description: "do not recover again")
+        pipeline.flush { secondScan.fulfill() }
+        wait(for: [secondScan], timeout: 10)
+        XCTAssertTrue(stateStorage.uploadRequestPending)
+    }
+
+    func testDisabledDiagnosticsLeavesPendingMarkerUntouched() {
+        configuration.enableDiagnostics = false
+        storage.uploadRequestPending = true
+        let scanned = expectation(description: "scan without recovery")
+        pipeline.flush { scanned.fulfill() }
+        wait(for: [scanned], timeout: 10)
+        XCTAssertTrue(storage.uploadRequestPending)
+    }
+
+    func testPendingMarkerClearsOnSuccessAndErrorCallbacks() throws {
+        class ObservingHttpClient: FakeHttpClient {
+            var onRequest: (() -> Void)?
+            override func upload(events: String, completion: @escaping (Result<Int, Error>) -> Void) -> URLSessionDataTask? {
+                onRequest?()
+                return super.upload(events: events, completion: completion)
+            }
+        }
+        for result: Result<Int, Error> in [.success(200), .failure(HttpClient.Exception.httpError(code: 500, data: nil))] {
+            let completed = expectation(description: "response callback completed")
+            let client = ObservingHttpClient(configuration: configuration, diagnostics: configuration.diagonostics)
+            client.onRequest = { [storage] in
+                XCTAssertTrue(storage?.uploadRequestPending == true)
+            }
+            client.uploadResults = [result]
+            client.uploadExpectations = [completed]
+            pipeline.httpClient = client
+            configuration.flushMaxRetries = 0
+            configuration.offline = false
+            try storage.write(key: .EVENTS, value: BaseEvent(eventType: "test"))
+            pipeline.flush()
+            wait(for: [completed], timeout: 10)
+            XCTAssertFalse(storage.uploadRequestPending)
+        }
     }
 
     func testInit() {
