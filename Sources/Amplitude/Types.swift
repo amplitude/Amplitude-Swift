@@ -200,3 +200,8 @@ extension ResponseHandler {
         return false
     }
 }
+
+// Optional internal capability for persisting upload diagnostics independently of event deletion.
+protocol UploadRequestStateStorage: AnyObject {
+    var uploadRequestPending: Bool { get set }
+}

@@ -7,6 +7,12 @@
 
 import Foundation
 
+#if AMPLITUDE_DISABLE_UIKIT
+@_spi(Internal) import AmplitudeCoreNoUIKit
+#else
+@_spi(Internal) import AmplitudeCore
+#endif
+
 /// Retry interval capped at 1 minutes
 private let MAX_RETRY_INTERVAL: Double = 60
 
@@ -22,11 +28,14 @@ public class EventPipeline {
 
     private var flushCompletions: [() -> Void] = []
     private var currentUpload: URLSessionTask?
+    private let uploadStateStorage: (any UploadRequestStateStorage)?
+    private var didRecoverPendingUpload = false
 
     init(amplitude: Amplitude) {
         storage = amplitude.storage
         logger = amplitude.logger
         configuration = amplitude.configuration
+        uploadStateStorage = amplitude.storage as? any UploadRequestStateStorage
         httpClient = HttpClient(configuration: amplitude.configuration,
                                 diagnostics: amplitude.configuration.diagonostics,
                                 callbackQueue: amplitude.trackingQueue)
@@ -76,6 +85,16 @@ public class EventPipeline {
                 return
             }
 
+            // Runs once on uploadsQueue, before this instance can start a request.
+            // Assumes one SDK initialization per instance name per process.
+            if configuration.enableDiagnostics && !didRecoverPendingUpload {
+                didRecoverPendingUpload = true
+                if uploadStateStorage?.uploadRequestPending == true {
+                    configuration.diagnosticsClient.increment(name: "analytics.upload.missed_network_callback")
+                }
+                uploadStateStorage?.uploadRequestPending = false
+            }
+
             guard let storage = storage,
                   let eventFiles: [URL] = storage.read(key: StorageKey.EVENTS),
                   let nextEventFile = eventFiles.first(where: { !skipFiles.contains($0) }) else {
@@ -105,7 +124,13 @@ public class EventPipeline {
                 return
             }
 
+            if configuration.enableDiagnostics {
+                uploadStateStorage?.uploadRequestPending = true
+            }
             currentUpload = httpClient.upload(events: eventsString) { [self] result in
+                if configuration.enableDiagnostics {
+                    uploadStateStorage?.uploadRequestPending = false
+                }
                 let responseHandler = storage.getResponseHandler(
                     configuration: self.configuration,
                     eventPipeline: self,

@@ -13,7 +13,7 @@ import Foundation
 @_spi(Internal) import AmplitudeCore
 #endif
 
-class PersistentStorage: Storage {
+class PersistentStorage: Storage, UploadRequestStateStorage {
     typealias EventBlock = URL
 
     static internal func getEventStoragePrefix(_ apiKey: String, _ instanceName: String) -> String {
@@ -142,6 +142,20 @@ class PersistentStorage: Storage {
     private func getQuarantineDirectory() -> URL {
         return getEventsStorageDirectory(createDirectory: false)
             .appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
+    }
+
+    // Reuse the instance-scoped suite. UserDefaults persistence is best effort.
+    var uploadRequestPending: Bool {
+        get { syncQueue.sync { userDefaults?.bool(forKey: "upload_request_pending") ?? false } }
+        set {
+            syncQueue.sync {
+                if newValue {
+                    userDefaults?.set(true, forKey: "upload_request_pending")
+                } else {
+                    userDefaults?.removeObject(forKey: "upload_request_pending")
+                }
+            }
+        }
     }
 
     func remove(eventBlock: EventBlock) {

@@ -38,13 +38,12 @@ class PersistentStorageResponseHandler: ResponseHandler {
     }
 
     func handleSuccessResponse(code: Int) -> Bool {
+        storage.remove(eventBlock: eventBlock)
         guard let events = BaseEvent.fromArrayString(jsonString: eventsString) else {
-            storage.remove(eventBlock: eventBlock)
             removeEventCallbackByEventsString(eventsString: eventsString)
             return true
         }
         triggerEventsCallback(events: events, code: code, message: "Successfully send event")
-        storage.remove(eventBlock: eventBlock)
         return true
     }
 

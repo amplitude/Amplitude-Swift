@@ -14,6 +14,23 @@ final class PersistentStorageTests: XCTestCase {
     let diagonostics = Diagnostics()
     let diagnosticsClient = FakeDiagnosticsClient()
 
+    func testPendingUploadPersistsIndependentlyOfFileDeletion() throws {
+        let prefix = "pending-upload-\(UUID().uuidString)"
+        let storage = PersistentStorage(storagePrefix: prefix, logger: nil, diagonostics: diagonostics,
+                                        diagnosticsClient: diagnosticsClient)
+        defer { storage.reset() }
+        storage.uploadRequestPending = true
+        let reopened = PersistentStorage(storagePrefix: prefix, logger: nil, diagonostics: diagonostics,
+                                         diagnosticsClient: diagnosticsClient)
+        XCTAssertTrue(reopened.uploadRequestPending)
+        let batch = storage.getEventsStorageDirectory().appendingPathComponent("batch")
+        try Data().write(to: batch)
+        storage.remove(eventBlock: batch)
+        XCTAssertTrue(storage.uploadRequestPending)
+        reopened.uploadRequestPending = false
+        XCTAssertFalse(storage.uploadRequestPending)
+    }
+
     func testIsBasicType() {
         let persistentStorage = PersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         var isValueBasicType = persistentStorage.isBasicType(value: 111)

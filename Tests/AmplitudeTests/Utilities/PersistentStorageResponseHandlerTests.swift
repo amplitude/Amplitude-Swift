@@ -29,6 +29,35 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         eventBlock = URL(string: "test")
     }
 
+    func testSuccessDeletesBatchBeforeGlobalAndEventCallbacks() throws {
+        let storage = PersistentStorage(storagePrefix: "callback-order-\(UUID().uuidString)", logger: nil,
+                                        diagonostics: diagonostics, diagnosticsClient: diagnosticsClient)
+        defer { storage.reset() }
+        var batch: URL!
+        var callbacks = [String]()
+        configuration.callback = { _, _, _ in
+            XCTAssertFalse(FileManager.default.fileExists(atPath: batch.path))
+            callbacks.append("global")
+        }
+        let event = BaseEvent(eventType: "test")
+        event.insertId = UUID().uuidString
+        event.callback = { _, _, _ in
+            XCTAssertFalse(FileManager.default.fileExists(atPath: batch.path))
+            callbacks.append("event")
+        }
+        try storage.write(key: .EVENTS, value: event)
+        storage.rollover()
+        let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+        batch = try XCTUnwrap(files.first)
+        let payload = try XCTUnwrap(storage.getEventsString(eventBlock: batch))
+        let handler = PersistentStorageResponseHandler(configuration: configuration, storage: storage,
+            eventPipeline: eventPipeline, eventBlock: batch, eventsString: payload, diagnosticsClient: diagnosticsClient)
+        let handled: Bool = handler.handle(result: .success(200))
+        XCTAssertTrue(handled)
+        XCTAssertEqual(callbacks, ["global", "event"])
+        XCTAssertNil(storage.getEventCallback(insertId: try XCTUnwrap(event.insertId)))
+    }
+
     func testInit() {
         eventsString = """
             [

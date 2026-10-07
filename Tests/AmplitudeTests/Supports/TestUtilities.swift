@@ -397,7 +397,11 @@ actor FakeDiagnosticsClient: CoreDiagnostics {
 
     let didLastRunCrash = false
 
-    init() { }
+    private let onIncrement: (@Sendable (String) -> Void)?
+
+    init(onIncrement: (@Sendable (String) -> Void)? = nil) {
+        self.onIncrement = onIncrement
+    }
 
     func setTag(name: String, value: String) { }
 
@@ -411,9 +415,9 @@ actor FakeDiagnosticsClient: CoreDiagnostics {
         return [:]
     }
 
-    func increment(name: String) { }
+    func increment(name: String) { onIncrement?(name) }
 
-    func increment(name: String, size: Int) { }
+    func increment(name: String, size: Int) { onIncrement?(name) }
 
     func recordHistogram(name: String, value: Double) { }
 
