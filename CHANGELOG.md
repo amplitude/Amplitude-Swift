@@ -1,3 +1,10 @@
+## [1.19.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.19.2...v1.19.3) (2026-10-08)
+
+
+### Bug Fixes
+
+* delete acknowledged batches before callbacks and diagnose interrupted uploads ([#449](https://github.com/amplitude/Amplitude-Swift/issues/449)) ([af7863e](https://github.com/amplitude/Amplitude-Swift/commit/af7863e83f60f18676df43eb0e7b832f2948e613))
+
 ## [1.19.2](https://github.com/amplitude/Amplitude-Swift/compare/v1.19.1...v1.19.2) (2026-09-28)
 
 
