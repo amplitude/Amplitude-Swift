@@ -1,0 +1,51 @@
+name: Size Limit
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  size-limit:
+    name: Size Limit
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set Xcode 16.4
+        run: |
+          sudo xcode-select -switch /Applications/Xcode_16.4.app
+
+      - name: Install Apple platform SDKs
+        run: |
+          # Warm up CoreSimulator to avoid "Unable to connect to simulator":
+          # https://github.com/actions/runner-images/issues/12862#issuecomment-3239326872
+          xcrun simctl list > /dev/null
+          sudo xcodebuild -downloadPlatform iOS
+          sudo xcodebuild -downloadPlatform tvOS
+          sudo xcodebuild -downloadPlatform watchOS
+          sudo xcodebuild -downloadPlatform visionOS
+
+      - name: Build xcframework
+        run: scripts/build_framework.sh
+
+      - name: Zip xcframeworks
+        working-directory: .build/artifacts
+        run: |
+          zip -r -y AmplitudeSwift.xcframework.zip AmplitudeSwift.xcframework
+          zip -r -y AmplitudeSwiftNoUIKit.xcframework.zip AmplitudeSwiftNoUIKit.xcframework
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Install size-limit
+        run: npm ci
+
+      - name: Check size
+        run: npm run size-limit
