@@ -88,7 +88,6 @@
 		EAE4C5FC2E5FA0C700FCD6E4 /* ObjectFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE4C5FB2E5FA0C100FCD6E4 /* ObjectFilterTests.swift */; };
 		EAE891872DA83B6F00AB97D0 /* FakeURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */; };
 		EAE989292DA831F200835345 /* NetworkTrackingPluginTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE989282DA831F200835345 /* NetworkTrackingPluginTest.swift */; };
-		A0DE0D0F2EA0000000000002 /* NetworkTrackingDuplicateListenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0DE0D0F2EA0000000000001 /* NetworkTrackingDuplicateListenerTests.swift */; };
 		EAED99FB2EE7B47E00A5FC08 /* FrustrationInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */; };
 		EAED99FC2EE7B47E00A5FC08 /* MiscellaneousExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84CF0A2DF8D8E400CD1CAD /* MiscellaneousExtension.swift */; };
 		EAED99FD2EE7B47E00A5FC08 /* Amplitude.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_8 /* Amplitude.swift */; };
@@ -322,7 +321,6 @@
 		EAE4C5FB2E5FA0C100FCD6E4 /* ObjectFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectFilterTests.swift; sourceTree = "<group>"; };
 		EAE891862DA83B6600AB97D0 /* FakeURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeURLProtocol.swift; sourceTree = "<group>"; };
 		EAE989282DA831F200835345 /* NetworkTrackingPluginTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrackingPluginTest.swift; sourceTree = "<group>"; };
-		A0DE0D0F2EA0000000000001 /* NetworkTrackingDuplicateListenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrackingDuplicateListenerTests.swift; sourceTree = "<group>"; };
 		EAED9A5B2EE7B47E00A5FC08 /* AmplitudeSwiftNoUIKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AmplitudeSwiftNoUIKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAF020762DBAE9C7003D22A2 /* ObjCNetworkTrackingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjCNetworkTrackingOptions.swift; sourceTree = "<group>"; };
 		EAF7B54A2E09445600E6E61A /* FrustrationInteractions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrustrationInteractions.swift; sourceTree = "<group>"; };
@@ -485,7 +483,6 @@
 				7B1B6866E0FA78BAF06C7422 /* ContextPluginDeviceIdTests.swift */,
 				4E2B646A2BA127460010E6F8 /* UIKitScreenViewsPluginTests.swift */,
 				EAE989282DA831F200835345 /* NetworkTrackingPluginTest.swift */,
-				A0DE0D0F2EA0000000000001 /* NetworkTrackingDuplicateListenerTests.swift */,
 			);
 			path = Plugins;
 			sourceTree = "<group>";
@@ -1046,7 +1043,6 @@
 				4E05BB942BE41AEB009DE475 /* Amplitude+Extensions.swift in Sources */,
 				OBJ_158 /* UrlExtensionTests.swift in Sources */,
 				EAE989292DA831F200835345 /* NetworkTrackingPluginTest.swift in Sources */,
-				A0DE0D0F2EA0000000000002 /* NetworkTrackingDuplicateListenerTests.swift in Sources */,
 				8EDEC4EE0DE1C89889F451B5 /* QueueTimeTests.swift in Sources */,
 				BA1EC0F62A9F63FD00C2D547 /* AmplitudeIOSTests.swift in Sources */,
 				4E5F89452F2AB9B60015FBC6 /* Data+Gzip.swift in Sources */,

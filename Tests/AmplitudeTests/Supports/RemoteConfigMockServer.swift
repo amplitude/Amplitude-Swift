@@ -39,7 +39,6 @@ enum RemoteConfigMockServer {
         var queued: [RemoteConfigClient.RemoteConfig] = []
         var released = false
         var waiting: [RemoteConfigUrlProtocol] = []
-        var failureStatusCode: Int?
     }
 
     private static let lock = NSLock()
@@ -71,20 +70,6 @@ enum RemoteConfigMockServer {
             entry.released = false
             entries[apiKey] = entry
         }
-    }
-
-    /// Answer every remote-config request for `apiKey` with `statusCode` and an empty body
-    /// (still subject to `release(apiKey:)`), e.g. 503 to drive RemoteConfigClient's retries.
-    static func failRequests(withStatusCode statusCode: Int, apiKey: String) {
-        lock.withLock {
-            var entry = entries[apiKey] ?? Entry()
-            entry.failureStatusCode = statusCode
-            entries[apiKey] = entry
-        }
-    }
-
-    fileprivate static func failureStatusCode(apiKey: String) -> Int? {
-        lock.withLock { entries[apiKey]?.failureStatusCode }
     }
 
     /// Let the queued response for `apiKey` go out. Safe to call before the SDK has
@@ -193,14 +178,6 @@ final class RemoteConfigUrlProtocol: URLProtocol {
     fileprivate func deliver() {
         Self.deliveryQueue.async { [self] in
             guard !stopped, let url = request.url else {
-                return
-            }
-
-            if isRemoteConfig, let statusCode = RemoteConfigMockServer.failureStatusCode(apiKey: apiKey ?? "") {
-                let response = HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: nil, headerFields: nil)!
-                client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-                client?.urlProtocol(self, didLoad: Data())
-                client?.urlProtocolDidFinishLoading(self)
                 return
             }
 
