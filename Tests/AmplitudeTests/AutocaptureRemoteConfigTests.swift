@@ -511,39 +511,41 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         // Verify the plugin is enabled
         XCTAssertFalse(networkTrackingPlugin.optOut)
 
-        // Verify the configuration was applied correctly
-        XCTAssertNotNil(networkTrackingPlugin.originalOptions)
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.ignoreHosts, ["test.example.com", "*.internal.com"])
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.ignoreAmplitudeRequests, false)
+        // Verify the configuration was compiled
+        guard let options = networkTrackingPlugin.options else {
+            XCTFail("Network tracking options not compiled")
+            return
+        }
+        XCTAssertTrue(options.ignoreHosts.matches("test.example.com"))
+        XCTAssertTrue(options.ignoreHosts.matches("api.internal.com"))
+        // ignoreAmplitudeRequests: false, so Amplitude's own hosts are not ignored
+        XCTAssertFalse(options.ignoreHosts.matches("api2.amplitude.com"))
 
         // Verify capture rules
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.captureRules.count, 1)
+        XCTAssertEqual(options.captureRules.count, 1)
 
-        if let captureRule = networkTrackingPlugin.originalOptions?.captureRules.first {
-            XCTAssertEqual(captureRule.hosts, ["api.example.com", "*.api.com"])
+        if let captureRule = options.captureRules.first {
+            XCTAssertEqual(captureRule.hosts?.hostSet, ["api.example.com"])
+            XCTAssertTrue(captureRule.hosts?.matches("v2.api.com") ?? false)
             XCTAssertEqual(captureRule.methods, ["GET", "POST"])
-            XCTAssertEqual(captureRule.statusCodeRange, "400-599")
+            XCTAssertEqual(captureRule.statusCodeIndexSet, IndexSet(400...599))
 
-            // Verify URLs patterns
-            XCTAssertEqual(captureRule.urls.count, 2)
+            // Verify URL patterns: urls are exact, urlsRegex are regexes
+            XCTAssertTrue(captureRule.urls?.matches("https://api.example.com/v1/endpoint") ?? false)
+            XCTAssertTrue(captureRule.urls?.matches("https://other.example.com/api/v2/items") ?? false)
+            XCTAssertFalse(captureRule.urls?.matches("https://api.example.com/v1/other") ?? true)
 
-            // Verify headers configuration
-            XCTAssertNotNil(captureRule.requestHeaders)
-            XCTAssertEqual(captureRule.requestHeaders?.allowlist, ["Content-Type", "Authorization"])
-            XCTAssertTrue(captureRule.requestHeaders?.captureSafeHeaders ?? false)
+            // Verify header filters. Authorization is always blocked; safe headers only on request.
+            let headers = ["Content-Type": "application/json", "Authorization": "Bearer x", "Cache-Control": "no-cache", "X-Other": "1"]
+            XCTAssertEqual(captureRule.requestHeaders?.filterHeaders(headers),
+                           ["Content-Type": "application/json", "Cache-Control": "no-cache"])
+            XCTAssertEqual(captureRule.responseHeaders?.filterHeaders(headers), ["Content-Type": "application/json"])
 
-            XCTAssertNotNil(captureRule.responseHeaders)
-            XCTAssertEqual(captureRule.responseHeaders?.allowlist, ["Content-Type"])
-            XCTAssertFalse(captureRule.responseHeaders?.captureSafeHeaders ?? true)
-
-            // Verify body configuration
-            XCTAssertNotNil(captureRule.requestBody)
-            XCTAssertEqual(captureRule.requestBody?.allowlist, ["userId", "eventType"])
-            XCTAssertEqual(captureRule.requestBody?.excludelist, ["password", "token"])
-
-            XCTAssertNotNil(captureRule.responseBody)
-            XCTAssertEqual(captureRule.responseBody?.allowlist, ["status", "message"])
-            XCTAssertEqual(captureRule.responseBody?.excludelist, ["secret"])
+            // Verify body filters
+            let requestBody = captureRule.requestBody?.filterBody(["userId": "u", "eventType": "e", "password": "p", "other": "o"])
+            XCTAssertEqual(requestBody as? [String: String], ["userId": "u", "eventType": "e"])
+            let responseBody = captureRule.responseBody?.filterBody(["status": "ok", "message": "m", "secret": "s", "other": "o"])
+            XCTAssertEqual(responseBody as? [String: String], ["status": "ok", "message": "m"])
         }
     }
 
@@ -598,14 +600,160 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         XCTAssertFalse(networkTrackingPlugin.optOut)
 
         // Verify ignoreHosts was overridden by remote config
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.ignoreHosts, ["remote-ignore.com"])
+        XCTAssertEqual(networkTrackingPlugin.options?.ignoreHosts.hostSet, ["remote-ignore.com"])
 
         // Verify captureRules stayed from local config (not overridden since missing in remote)
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.captureRules.count, 1)
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.captureRules.first?.hosts, ["local.example.com"])
+        XCTAssertEqual(networkTrackingPlugin.options?.captureRules.count, 1)
+        XCTAssertEqual(networkTrackingPlugin.options?.captureRules.first?.hosts?.hostSet, ["local.example.com"])
 
-        // Verify ignoreAmplitudeRequests stayed from local config
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.ignoreAmplitudeRequests, false)
+        // Verify ignoreAmplitudeRequests stayed from local config (false: Amplitude hosts not ignored)
+        XCTAssertEqual(networkTrackingPlugin.options?.ignoreHosts.hostPatterns.count, 0)
+    }
+#endif
+#if !os(watchOS)
+    // The tests below drive deliveries with `handleRemoteConfig` directly. The remote fetch never
+    // answers (nothing is queued or released for the API key) and the cache is reset, so the
+    // test's deliveries are the only ones.
+
+    private static let localNetworkTrackingOptions = NetworkTrackingOptions(
+        captureRules: [.init(hosts: ["local.example.com"])],
+        ignoreHosts: ["local-ignore.example.com"]
+    )
+    private static let remoteCaptureRule: [String: Any] = ["hosts": ["remote.example.com"], "statusCodeRange": "400-499"]
+
+    private func makeNetworkTrackingAmplitude(_ function: String = #function) -> Amplitude {
+        resetStorage(function)
+        return Amplitude(configuration: Configuration(apiKey: uniqueApiKey(function),
+                                                      instanceName: uniqueInstanceName(function),
+                                                      autocapture: [.networkTracking],
+                                                      networkTrackingOptions: Self.localNetworkTrackingOptions))
+    }
+
+    private func networkTrackingPlugin(of amplitude: Amplitude) -> NetworkTrackingPlugin? {
+        var found: NetworkTrackingPlugin?
+        amplitude.apply { plugin in
+            if let plugin = plugin as? NetworkTrackingPlugin {
+                found = plugin
+            }
+        }
+        return found
+    }
+
+    private func captureRuleHosts(_ plugin: NetworkTrackingPlugin) -> [Set<String>?]? {
+        plugin.options?.captureRules.map { $0.hosts?.hostSet }
+    }
+
+    // MARK: Network tracking plugin added after deliveries
+    //
+    // A config handled before the plugin is added (the cached config, or the nil fallback after a
+    // failed fetch, usually arrives while Amplitude.init is still adding plugins) must be in effect
+    // as soon as add(plugin:) returns. The instance's own plugin is removed first, so only the
+    // plugin under test is compiled and registered with the swizzler.
+
+    private func addNetworkTrackingPlugin(afterDeliveries deliveries: [[String: Any]?],
+                                          _ function: String = #function) throws -> RecordingNetworkTrackingPlugin {
+        let amplitude = makeNetworkTrackingAmplitude(function)
+        amplitude.remove(plugin: try XCTUnwrap(networkTrackingPlugin(of: amplitude)))
+        for delivery in deliveries {
+            amplitude.autocaptureManager.handleRemoteConfig(delivery)
+        }
+        let plugin = RecordingNetworkTrackingPlugin()
+        amplitude.add(plugin: plugin)
+        addTeardownBlock { amplitude.remove(plugin: plugin) }
+        return plugin
+    }
+
+    func testNetworkTrackingPluginAddedWithNoDelivery_compilesLocalOptions() throws {
+        let plugin = try addNetworkTrackingPlugin(afterDeliveries: [])
+
+        XCTAssertFalse(plugin.optOut)
+        XCTAssertEqual(captureRuleHosts(plugin), [["local.example.com"]])
+        XCTAssertEqual(plugin.options?.ignoreHosts.hostSet, ["local-ignore.example.com"])
+        XCTAssertEqual(swizzlerEntries(of: plugin), 1)
+    }
+
+    func testNetworkTrackingPluginAddedAfterNilDelivery_compilesLocalOptions() throws {
+        let plugin = try addNetworkTrackingPlugin(afterDeliveries: [nil])
+
+        XCTAssertFalse(plugin.optOut)
+        XCTAssertEqual(captureRuleHosts(plugin), [["local.example.com"]])
+        XCTAssertEqual(plugin.options?.ignoreHosts.hostSet, ["local-ignore.example.com"])
+        XCTAssertEqual(swizzlerEntries(of: plugin), 1)
+    }
+
+    func testNetworkTrackingPluginAddedAfterCachedConfig_compilesRemoteOptions() throws {
+        let plugin = try addNetworkTrackingPlugin(afterDeliveries: [[
+            "networkTracking": [
+                "enabled": true,
+                "captureRules": [Self.remoteCaptureRule],
+                "ignoreHosts": ["remote-ignore.example.com"],
+            ]
+        ]])
+
+        XCTAssertFalse(plugin.optOut)
+        XCTAssertEqual(captureRuleHosts(plugin), [["remote.example.com"]])
+        XCTAssertEqual(plugin.options?.captureRules.first?.statusCodeIndexSet, IndexSet(400...499))
+        XCTAssertEqual(plugin.options?.ignoreHosts.hostSet, ["remote-ignore.example.com"])
+        XCTAssertEqual(swizzlerEntries(of: plugin), 1)
+    }
+
+    func testNetworkTrackingPluginAddedAfterDisablingConfig_optsOutWithoutCompiling() throws {
+        let plugin = try addNetworkTrackingPlugin(afterDeliveries: [[
+            "networkTracking": [
+                "enabled": false,
+                "captureRules": [Self.remoteCaptureRule],
+            ]
+        ]])
+
+        XCTAssertTrue(plugin.optOut)
+        XCTAssertNil(plugin.options)
+        XCTAssertEqual(swizzlerEntries(of: plugin), 0)
+    }
+
+    // MARK: Successive remote configs
+    //
+    // Each networkTracking section is overlaid on the local options, not on the previous section:
+    // a field the section omits takes the local value. A config without the section, or a nil
+    // delivery, keeps the previous section, as it keeps the enabled flag.
+
+    func testNetworkTrackingSuccessiveRemoteConfigs() throws {
+        let amplitude = makeNetworkTrackingAmplitude()
+        let plugin = try XCTUnwrap(networkTrackingPlugin(of: amplitude))
+        let manager = amplitude.autocaptureManager
+
+        // A: captureRules replace the local rules; the omitted ignoreHosts stay local
+        manager.handleRemoteConfig(["networkTracking": ["enabled": true, "captureRules": [Self.remoteCaptureRule]]])
+        XCTAssertEqual(captureRuleHosts(plugin), [["remote.example.com"]])
+        XCTAssertEqual(plugin.options?.ignoreHosts.hostSet, ["local-ignore.example.com"])
+
+        // B: a section without captureRules: the local rules, not A's
+        manager.handleRemoteConfig(["networkTracking": ["enabled": true, "ignoreHosts": ["remote-ignore.example.com"]]])
+        XCTAssertEqual(captureRuleHosts(plugin), [["local.example.com"]])
+        XCTAssertEqual(plugin.options?.ignoreHosts.hostSet, ["remote-ignore.example.com"])
+
+        // C: no networkTracking section: B's section is kept
+        manager.handleRemoteConfig(["sessions": true])
+        XCTAssertEqual(captureRuleHosts(plugin), [["local.example.com"]])
+        XCTAssertEqual(plugin.options?.ignoreHosts.hostSet, ["remote-ignore.example.com"])
+
+        // nil (the fallback after a failed fetch): state is kept
+        manager.handleRemoteConfig(nil)
+        XCTAssertEqual(captureRuleHosts(plugin), [["local.example.com"]])
+        XCTAssertEqual(plugin.options?.ignoreHosts.hostSet, ["remote-ignore.example.com"])
+        XCTAssertFalse(plugin.optOut)
+    }
+
+    func testNetworkTrackingConfigWithoutSection_keepsPreviousCaptureRules() throws {
+        let amplitude = makeNetworkTrackingAmplitude()
+        let plugin = try XCTUnwrap(networkTrackingPlugin(of: amplitude))
+        let manager = amplitude.autocaptureManager
+
+        manager.handleRemoteConfig(["networkTracking": ["enabled": true, "captureRules": [Self.remoteCaptureRule]]])
+        manager.handleRemoteConfig(["sessions": true])
+
+        XCTAssertEqual(captureRuleHosts(plugin), [["remote.example.com"]])
+        XCTAssertEqual(plugin.options?.captureRules.first?.statusCodeIndexSet, IndexSet(400...499))
+        XCTAssertFalse(plugin.optOut)
     }
 #endif
 }

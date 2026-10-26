@@ -1202,6 +1202,55 @@ final class NetworkTrackingPluginTest: XCTestCase {
         let events = eventCollector.events
         XCTAssertEqual(events.count, 3, "Should capture requests matching any of the rules")
     }
+
+    // MARK: - Swizzler registration
+
+    /// Every remote-config delivery refreshes the plugin, and every compile registers it with
+    /// NetworkSwizzler again. It must keep one entry: the swizzler calls each entry, so a second
+    /// entry tracks every request twice.
+    func testRepeatedRegistrationKeepsOneSwizzlerEntry() throws {
+        setupAmplitude()
+        let defaultPlugin = try XCTUnwrap(networkTrackingPlugin)
+        amplitude.remove(plugin: defaultPlugin)
+        let plugin = RecordingNetworkTrackingPlugin()
+        amplitude.add(plugin: plugin)
+        defer { amplitude.remove(plugin: plugin) }
+
+        for _ in 0..<3 {
+            NetworkSwizzler.shared.addListener(plugin)
+            plugin.refresh()
+            plugin.compileConfig(NetworkTrackingOptions.default)
+        }
+
+        FakeURLProtocol.mockResponses = [.init(statusCode: 500)]
+        let url = URL(string: "https://example.com/repeated-registration")!
+        sendRequestAndWaitForSwizzlerListeners(url, session: Self.sharedSession)
+        try waitForCollectedEvents(1)
+        plugin.waitforNetworkTrackingQueue()
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertEqual(plugin.recorder.count(for: url), 1, "swizzler entries for the plugin")
+        XCTAssertEqual(eventCollector.events.count, 1, "events for one 500")
+    }
+
+    func testDistinctListenersAreAllKept() {
+        let first = RecordingNetworkTaskListener()
+        let second = RecordingNetworkTaskListener()
+        NetworkSwizzler.shared.addListener(first)
+        NetworkSwizzler.shared.addListener(second)
+        NetworkSwizzler.shared.addListener(first)
+        defer {
+            NetworkSwizzler.shared.removeListener(first)
+            NetworkSwizzler.shared.removeListener(second)
+        }
+
+        FakeURLProtocol.mockResponses = [.init(statusCode: 200)]
+        let url = URL(string: "https://example.com/distinct-listeners")!
+        sendRequestAndWaitForSwizzlerListeners(url, session: Self.sharedSession)
+
+        XCTAssertEqual(first.recorder.count(for: url), 1)
+        XCTAssertEqual(second.recorder.count(for: url), 1)
+    }
 #else
     func testShouldOptOutOnWatchOS() {
         setupAmplitude()

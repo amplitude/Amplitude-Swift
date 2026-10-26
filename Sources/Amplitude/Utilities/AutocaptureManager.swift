@@ -31,6 +31,18 @@ class AutocaptureManager {
         lock.withLock { _deadClickEnabled }
     }
 
+    private var _networkTrackingConfig: [String: Any]?
+
+    /// Whether network tracking is enabled, and the latest remote `networkTracking` section (nil
+    /// until a config with one arrives), read together under one lock so the pair is consistent.
+    /// Like the enabled flag, the section is replaced only by a config that has one: a config
+    /// without the section, or a nil delivery (the fallback after a failed fetch), keeps it.
+    /// Updated before `onChange` callbacks run, so a reader that runs after a callback sees that
+    /// delivery's state or a newer one.
+    var networkTrackingState: (enabled: Bool, config: [String: Any]?) {
+        lock.withLock { (_enabledOptions.contains(.networkTracking), _networkTrackingConfig) }
+    }
+
     private var changeCallbacks: [ChangeCallback] = []
 
     init(context: AmplitudeContext,
@@ -76,7 +88,8 @@ class AutocaptureManager {
             }
     }
 
-    private func handleRemoteConfig(_ config: [String: Any]?) {
+    // Internal (not private) so tests can drive deliveries directly.
+    func handleRemoteConfig(_ config: [String: Any]?) {
         if let config {
             // Update enabled options from config
             lock.withLock {
@@ -132,13 +145,15 @@ class AutocaptureManager {
                     }
                 }
 
-                if let networkTracking = config["networkTracking"] as? [String: Any],
-                   let enabled = networkTracking["enabled"] as? Bool {
-                    if enabled {
-                        _enabledOptions.formUnion(.networkTracking)
-                    } else {
-                        _enabledOptions.subtract(.networkTracking)
+                if let networkTracking = config["networkTracking"] as? [String: Any] {
+                    if let enabled = networkTracking["enabled"] as? Bool {
+                        if enabled {
+                            _enabledOptions.formUnion(.networkTracking)
+                        } else {
+                            _enabledOptions.subtract(.networkTracking)
+                        }
                     }
+                    _networkTrackingConfig = networkTracking
                 }
             }
         }
