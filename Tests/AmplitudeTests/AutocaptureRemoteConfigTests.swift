@@ -512,14 +512,14 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         XCTAssertFalse(networkTrackingPlugin.optOut)
 
         // Verify the configuration was applied correctly
-        XCTAssertNotNil(networkTrackingPlugin.originalOptions)
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.ignoreHosts, ["test.example.com", "*.internal.com"])
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.ignoreAmplitudeRequests, false)
+        XCTAssertNotNil(networkTrackingPlugin.currentOptions)
+        XCTAssertEqual(networkTrackingPlugin.currentOptions?.ignoreHosts, ["test.example.com", "*.internal.com"])
+        XCTAssertEqual(networkTrackingPlugin.currentOptions?.ignoreAmplitudeRequests, false)
 
         // Verify capture rules
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.captureRules.count, 1)
+        XCTAssertEqual(networkTrackingPlugin.currentOptions?.captureRules.count, 1)
 
-        if let captureRule = networkTrackingPlugin.originalOptions?.captureRules.first {
+        if let captureRule = networkTrackingPlugin.currentOptions?.captureRules.first {
             XCTAssertEqual(captureRule.hosts, ["api.example.com", "*.api.com"])
             XCTAssertEqual(captureRule.methods, ["GET", "POST"])
             XCTAssertEqual(captureRule.statusCodeRange, "400-599")
@@ -598,14 +598,14 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         XCTAssertFalse(networkTrackingPlugin.optOut)
 
         // Verify ignoreHosts was overridden by remote config
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.ignoreHosts, ["remote-ignore.com"])
+        XCTAssertEqual(networkTrackingPlugin.currentOptions?.ignoreHosts, ["remote-ignore.com"])
 
         // Verify captureRules stayed from local config (not overridden since missing in remote)
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.captureRules.count, 1)
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.captureRules.first?.hosts, ["local.example.com"])
+        XCTAssertEqual(networkTrackingPlugin.currentOptions?.captureRules.count, 1)
+        XCTAssertEqual(networkTrackingPlugin.currentOptions?.captureRules.first?.hosts, ["local.example.com"])
 
         // Verify ignoreAmplitudeRequests stayed from local config
-        XCTAssertEqual(networkTrackingPlugin.originalOptions?.ignoreAmplitudeRequests, false)
+        XCTAssertEqual(networkTrackingPlugin.currentOptions?.ignoreAmplitudeRequests, false)
     }
 #endif
 }

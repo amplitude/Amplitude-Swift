@@ -31,6 +31,17 @@ class AutocaptureManager {
         lock.withLock { _deadClickEnabled }
     }
 
+    private var _networkTrackingConfig: [String: Any]?
+
+    /// The `networkTracking` section of the latest non-nil remote config, or nil if that config had
+    /// none (or none has arrived yet). Like the enabled options, it is left as is by a nil delivery
+    /// (the fallback after a failed fetch). Updated before `onChange` callbacks run, so a reader
+    /// that runs after a callback sees that delivery's section or a newer one. Its `enabled` flag
+    /// is already reflected in `isEnabled(.networkTracking)`.
+    var networkTrackingConfig: [String: Any]? {
+        lock.withLock { _networkTrackingConfig }
+    }
+
     private var changeCallbacks: [ChangeCallback] = []
 
     init(context: AmplitudeContext,
@@ -76,7 +87,8 @@ class AutocaptureManager {
             }
     }
 
-    private func handleRemoteConfig(_ config: [String: Any]?) {
+    // Internal (not private) so tests can drive deliveries directly.
+    func handleRemoteConfig(_ config: [String: Any]?) {
         if let config {
             // Update enabled options from config
             lock.withLock {
@@ -140,6 +152,7 @@ class AutocaptureManager {
                         _enabledOptions.subtract(.networkTracking)
                     }
                 }
+                _networkTrackingConfig = config["networkTracking"] as? [String: Any]
             }
         }
 

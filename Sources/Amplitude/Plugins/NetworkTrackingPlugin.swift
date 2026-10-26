@@ -223,12 +223,17 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
 
     @AtomicRef var options: CompiledNetworkTrackingOptions?
     @AtomicRef var optOut = true
+    /// The options from `Configuration`. Not changed after `setup`: remote config is overlaid on
+    /// a copy, so a field the latest remote config omits falls back to the local value.
     @AtomicRef var originalOptions: NetworkTrackingOptions?
+    /// What `options` was compiled from: `originalOptions` with the latest remote overlay.
+    @AtomicRef var currentOptions: NetworkTrackingOptions?
     var ruleCache: [String: CompiledNetworkTrackingOptions.CaptureRule?] = [:]
 
     let networkTrackingQueue = DispatchQueue(label: "com.amplitude.analytics.networkTracking", attributes: .concurrent)
 
     private let ruleCacheLock: NSLock = NSLock()
+    private let refreshLock = NSLock()
 
     var logger: (any Logger)? {
         amplitude?.logger
@@ -241,55 +246,59 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
         logger?.warn(message: "NetworkTrackingPlugin is not supported on watchOS yet.")
         optOut = true
 #else
-        optOut = !amplitude.autocaptureManager.isEnabled(.networkTracking)
         originalOptions = amplitude.configuration.networkTrackingOptions
 
         if amplitude.configuration.enableAutoCaptureRemoteConfig {
-            amplitude.autocaptureManager.onChange { [weak self, weak amplitude] config in
-                guard let self, let amplitude else { return }
-
-                optOut = !amplitude.autocaptureManager.isEnabled(.networkTracking)
-
-                if let config {
-                    updateConfig(config)
-                } else if let originalOptions {
-                    compileConfig(originalOptions)
-                }
-            }
-        } else {
-            if let originalOptions {
-                compileConfig(originalOptions)
+            // Subscribe before the first refresh(), so a config the manager applies after that
+            // refresh has read its state is always followed by another refresh. The payload is
+            // not needed: refresh() reads the manager's current state, which also covers configs
+            // delivered before this plugin was added (the cached config and the offline nil
+            // fallback usually arrive while Amplitude.init is still adding plugins).
+            amplitude.autocaptureManager.onChange { [weak self] _ in
+                self?.refresh()
             }
         }
+        refresh()
 #endif
     }
 
-    private func updateConfig(_ config: [String: Any]?) {
-        guard var updatedOptions = originalOptions else {
-            return
+    /// Compiles the options from current state: `originalOptions` with the latest remote
+    /// `networkTracking` section overlaid, opted out unless the manager has network tracking
+    /// enabled. State is read under `refreshLock`, so when refreshes overlap, the one that
+    /// finishes last also read the newest state.
+    func refresh() {
+        guard let amplitude else { return }
+        refreshLock.withLock {
+            let manager = amplitude.autocaptureManager
+            optOut = !manager.isEnabled(.networkTracking)
+            guard let originalOptions else { return }
+            let remoteOptions = amplitude.configuration.enableAutoCaptureRemoteConfig ? manager.networkTrackingConfig : nil
+            compileConfig(Self.overlay(remoteOptions, on: originalOptions))
         }
-
-        let options = config?["networkTracking"] as? [String: Any]
-        if let ignoreHosts = options?["ignoreHosts"] as? [String] {
-            updatedOptions.ignoreHosts = ignoreHosts
-        }
-        if let ignoreAmplitudeRequests = options?["ignoreAmplitudeRequests"] as? Bool {
-            updatedOptions.ignoreAmplitudeRequests = ignoreAmplitudeRequests
-        }
-        if let captureRules = options?["captureRules"] as? [[String: Any]],
-           let rules = NetworkTrackingOptions.CaptureRule.fromRemoteConfig(captureRules) {
-            updatedOptions.captureRules = rules
-        }
-
-        originalOptions = updatedOptions
-        compileConfig(updatedOptions)
     }
 
-    func compileConfig(_ originalOptions: NetworkTrackingOptions) {
-        guard let originalOptions = self.originalOptions else { return }
+    /// `localOptions` with the fields present in a remote `networkTracking` section replacing
+    /// theirs. Always starts from the local options, so a field the remote section omits (or
+    /// sends malformed) keeps its local value rather than an earlier remote one.
+    static func overlay(_ remoteOptions: [String: Any]?, on localOptions: NetworkTrackingOptions) -> NetworkTrackingOptions {
+        var options = localOptions
+        if let ignoreHosts = remoteOptions?["ignoreHosts"] as? [String] {
+            options.ignoreHosts = ignoreHosts
+        }
+        if let ignoreAmplitudeRequests = remoteOptions?["ignoreAmplitudeRequests"] as? Bool {
+            options.ignoreAmplitudeRequests = ignoreAmplitudeRequests
+        }
+        if let captureRules = remoteOptions?["captureRules"] as? [[String: Any]],
+           let rules = NetworkTrackingOptions.CaptureRule.fromRemoteConfig(captureRules) {
+            options.captureRules = rules
+        }
+        return options
+    }
 
+    func compileConfig(_ trackingOptions: NetworkTrackingOptions) {
         do {
-            options = try CompiledNetworkTrackingOptions(options: originalOptions)
+            options = try CompiledNetworkTrackingOptions(options: trackingOptions)
+            currentOptions = trackingOptions
 
             ruleCacheLock.withLock {
                 ruleCache.removeAll()
@@ -301,7 +310,7 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
                 NetworkSwizzler.shared.addListener(self)
             }
         } catch {
-            logger?.error(message: "NetworkTrackingPlugin: Failed to parse options: \(originalOptions), error: \(error.localizedDescription)")
+            logger?.error(message: "NetworkTrackingPlugin: Failed to parse options: \(trackingOptions), error: \(error.localizedDescription)")
             optOut = true
             NetworkSwizzler.shared.removeListener(self)
         }
