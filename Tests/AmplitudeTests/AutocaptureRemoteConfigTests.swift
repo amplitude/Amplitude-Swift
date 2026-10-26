@@ -511,39 +511,41 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         // Verify the plugin is enabled
         XCTAssertFalse(networkTrackingPlugin.optOut)
 
-        // Verify the configuration was applied correctly
-        XCTAssertNotNil(networkTrackingPlugin.currentOptions)
-        XCTAssertEqual(networkTrackingPlugin.currentOptions?.ignoreHosts, ["test.example.com", "*.internal.com"])
-        XCTAssertEqual(networkTrackingPlugin.currentOptions?.ignoreAmplitudeRequests, false)
+        // Verify the configuration was compiled
+        guard let options = networkTrackingPlugin.options else {
+            XCTFail("Network tracking options not compiled")
+            return
+        }
+        XCTAssertTrue(options.ignoreHosts.matches("test.example.com"))
+        XCTAssertTrue(options.ignoreHosts.matches("api.internal.com"))
+        // ignoreAmplitudeRequests: false, so Amplitude's own hosts are not ignored
+        XCTAssertFalse(options.ignoreHosts.matches("api2.amplitude.com"))
 
         // Verify capture rules
-        XCTAssertEqual(networkTrackingPlugin.currentOptions?.captureRules.count, 1)
+        XCTAssertEqual(options.captureRules.count, 1)
 
-        if let captureRule = networkTrackingPlugin.currentOptions?.captureRules.first {
-            XCTAssertEqual(captureRule.hosts, ["api.example.com", "*.api.com"])
+        if let captureRule = options.captureRules.first {
+            XCTAssertEqual(captureRule.hosts?.hostSet, ["api.example.com"])
+            XCTAssertTrue(captureRule.hosts?.matches("v2.api.com") ?? false)
             XCTAssertEqual(captureRule.methods, ["GET", "POST"])
-            XCTAssertEqual(captureRule.statusCodeRange, "400-599")
+            XCTAssertEqual(captureRule.statusCodeIndexSet, IndexSet(400...599))
 
-            // Verify URLs patterns
-            XCTAssertEqual(captureRule.urls.count, 2)
+            // Verify URL patterns: urls are exact, urlsRegex are regexes
+            XCTAssertTrue(captureRule.urls?.matches("https://api.example.com/v1/endpoint") ?? false)
+            XCTAssertTrue(captureRule.urls?.matches("https://other.example.com/api/v2/items") ?? false)
+            XCTAssertFalse(captureRule.urls?.matches("https://api.example.com/v1/other") ?? true)
 
-            // Verify headers configuration
-            XCTAssertNotNil(captureRule.requestHeaders)
-            XCTAssertEqual(captureRule.requestHeaders?.allowlist, ["Content-Type", "Authorization"])
-            XCTAssertTrue(captureRule.requestHeaders?.captureSafeHeaders ?? false)
+            // Verify header filters. Authorization is always blocked; safe headers only on request.
+            let headers = ["Content-Type": "application/json", "Authorization": "Bearer x", "Cache-Control": "no-cache", "X-Other": "1"]
+            XCTAssertEqual(captureRule.requestHeaders?.filterHeaders(headers),
+                           ["Content-Type": "application/json", "Cache-Control": "no-cache"])
+            XCTAssertEqual(captureRule.responseHeaders?.filterHeaders(headers), ["Content-Type": "application/json"])
 
-            XCTAssertNotNil(captureRule.responseHeaders)
-            XCTAssertEqual(captureRule.responseHeaders?.allowlist, ["Content-Type"])
-            XCTAssertFalse(captureRule.responseHeaders?.captureSafeHeaders ?? true)
-
-            // Verify body configuration
-            XCTAssertNotNil(captureRule.requestBody)
-            XCTAssertEqual(captureRule.requestBody?.allowlist, ["userId", "eventType"])
-            XCTAssertEqual(captureRule.requestBody?.excludelist, ["password", "token"])
-
-            XCTAssertNotNil(captureRule.responseBody)
-            XCTAssertEqual(captureRule.responseBody?.allowlist, ["status", "message"])
-            XCTAssertEqual(captureRule.responseBody?.excludelist, ["secret"])
+            // Verify body filters
+            let requestBody = captureRule.requestBody?.filterBody(["userId": "u", "eventType": "e", "password": "p", "other": "o"])
+            XCTAssertEqual(requestBody as? [String: String], ["userId": "u", "eventType": "e"])
+            let responseBody = captureRule.responseBody?.filterBody(["status": "ok", "message": "m", "secret": "s", "other": "o"])
+            XCTAssertEqual(responseBody as? [String: String], ["status": "ok", "message": "m"])
         }
     }
 
@@ -598,14 +600,14 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         XCTAssertFalse(networkTrackingPlugin.optOut)
 
         // Verify ignoreHosts was overridden by remote config
-        XCTAssertEqual(networkTrackingPlugin.currentOptions?.ignoreHosts, ["remote-ignore.com"])
+        XCTAssertEqual(networkTrackingPlugin.options?.ignoreHosts.hostSet, ["remote-ignore.com"])
 
         // Verify captureRules stayed from local config (not overridden since missing in remote)
-        XCTAssertEqual(networkTrackingPlugin.currentOptions?.captureRules.count, 1)
-        XCTAssertEqual(networkTrackingPlugin.currentOptions?.captureRules.first?.hosts, ["local.example.com"])
+        XCTAssertEqual(networkTrackingPlugin.options?.captureRules.count, 1)
+        XCTAssertEqual(networkTrackingPlugin.options?.captureRules.first?.hosts?.hostSet, ["local.example.com"])
 
-        // Verify ignoreAmplitudeRequests stayed from local config
-        XCTAssertEqual(networkTrackingPlugin.currentOptions?.ignoreAmplitudeRequests, false)
+        // Verify ignoreAmplitudeRequests stayed from local config (false: Amplitude hosts not ignored)
+        XCTAssertEqual(networkTrackingPlugin.options?.ignoreHosts.hostPatterns.count, 0)
     }
 #endif
 }

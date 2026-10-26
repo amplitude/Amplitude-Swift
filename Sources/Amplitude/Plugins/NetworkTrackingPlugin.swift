@@ -224,15 +224,15 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
     @AtomicRef var options: CompiledNetworkTrackingOptions?
     @AtomicRef var optOut = true
     /// The options from `Configuration`. Not changed after `setup`: remote config is overlaid on
-    /// a copy, so a field the latest remote config omits falls back to the local value.
+    /// a copy, so a field the remote `networkTracking` section omits falls back to the local value.
     @AtomicRef var originalOptions: NetworkTrackingOptions?
-    /// What `options` was compiled from: `originalOptions` with the latest remote overlay.
-    @AtomicRef var currentOptions: NetworkTrackingOptions?
     var ruleCache: [String: CompiledNetworkTrackingOptions.CaptureRule?] = [:]
 
     let networkTrackingQueue = DispatchQueue(label: "com.amplitude.analytics.networkTracking", attributes: .concurrent)
 
     private let ruleCacheLock: NSLock = NSLock()
+    // Serializes refresh()'s read -> compile -> publish, so when setup's refresh and a delivery's
+    // refresh overlap, an older compile can't publish after a newer one.
     private let refreshLock = NSLock()
 
     var logger: (any Logger)? {
@@ -262,18 +262,19 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
 #endif
     }
 
-    /// Compiles the options from current state: `originalOptions` with the latest remote
-    /// `networkTracking` section overlaid, opted out unless the manager has network tracking
-    /// enabled. State is read under `refreshLock`, so when refreshes overlap, the one that
-    /// finishes last also read the newest state.
+    /// Applies the manager's current state. Disabled: stops listening, compiles nothing.
+    /// Enabled: compiles `originalOptions` with the latest remote `networkTracking` section
+    /// overlaid (none when remote config is off: the manager then never receives one).
     func refresh() {
         guard let amplitude else { return }
         refreshLock.withLock {
-            let manager = amplitude.autocaptureManager
-            optOut = !manager.isEnabled(.networkTracking)
-            guard let originalOptions else { return }
-            let remoteOptions = amplitude.configuration.enableAutoCaptureRemoteConfig ? manager.networkTrackingConfig : nil
-            compileConfig(Self.overlay(remoteOptions, on: originalOptions))
+            let state = amplitude.autocaptureManager.networkTrackingState
+            optOut = !state.enabled
+            guard state.enabled, let originalOptions else {
+                NetworkSwizzler.shared.removeListener(self)
+                return
+            }
+            compileConfig(Self.overlay(state.config, on: originalOptions))
         }
     }
 
@@ -298,7 +299,6 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
     func compileConfig(_ trackingOptions: NetworkTrackingOptions) {
         do {
             options = try CompiledNetworkTrackingOptions(options: trackingOptions)
-            currentOptions = trackingOptions
 
             ruleCacheLock.withLock {
                 ruleCache.removeAll()

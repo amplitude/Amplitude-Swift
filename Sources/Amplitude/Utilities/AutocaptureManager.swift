@@ -33,13 +33,14 @@ class AutocaptureManager {
 
     private var _networkTrackingConfig: [String: Any]?
 
-    /// The `networkTracking` section of the latest non-nil remote config, or nil if that config had
-    /// none (or none has arrived yet). Like the enabled options, it is left as is by a nil delivery
-    /// (the fallback after a failed fetch). Updated before `onChange` callbacks run, so a reader
-    /// that runs after a callback sees that delivery's section or a newer one. Its `enabled` flag
-    /// is already reflected in `isEnabled(.networkTracking)`.
-    var networkTrackingConfig: [String: Any]? {
-        lock.withLock { _networkTrackingConfig }
+    /// Whether network tracking is enabled, and the latest remote `networkTracking` section (nil
+    /// until a config with one arrives), read together under one lock so the pair is consistent.
+    /// Like the enabled flag, the section is replaced only by a config that has one: a config
+    /// without the section, or a nil delivery (the fallback after a failed fetch), keeps it.
+    /// Updated before `onChange` callbacks run, so a reader that runs after a callback sees that
+    /// delivery's state or a newer one.
+    var networkTrackingState: (enabled: Bool, config: [String: Any]?) {
+        lock.withLock { (_enabledOptions.contains(.networkTracking), _networkTrackingConfig) }
     }
 
     private var changeCallbacks: [ChangeCallback] = []
@@ -144,15 +145,16 @@ class AutocaptureManager {
                     }
                 }
 
-                if let networkTracking = config["networkTracking"] as? [String: Any],
-                   let enabled = networkTracking["enabled"] as? Bool {
-                    if enabled {
-                        _enabledOptions.formUnion(.networkTracking)
-                    } else {
-                        _enabledOptions.subtract(.networkTracking)
+                if let networkTracking = config["networkTracking"] as? [String: Any] {
+                    if let enabled = networkTracking["enabled"] as? Bool {
+                        if enabled {
+                            _enabledOptions.formUnion(.networkTracking)
+                        } else {
+                            _enabledOptions.subtract(.networkTracking)
+                        }
                     }
+                    _networkTrackingConfig = networkTracking
                 }
-                _networkTrackingConfig = config["networkTracking"] as? [String: Any]
             }
         }
 
