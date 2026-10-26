@@ -88,6 +88,9 @@ class NetworkSwizzler {
     func addListener(_ listener: NetworkTaskListener) {
         swizzle()
         lock.withLock {
+            // Callers re-register on every config change (NetworkTrackingPlugin.compileConfig runs
+            // on each autocapture remote-config delivery); a second entry means a second event.
+            guard !listeners.contains(where: { $0 === listener }) else { return }
             listeners.append(listener)
         }
     }
