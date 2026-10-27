@@ -1,0 +1,4 @@
+# DX maintains this SDK and its build and release tooling.
+# This includes GitHub Actions, publishing and signing automation, Swift and
+# Objective-C build/package metadata, and this CODEOWNERS file.
+* @amplitude/dx
