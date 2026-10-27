@@ -1,3 +1,10 @@
+## [1.19.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.19.3...v1.19.4) (2026-10-27)
+
+
+### Bug Fixes
+
+* **network-tracking:** dedupe listeners and track requests before remote config arrives ([#452](https://github.com/amplitude/Amplitude-Swift/issues/452)) ([0691e95](https://github.com/amplitude/Amplitude-Swift/commit/0691e95e7b1f259db5f3c5cf76279ffe89b95dcc))
+
 ## [1.19.3](https://github.com/amplitude/Amplitude-Swift/compare/v1.19.2...v1.19.3) (2026-10-08)
 
 
