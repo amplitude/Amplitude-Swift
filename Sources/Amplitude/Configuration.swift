@@ -77,6 +77,11 @@ public class Configuration {
     public var useBatch: Bool
     public var serverZone: ServerZone
     public var serverUrl: String?
+
+    /// Transport for Analytics uploads, remote configuration, diagnostics, and plugins
+    /// such as Session Replay. Set at initialization so every client uses the same HTTP client.
+    /// When nil, each client uses its default URLSession transport.
+    public let httpClient: (any HttpClient)?
     public var plan: Plan?
     public var ingestionMetadata: IngestionMetadata?
     public var trackingOptions: TrackingOptions
@@ -209,6 +214,7 @@ public class Configuration {
         enableRequestBodyCompression: Bool = Defaults.enableRequestBodyCompression,
         userId: String? = nil,
         deviceId: String? = nil,
+        httpClient: (any HttpClient)? = nil,
     ) {
         let normalizedInstanceName = Configuration.getNormalizeInstanceName(instanceName)
 
@@ -225,13 +231,15 @@ public class Configuration {
         self.remoteConfigClient = RemoteConfigClient(apiKey: self.apiKey,
                                                      serverZone: self.serverZone,
                                                      instanceName: self.instanceName,
-                                                     logger: self.loggerProvider)
+                                                     logger: self.loggerProvider,
+                                                     httpClient: httpClient)
         self.diagnosticsClient = DiagnosticsClient(apiKey: self.apiKey,
                                                    serverZone: self.serverZone,
                                                    instanceName: self.instanceName,
                                                    logger: self.loggerProvider,
                                                    enabled: self.enableDiagnostics,
-                                                   remoteConfigClient: self.remoteConfigClient)
+                                                   remoteConfigClient: self.remoteConfigClient,
+                                                   httpClient: httpClient ?? URLSessionHttpClient())
         self.storageProvider = storageProvider
         ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         self.identifyStorageProvider = identifyStorageProvider
@@ -261,6 +269,7 @@ public class Configuration {
         self.enableRequestBodyCompression = enableRequestBodyCompression
         self.userId = userId
         self.deviceId = deviceId
+        self.httpClient = httpClient
     }
 
     func isValid() -> Bool {

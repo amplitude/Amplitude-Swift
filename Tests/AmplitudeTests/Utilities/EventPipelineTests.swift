@@ -86,12 +86,12 @@ final class EventPipelineTests: XCTestCase {
     func testPendingMarkerClearsOnSuccessAndErrorCallbacks() throws {
         class ObservingHttpClient: FakeHttpClient {
             var onRequest: (() -> Void)?
-            override func upload(events: String, completion: @escaping (Result<Int, Error>) -> Void) -> URLSessionDataTask? {
+            override func upload(events: String, completion: @escaping (Result<Int, Error>) -> Void) -> (@Sendable () -> Void)? {
                 onRequest?()
                 return super.upload(events: events, completion: completion)
             }
         }
-        for result: Result<Int, Error> in [.success(200), .failure(HttpClient.Exception.httpError(code: 500, data: nil))] {
+        for result: Result<Int, Error> in [.success(200), .failure(AnalyticsHttpClient.Exception.httpError(code: 500, data: nil))] {
             let completed = expectation(description: "response callback completed")
             let client = ObservingHttpClient(configuration: configuration, diagnostics: configuration.diagonostics)
             client.onRequest = { [storage] in
@@ -216,7 +216,7 @@ final class EventPipelineTests: XCTestCase {
         let invalidResponseData = "{\"events_with_invalid_fields\": {\"user_id\": [0]}}".data(using: .utf8)!
 
         httpClient.uploadResults = [
-            .failure(HttpClient.Exception.httpError(code: 400, data: invalidResponseData))
+            .failure(AnalyticsHttpClient.Exception.httpError(code: 400, data: invalidResponseData))
         ]
 
         let uploadExpectations = (0..<2).map { i in expectation(description: "httpresponse-\(i)") }
@@ -454,8 +454,8 @@ final class EventPipelineTests: XCTestCase {
 
         let invalidResponseData = "{\"events_with_invalid_fields\": {\"user_id\": [0]}}".data(using: .utf8)!
         httpClient.uploadResults = [
-            .failure(HttpClient.Exception.httpError(code: HttpClient.HttpStatus.BAD_REQUEST.rawValue, data: invalidResponseData)),
-            .failure(HttpClient.Exception.httpError(code: HttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue, data: nil)),
+            .failure(AnalyticsHttpClient.Exception.httpError(code: AnalyticsHttpClient.HttpStatus.BAD_REQUEST.rawValue, data: invalidResponseData)),
+            .failure(AnalyticsHttpClient.Exception.httpError(code: AnalyticsHttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue, data: nil)),
             .success(200),
         ]
 

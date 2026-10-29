@@ -60,7 +60,7 @@ class PersistentStorageResponseHandler: ResponseHandler {
         if isInvalidApiKey {
             triggerEventsCallback(
                 events: events,
-                code: HttpClient.HttpStatus.BAD_REQUEST.rawValue,
+                code: AnalyticsHttpClient.HttpStatus.BAD_REQUEST.rawValue,
                 message: error
             )
             storage.remove(eventBlock: eventBlock)
@@ -92,7 +92,7 @@ class PersistentStorageResponseHandler: ResponseHandler {
             }
         }
 
-        triggerEventsCallback(events: eventsToDrop, code: HttpClient.HttpStatus.BAD_REQUEST.rawValue, message: error)
+        triggerEventsCallback(events: eventsToDrop, code: AnalyticsHttpClient.HttpStatus.BAD_REQUEST.rawValue, message: error)
 
         eventsToRetry.forEach { event in
             eventPipeline.put(event: event)
@@ -112,7 +112,7 @@ class PersistentStorageResponseHandler: ResponseHandler {
             let error = data["error"] as? String ?? ""
             triggerEventsCallback(
                 events: events,
-                code: HttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue,
+                code: AnalyticsHttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue,
                 message: error
             )
             storage.remove(eventBlock: eventBlock)
@@ -144,21 +144,21 @@ class PersistentStorageResponseHandler: ResponseHandler {
             return handleSuccessResponse(code: code)
         case .failure(let error):
             switch error {
-            case HttpClient.Exception.httpError(let code, let data):
+            case AnalyticsHttpClient.Exception.httpError(let code, let data):
                 var json = [String: Any]()
                 if data != nil {
                     json = (try? JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any]) ?? json
                 }
                 switch code {
-                case HttpClient.HttpStatus.BAD_REQUEST.rawValue:
+                case AnalyticsHttpClient.HttpStatus.BAD_REQUEST.rawValue:
                     return handleBadRequestResponse(data: json)
-                case HttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue:
+                case AnalyticsHttpClient.HttpStatus.PAYLOAD_TOO_LARGE.rawValue:
                     return handlePayloadTooLargeResponse(data: json)
-                case HttpClient.HttpStatus.TIMEOUT.rawValue:
+                case AnalyticsHttpClient.HttpStatus.TIMEOUT.rawValue:
                     return handleTimeoutResponse(data: json)
-                case HttpClient.HttpStatus.TOO_MANY_REQUESTS.rawValue:
+                case AnalyticsHttpClient.HttpStatus.TOO_MANY_REQUESTS.rawValue:
                     return handleTooManyRequestsResponse(data: json)
-                case HttpClient.HttpStatus.FAILED.rawValue:
+                case AnalyticsHttpClient.HttpStatus.FAILED.rawValue:
                     return handleFailedResponse(data: json)
                 default:
                     return handleFailedResponse(data: json)

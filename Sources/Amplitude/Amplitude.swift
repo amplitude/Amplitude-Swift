@@ -158,7 +158,8 @@ public class Amplitude {
                                             serverZone: serverZone,
                                             logger: configuration.loggerProvider,
                                             remoteConfigClient: configuration.remoteConfigClient,
-                                            diagnosticsClient: configuration.diagnosticsClient)
+                                            diagnosticsClient: configuration.diagnosticsClient,
+                                            httpClient: configuration.httpClient)
 
         let contextPlugin = ContextPlugin()
         self.contextPlugin = contextPlugin
