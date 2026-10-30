@@ -35,7 +35,8 @@ final class EventPipelineTests: XCTestCase {
             flushIntervalMillis: Int(Self.FLUSH_INTERVAL_SECONDS * 1000),
             instanceName: UUID().uuidString,
             storageProvider: storage,
-            offline: NetworkConnectivityCheckerPlugin.Disabled
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
+            httpClient: RemoteConfigMockServer()
         )
         let amplitude = Amplitude(configuration: configuration)
         httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagonostics)
@@ -59,7 +60,7 @@ final class EventPipelineTests: XCTestCase {
         let amplitude = Amplitude(configuration: Configuration(
             apiKey: "test", instanceName: name, storageProvider: stateStorage,
             identifyStorageProvider: InMemoryStorage(), autocapture: [],
-            offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false))
+            offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false, httpClient: RemoteConfigMockServer()))
         let pipeline = EventPipeline(amplitude: amplitude)
         pipeline.flushTimer?.suspend()
         let firstScan = expectation(description: "recover previous request")
@@ -353,7 +354,8 @@ final class EventPipelineTests: XCTestCase {
             apiKey: "testApiKey",
             flushIntervalMillis: Int(Self.FLUSH_INTERVAL_SECONDS * 1000),
             storageProvider: spyStorage,
-            offline: NetworkConnectivityCheckerPlugin.Disabled
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
+            httpClient: RemoteConfigMockServer()
         )
         let spyAmplitude = Amplitude(configuration: spyConfiguration)
         let spyHttp = FakeHttpClient(configuration: spyConfiguration, diagnostics: spyConfiguration.diagonostics)

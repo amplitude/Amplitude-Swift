@@ -425,3 +425,16 @@ actor FakeDiagnosticsClient: CoreDiagnostics {
 
     func flush() async {}
 }
+
+struct ClosureHttpClient: HttpClient {
+    let handler: @Sendable (URLRequest) async throws -> (Data, URLResponse)
+
+    init(_ handler: @escaping @Sendable (URLRequest) async throws -> (Data, URLResponse)) {
+        self.handler = handler
+    }
+
+    func send(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        await Task.yield()
+        return try await handler(request)
+    }
+}

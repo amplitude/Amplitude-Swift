@@ -22,7 +22,7 @@ final class NetworkConnectivityCheckerPluginTests: XCTestCase {
         // a second writer racing the mock-driven plugin under test, which on a busy runner
         // flipped the value back between simulateNetworkChange and the assertion.
         amplitude = Amplitude(configuration: Configuration(apiKey: "test-api-key",
-                                                           offline: NetworkConnectivityCheckerPlugin.Disabled))
+                                                           offline: NetworkConnectivityCheckerPlugin.Disabled, httpClient: RemoteConfigMockServer()))
         plugin = NetworkConnectivityCheckerPlugin(pathCreation: mockPathCreation)
         plugin.setup(amplitude: amplitude)
     }

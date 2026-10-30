@@ -4,7 +4,7 @@ import XCTest
 
 final class AutocaptureOptionsTests: XCTestCase {
     func testDefault() {
-        let config = Configuration(apiKey: "TEST_KEY")
+        let config = Configuration(apiKey: "TEST_KEY", httpClient: RemoteConfigMockServer())
         XCTAssertFalse(config.autocapture.contains(.appLifecycles))
         XCTAssertFalse(config.autocapture.contains(.screenViews))
         XCTAssertTrue(config.autocapture.contains(.sessions))
@@ -27,7 +27,8 @@ final class AutocaptureOptionsTests: XCTestCase {
 
     func testDefaultTrackingOptionChangesReflectInAutocapture() {
         let configuration = Configuration(
-            apiKey: "test-api-key"
+            apiKey: "test-api-key",
+            httpClient: RemoteConfigMockServer()
         )
 
         XCTAssertTrue(configuration.autocapture.contains(.sessions))
@@ -41,7 +42,8 @@ final class AutocaptureOptionsTests: XCTestCase {
 
     func testDefaultTrackingInstanceChangeReflectInAutocapture() {
         let configuration = Configuration(
-            apiKey: "test-api-key"
+            apiKey: "test-api-key",
+            httpClient: RemoteConfigMockServer()
         )
 
         (configuration as DeprecationWarningDiscardable).setDefaultTracking(sessions: false, appLifecycles: true, screenViews: true)

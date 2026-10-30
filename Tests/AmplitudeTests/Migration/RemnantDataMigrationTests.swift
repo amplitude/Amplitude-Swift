@@ -48,7 +48,8 @@ final class RemnantDataMigrationTests: XCTestCase {
         let configuration = Configuration(
             apiKey: apiKey,
             instanceName: instanceName,
-            migrateLegacyData: migrateLegacyData
+            migrateLegacyData: migrateLegacyData,
+            httpClient: RemoteConfigMockServer()
         )
         let amplitude = FakeAmplitudeWithSandboxEnabled(configuration: configuration)
 

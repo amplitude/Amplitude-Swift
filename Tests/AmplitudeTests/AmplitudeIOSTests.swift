@@ -32,7 +32,8 @@ final class AmplitudeIOSTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: .appLifecycles,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
         let amplitude = Amplitude(configuration: configuration)
         try storageMem.write(key: StorageKey.APP_BUILD, value: nil)
@@ -63,7 +64,8 @@ final class AmplitudeIOSTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: .appLifecycles,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
         try storageMem.write(key: StorageKey.APP_BUILD, value: "abc")
         try storageMem.write(key: StorageKey.APP_VERSION, value: "xyz")
@@ -94,7 +96,8 @@ final class AmplitudeIOSTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: .appLifecycles,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
 
         let info = Bundle.main.infoDictionary
@@ -120,7 +123,8 @@ final class AmplitudeIOSTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: .appLifecycles,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
 
         let info = Bundle.main.infoDictionary
@@ -166,7 +170,8 @@ final class AmplitudeIOSTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: .appLifecycles,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
 
         let info = Bundle.main.infoDictionary
@@ -199,7 +204,8 @@ final class AmplitudeIOSTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: .appLifecycles,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -219,7 +225,8 @@ final class AmplitudeIOSTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: .appLifecycles,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
 
         let info = Bundle.main.infoDictionary
@@ -252,7 +259,8 @@ final class AmplitudeIOSTests: XCTestCase {
             autocapture: .sessions,
             enableAutoCaptureRemoteConfig: false,
             userId: "test-user",
-            deviceId: "test-device"
+            deviceId: "test-device",
+            httpClient: RemoteConfigMockServer()
         )
 
         // force new session event to fire immediately
