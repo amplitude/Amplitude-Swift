@@ -39,6 +39,7 @@ struct RemoteConfigMockServer: HttpClient {
     }
 
     func send(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        await Task.yield()
         let url = try XCTUnwrap(request.url)
         var body: [String: Any] = [:]
         if url.host?.hasPrefix("sr-client-cfg.") == true {

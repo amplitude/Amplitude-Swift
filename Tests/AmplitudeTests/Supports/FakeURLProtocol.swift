@@ -225,6 +225,7 @@ struct NetworkTrackingHttpClient: HttpClient {
     }()
 
     func send(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        await Task.yield()
         let host = request.url?.host ?? ""
         if host.hasPrefix("sr-client-cfg.") || host.hasPrefix("diagnostics.prod.") {
             return try await RemoteConfigMockServer().send(request)

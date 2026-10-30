@@ -434,6 +434,7 @@ struct ClosureHttpClient: HttpClient {
     }
 
     func send(_ request: URLRequest) async throws -> (Data, URLResponse) {
-        try await handler(request)
+        await Task.yield()
+        return try await handler(request)
     }
 }
