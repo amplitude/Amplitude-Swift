@@ -17,7 +17,7 @@ import Foundation
 private let MAX_RETRY_INTERVAL: Double = 60
 
 public class EventPipeline {
-    var httpClient: HttpClient
+    var httpClient: AnalyticsHttpClient
     let storage: Storage?
     let logger: (any Logger)?
     let configuration: Configuration
@@ -27,7 +27,7 @@ public class EventPipeline {
     private let uploadsQueue = DispatchQueue(label: "uploadsQueue.amplitude.com")
 
     private var flushCompletions: [() -> Void] = []
-    private var currentUpload: URLSessionTask?
+    private var currentUpload: (@Sendable () -> Void)?
     private let uploadStateStorage: (any UploadRequestStateStorage)?
     private var didRecoverPendingUpload = false
 
@@ -36,7 +36,7 @@ public class EventPipeline {
         logger = amplitude.logger
         configuration = amplitude.configuration
         uploadStateStorage = amplitude.storage as? any UploadRequestStateStorage
-        httpClient = HttpClient(configuration: amplitude.configuration,
+        httpClient = AnalyticsHttpClient(configuration: amplitude.configuration,
                                 diagnostics: amplitude.configuration.diagonostics,
                                 callbackQueue: amplitude.trackingQueue)
         flushTimer = QueueTimer(interval: getFlushInterval(), queue: amplitude.trackingQueue) { [weak self] in

@@ -186,7 +186,7 @@ class FakeInMemoryStorage: Storage {
     }
 }
 
-class FakeHttpClient: HttpClient {
+class FakeHttpClient: AnalyticsHttpClient {
     var uploadCount: Int = 0
     var uploadedEvents: [String] = []
     var uploadExpectations: [XCTestExpectation] = []
@@ -195,7 +195,7 @@ class FakeHttpClient: HttpClient {
     let completionQueue = DispatchQueue(label: "FakeHttpClient.completionQueue")
 
     override func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void)
-        -> URLSessionDataTask?
+        -> (@Sendable () -> Void)?
     {
         uploadCount += 1
         uploadedEvents.append(events)
@@ -214,7 +214,7 @@ class FakeHttpClient: HttpClient {
                 self.uploadExpectations.removeFirst().fulfill()
             }
         }
-        return URLSession.shared.dataTask(with: URLRequest(url: URL(string: "https://www.amplitude.com")!))
+        return {}
     }
 
     override func getDate() -> Date {

@@ -1,5 +1,5 @@
 //
-//  HttpClient.swift
+//  AnalyticsHttpClient.swift
 //
 //
 //  Created by Marvin Liu on 10/28/22.
@@ -7,9 +7,15 @@
 
 import Foundation
 
-class HttpClient {
+#if AMPLITUDE_DISABLE_UIKIT
+@_spi(Internal) import AmplitudeCoreNoUIKit
+#else
+@_spi(Internal) import AmplitudeCore
+#endif
+
+class AnalyticsHttpClient {
     let configuration: Configuration
-    let session: URLSession
+    let httpClient: any HttpClient
     let logger: (any Logger)?
     let diagnostics: Diagnostics
     let callbackQueue: DispatchQueue
@@ -26,19 +32,23 @@ class HttpClient {
         self.logger = configuration.loggerProvider
         self.callbackQueue = callbackQueue ?? .global()
 
-        let sessionConfiguration = URLSessionConfiguration.default
-        sessionConfiguration.httpMaximumConnectionsPerHost = 2
-        sessionConfiguration.urlCache = nil
-        self.session = URLSession(configuration: sessionConfiguration, delegate: nil, delegateQueue: nil)
+        self.httpClient = configuration.httpClient ?? URLSessionHttpClient(session: Self.makeSession())
     }
 
-    func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> URLSessionDataTask? {
-        var sessionTask: URLSessionDataTask?
+    private static func makeSession() -> URLSession {
+        let configuration = URLSessionConfiguration.default
+        configuration.httpMaximumConnectionsPerHost = 2
+        configuration.urlCache = nil
+        return URLSession(configuration: configuration)
+    }
+
+    func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> (@Sendable () -> Void)? {
         let backgroundTaskCompletion = VendorSystem.current.beginBackgroundTask()
         do {
             let (requestData, isGzipEncoded) = getRequestData(events: events)
-            let request = try getRequest(isGzipEncoded: isGzipEncoded)
-            sessionTask = session.uploadTask(with: request, from: requestData) { [callbackQueue, configuration, logger] data, response, error in
+            var request = try getRequest(isGzipEncoded: isGzipEncoded)
+            request.httpBody = requestData
+            let requestCompletion: @Sendable (Data?, URLResponse?, Error?) -> Void = { [callbackQueue, configuration, logger] data, response, error in
                 callbackQueue.async {
                     if let error = error {
                         let nsError = error as NSError
@@ -62,17 +72,19 @@ class HttpClient {
                             logger?.error(message: "Response failed with code\(httpResponse.statusCode): \(response)")
                             completion(.failure(Exception.httpError(code: httpResponse.statusCode, data: data)))
                         }
+                    } else {
+                        completion(.failure(URLError(.badServerResponse)))
                     }
                     backgroundTaskCompletion?()
                 }
             }
-            sessionTask!.resume()
+            return httpClient.send(request, completion: requestCompletion)
         } catch {
             logger?.debug(message: "Failed to construct request")
             completion(.failure(Exception.httpError(code: 500, data: nil)))
             backgroundTaskCompletion?()
         }
-        return sessionTask
+        return nil
     }
 
     func getUrl() -> String {
@@ -159,7 +171,7 @@ class HttpClient {
     }
 }
 
-extension HttpClient {
+extension AnalyticsHttpClient {
     enum HttpStatus: Int {
         case SUCCESS = 200
         case BAD_REQUEST = 400

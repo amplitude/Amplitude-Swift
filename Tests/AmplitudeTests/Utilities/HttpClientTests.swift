@@ -18,25 +18,73 @@ final class HttpClientTests: XCTestCase {
         configuration = Configuration(apiKey: "testApiKey")
     }
 
+    func testCustomHandlerReceivesCompleteCompressedRequest() {
+        let completed = expectation(description: "upload completed once")
+        completed.assertForOverFulfill = true
+        let config = Configuration(apiKey: "testApiKey", enableDiagnostics: false, httpClient: ClosureHttpClient({ request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            if request.httpMethod == "POST" {
+                XCTAssertEqual(request.url?.absoluteString, Constants.DEFAULT_API_HOST)
+                XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Encoding"), "gzip")
+                let body = request.httpBody?.gunzipped()
+                XCTAssertNotNil(body)
+                XCTAssertTrue(String(data: body ?? Data(), encoding: .utf8)?.contains("testApiKey") == true)
+            }
+            return (Data(#"{"configs":{}}"#.utf8), response)
+        }))
+        let client = AnalyticsHttpClient(configuration: config, diagnostics: diagonostics)
+        _ = client.upload(events: "[]") { result in
+            XCTAssertEqual(try? result.get(), 200)
+            completed.fulfill()
+        }
+        waitForExpectations(timeout: 3)
+    }
+
+    func testCustomHandlerCancellation() {
+        let started = expectation(description: "custom transport started")
+        let cancelled = expectation(description: "custom transport cancelled")
+        let completed = expectation(description: "upload failed with cancellation")
+        let config = Configuration(apiKey: "testApiKey", enableDiagnostics: false, httpClient: ClosureHttpClient({ request in
+            if request.httpMethod != "POST" {
+                throw URLError(.cancelled)
+            }
+            return try await withTaskCancellationHandler(operation: {
+                started.fulfill()
+                try await Task.sleep(nanoseconds: 60 * NSEC_PER_SEC)
+                throw URLError(.timedOut)
+            }, onCancel: { cancelled.fulfill() })
+        }))
+        let client = AnalyticsHttpClient(configuration: config, diagnostics: diagonostics)
+        let cancel = client.upload(events: "[]") { result in
+            guard case .failure(let error) = result else { return XCTFail("Expected cancellation") }
+            XCTAssertEqual((error as? URLError)?.code, .cancelled)
+            completed.fulfill()
+        }
+        wait(for: [started], timeout: 3)
+        cancel?()
+        cancel?()
+        wait(for: [cancelled, completed], timeout: 3)
+    }
+
     func testGetUrlWithDefault() {
-        let httpClient = HttpClient(configuration: configuration, diagnostics: diagonostics)
+        let httpClient = AnalyticsHttpClient(configuration: configuration, diagnostics: diagonostics)
         XCTAssertEqual(httpClient.getUrl(), Constants.DEFAULT_API_HOST)
     }
 
     func testGetUrlWithCustomUrl() {
         let customUrl = "https//localhost.test"
         configuration.serverUrl = customUrl
-        let httpClient = HttpClient(configuration: configuration, diagnostics: diagonostics)
+        let httpClient = AnalyticsHttpClient(configuration: configuration, diagnostics: diagonostics)
         XCTAssertEqual(httpClient.getUrl(), customUrl)
     }
 
     func testGetRequestWithInvalidUrl() {
         let invalidUrl = "local host"
         configuration.serverUrl = invalidUrl
-        let httpClient = HttpClient(configuration: configuration, diagnostics: diagonostics)
+        let httpClient = AnalyticsHttpClient(configuration: configuration, diagnostics: diagonostics)
 
         XCTAssertThrowsError(try httpClient.getRequest(isGzipEncoded: false)) { error in
-            guard case HttpClient.Exception.invalidUrl(let url) = error else {
+            guard case AnalyticsHttpClient.Exception.invalidUrl(let url) = error else {
                 return XCTFail("not getting invalidUrl error")
             }
             XCTAssertEqual(url, invalidUrl)
@@ -72,14 +120,14 @@ final class HttpClientTests: XCTestCase {
 
     func testUploadWithInvalidApiKey() {
         // TODO: currently this test is sending request to real Amplitude host, update to mock for better stability
-        let httpClient = HttpClient(configuration: configuration, diagnostics: diagonostics)
+        let httpClient = AnalyticsHttpClient(configuration: configuration, diagnostics: diagonostics)
         let asyncExpectation = expectation(description: "Async function")
         let event1 = BaseEvent(userId: "unit-test user", deviceId: "unit-test device", eventType: "unit-test event")
         _ = httpClient.upload(events: "[\(event1.toString())]") { result in
             guard case .failure(let error) = result else {
                 return XCTFail("not getting upload failure")
             }
-            guard case HttpClient.Exception.httpError(let code, let data) = error else {
+            guard case AnalyticsHttpClient.Exception.httpError(let code, let data) = error else {
                 return XCTFail("not getting httpError error")
             }
             XCTAssertEqual(code, 400)
@@ -91,7 +139,7 @@ final class HttpClientTests: XCTestCase {
 
     func testUploadWithCannotConnectToHostError() {
         let config = Configuration(apiKey: "fake", serverUrl: "http://localhost:3000", offline: false)
-        let httpClient = HttpClient(configuration: config, diagnostics: diagonostics)
+        let httpClient = AnalyticsHttpClient(configuration: config, diagnostics: diagonostics)
         let uploadExpectation = expectation(description: "Did Call Upload")
         let event = BaseEvent(userId: "unit-test user", eventType: "unit-test event")
 
@@ -111,7 +159,7 @@ final class HttpClientTests: XCTestCase {
     }
 
     func testGetRequestSetsGzipHeaderWhenEnabled() throws {
-        let httpClient = HttpClient(configuration: configuration, diagnostics: diagonostics)
+        let httpClient = AnalyticsHttpClient(configuration: configuration, diagnostics: diagonostics)
         let request = try httpClient.getRequest(isGzipEncoded: true)
 
         let contentEncoding = request.value(forHTTPHeaderField: "Content-Encoding")
@@ -127,7 +175,7 @@ final class HttpClientTests: XCTestCase {
                                                useBatch: useBatch,
                                                serverZone: serverZone,
                                                enableRequestBodyCompression: enableRequestBodyCompression)
-                    let httpClient = HttpClient(configuration: config, diagnostics: diagonostics)
+                    let httpClient = AnalyticsHttpClient(configuration: config, diagnostics: diagonostics)
                     XCTAssertTrue(httpClient.shouldCompressUploadBody)
 
                     let (_, isGzipEncoded) = httpClient.getRequestData(events: "events")
@@ -140,7 +188,7 @@ final class HttpClientTests: XCTestCase {
         let enabledConfig = Configuration(apiKey: "aaa",
                                           serverUrl: "https://www.google.com",
                                           enableRequestBodyCompression: true)
-        let enabledHttpClient = HttpClient(configuration: enabledConfig,
+        let enabledHttpClient = AnalyticsHttpClient(configuration: enabledConfig,
                                            diagnostics: diagonostics)
         XCTAssertTrue(enabledHttpClient.shouldCompressUploadBody)
         let (_, enabledRequestIsGzipEncoded) = enabledHttpClient.getRequestData(events: "events")
@@ -149,10 +197,22 @@ final class HttpClientTests: XCTestCase {
         let disabledConfig = Configuration(apiKey: "aaa",
                                           serverUrl: "https://www.google.com",
                                           enableRequestBodyCompression: false)
-        let disabledHttpClient = HttpClient(configuration: disabledConfig,
+        let disabledHttpClient = AnalyticsHttpClient(configuration: disabledConfig,
                                            diagnostics: diagonostics)
         XCTAssertFalse(disabledHttpClient.shouldCompressUploadBody)
         let (_, disabledRequestIsGzipEncoded) = disabledHttpClient.getRequestData(events: "events")
         XCTAssertFalse(disabledRequestIsGzipEncoded)
+    }
+}
+
+private struct ClosureHttpClient: HttpClient {
+    let handler: @Sendable (URLRequest) async throws -> (Data, URLResponse)
+
+    init(_ handler: @escaping @Sendable (URLRequest) async throws -> (Data, URLResponse)) {
+        self.handler = handler
+    }
+
+    func send(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        try await handler(request)
     }
 }
