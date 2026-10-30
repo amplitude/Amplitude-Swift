@@ -24,7 +24,8 @@ final class IdentifyInterceptorTests: XCTestCase {
             storageProvider: storage,
             identifyStorageProvider: identifyStorage,
             identifyBatchIntervalMillis: identifyBatchIntervalMillis,
-            offline: NetworkConnectivityCheckerPlugin.Disabled
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
+            httpClient: RemoteConfigMockServer()
         )
         amplitude = Amplitude(configuration: configuration)
         mockPathCreation = MockPathCreation()

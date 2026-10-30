@@ -66,7 +66,7 @@ final class NetworkTrackingPluginTest: XCTestCase {
                                           autocapture: .networkTracking,
                                           offline: NetworkConnectivityCheckerPlugin.Disabled,
                                           networkTrackingOptions: options,
-                                          enableAutoCaptureRemoteConfig: false)
+                                          enableAutoCaptureRemoteConfig: false, httpClient: NetworkTrackingHttpClient())
         amplitude = Amplitude(configuration: configuration)
         amplitude.add(plugin: eventCollector)
     }

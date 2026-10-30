@@ -443,7 +443,7 @@ final class WebViewDeadClickTests: XCTestCase {
             autocapture: [.frustrationInteractions],
             enableAutoCaptureRemoteConfig: false,
             interactionsOptions: InteractionsOptions(rageClick: .init(enabled: true),
-                                                     deadClick: .init(enabled: true)))
+                                                     deadClick: .init(enabled: true)), httpClient: RemoteConfigMockServer())
         let amplitude = Amplitude(configuration: configuration)
         let collector = EventCollectorPlugin()
         amplitude.add(plugin: collector)

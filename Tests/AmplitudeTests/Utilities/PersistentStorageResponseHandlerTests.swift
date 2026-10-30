@@ -23,7 +23,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
     override func setUp() {
         super.setUp()
         storage = PersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
-        configuration = Configuration(apiKey: "testApiKey", storageProvider: storage)
+        configuration = Configuration(apiKey: "testApiKey", storageProvider: storage, httpClient: RemoteConfigMockServer())
         amplitude = Amplitude(configuration: configuration)
         eventPipeline = EventPipeline(amplitude: amplitude)
         eventBlock = URL(string: "test")

@@ -54,7 +54,8 @@ final class ContextPluginDeviceIdTests: XCTestCase {
             identifyStorageProvider: FakeInMemoryStorage(),
             trackingOptions: trackingOptions,
             migrateLegacyData: false,
-            deviceId: configuredDeviceId
+            deviceId: configuredDeviceId,
+            httpClient: RemoteConfigMockServer()
         ))
     }
 
@@ -182,7 +183,8 @@ final class MacOSVendorSystemDeviceIdTests: XCTestCase {
             instanceName: "macos-vendor-system-device-id-\(UUID().uuidString)",
             storageProvider: FakeInMemoryStorage(),
             identifyStorageProvider: FakeInMemoryStorage(),
-            migrateLegacyData: false
+            migrateLegacyData: false,
+            httpClient: RemoteConfigMockServer()
         ))
         print("fresh install deviceId = \(amplitude.getDeviceId() ?? "nil")")
 

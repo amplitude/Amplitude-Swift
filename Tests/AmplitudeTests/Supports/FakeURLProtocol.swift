@@ -1,3 +1,4 @@
+@_spi(Internal) import AmplitudeCore
 //
 //  FakeURLProtocol.swift
 //  Amplitude-Swift
@@ -212,5 +213,22 @@ extension URLSessionConfiguration {
         let cfg = _mock_default()
         cfg.protocolClasses = [FakeURLProtocol.self]
         return cfg
+    }
+}
+
+/// Keep URLSession interception coverage for SDK upload exclusion tests.
+struct NetworkTrackingHttpClient: HttpClient {
+    private static let client: URLSessionHttpClient = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [FakeURLProtocol.self]
+        return URLSessionHttpClient(session: URLSession(configuration: configuration))
+    }()
+
+    func send(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        let host = request.url?.host ?? ""
+        if host.hasPrefix("sr-client-cfg.") || host.hasPrefix("diagnostics.prod.") {
+            return try await RemoteConfigMockServer().send(request)
+        }
+        return try await Self.client.send(request)
     }
 }

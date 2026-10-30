@@ -24,14 +24,15 @@ final class AmplitudeTests: XCTestCase {
         super.setUp()
         let apiKey = "testApiKey"
 
-        configuration = Configuration(apiKey: apiKey)
+        configuration = Configuration(apiKey: apiKey, httpClient: RemoteConfigMockServer())
 
         storage = FakePersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         interceptStorage = FakePersistentStorage(storagePrefix: "intercept", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         configurationWithFakeStorage = Configuration(
             apiKey: apiKey,
             storageProvider: storage,
-            identifyStorageProvider: interceptStorage
+            identifyStorageProvider: interceptStorage,
+            httpClient: RemoteConfigMockServer()
         )
 
         storageMem = FakeInMemoryStorage()
@@ -42,7 +43,8 @@ final class AmplitudeTests: XCTestCase {
             identifyStorageProvider: interceptStorageMem,
             autocapture: [],
             offline: NetworkConnectivityCheckerPlugin.Disabled,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
     }
 
@@ -52,7 +54,7 @@ final class AmplitudeTests: XCTestCase {
     }
 
     func testInit_defaultInstanceName() {
-        let configuration = Configuration(apiKey: "api-key")
+        let configuration = Configuration(apiKey: "api-key", httpClient: RemoteConfigMockServer())
         XCTAssertEqual(
             Amplitude(configuration: configuration).configuration.instanceName,
             Constants.Configuration.DEFAULT_INSTANCE
@@ -60,7 +62,7 @@ final class AmplitudeTests: XCTestCase {
     }
 
     func testInit_emptyInstanceName() {
-        let configuration = Configuration(apiKey: "api-key", instanceName: "")
+        let configuration = Configuration(apiKey: "api-key", instanceName: "", httpClient: RemoteConfigMockServer())
         XCTAssertEqual(
             Amplitude(configuration: configuration).configuration.instanceName,
             Constants.Configuration.DEFAULT_INSTANCE
@@ -104,7 +106,8 @@ final class AmplitudeTests: XCTestCase {
         let storage = FakeInMemoryStorage()
         let amplitude = Amplitude(configuration: Configuration(
             apiKey: apiKey,
-            storageProvider: storage
+            storageProvider: storage,
+            httpClient: RemoteConfigMockServer()
         ))
 
         class TestFilterAndEnrichmentPlugin: EnrichmentPlugin {
@@ -164,7 +167,7 @@ final class AmplitudeTests: XCTestCase {
         let amplitude = Amplitude(configuration: Configuration(apiKey: "testPluginChangeNotifications",
                                                                flushIntervalMillis: 1000000,
                                                                optOut: false,
-                                                               storageProvider: FakeInMemoryStorage()))
+                                                               storageProvider: FakeInMemoryStorage(), httpClient: RemoteConfigMockServer()))
         amplitude.add(plugin: testPlugin)
         amplitude.waitForTrackingQueue()
 
@@ -221,7 +224,7 @@ final class AmplitudeTests: XCTestCase {
         let amplitude = Amplitude(configuration: Configuration(apiKey: "testPluginChangeNotifications",
                                                                flushIntervalMillis: 1000000,
                                                                optOut: false,
-                                                               storageProvider: FakeInMemoryStorage()))
+                                                               storageProvider: FakeInMemoryStorage(), httpClient: RemoteConfigMockServer()))
         amplitude.add(plugin: testPlugin)
         amplitude.waitForTrackingQueue()
 
@@ -242,7 +245,7 @@ final class AmplitudeTests: XCTestCase {
             .disableTrackCarrier()
             .disableTrackIDFV()
             .disableTrackCountry()
-        let configuration = Configuration(apiKey: apiKey, trackingOptions: trackingOptions)
+        let configuration = Configuration(apiKey: apiKey, trackingOptions: trackingOptions, httpClient: RemoteConfigMockServer())
 
         let amplitude = Amplitude(configuration: configuration)
 
@@ -263,7 +266,7 @@ final class AmplitudeTests: XCTestCase {
         let configuration = Configuration(
             apiKey: "testApiKeyDeviceIDWithDisableIDFV",
             storageProvider: storage,
-            trackingOptions: TrackingOptions().disableTrackIDFV())
+            trackingOptions: TrackingOptions().disableTrackIDFV(), httpClient: RemoteConfigMockServer())
 
         let amplitude = Amplitude(configuration: configuration)
 
@@ -296,7 +299,8 @@ final class AmplitudeTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             userId: "configured-user",
-            deviceId: "configured-device"
+            deviceId: "configured-device",
+            httpClient: RemoteConfigMockServer()
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -320,7 +324,8 @@ final class AmplitudeTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             userId: "configured-user",
-            deviceId: "configured-device"
+            deviceId: "configured-device",
+            httpClient: RemoteConfigMockServer()
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -337,7 +342,8 @@ final class AmplitudeTests: XCTestCase {
             apiKey: "test-api-key",
             instanceName: #function,
             storageProvider: storageMem,
-            identifyStorageProvider: interceptStorageMem
+            identifyStorageProvider: interceptStorageMem,
+            httpClient: RemoteConfigMockServer()
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -353,7 +359,8 @@ final class AmplitudeTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             userId: "configured-user",
-            deviceId: "configured-device"
+            deviceId: "configured-device",
+            httpClient: RemoteConfigMockServer()
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -373,25 +380,41 @@ final class AmplitudeTests: XCTestCase {
     }
 
     func testInterceptedIdentifyIsSentOnFlush() {
-        let amplitude = Amplitude(configuration: configurationWithFakeMemoryStorage)
+        let uploaded = expectation(description: "merged identify uploaded")
+        let configuration = Configuration(
+            apiKey: "testApiKey",
+            storageProvider: storageMem,
+            identifyStorageProvider: interceptStorageMem,
+            autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: ClosureHttpClient { request in
+                if request.httpMethod == "POST", request.url?.host == "api2.amplitude.com" {
+                    let body = try XCTUnwrap(request.httpBody?.gunzipped())
+                    let payload = try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: Any])
+                    let events = try XCTUnwrap(payload["events"] as? [[String: Any]])
+                    XCTAssertEqual(events.count, 1)
+                    XCTAssertEqual(events.first?["event_type"] as? String, "$identify")
+                    let properties = events.first?["user_properties"] as? [String: Any]
+                    XCTAssertEqual(properties?["$set"] as? [String: String],
+                                   ["key-1": "value-1", "key-2": "value-2"])
+                    uploaded.fulfill()
+                }
+                return try await RemoteConfigMockServer().send(request)
+            })
+        let amplitude = Amplitude(configuration: configuration)
 
         amplitude.setUserId(userId: "test-user")
         amplitude.identify(identify: Identify().set(property: "key-1", value: "value-1"))
         amplitude.identify(identify: Identify().set(property: "key-2", value: "value-2"))
         amplitude.waitForTrackingQueue()
 
-        var intercepts = interceptStorageMem.events()
-        var events = storageMem.events()
-        XCTAssertEqual(intercepts.count, 2)
-        XCTAssertEqual(events.count, 0)
+        XCTAssertEqual(interceptStorageMem.events().count, 2)
+        XCTAssertEqual(storageMem.events().count, 0)
 
         amplitude.flush()
-        amplitude.waitForTrackingQueue()
-
-        intercepts = interceptStorageMem.events()
-        events = storageMem.events()
-        XCTAssertEqual(intercepts.count, 0)
-        XCTAssertEqual(events.count, 1)
+        wait(for: [uploaded], timeout: 5)
+        XCTAssertEqual(interceptStorageMem.events().count, 0)
     }
 
     func testInterceptedIdentifyWithPersistentStorage() {
@@ -403,7 +426,8 @@ final class AmplitudeTests: XCTestCase {
             storageProvider: storageTest,
             identifyStorageProvider: interceptStorageTest,
             autocapture: [],
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         ))
 
         amplitude.setUserId(userId: "test-user")
@@ -456,7 +480,8 @@ final class AmplitudeTests: XCTestCase {
                 apiKey: apiKey,
                 instanceName: instanceName,
                 storageProvider: storageMem,
-                identifyStorageProvider: interceptStorageMem
+                identifyStorageProvider: interceptStorageMem,
+                httpClient: RemoteConfigMockServer()
             ))
 
         let userId = "some-user"
@@ -487,7 +512,7 @@ final class AmplitudeTests: XCTestCase {
     }
 
     func testInit_autocapture() {
-        let configuration = Configuration(apiKey: "api-key")
+        let configuration = Configuration(apiKey: "api-key", httpClient: RemoteConfigMockServer())
         let amplitude = Amplitude(configuration: configuration)
         let autocapture = amplitude.configuration.autocapture
         XCTAssertFalse(autocapture.contains(.appLifecycles))
@@ -502,7 +527,8 @@ final class AmplitudeTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: [],
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -531,7 +557,8 @@ final class AmplitudeTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: [],
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -555,7 +582,8 @@ final class AmplitudeTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: [],
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -579,7 +607,8 @@ final class AmplitudeTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: [],
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
 
         let amplitude = Amplitude(configuration: configuration)
@@ -603,7 +632,8 @@ final class AmplitudeTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: [],
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
         let amplitude = Amplitude(configuration: configuration)
         let eventOptions = EventOptions(sessionId: -1)
@@ -622,7 +652,8 @@ final class AmplitudeTests: XCTestCase {
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
             autocapture: [],
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
         let amplitude = Amplitude(configuration: configuration)
         amplitude.sessions = SessionsWithDelayedEventStartProcessing(amplitude: amplitude)
@@ -663,7 +694,8 @@ final class AmplitudeTests: XCTestCase {
             flushIntervalMillis: 99999,
             logLevel: LogLevelEnum.debug,
             autocapture: [],
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
 
         // Create storages using instance name only
@@ -679,7 +711,8 @@ final class AmplitudeTests: XCTestCase {
                 storageProvider: legacyEventStorage,
                 identifyStorageProvider: legacyIdentityStorage,
                 logLevel: config.logLevel,
-                autocapture: config.autocapture
+                autocapture: config.autocapture,
+                httpClient: RemoteConfigMockServer()
             ))
 
         let legacyDeviceId = legacyStorageAmplitude.getDeviceId()
@@ -748,7 +781,8 @@ final class AmplitudeTests: XCTestCase {
                 flushIntervalMillis: 99999,
                 logLevel: LogLevelEnum.debug,
                 autocapture: [],
-                enableAutoCaptureRemoteConfig: false
+                enableAutoCaptureRemoteConfig: false,
+                httpClient: RemoteConfigMockServer()
             )
 
             // Create storages using instance name only
@@ -764,7 +798,8 @@ final class AmplitudeTests: XCTestCase {
                     storageProvider: legacyEventStorage,
                     identifyStorageProvider: legacyIdentityStorage,
                     logLevel: config.logLevel,
-                    autocapture: config.autocapture
+                    autocapture: config.autocapture,
+                    httpClient: RemoteConfigMockServer()
                 ))
 
             let legacyDeviceId = legacyStorageAmplitude.getDeviceId()
@@ -845,7 +880,8 @@ final class AmplitudeTests: XCTestCase {
         let configuration = Configuration(
             apiKey: apiKey,
             instanceName: instanceName,
-            migrateLegacyData: true
+            migrateLegacyData: true,
+            httpClient: RemoteConfigMockServer()
         )
         let amplitude = Amplitude(configuration: configuration)
 
@@ -890,7 +926,8 @@ final class AmplitudeTests: XCTestCase {
         let configuration = Configuration(
             apiKey: apiKey,
             instanceName: instanceName,
-            migrateLegacyData: true
+            migrateLegacyData: true,
+            httpClient: RemoteConfigMockServer()
         )
         let amplitude = FakeAmplitudeWithSandboxEnabled(configuration: configuration)
 
@@ -904,7 +941,7 @@ final class AmplitudeTests: XCTestCase {
     #endif
 
     func testReset() {
-        let amplitude = Amplitude(configuration: Configuration(apiKey: "test-api-key"))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: "test-api-key", httpClient: RemoteConfigMockServer()))
         amplitude.setUserId(userId: "originalUserId")
         amplitude.setDeviceId(deviceId: "originalDeviceId")
         amplitude.reset()
@@ -938,7 +975,7 @@ final class AmplitudeTests: XCTestCase {
     func testConcurrentAccess() {
         let amplitude = Amplitude(configuration: Configuration(apiKey: "test-api-key",
                                                                storageProvider: InMemoryStorage(),
-                                                               autocapture: [.sessions, .appLifecycles]))
+                                                               autocapture: [.sessions, .appLifecycles], httpClient: RemoteConfigMockServer()))
         let eventCollector = EventCollectorPlugin()
         amplitude.add(plugin: eventCollector)
         let sessionID = Int64(Date().timeIntervalSince1970 * 1000)
@@ -984,7 +1021,7 @@ final class AmplitudeTests: XCTestCase {
             init(deallocExpectation: XCTestExpectation, trackExpectation: XCTestExpectation) {
                 self.deallocExpectation = deallocExpectation
                 super.init(configuration: Configuration(apiKey: "test-api-key",
-                                                        storageProvider: TestStorage(expectation: trackExpectation)))
+                                                        storageProvider: TestStorage(expectation: trackExpectation), httpClient: RemoteConfigMockServer()))
             }
 
             deinit {
@@ -1064,7 +1101,7 @@ final class AmplitudeTests: XCTestCase {
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: "test-api-key",
                                                                storageProvider: storage,
-                                                               maxQueuedEventCount: 15))
+                                                               maxQueuedEventCount: 15, httpClient: RemoteConfigMockServer()))
         amplitude.waitForTrackingQueue()
 
         let allEventBlocks: [URL] = storage.read(key: .EVENTS) ?? []

@@ -13,7 +13,7 @@ final class ConfigurationTests: XCTestCase {
     let apiKey = "testApiKey"
 
     func testConfigurationInit() {
-        let configuration = Configuration(apiKey: apiKey)
+        let configuration = Configuration(apiKey: apiKey, httpClient: RemoteConfigMockServer())
         XCTAssertEqual(
             configuration.apiKey,
             apiKey
@@ -21,35 +21,36 @@ final class ConfigurationTests: XCTestCase {
     }
 
     func testConfigurationIsValid() {
-        var configuration = Configuration(apiKey: apiKey)
+        var configuration = Configuration(apiKey: apiKey, httpClient: RemoteConfigMockServer())
         XCTAssertTrue(configuration.isValid())
 
         configuration = Configuration(
             apiKey: apiKey,
             flushQueueSize: 100,
             flushIntervalMillis: 3000,
-            minIdLength: 10
+            minIdLength: 10,
+            httpClient: RemoteConfigMockServer()
         )
         XCTAssertTrue(configuration.isValid())
 
-        configuration = Configuration(apiKey: "")
+        configuration = Configuration(apiKey: "", httpClient: RemoteConfigMockServer())
         XCTAssertFalse(configuration.isValid())
 
-        configuration = Configuration(apiKey: apiKey, flushQueueSize: -10)
+        configuration = Configuration(apiKey: apiKey, flushQueueSize: -10, httpClient: RemoteConfigMockServer())
         XCTAssertFalse(configuration.isValid())
 
-        configuration = Configuration(apiKey: apiKey, flushIntervalMillis: -1000)
+        configuration = Configuration(apiKey: apiKey, flushIntervalMillis: -1000, httpClient: RemoteConfigMockServer())
         XCTAssertFalse(configuration.isValid())
 
-        configuration = Configuration(apiKey: apiKey, minTimeBetweenSessionsMillis: -3000)
+        configuration = Configuration(apiKey: apiKey, minTimeBetweenSessionsMillis: -3000, httpClient: RemoteConfigMockServer())
         XCTAssertFalse(configuration.isValid())
 
-        configuration = Configuration(apiKey: apiKey, minIdLength: 0)
+        configuration = Configuration(apiKey: apiKey, minIdLength: 0, httpClient: RemoteConfigMockServer())
         XCTAssertFalse(configuration.isValid())
     }
 
     func testStorageByApiKeyAndInstanceName() throws {
-        let configuration = Configuration(apiKey: "migration-api-key")
+        let configuration = Configuration(apiKey: "migration-api-key", httpClient: RemoteConfigMockServer())
 
         let expectedStoragePostfix = "\(configuration.apiKey)-\(configuration.getNormalizeInstanceName())"
 
@@ -70,7 +71,8 @@ final class ConfigurationTests: XCTestCase {
     func testStorageByApiKeyAndInstanceNameWithCustomInstanceName() throws {
         let configuration = Configuration(
             apiKey: "migration-api-key",
-            instanceName: "test-instance"
+            instanceName: "test-instance",
+            httpClient: RemoteConfigMockServer()
         )
 
         let expectedStoragePostfix = "\(configuration.apiKey)-\(configuration.getNormalizeInstanceName())"

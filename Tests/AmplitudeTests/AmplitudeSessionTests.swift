@@ -20,7 +20,8 @@ final class AmplitudeSessionTests: XCTestCase {
             identifyStorageProvider: interceptStorageMem,
             minTimeBetweenSessionsMillis: 100,
             offline: NetworkConnectivityCheckerPlugin.Disabled,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
     }
 
@@ -173,7 +174,8 @@ final class AmplitudeSessionTests: XCTestCase {
             minTimeBetweenSessionsMillis: 100,
             autocapture: [],
             offline: NetworkConnectivityCheckerPlugin.Disabled,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
         let amplitude = Amplitude(configuration: customCongiguration)
         amplitude.setSessionId(timestamp: 800)
@@ -860,7 +862,8 @@ final class AmplitudeSessionTests: XCTestCase {
             identifyStorageProvider: interceptStorageMem,
             minTimeBetweenSessionsMillis: 100,
             offline: NetworkConnectivityCheckerPlugin.Disabled,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
         let amplitude = Amplitude(configuration: optOutConfiguration)
 
@@ -889,7 +892,8 @@ final class AmplitudeSessionTests: XCTestCase {
             identifyStorageProvider: interceptStorageMem,
             minTimeBetweenSessionsMillis: 100,
             offline: NetworkConnectivityCheckerPlugin.Disabled,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
         let amplitude = Amplitude(configuration: optOutConfiguration)
 
@@ -947,7 +951,8 @@ final class AmplitudeSessionTests: XCTestCase {
             identifyStorageProvider: interceptStorageMem,
             minTimeBetweenSessionsMillis: 100,
             offline: NetworkConnectivityCheckerPlugin.Disabled,
-            enableAutoCaptureRemoteConfig: false
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
         )
         let amplitude = Amplitude(configuration: optOutConfiguration)
 

@@ -15,7 +15,7 @@ final class HttpClientTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        configuration = Configuration(apiKey: "testApiKey")
+        configuration = Configuration(apiKey: "testApiKey", httpClient: RemoteConfigMockServer())
     }
 
     func testCustomHandlerReceivesCompleteCompressedRequest() {
@@ -119,7 +119,11 @@ final class HttpClientTests: XCTestCase {
     }
 
     func testUploadWithInvalidApiKey() {
-        // TODO: currently this test is sending request to real Amplitude host, update to mock for better stability
+        configuration = Configuration(apiKey: "testApiKey", httpClient: ClosureHttpClient { request in
+            if request.httpMethod != "POST" { return try await RemoteConfigMockServer().send(request) }
+            return (Data("Invalid API key: testApiKey".utf8),
+                    HTTPURLResponse(url: request.url!, statusCode: 400, httpVersion: nil, headerFields: nil)!)
+        })
         let httpClient = AnalyticsHttpClient(configuration: configuration, diagnostics: diagonostics)
         let asyncExpectation = expectation(description: "Async function")
         let event1 = BaseEvent(userId: "unit-test user", deviceId: "unit-test device", eventType: "unit-test event")
@@ -134,11 +138,15 @@ final class HttpClientTests: XCTestCase {
             XCTAssertTrue(String(data: data!, encoding: .utf8)!.contains("Invalid API key: testApiKey"))
             asyncExpectation.fulfill()
         }
-        _ = XCTWaiter.wait(for: [asyncExpectation], timeout: 5)
+        wait(for: [asyncExpectation], timeout: 5)
     }
 
     func testUploadWithCannotConnectToHostError() {
-        let config = Configuration(apiKey: "fake", serverUrl: "http://localhost:3000", offline: false)
+        let config = Configuration(apiKey: "fake", serverUrl: "http://localhost:3000", offline: false,
+                                   httpClient: ClosureHttpClient { request in
+            if request.httpMethod != "POST" { return try await RemoteConfigMockServer().send(request) }
+            throw URLError(.cannotConnectToHost)
+        })
         let httpClient = AnalyticsHttpClient(configuration: config, diagnostics: diagonostics)
         let uploadExpectation = expectation(description: "Did Call Upload")
         let event = BaseEvent(userId: "unit-test user", eventType: "unit-test event")
@@ -174,7 +182,7 @@ final class HttpClientTests: XCTestCase {
                     let config = Configuration(apiKey: "aaa",
                                                useBatch: useBatch,
                                                serverZone: serverZone,
-                                               enableRequestBodyCompression: enableRequestBodyCompression)
+                                               enableRequestBodyCompression: enableRequestBodyCompression, httpClient: RemoteConfigMockServer())
                     let httpClient = AnalyticsHttpClient(configuration: config, diagnostics: diagonostics)
                     XCTAssertTrue(httpClient.shouldCompressUploadBody)
 
@@ -187,7 +195,7 @@ final class HttpClientTests: XCTestCase {
         // Custom URLs should only compress if specified
         let enabledConfig = Configuration(apiKey: "aaa",
                                           serverUrl: "https://www.google.com",
-                                          enableRequestBodyCompression: true)
+                                          enableRequestBodyCompression: true, httpClient: RemoteConfigMockServer())
         let enabledHttpClient = AnalyticsHttpClient(configuration: enabledConfig,
                                            diagnostics: diagonostics)
         XCTAssertTrue(enabledHttpClient.shouldCompressUploadBody)
@@ -196,23 +204,11 @@ final class HttpClientTests: XCTestCase {
 
         let disabledConfig = Configuration(apiKey: "aaa",
                                           serverUrl: "https://www.google.com",
-                                          enableRequestBodyCompression: false)
+                                          enableRequestBodyCompression: false, httpClient: RemoteConfigMockServer())
         let disabledHttpClient = AnalyticsHttpClient(configuration: disabledConfig,
                                            diagnostics: diagonostics)
         XCTAssertFalse(disabledHttpClient.shouldCompressUploadBody)
         let (_, disabledRequestIsGzipEncoded) = disabledHttpClient.getRequestData(events: "events")
         XCTAssertFalse(disabledRequestIsGzipEncoded)
-    }
-}
-
-private struct ClosureHttpClient: HttpClient {
-    let handler: @Sendable (URLRequest) async throws -> (Data, URLResponse)
-
-    init(_ handler: @escaping @Sendable (URLRequest) async throws -> (Data, URLResponse)) {
-        self.handler = handler
-    }
-
-    func send(_ request: URLRequest) async throws -> (Data, URLResponse) {
-        try await handler(request)
     }
 }

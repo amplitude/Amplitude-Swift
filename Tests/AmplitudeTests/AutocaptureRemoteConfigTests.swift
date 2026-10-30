@@ -21,13 +21,6 @@ import XCTest
 // Nothing here depends on how long any step takes. See RemoteConfigMockServer.
 class AutocaptureRemoteConfigTests: XCTestCase {
 
-    override class func setUp() {
-        super.setUp()
-        // Already done by TestBundlePrincipal under xcodebuild; idempotent safety net
-        // for runners that ignore NSPrincipalClass, such as `swift test`.
-        RemoteConfigMockServer.install()
-    }
-
     private func uniqueApiKey(_ function: String = #function) -> String {
         let cleanName = function.replacingOccurrences(of: "()", with: "")
         return "\(RemoteConfigMockServer.testApiKeyPrefix)\(cleanName)"
@@ -56,7 +49,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [], httpClient: RemoteConfigMockServer()))
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.sessions), "Sessions should be off by default")
 
         let remoteConfigApplied = amplitude.remoteConfigAppliedExpectation()
@@ -79,7 +72,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.sessions]))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.sessions], httpClient: RemoteConfigMockServer()))
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.sessions), "Sessions should be on by default")
 
         let remoteConfigApplied = amplitude.remoteConfigAppliedExpectation()
@@ -104,7 +97,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [], httpClient: RemoteConfigMockServer()))
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
         amplitude.apply { plugin in
@@ -136,7 +129,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.screenViews]))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.screenViews], httpClient: RemoteConfigMockServer()))
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
         amplitude.apply { plugin in
@@ -169,7 +162,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [], httpClient: RemoteConfigMockServer()))
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
         amplitude.apply { plugin in
@@ -202,7 +195,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.elementInteractions]))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.elementInteractions], httpClient: RemoteConfigMockServer()))
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
         amplitude.apply { plugin in
@@ -250,7 +243,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         let config = Configuration(apiKey: apiKey,
                                    instanceName: uniqueInstanceName(),
                                    autocapture: [],
-                                   interactionsOptions: interactionsOptions)
+                                   interactionsOptions: interactionsOptions, httpClient: RemoteConfigMockServer())
         let amplitude = Amplitude(configuration: config)
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
@@ -297,7 +290,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         let config = Configuration(apiKey: apiKey,
                                    instanceName: uniqueInstanceName(),
                                    autocapture: [.frustrationInteractions],
-                                   interactionsOptions: interactionsOptions)
+                                   interactionsOptions: interactionsOptions, httpClient: RemoteConfigMockServer())
         let amplitude = Amplitude(configuration: config)
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
@@ -349,7 +342,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         let config = Configuration(apiKey: apiKey,
                                    instanceName: uniqueInstanceName(),
                                    autocapture: [.frustrationInteractions],
-                                   interactionsOptions: interactionsOptions)
+                                   interactionsOptions: interactionsOptions, httpClient: RemoteConfigMockServer())
         let amplitude = Amplitude(configuration: config)
 
         var iosLifecycleMonitor: IOSLifecycleMonitor?
@@ -390,7 +383,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [], httpClient: RemoteConfigMockServer()))
 
         var networkTrackingPlugin: NetworkTrackingPlugin?
         amplitude.apply { plugin in
@@ -427,7 +420,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.networkTracking]))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.networkTracking], httpClient: RemoteConfigMockServer()))
 
         var networkTrackingPlugin: NetworkTrackingPlugin?
         amplitude.apply { plugin in
@@ -491,7 +484,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
             ]
         ], forApiKey: apiKey)
 
-        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: []))
+        let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [], httpClient: RemoteConfigMockServer()))
 
         var networkTrackingPlugin: NetworkTrackingPlugin?
         amplitude.apply { plugin in
@@ -578,7 +571,7 @@ class AutocaptureRemoteConfigTests: XCTestCase {
         let config = Configuration(apiKey: apiKey,
                                    instanceName: uniqueInstanceName(),
                                    autocapture: [.networkTracking],
-                                   networkTrackingOptions: localOptions)
+                                   networkTrackingOptions: localOptions, httpClient: RemoteConfigMockServer())
         let amplitude = Amplitude(configuration: config)
 
         var networkTrackingPlugin: NetworkTrackingPlugin?
