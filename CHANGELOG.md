@@ -1,3 +1,15 @@
+# [1.20.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.19.4...v1.20.0) (2026-11-03)
+
+
+### Bug Fixes
+
+* **deps:** require AmplitudeCore 1.6.1 ([#459](https://github.com/amplitude/Amplitude-Swift/issues/459)) ([b247d91](https://github.com/amplitude/Amplitude-Swift/commit/b247d91a8c92975d2d06b53eacfd2d8f2affd7b7))
+
+
+### Features
+
+* support custom HTTP clients ([#454](https://github.com/amplitude/Amplitude-Swift/issues/454)) ([67bf5c0](https://github.com/amplitude/Amplitude-Swift/commit/67bf5c0b39ccd1a7ae0efc4da7d308ac65182bab))
+
 ## [1.19.4](https://github.com/amplitude/Amplitude-Swift/compare/v1.19.3...v1.19.4) (2026-10-27)
 
 
