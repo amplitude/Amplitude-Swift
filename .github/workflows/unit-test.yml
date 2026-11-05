@@ -82,14 +82,14 @@ jobs:
       - name: Set Xcode ${{ matrix.xcode }}
         run: |
           sudo xcode-select -switch /Applications/Xcode_${{ matrix.xcode }}.app
+      - name: List Simulators
+        run: |
+          xcrun simctl list
       # Xcode 26.0 requires its matching platform runtime even when testing another OS.
       # macos-15 already includes iOS 26.0; macOS needs no additional platform.
       - name: Install required platform
         if: matrix.platform != 'macOS' && (matrix.runs-on == 'macos-26' || matrix.platform != 'iOS')
         run: sudo xcodebuild -downloadPlatform '${{ matrix.platform }}'
-      - name: List Simulators
-        run: |
-          xcrun simctl list
       - name: List Project Configuration
         # Informational only. Package resolution runs here too and has failed on a bad release
         # download; the test step retries that case, this step must not fail the job by itself.

@@ -45,6 +45,7 @@ jobs:
 
       - name: Install required platforms
         run: |
+          xcrun simctl list > /dev/null
           for platform in tvOS watchOS visionOS; do
             sudo xcodebuild -downloadPlatform "$platform"
           done
