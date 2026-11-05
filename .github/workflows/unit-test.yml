@@ -17,40 +17,64 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Oldest/newest preinstalled runtimes on the selected runner images.
         include:
           - runs-on: macos-15
             platform: iOS
-            xcode: 16.4
+            xcode: "26.0"
+            test-destination-os: "18.5"
             device: "iPhone 16"
-            test-destination-os: latest
+
+          - runs-on: macos-26
+            platform: iOS
+            xcode: "26.0"
+            test-destination-os: "26.5"
+            device: "iPhone 17"
 
           - runs-on: macos-15
-            platform: iOS
-            xcode: 16.4
-            test-destination-os: 18.5
-            device: "iPhone 16"
-          
-          - runs-on: macos-15
             platform: macOS
-            xcode: 16.4
-            test-destination-os: latest
+            xcode: "26.0"
+            test-destination-os: "15"
+
+          - runs-on: macos-26
+            platform: macOS
+            xcode: "26.0"
+            test-destination-os: "26"
 
           - runs-on: macos-15
             platform: tvOS
-            xcode: 16.4
-            test-destination-os: latest
+            xcode: "26.0"
+            test-destination-os: "18.5"
+            device: "Apple TV"
+
+          - runs-on: macos-26
+            platform: tvOS
+            xcode: "26.0"
+            test-destination-os: "26.5"
             device: "Apple TV"
 
           - runs-on: macos-15
             platform: watchOS
-            xcode: 16.4
-            test-destination-os: latest
+            xcode: "26.0"
+            test-destination-os: "11.5"
             device: "Apple Watch Series 10 (42mm)"
+
+          - runs-on: macos-26
+            platform: watchOS
+            xcode: "26.0"
+            test-destination-os: "26.5"
+            device: "Apple Watch Series 11 (42mm)"
 
           - runs-on: macos-15
             platform: visionOS
-            xcode: 16.4
-            test-destination-os: 2.5
+            xcode: "26.0"
+            test-destination-os: "2.3"
+            device: "Apple Vision Pro"
+
+          - runs-on: macos-26
+            platform: visionOS
+            xcode: "26.0"
+            test-destination-os: "26.5"
             device: "Apple Vision Pro"
     steps:
       - name: Checkout
@@ -133,14 +157,24 @@ jobs:
           path: ${{ runner.temp }}/xcodebuild-logs
           if-no-files-found: ignore
   objc-example-test:
-    runs-on: macos-15
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            os: "18.5"
+            device: "iPhone 16"
+          - runner: macos-26
+            os: "26.5"
+            device: "iPhone 17"
     timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - name: Set Xcode 16
+      - name: Set Xcode 26.0
         run: |
-          sudo xcode-select -switch /Applications/Xcode_16.4.app
+          sudo xcode-select -switch /Applications/Xcode_26.0.app
       - name: Install Apple platform SDKs
         run: |
           # Warm up CoreSimulator to avoid "Unable to connect to simulator":
@@ -155,11 +189,11 @@ jobs:
           "$GITHUB_WORKSPACE/scripts/ci_xcodebuild_test.sh" test \
             -scheme AmplitudeObjCExample \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16'
+            -destination 'platform=iOS Simulator,OS=${{ matrix.os }},name=${{ matrix.device }}'
       - name: Upload xcodebuild logs
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: xcodebuild-logs-objc-example
+          name: xcodebuild-logs-objc-example-${{ matrix.os }}
           path: ${{ runner.temp }}/xcodebuild-logs
           if-no-files-found: ignore

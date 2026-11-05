@@ -39,9 +39,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
-      - name: Set Xcode 16.3
+      - name: Set Xcode 26.0
         run: |
-          sudo xcode-select -switch /Applications/Xcode_16.3.app
+          sudo xcode-select -switch /Applications/Xcode_26.0.app
 
       - name: Install Apple platform SDKs
         run: |
