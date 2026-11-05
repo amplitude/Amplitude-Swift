@@ -82,6 +82,11 @@ jobs:
       - name: Set Xcode ${{ matrix.xcode }}
         run: |
           sudo xcode-select -switch /Applications/Xcode_${{ matrix.xcode }}.app
+      # Xcode 26.0 requires its matching platform runtime even when testing another OS.
+      # macos-15 already includes iOS 26.0; macOS needs no additional platform.
+      - name: Install required platform
+        if: matrix.platform != 'macOS' && (matrix.runs-on == 'macos-26' || matrix.platform != 'iOS')
+        run: sudo xcodebuild -downloadPlatform '${{ matrix.platform }}'
       - name: List Simulators
         run: |
           xcrun simctl list
@@ -156,6 +161,9 @@ jobs:
       - name: Set Xcode 26.0
         run: |
           sudo xcode-select -switch /Applications/Xcode_26.0.app
+      - name: Install required iOS platform
+        if: matrix.runner == 'macos-26'
+        run: sudo xcodebuild -downloadPlatform iOS
       - name: Objective-C Example Tests (iOS)
         working-directory: Examples/AmplitudeObjCExample
         env:
