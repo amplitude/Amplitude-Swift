@@ -39,19 +39,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
-      - name: Set Xcode 16.3
+      - name: Set Xcode 26.0
         run: |
-          sudo xcode-select -switch /Applications/Xcode_16.3.app
+          sudo xcode-select -switch /Applications/Xcode_26.0.app
 
-      - name: Install Apple platform SDKs
+      - name: Install required platforms
         run: |
-          # Warm up CoreSimulator to avoid "Unable to connect to simulator":
-          # https://github.com/actions/runner-images/issues/12862#issuecomment-3239326872
           xcrun simctl list > /dev/null
-          sudo xcodebuild -downloadPlatform iOS
-          sudo xcodebuild -downloadPlatform tvOS
-          sudo xcodebuild -downloadPlatform watchOS
-          sudo xcodebuild -downloadPlatform visionOS
+          for platform in tvOS watchOS visionOS; do
+            sudo xcodebuild -downloadPlatform "$platform"
+          done
 
       - name: Validate Podfile
         run: |
