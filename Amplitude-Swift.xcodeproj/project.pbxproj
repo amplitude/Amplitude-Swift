@@ -1274,6 +1274,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
 				TARGET_NAME = "Amplitude-SwiftTests";
+				XROS_DEPLOYMENT_TARGET = 1.3;
 				TVOS_DEPLOYMENT_TARGET = 14.0;
 				"TVOS_DEPLOYMENT_TARGET[sdk=appletvos27*]" = 15.0;
 				"TVOS_DEPLOYMENT_TARGET[sdk=appletvsimulator27*]" = 15.0;
@@ -1312,6 +1313,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
 				TARGET_NAME = "Amplitude-SwiftTests";
+				XROS_DEPLOYMENT_TARGET = 1.3;
 				TVOS_DEPLOYMENT_TARGET = 14.0;
 				"TVOS_DEPLOYMENT_TARGET[sdk=appletvos27*]" = 15.0;
 				"TVOS_DEPLOYMENT_TARGET[sdk=appletvsimulator27*]" = 15.0;
