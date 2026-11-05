@@ -161,6 +161,7 @@ jobs:
       - name: Set Xcode 26.0
         run: |
           sudo xcode-select -switch /Applications/Xcode_26.0.app
+          xcrun simctl list > /dev/null
       - name: Install required iOS platform
         if: matrix.runner == 'macos-26'
         run: sudo xcodebuild -downloadPlatform iOS
