@@ -194,7 +194,7 @@ class FakeHttpClient: AnalyticsHttpClient {
 
     let completionQueue = DispatchQueue(label: "FakeHttpClient.completionQueue")
 
-    override func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void)
+    override func upload(events: String, onSuccess: (() -> Void)? = nil, completion: @escaping (_ result: Result<Int, Error>) -> Void)
         -> (@Sendable () -> Void)?
     {
         uploadCount += 1
@@ -208,6 +208,9 @@ class FakeHttpClient: AnalyticsHttpClient {
         }
 
         completionQueue.async { [weak self] in
+            if case .success = result {
+                onSuccess?()
+            }
             completion(result)
 
             if let self, !self.uploadExpectations.isEmpty {

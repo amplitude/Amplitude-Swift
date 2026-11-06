@@ -42,13 +42,18 @@ class AnalyticsHttpClient {
         return URLSession(configuration: configuration)
     }
 
-    func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> (@Sendable () -> Void)? {
+    func upload(events: String, onSuccess: (() -> Void)? = nil, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> (@Sendable () -> Void)? {
         let backgroundTaskCompletion = VendorSystem.current.beginBackgroundTask()
         do {
             let (requestData, isGzipEncoded) = getRequestData(events: events)
             var request = try getRequest(isGzipEncoded: isGzipEncoded)
             request.httpBody = requestData
             let requestCompletion: @Sendable (Data?, URLResponse?, Error?) -> Void = { [callbackQueue, configuration, logger] data, response, error in
+                // Acknowledge delivery before waiting behind tracking work. The background
+                // assertion remains held through both acknowledgement and completion.
+                if error == nil, let response = response as? HTTPURLResponse, (1..<300).contains(response.statusCode) {
+                    onSuccess?()
+                }
                 callbackQueue.async {
                     if let error = error {
                         let nsError = error as NSError
