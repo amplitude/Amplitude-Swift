@@ -127,7 +127,15 @@ public class EventPipeline {
             if configuration.enableDiagnostics {
                 uploadStateStorage?.uploadRequestPending = true
             }
-            currentUpload = httpClient.upload(events: eventsString) { [self] result in
+            currentUpload = httpClient.upload(events: eventsString, onSuccess: { [self] in
+                // PersistentStorage serializes file and marker access internally. Keep
+                // custom storage handlers and event callback access on the tracking queue.
+                guard let persistentStorage = storage as? PersistentStorage else { return }
+                persistentStorage.remove(eventBlock: nextEventFile)
+                if configuration.enableDiagnostics {
+                    uploadStateStorage?.uploadRequestPending = false
+                }
+            }, completion: { [self] result in
                 if configuration.enableDiagnostics {
                     uploadStateStorage?.uploadRequestPending = false
                 }
@@ -137,7 +145,14 @@ public class EventPipeline {
                     eventBlock: nextEventFile,
                     eventsString: eventsString
                 )
-                let handled: Bool = responseHandler.handle(result: result)
+                let handled: Bool
+                if case .success(let code) = result,
+                   storage is PersistentStorage,
+                   let responseHandler = responseHandler as? PersistentStorageResponseHandler {
+                    handled = responseHandler.handleAcknowledgedSuccessResponse(code: code)
+                } else {
+                    handled = responseHandler.handle(result: result)
+                }
                 var failures = failures
 
                 switch result {
@@ -173,7 +188,7 @@ public class EventPipeline {
                         self.logger?.error(message: "Request failed \(failures) times, send next event file in \(sendingInterval) seconds")
                     }
                 }
-            }
+            })
         }
     }
 
