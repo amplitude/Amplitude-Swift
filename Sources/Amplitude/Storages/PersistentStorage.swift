@@ -104,10 +104,9 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
         } catch {
             diagonosticsClient.increment(name: "analytics.events.file.read.failed")
             diagonosticsClient.recordEvent(name: "analytics.events.file.read.failed", properties: [
-                "file": eventBlock.lastPathComponent,
-                "error": error.localizedDescription
+                "error_code": (error as NSError).code
             ])
-            logger?.error(message: "Could not read events file \(eventBlock.lastPathComponent): \(error.localizedDescription)")
+            logger?.error(message: "Could not read events file: error code \((error as NSError).code)")
             // Quarantine the unreadable file so the upload pipeline can make progress.
             // Without this, the same file blocks every subsequent flush forever.
             quarantineUnreadableFile(eventBlock)
@@ -124,17 +123,16 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
             do {
                 try fileManager.createDirectory(at: quarantineDir, withIntermediateDirectories: true, attributes: nil)
                 try fileManager.moveItem(at: file, to: target)
-                logger?.error(message: "Quarantined unreadable events file: \(file.lastPathComponent) -> \(PersistentStorage.QUARANTINE_DIR_NAME)/\(target.lastPathComponent)")
+                logger?.error(message: "Quarantined unreadable events file")
                 if let contents = try? fileManager.contentsOfDirectory(atPath: quarantineDir.path) {
                     diagonosticsClient.recordHistogram(name: "analytics.events.file.quarantined.count", value: Double(contents.count))
                 }
             } catch {
                 diagonosticsClient.increment(name: "analytics.events.file.quarantine.failed")
                 diagonosticsClient.recordEvent(name: "analytics.events.file.quarantine.failed", properties: [
-                    "file": file.lastPathComponent,
-                    "error": error.localizedDescription
+                    "error_code": (error as NSError).code
                 ])
-                logger?.error(message: "Unable to quarantine unreadable events file \(file.lastPathComponent): \(error.localizedDescription)")
+                logger?.error(message: "Unable to quarantine unreadable events file: error code \((error as NSError).code)")
             }
         }
     }
@@ -163,8 +161,8 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
             do {
                 try fileManager.removeItem(atPath: eventBlock.path)
             } catch {
-                diagonostics.addErrorLog(error.localizedDescription)
-                logger?.error(message: error.localizedDescription)
+                diagonostics.addErrorLog("Storage operation failed (error code \((error as NSError).code))")
+                logger?.error(message: "Storage operation failed (error code \((error as NSError).code))")
             }
         }
     }
@@ -180,8 +178,8 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
             do {
                 try fileManager.removeItem(atPath: eventBlock.path)
             } catch {
-                diagonostics.addErrorLog(error.localizedDescription)
-                logger?.error(message: error.localizedDescription)
+                diagonostics.addErrorLog("Storage operation failed (error code \((error as NSError).code))")
+                logger?.error(message: "Storage operation failed (error code \((error as NSError).code))")
             }
         }
     }
@@ -406,8 +404,8 @@ extension PersistentStorage {
                 do {
                     try fileManager.moveItem(at: legacyFile, to: destinationFile)
                 } catch {
-                    diagonostics.addErrorLog(error.localizedDescription)
-                    logger?.error(message: "Unable to migrate legacy event file: \(legacyFile.path)")
+                    diagonostics.addErrorLog("Storage operation failed (error code \((error as NSError).code))")
+                    logger?.error(message: "Unable to migrate legacy event file")
                 }
             }
         }
@@ -432,8 +430,8 @@ extension PersistentStorage {
                 didExcludeStorageFromBackup = true
             } catch {
                 let nsError = error as NSError
-                diagonostics.addErrorLog("Unable to exclude storage directory from backup: \(nsError.domain)#\(nsError.code)")
-                logger?.error(message: "Unable to exclude storage directory from backup: \(storageUrl.path)")
+                diagonostics.addErrorLog("Unable to exclude storage directory from backup: error code \(nsError.code)")
+                logger?.error(message: "Unable to exclude storage directory from backup (error code \(nsError.code))")
             }
         }
 
@@ -483,10 +481,8 @@ extension PersistentStorage {
         // new event into the void.
         if outputStream == nil {
             diagonosticsClient.increment(name: "analytics.events.file.open.failed")
-            diagonosticsClient.recordEvent(name: "analytics.events.file.open.failed", properties: [
-                "file": storeFile.lastPathComponent
-            ])
-            logger?.error(message: "Could not open events file for writing \(storeFile.lastPathComponent); rolling over to a fresh file.")
+            diagonosticsClient.recordEvent(name: "analytics.events.file.open.failed")
+            logger?.error(message: "Could not open events file for writing; rolling over to a fresh file.")
             forceAdvanceToNewFile(storeFile)
             storeFile = getCurrentEventFile()
             start(file: storeFile)
@@ -506,12 +502,12 @@ extension PersistentStorage {
         let jsonString = event.toString().replacingOccurrences(of: PersistentStorage.DELMITER, with: "")
         do {
             if outputStream == nil {
-                logger?.error(message: "OutputStream is nil with file: \(storeFile)")
+                logger?.error(message: "Event output stream is unavailable")
             }
             try outputStream?.write("\(jsonString)\(PersistentStorage.DELMITER)")
         } catch {
-            diagonostics.addErrorLog(error.localizedDescription)
-            logger?.error(message: error.localizedDescription)
+            diagonostics.addErrorLog("Storage operation failed (error code \((error as NSError).code))")
+            logger?.error(message: "Storage operation failed (error code \((error as NSError).code))")
         }
     }
 
@@ -519,7 +515,7 @@ extension PersistentStorage {
         let storeFile = file
 
         guard fileManager.fileExists(atPath: storeFile.path) != true else {
-            diagonostics.addErrorLog("Splited file duplicate for path: \(storeFile.path)")
+            diagonostics.addErrorLog("Split event file already exists")
             return
         }
 
@@ -528,12 +524,12 @@ extension PersistentStorage {
         let jsonString = events.map { $0.toString().replacingOccurrences(of: PersistentStorage.DELMITER, with: "")  }.joined(separator: PersistentStorage.DELMITER)
         do {
             if outputStream == nil {
-                logger?.error(message: "OutputStream is nil with file: \(storeFile)")
+                logger?.error(message: "Event output stream is unavailable")
             }
             try outputStream?.write("\(jsonString)\(PersistentStorage.DELMITER)")
         } catch {
-            diagonostics.addErrorLog(error.localizedDescription)
-            logger?.error(message: error.localizedDescription)
+            diagonostics.addErrorLog("Storage operation failed (error code \((error as NSError).code))")
+            logger?.error(message: "Storage operation failed (error code \((error as NSError).code))")
         }
         finish(file: storeFile)
     }
@@ -549,8 +545,8 @@ extension PersistentStorage {
             try stream.create()
             outputStream = stream
         } catch {
-            diagonostics.addErrorLog(error.localizedDescription)
-            logger?.error(message: error.localizedDescription)
+            diagonostics.addErrorLog("Storage operation failed (error code \((error as NSError).code))")
+            logger?.error(message: "Storage operation failed (error code \((error as NSError).code))")
             outputStream = nil
         }
     }
@@ -563,8 +559,8 @@ extension PersistentStorage {
             try stream.open()
             outputStream = stream
         } catch {
-            diagonostics.addErrorLog(error.localizedDescription)
-            logger?.error(message: error.localizedDescription)
+            diagonostics.addErrorLog("Storage operation failed (error code \((error as NSError).code))")
+            logger?.error(message: "Storage operation failed (error code \((error as NSError).code))")
             outputStream = nil
         }
     }
@@ -577,8 +573,8 @@ extension PersistentStorage {
         do {
             try outputStream.close()
         } catch {
-            diagonostics.addErrorLog(error.localizedDescription)
-            logger?.error(message: error.localizedDescription)
+            diagonostics.addErrorLog("Storage operation failed (error code \((error as NSError).code))")
+            logger?.error(message: "Storage operation failed (error code \((error as NSError).code))")
         }
         self.outputStream = nil
 
@@ -603,15 +599,15 @@ extension PersistentStorage {
             return
         }
         if fileManager.fileExists(atPath: fileWithoutTemp.path) {
-            logger?.debug(message: "File already exists \(fileWithoutTemp.path), handle gracefully.")
+            logger?.debug(message: "Completed event file already exists; selecting a new file name.")
             let suffix = "-\(Date().timeIntervalSince1970)-\(Int.random(in: 0..<1000))"
             updatedFile = fileWithoutTemp.appendFileNameSuffix(suffix: suffix)
         }
         do {
             try fileManager.moveItem(at: file, to: updatedFile)
         } catch {
-            diagonostics.addErrorLog(error.localizedDescription)
-            logger?.error(message: "Unable to rename file: \(file.path)")
+            diagonostics.addErrorLog("Storage operation failed (error code \((error as NSError).code))")
+            logger?.error(message: "Unable to rename event file")
         }
     }
 
@@ -643,8 +639,8 @@ extension PersistentStorage {
                     }
                     migrateFileName(file)
                 } catch {
-                    diagonostics.addErrorLog("Error migrating file: \(file.path) for \(error.localizedDescription)")
-                    logger?.error(message: error.localizedDescription)
+                    diagonostics.addErrorLog("Error migrating event file: error code \((error as NSError).code)")
+                    logger?.error(message: "Storage operation failed (error code \((error as NSError).code))")
                 }
             }
             userDefaults?.setValue(2, forKey: self.storageVersionKey)
@@ -653,7 +649,7 @@ extension PersistentStorage {
 
     private func migrateFile(file: URL, events: [BaseEvent]) {
         guard fileManager.fileExists(atPath: file.path) == true else {
-            diagonostics.addErrorLog("File to migrate not exists any more : \(file.path)")
+            diagonostics.addErrorLog("Event file to migrate no longer exists")
             return
         }
 
@@ -662,8 +658,8 @@ extension PersistentStorage {
             let finalString = "\(jsonString)\(PersistentStorage.DELMITER)"
             try finalString.write(to: file, atomically: true, encoding: .utf8)
         } catch {
-            diagonostics.addErrorLog(error.localizedDescription)
-            logger?.error(message: error.localizedDescription)
+            diagonostics.addErrorLog("Storage operation failed (error code \((error as NSError).code))")
+            logger?.error(message: "Storage operation failed (error code \((error as NSError).code))")
         }
     }
 
@@ -676,8 +672,8 @@ extension PersistentStorage {
         do {
             try fileManager.moveItem(at: file, to: fileNameV2)
         } catch {
-            diagonostics.addErrorLog(error.localizedDescription)
-            logger?.error(message: "Unable to migrate file: \(file.path)")
+            diagonostics.addErrorLog("Storage operation failed (error code \((error as NSError).code))")
+            logger?.error(message: "Unable to migrate event file")
         }
     }
 
@@ -707,7 +703,7 @@ extension PersistentStorage {
                 result = printed
             }
         } catch {
-            diagonostics.addErrorLog(error.localizedDescription)
+            diagonostics.addErrorLog("Storage operation failed (error code \((error as NSError).code))")
         }
         return result
     }

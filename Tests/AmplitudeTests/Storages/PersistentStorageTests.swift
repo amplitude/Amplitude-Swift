@@ -31,6 +31,25 @@ final class PersistentStorageTests: XCTestCase {
         XCTAssertFalse(storage.uploadRequestPending)
     }
 
+    func testStorageFailureDoesNotLogFilePathsOrErrorDescriptions() {
+        let logger = CapturingLogger()
+        let diagnostics = Diagnostics()
+        let prefix = "private-storage-\(UUID().uuidString)"
+        let storage = PersistentStorage(storagePrefix: prefix, logger: logger, diagonostics: diagnostics,
+                                        diagnosticsClient: diagnosticsClient)
+        defer { storage.reset() }
+        let missingFile = storage.getEventsStorageDirectory().appendingPathComponent("private-event-name")
+        storage.remove(eventBlock: missingFile)
+        let messages = logger.messages.joined()
+        XCTAssertTrue(messages.contains("error code"))
+        XCTAssertFalse(messages.contains(prefix))
+        XCTAssertFalse(messages.contains(missingFile.lastPathComponent))
+        let metadata = diagnostics.extractDiagnosticsToString() ?? ""
+        XCTAssertTrue(metadata.contains("error code"))
+        XCTAssertFalse(metadata.contains(prefix))
+        XCTAssertFalse(metadata.contains(missingFile.lastPathComponent))
+    }
+
     func testIsBasicType() {
         let persistentStorage = PersistentStorage(storagePrefix: "storage", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         var isValueBasicType = persistentStorage.isBasicType(value: 111)
@@ -274,12 +293,9 @@ final class PersistentStorageTests: XCTestCase {
 
         let eventString = persistentStorage.getEventsString(eventBlock: (eventFiles?[0])!)
         let decodedEvents = BaseEvent.fromArrayString(jsonString: eventString!)
-        var malformedArr: [String] = [String]()
-        malformedArr.append(partial)
-        let data = try? JSONSerialization.data(withJSONObject: malformedArr, options: [])
-        let expectedPartial = String(data: data!, encoding: .utf8) ?? ""
         XCTAssertEqual(decodedEvents!.count, 1)
-        XCTAssertEqual(self.diagonostics.extractDiagnosticsToString(), "{\"malformed_events\":\(expectedPartial)}")
+        XCTAssertEqual(self.diagonostics.extractDiagnosticsToString(),
+                       "{\"error_logs\":[\"Malformed event JSON discarded\"]}")
         persistentStorage.reset()
    }
 

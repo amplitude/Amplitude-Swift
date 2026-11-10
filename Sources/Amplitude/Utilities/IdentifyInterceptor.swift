@@ -49,7 +49,7 @@ public class IdentifyInterceptor {
         do {
             return try interceptIdentifyEvent(event)
         } catch {
-            logger?.error(message: "Error when intercept event: \(error.localizedDescription)")
+            logger?.error(message: "Error when intercept event: error code \((error as NSError).code)")
         }
 
         return event

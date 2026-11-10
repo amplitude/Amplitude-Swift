@@ -66,9 +66,81 @@ final class HttpClientTests: XCTestCase {
         wait(for: [cancelled, completed], timeout: 3)
     }
 
+    func testFailedResponseDoesNotLogBodyAndPreservesErrorData() {
+        let logger = CapturingLogger()
+        let marker = "private-response-user@example.com"
+        let completed = expectation(description: "failed response")
+        let config = Configuration(apiKey: "testApiKey", logLevel: .debug, loggerProvider: logger,
+                                   enableDiagnostics: false, httpClient: ClosureHttpClient({ request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 400, httpVersion: nil, headerFields: nil)!
+            return (Data(marker.utf8), response)
+        }))
+        _ = AnalyticsHttpClient(configuration: config, diagnostics: diagonostics).upload(events: "[]") { result in
+            guard case .failure(let error) = result,
+                  case AnalyticsHttpClient.Exception.httpError(let code, let data) = error else {
+                XCTFail("Expected HTTP error")
+                completed.fulfill()
+                return
+            }
+            XCTAssertEqual(code, 400)
+            XCTAssertEqual(data, Data(marker.utf8))
+            completed.fulfill()
+        }
+        waitForExpectations(timeout: 3)
+        XCTAssertTrue(logger.messages.contains { $0.contains("400") })
+        XCTAssertFalse(logger.messages.joined().contains(marker))
+    }
+
+    func testTransportErrorDoesNotLogDescriptionAndPreservesOriginalError() {
+        let logger = CapturingLogger()
+        let marker = "https://example.com/private?token=secret"
+        let failure = NSError(domain: NSURLErrorDomain, code: NSURLErrorTimedOut,
+                              userInfo: [NSLocalizedDescriptionKey: marker])
+        let completed = expectation(description: "transport failure")
+        let config = Configuration(apiKey: "testApiKey", logLevel: .debug, loggerProvider: logger,
+                                   enableDiagnostics: false, httpClient: ClosureHttpClient({ _ in throw failure }))
+        _ = AnalyticsHttpClient(configuration: config, diagnostics: diagonostics).upload(events: "[]") { result in
+            guard case .failure(let error) = result else {
+                XCTFail("Expected transport failure")
+                completed.fulfill()
+                return
+            }
+            XCTAssertEqual((error as NSError).userInfo[NSLocalizedDescriptionKey] as? String, marker)
+            completed.fulfill()
+        }
+        waitForExpectations(timeout: 3)
+        XCTAssertTrue(logger.messages.contains { $0.contains(String(NSURLErrorTimedOut)) })
+        XCTAssertFalse(logger.messages.joined().contains(marker))
+    }
+
     func testGetUrlWithDefault() {
         let httpClient = AnalyticsHttpClient(configuration: configuration, diagnostics: diagonostics)
         XCTAssertEqual(httpClient.getUrl(), Constants.DEFAULT_API_HOST)
+    }
+
+    func testNetworkTrackingDebugLogsDoNotIncludeRequestURLs() {
+        let logger = CapturingLogger()
+        let config = Configuration(apiKey: "testApiKey", logLevel: .debug, loggerProvider: logger,
+                                   offline: NetworkConnectivityCheckerPlugin.Disabled,
+                                   enableAutoCaptureRemoteConfig: false, enableDiagnostics: false,
+                                   httpClient: RemoteConfigMockServer())
+        let amplitude = Amplitude(configuration: config)
+        let plugin = NetworkTrackingPlugin()
+        plugin.setup(amplitude: amplitude)
+        plugin.compileConfig(.default)
+        plugin.optOut = false
+        let session = URLSession(configuration: .ephemeral)
+        defer { session.invalidateAndCancel() }
+        let task = session.dataTask(with: URL(string: "https://example.com/private-path?token=private-token")!)
+        // Exercise the hooks directly without issuing a network request.
+        plugin.onTaskResume(task)
+        plugin.onTask(task, setState: .running)
+        let messages = logger.messages.joined()
+        XCTAssertTrue(messages.contains("Tracked task resumed"))
+        XCTAssertTrue(messages.contains("Tracked task state"))
+        XCTAssertFalse(messages.contains("example.com"))
+        XCTAssertFalse(messages.contains("private-path"))
+        XCTAssertFalse(messages.contains("private-token"))
     }
 
     func testGetUrlWithCustomUrl() {
@@ -110,7 +182,7 @@ final class HttpClientTests: XCTestCase {
         let event = BaseEvent(userId: "unit-test user", eventType: "unit-test event")
         diagonostics.addMalformedEvent("malformed event")
         let expectedRequestPayload: Data? = """
-            {"api_key":"testApiKey","client_upload_time":"2023-10-24T18:16:24.000Z","events":[\(event.toString())],"request_metadata":{"sdk":{"malformed_events":["malformed event"]}}}
+            {"api_key":"testApiKey","client_upload_time":"2023-10-24T18:16:24.000Z","events":[\(event.toString())],"request_metadata":{"sdk":{"error_logs":["Malformed event JSON discarded"]}}}
             """.data(using: .utf8)
         let (result, isGzipEncoded) = httpClient.getRequestData(events: "[\(event.toString())]")
 

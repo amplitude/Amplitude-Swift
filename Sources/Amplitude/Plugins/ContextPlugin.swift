@@ -158,7 +158,7 @@ class ContextPlugin: BeforePlugin {
             // it here would mint a new device each time. Keep what the app asked for.
             if currentDeviceId == amplitude?.configuration.deviceId {
                 amplitude?.logger?.warn(
-                    message: "Configured deviceId \(currentDeviceId) is a known invalid value shared by many devices")
+                    message: "Configured deviceId is a known invalid value shared by many devices")
                 return
             }
         }

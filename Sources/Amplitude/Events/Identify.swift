@@ -730,7 +730,7 @@ open class Identify {
         guard value != nil else {
             logger.warn(
                 message:
-                    "Attempting to perform operation \(operation.rawValue) with null value for property \(property), ignoring"
+                    "Attempting to perform operation \(operation.rawValue) with null property value, ignoring"
             )
             return
         }
@@ -744,7 +744,7 @@ open class Identify {
         guard !propertySet.contains(property) else {
             logger.warn(
                 message:
-                    "Already used property \(property) in previous operation, ignoring operation \(operation.rawValue)"
+                    "Property already used in previous operation, ignoring operation \(operation.rawValue)"
             )
             return
         }

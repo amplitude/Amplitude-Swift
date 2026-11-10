@@ -55,10 +55,10 @@ class AnalyticsHttpClient {
                         if nsError.domain == NSURLErrorDomain {
                             switch nsError.code {
                             case NSURLErrorCannotConnectToHost, NSURLErrorNetworkConnectionLost, NSURLErrorCannotFindHost, NSURLErrorAppTransportSecurityRequiresSecureConnection, NSURLErrorNotConnectedToInternet, NSURLErrorBadURL:
-                                logger?.error(message: "Conection failed with error: \(error.localizedDescription), marking offline")
+                                logger?.error(message: "Connection failed with error code \((error as NSError).code), marking offline")
                                 configuration.offline = true
                             default:
-                                logger?.error(message: "Request failed with error: \(error.localizedDescription)")
+                                logger?.error(message: "Request failed with error code \((error as NSError).code)")
                             }
                         }
                         completion(.failure(error))
@@ -68,8 +68,7 @@ class AnalyticsHttpClient {
                             completion(.success(httpResponse.statusCode))
                             logger?.debug(message: "Successfully completed request")
                         default:
-                            let response = String(data: data ?? Data(), encoding: .utf8) ?? ""
-                            logger?.error(message: "Response failed with code\(httpResponse.statusCode): \(response)")
+                            logger?.error(message: "Response failed with code \(httpResponse.statusCode)")
                             completion(.failure(Exception.httpError(code: httpResponse.statusCode, data: data)))
                         }
                     } else {
@@ -149,7 +148,7 @@ class AnalyticsHttpClient {
             do {
                 return (try data.gzipped(), !data.isEmpty)
             } catch {
-                logger?.error(message: "Error compressing request body: \(error)")
+                logger?.error(message: "Error compressing request body: error code \((error as NSError).code)")
                 return (data, false)
             }
         } else {
