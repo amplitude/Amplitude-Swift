@@ -58,6 +58,31 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         XCTAssertNil(storage.getEventCallback(insertId: try XCTUnwrap(event.insertId)))
     }
 
+    func testDroppedEventDiagnosticsDoNotCopyEventOrServerMessage() {
+        let recorded = expectation(description: "dropped event diagnostic")
+        let callback = expectation(description: "original response callback")
+        let diagnostics = FakeDiagnosticsClient(onRecordEvent: { name, properties in
+            guard name == "analytics.events.dropped" else { return }
+            XCTAssertEqual(Set(properties?.keys.map { $0 } ?? []), ["count", "code"])
+            XCTAssertEqual(properties?["count"] as? Int, 1)
+            XCTAssertEqual(properties?["code"] as? Int, 413)
+            recorded.fulfill()
+        })
+        let event = BaseEvent(eventType: "private-event-name")
+        let message = "private-server-response"
+        configuration.callback = { returnedEvent, code, returnedMessage in
+            XCTAssertEqual(returnedEvent.eventType, event.eventType)
+            XCTAssertEqual(code, 413)
+            XCTAssertEqual(returnedMessage, message)
+            callback.fulfill()
+        }
+        let handler = PersistentStorageResponseHandler(configuration: configuration, storage: storage,
+            eventPipeline: eventPipeline, eventBlock: eventBlock, eventsString: "[\(event.toString())]",
+            diagnosticsClient: diagnostics)
+        XCTAssertTrue(handler.handlePayloadTooLargeResponse(data: ["error": message]))
+        wait(for: [callback, recorded], timeout: 3)
+    }
+
     func testInit() {
         eventsString = """
             [

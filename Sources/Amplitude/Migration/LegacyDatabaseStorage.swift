@@ -73,7 +73,7 @@ class LegacyDatabaseStorage {
 
             let stepResult = sqlite3_step(stmt)
             if stepResult != SQLITE_ROW {
-                logger?.error(message: "execute query '\(query)' failed with result: \(stepResult)")
+                logger?.error(message: "execute query failed with result: \(stepResult)")
                 return
             }
 
@@ -111,7 +111,7 @@ class LegacyDatabaseStorage {
 
             let stepResult = sqlite3_step(stmt)
             if stepResult != SQLITE_DONE {
-                logger?.error(message: "execute query '\(query)' failed with result: \(stepResult)")
+                logger?.error(message: "execute query failed with result: \(stepResult)")
                 return
             }
         }
@@ -140,7 +140,7 @@ class LegacyDatabaseStorage {
 
             let stepResult = sqlite3_step(stmt)
             if stepResult != SQLITE_DONE {
-                logger?.error(message: "execute query '\(query)' failed with result: \(stepResult)")
+                logger?.error(message: "execute query failed with result: \(stepResult)")
                 return
             }
         }

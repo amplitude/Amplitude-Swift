@@ -398,9 +398,12 @@ actor FakeDiagnosticsClient: CoreDiagnostics {
     let didLastRunCrash = false
 
     private let onIncrement: (@Sendable (String) -> Void)?
+    private let onRecordEvent: (@Sendable (String, [String: any Sendable]?) -> Void)?
 
-    init(onIncrement: (@Sendable (String) -> Void)? = nil) {
+    init(onIncrement: (@Sendable (String) -> Void)? = nil,
+         onRecordEvent: (@Sendable (String, [String: any Sendable]?) -> Void)? = nil) {
         self.onIncrement = onIncrement
+        self.onRecordEvent = onRecordEvent
     }
 
     func setTag(name: String, value: String) { }
@@ -421,7 +424,7 @@ actor FakeDiagnosticsClient: CoreDiagnostics {
 
     func recordHistogram(name: String, value: Double) { }
 
-    func recordEvent(name: String, properties: [String: any Sendable]?) { }
+    func recordEvent(name: String, properties: [String: any Sendable]?) { onRecordEvent?(name, properties) }
 
     func flush() async {}
 }
@@ -437,4 +440,29 @@ struct ClosureHttpClient: HttpClient {
         await Task.yield()
         return try await handler(request)
     }
+}
+
+// Capture messages before OSLog privacy handling, including custom logger consumers.
+final class CapturingLogger: Logger, @unchecked Sendable {
+    typealias LogLevel = LogLevelEnum
+    var logLevel = LogLevelEnum.debug.rawValue
+    private let lock = NSLock()
+    private var captured: [String] = []
+
+    var messages: [String] {
+        lock.lock()
+        defer { lock.unlock() }
+        return captured
+    }
+
+    private func capture(_ message: String) {
+        lock.lock()
+        defer { lock.unlock() }
+        captured.append(message)
+    }
+
+    func error(message: String) { capture(message) }
+    func warn(message: String) { capture(message) }
+    func log(message: String) { capture(message) }
+    func debug(message: String) { capture(message) }
 }

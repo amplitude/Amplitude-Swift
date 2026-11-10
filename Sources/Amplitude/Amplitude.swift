@@ -650,7 +650,7 @@ public class Amplitude {
                     eventCount += eventArray.count
                 }
             } else {
-                logger?.debug(message: "Trimming \(eventBlock)")
+                logger?.debug(message: "Trimming queued event file")
                 storage.remove(eventBlock: eventBlock)
             }
         }

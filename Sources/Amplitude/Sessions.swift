@@ -30,7 +30,7 @@ public class Sessions {
             do {
                 try storage.write(key: StorageKey.PREVIOUS_SESSION_ID, value: newValue)
             } catch {
-                context.logger.warn(message: "Can't write PREVIOUS_SESSION_ID to storage: \(error)")
+                context.logger.warn(message: "Can't write PREVIOUS_SESSION_ID to storage: error code \((error as NSError).code)")
             }
             timeline.apply {
                 $0.onSessionIdChanged(newValue)
@@ -48,7 +48,7 @@ public class Sessions {
             do {
                 try storage.write(key: StorageKey.LAST_EVENT_ID, value: _lastEventId)
             } catch {
-                context.logger.warn(message: "Can't write LAST_EVENT_ID to storage: \(error)")
+                context.logger.warn(message: "Can't write LAST_EVENT_ID to storage: error code \((error as NSError).code)")
             }
         }
     }
@@ -61,7 +61,7 @@ public class Sessions {
             do {
                 try storage.write(key: StorageKey.LAST_EVENT_TIME, value: _lastEventTime)
             } catch {
-                context.logger.warn(message: "Can't write LAST_EVENT_TIME to storage: \(error)")
+                context.logger.warn(message: "Can't write LAST_EVENT_TIME to storage: error code \((error as NSError).code)")
             }
         }
     }

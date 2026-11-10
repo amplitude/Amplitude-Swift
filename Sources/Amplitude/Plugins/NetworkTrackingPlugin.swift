@@ -310,7 +310,7 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
                 NetworkSwizzler.shared.addListener(self)
             }
         } catch {
-            logger?.error(message: "NetworkTrackingPlugin: Failed to parse options: \(trackingOptions), error: \(error.localizedDescription)")
+            logger?.error(message: "NetworkTrackingPlugin: Failed to parse options: error code \((error as NSError).code)")
             optOut = true
             NetworkSwizzler.shared.removeListener(self)
         }
@@ -358,11 +358,11 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
               task.state != .completed,
               task.state != .canceling,
               let request = task.originalRequest,
-              let url = request.url,
+              request.url != nil,
               ruleForRequest(request) != nil
         else { return }
 
-        logger?.debug(message: "NetworkTrackingPlugin: onTaskResume(\(task)) for \(url)")
+        logger?.debug(message: "NetworkTrackingPlugin: Tracked task resumed")
 
         if task.amp_requestTimestamp == nil {
             task.amp_requestTimestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
@@ -375,7 +375,7 @@ class NetworkTrackingPlugin: UtilityPlugin, NetworkTaskListener {
               let url: URL = request.url,
               let rule = ruleForRequest(request) else { return }
 
-        logger?.debug(message: "NetworkTrackingPlugin: setState: \(state) for \(url)")
+        logger?.debug(message: "NetworkTrackingPlugin: Tracked task state: \(state.rawValue)")
 
         let response = task.response as? HTTPURLResponse
         let statusCode = response?.statusCode ?? 0

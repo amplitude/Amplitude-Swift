@@ -55,7 +55,7 @@ public class EventPipeline {
             }
             completion?()
         } catch {
-            logger?.error(message: "Error when storing event: \(error.localizedDescription)")
+            logger?.error(message: "Error when storing event: error code \((error as NSError).code)")
         }
     }
 
@@ -111,7 +111,7 @@ public class EventPipeline {
 
             guard let eventsString = storage.getEventsString(eventBlock: nextEventFile),
                   !eventsString.isEmpty else {
-                logger?.log(message: "Could not read events file: \(nextEventFile)")
+                logger?.log(message: "Could not read events file")
                 // Storage quarantines unreadable files inside getEventsString. Add the
                 // file to skipFiles so this flush chain continues to later files even
                 // if the quarantine rename itself failed, and so we don't revisit it

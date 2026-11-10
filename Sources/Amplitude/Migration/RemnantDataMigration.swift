@@ -118,7 +118,7 @@ class RemnantDataMigration {
             removeFromSource(rowId!)
             return rowId!
         } catch {
-            logger?.error(message: "event migration failed: \(error)")
+            logger?.error(message: "event migration failed: error code \((error as NSError).code)")
             return -1
         }
     }

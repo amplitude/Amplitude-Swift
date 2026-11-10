@@ -53,7 +53,7 @@ class StoragePrefixMigration {
             do {
                 try fileManager.moveItem(atPath: sourceEventFile.path, toPath: destinationEventFile)
             } catch {
-                logger?.warn(message: "Can't move \(sourceEventFile) to \(destinationEventFile): \(error)")
+                logger?.warn(message: "Can't move legacy event file: error code \((error as NSError).code)")
             }
         }
     }
@@ -68,14 +68,14 @@ class StoragePrefixMigration {
             do {
                 try destination.write(key: key, value: sourceValue)
             } catch {
-                logger?.warn(message: "can't write destination \(key): \(error)")
+                logger?.warn(message: "can't write destination \(key): error code \((error as NSError).code)")
             }
         }
 
         do {
             try source.write(key: key, value: nil)
         } catch {
-            logger?.warn(message: "can't write source \(key): \(error)")
+            logger?.warn(message: "can't write source \(key): error code \((error as NSError).code)")
         }
     }
 
@@ -89,14 +89,14 @@ class StoragePrefixMigration {
             do {
                 try destination.write(key: key, value: sourceValue)
             } catch {
-                logger?.warn(message: "can't write destination \(key): \(error)")
+                logger?.warn(message: "can't write destination \(key): error code \((error as NSError).code)")
             }
         }
 
         do {
             try source.write(key: key, value: nil)
         } catch {
-            logger?.warn(message: "can't clear source \(key): \(error)")
+            logger?.warn(message: "can't clear source \(key): error code \((error as NSError).code)")
         }
     }
 

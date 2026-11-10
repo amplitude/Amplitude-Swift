@@ -14,7 +14,7 @@ final class DiagnosticsTests: XCTestCase {
     func testAddMalformedEvent() {
         let diagnostics = Diagnostics()
         diagnostics.addMalformedEvent("event")
-        XCTAssertEqual(diagnostics.extractDiagnosticsToString(), "{\"malformed_events\":[\"event\"]}")
+        XCTAssertEqual(diagnostics.extractDiagnosticsToString(), "{\"error_logs\":[\"Malformed event JSON discarded\"]}")
     }
 
     func testAddErrorLog() {
@@ -38,8 +38,8 @@ final class DiagnosticsTests: XCTestCase {
         diagnostics.addMalformedEvent("event")
         diagnostics.addErrorLog("log")
         let result = convertToDictionary(text: diagnostics.extractDiagnosticsToString()!)
-        XCTAssertEqual((result?["malformed_events"] as? [String]) ?? [], ["event"])
-        XCTAssertEqual((result?["error_logs"] as? [String]) ?? [], ["log"])
+        XCTAssertNil(result?["malformed_events"])
+        XCTAssertEqual(result?["error_logs"] as? [String], ["Malformed event JSON discarded", "log"])
         XCTAssertNil(diagnostics.extractDiagnosticsToString())
     }
 
