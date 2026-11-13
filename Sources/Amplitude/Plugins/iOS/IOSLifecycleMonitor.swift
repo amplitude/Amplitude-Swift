@@ -49,8 +49,8 @@ class IOSLifecycleMonitor: UtilityPlugin {
             // this is added in init - launch on trackingQueue to allow identity to be set
             // prior to firing the event
             amplitude.trackingQueue.async { [self] in
-                utils?.trackAppUpdatedInstalledEvent()
                 amplitude.onEnterForeground(timestamp: currentTimestamp)
+                utils?.trackAppUpdatedInstalledEvent()
                 utils?.trackAppOpenedEvent()
             }
         // If app state is inactive, it won't receive didFinishLaunching and willEnterForeground
@@ -58,6 +58,9 @@ class IOSLifecycleMonitor: UtilityPlugin {
         } else if appState == .inactive {
             sendAppInstalledOnDidBecomeActive = true
             sendAppOpenedOnDidBecomeActive = true
+        } else if appState == .background {
+            // A background launch may have already delivered didFinishLaunching.
+            sendAppInstalledOnDidBecomeActive = true
         }
 
         updateAutocaptureSetup()
@@ -89,8 +92,13 @@ class IOSLifecycleMonitor: UtilityPlugin {
 
     @objc
     func applicationDidFinishLaunchingNotification(notification: Notification) {
-        amplitude?.trackingQueue.async { [self] in
-            utils?.trackAppUpdatedInstalledEvent()
+        if IOSVendorSystem.applicationState == .background {
+            // Preserve the previous version until the app enters the foreground.
+            sendAppInstalledOnDidBecomeActive = true
+        } else {
+            amplitude?.trackingQueue.async { [self] in
+                utils?.trackAppUpdatedInstalledEvent()
+            }
         }
 
         // Pre SceneDelegate apps wil not fire a willEnterForeground notification on app launch.
@@ -111,10 +119,10 @@ class IOSLifecycleMonitor: UtilityPlugin {
         sendAppOpenedOnDidBecomeActive = false
 
         amplitude?.trackingQueue.async { [self] in
+            amplitude?.onEnterForeground(timestamp: currentTimestamp)
             if sendInstall {
                 utils?.trackAppUpdatedInstalledEvent()
             }
-            amplitude?.onEnterForeground(timestamp: currentTimestamp)
             if sendOpened {
                 utils?.trackAppOpenedEvent()
             }
@@ -133,8 +141,16 @@ class IOSLifecycleMonitor: UtilityPlugin {
             fromBackground = false
         }
 
+        let sendInstall = sendAppInstalledOnDidBecomeActive
+        sendAppInstalledOnDidBecomeActive = false
+        sendAppOpenedOnDidBecomeActive = false
         amplitude?.onEnterForeground(timestamp: currentTimestamp)
-        utils?.trackAppOpenedEvent(fromBackground: fromBackground)
+        amplitude?.trackingQueue.async { [self] in
+            if sendInstall {
+                utils?.trackAppUpdatedInstalledEvent()
+            }
+            utils?.trackAppOpenedEvent(fromBackground: fromBackground)
+        }
     }
 
     @objc
