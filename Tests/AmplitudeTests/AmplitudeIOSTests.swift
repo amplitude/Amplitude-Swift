@@ -25,6 +25,38 @@ final class AmplitudeIOSTests: XCTestCase {
         super.tearDown()
     }
 
+    func testForegroundEventsStayAheadOfCallerEventsAndBackgrounding() throws {
+        IOSVendorSystem.overrideApplicationState(.background)
+        try storageMem.write(key: StorageKey.APP_BUILD, value: "old-build")
+        try storageMem.write(key: StorageKey.APP_VERSION, value: "old-version")
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: "local-test", instanceName: #function,
+            storageProvider: storageMem, identifyStorageProvider: interceptStorageMem,
+            autocapture: [.sessions, .appLifecycles],
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
+        ))
+        let collector = EventCollectorPlugin()
+        amplitude.add(plugin: collector)
+        amplitude.waitForTrackingQueue()
+
+        let releaseQueue = DispatchSemaphore(value: 0)
+        amplitude.trackingQueue.async { releaseQueue.wait() }
+        IOSVendorSystem.overrideApplicationState(.inactive)
+        NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        amplitude.track(eventType: "caller_event")
+        IOSVendorSystem.overrideApplicationState(.background)
+        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        releaseQueue.signal()
+        for _ in 0..<4 { amplitude.waitForTrackingQueue() }
+
+        XCTAssertEqual(collector.events.map { $0.eventType }, [
+            Constants.AMP_SESSION_START_EVENT, Constants.AMP_APPLICATION_UPDATED_EVENT,
+            Constants.AMP_APPLICATION_OPENED_EVENT, "caller_event", Constants.AMP_APPLICATION_BACKGROUNDED_EVENT
+        ])
+    }
+
     func testSDK727BackgroundLaunchDefersUntilForeground() throws {
         try assertBackgroundLifecycle(instanceName: #function, receivesLaunch: true, usesScenes: false)
     }

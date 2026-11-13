@@ -145,12 +145,10 @@ class IOSLifecycleMonitor: UtilityPlugin {
         sendAppInstalledOnDidBecomeActive = false
         sendAppOpenedOnDidBecomeActive = false
         amplitude?.onEnterForeground(timestamp: currentTimestamp)
-        amplitude?.trackingQueue.async { [self] in
-            if sendInstall {
-                utils?.trackAppUpdatedInstalledEvent()
-            }
-            utils?.trackAppOpenedEvent(fromBackground: fromBackground)
+        if sendInstall {
+            utils?.trackAppUpdatedInstalledEvent()
         }
+        utils?.trackAppOpenedEvent(fromBackground: fromBackground)
     }
 
     @objc
