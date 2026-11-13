@@ -113,7 +113,7 @@ final class EventPipelineTests: XCTestCase {
     func testExpirationStopsTheChainAndAllowsAnotherFlush() throws {
         class ExpiringVendor: VendorSystem {
             var expire: (() -> Void)?
-            override func beginBackgroundTask(expirationHandler: @escaping () -> Void) -> BackgroundTaskCompletionCallback? {
+            override func beginBackgroundTask(label: String? = nil, expirationHandler: @escaping () -> Void) -> BackgroundTaskCompletionCallback? {
                 expire = expirationHandler
                 return {}
             }
@@ -236,7 +236,7 @@ final class EventPipelineTests: XCTestCase {
         class ExpiringVendor: VendorSystem {
             var expire: (() -> Void)?
             var onEnd: (() -> Void)?
-            override func beginBackgroundTask(expirationHandler: @escaping () -> Void) -> BackgroundTaskCompletionCallback? {
+            override func beginBackgroundTask(label: String? = nil, expirationHandler: @escaping () -> Void) -> BackgroundTaskCompletionCallback? {
                 expire = expirationHandler
                 return { self.onEnd?() }
             }

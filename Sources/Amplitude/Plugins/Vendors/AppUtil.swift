@@ -66,16 +66,16 @@ import Foundation
             return IOSLifecycleMonitor()
         }
 
-        override func beginBackgroundTask(expirationHandler: @escaping () -> Void) -> BackgroundTaskCompletionCallback? {
+        override func beginBackgroundTask(label: String? = nil, expirationHandler: @escaping () -> Void) -> BackgroundTaskCompletionCallback? {
             if !isRunningInAppExtension, let application = IOSVendorSystem.sharedApplication {
-                let id = application.beginBackgroundTask(withName: "amplitude", expirationHandler: expirationHandler)
+                let id = application.beginBackgroundTask(withName: label, expirationHandler: expirationHandler)
                 // The pipeline ends the assertion after it processes the transport's completion.
                 return {
                     if id != .invalid { application.endBackgroundTask(id) }
                 }
             } else {
                 let semaphore = DispatchSemaphore(value: 0)
-                ProcessInfo.processInfo.performExpiringActivity(withReason: "Amplitude") { expired in
+                ProcessInfo.processInfo.performExpiringActivity(withReason: label ?? "Amplitude") { expired in
                     guard !expired else {
                         expirationHandler()
                         return

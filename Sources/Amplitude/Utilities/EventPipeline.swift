@@ -128,7 +128,7 @@ public class EventPipeline {
 
             var expired = false
             var cancelUpload: (@Sendable () -> Void)?
-            let backgroundTaskCompletion = vendorSystem.beginBackgroundTask {
+            let backgroundTaskCompletion = vendorSystem.beginBackgroundTask(label: "amplitude.upload") {
                 // Request creation and response handling also run on uploadsQueue.
                 self.uploadsQueue.async {
                     expired = true
