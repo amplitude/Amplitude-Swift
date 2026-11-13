@@ -173,12 +173,10 @@ class PersistentStorageResponseHandler: ResponseHandler {
 extension PersistentStorageResponseHandler {
     private func triggerEventsCallback(events: [BaseEvent], code: Int, message: String) {
         events.forEach { event in
+            // Take ownership under storage synchronization, then invoke user code outside it.
+            let eventCallback = event.insertId.flatMap { storage.takeEventCallback(insertId: $0) }
             configuration.callback?(event, code, message)
-            if let eventInsertId = event.insertId, let eventCallback = storage.getEventCallback(insertId: eventInsertId)
-            {
-                eventCallback(event, code, message)
-                storage.removeEventCallback(insertId: eventInsertId)
-            }
+            eventCallback?(event, code, message)
         }
 
         let diagnosticsClient = self.diagnosticsClient

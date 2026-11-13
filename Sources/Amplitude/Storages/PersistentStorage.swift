@@ -28,7 +28,7 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
     let userDefaults: UserDefaults?
     let fileManager: FileManager
     private var outputStream: OutputFileStream?
-    // Store event.callback in memory as it cannot be ser/deser in files.
+    // Store event.callback in memory as it cannot be ser/deser in files. Access only on syncQueue.
     private var eventCallbackMap: [String: EventCallback]
     private var appPath: String!
     let syncQueue = DispatchQueueHolder.storageQueue
@@ -236,11 +236,15 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
     }
 
     func getEventCallback(insertId: String) -> EventCallback? {
-        return eventCallbackMap[insertId]
+        syncQueue.sync { eventCallbackMap[insertId] }
+    }
+
+    func takeEventCallback(insertId: String) -> EventCallback? {
+        syncQueue.sync { eventCallbackMap.removeValue(forKey: insertId) }
     }
 
     func removeEventCallback(insertId: String) {
-        eventCallbackMap.removeValue(forKey: insertId)
+        _ = takeEventCallback(insertId: insertId)
     }
 
     func isBasicType(value: Any?) -> Bool {

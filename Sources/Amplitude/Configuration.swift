@@ -101,7 +101,12 @@ public class Configuration {
     }
     public internal(set) var autocapture: AutocaptureOptions
     public internal(set) var networkTrackingOptions: NetworkTrackingOptions
-    public var offline: Bool?
+    private let offlineLock = NSLock()
+    private var _offline: Bool?
+    public var offline: Bool? {
+        get { offlineLock.withLock { _offline } }
+        set { offlineLock.withLock { _offline = newValue } }
+    }
     internal let diagonostics: Diagnostics
     public var maxQueuedEventCount = -1
     var optOutChanged: ((Bool) -> Void)?
@@ -262,7 +267,7 @@ public class Configuration {
         self.migrateLegacyData = migrateLegacyData
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
-        self.offline = offline
+        self._offline = offline
         self.networkTrackingOptions = networkTrackingOptions
         self.enableAutoCaptureRemoteConfig = enableAutoCaptureRemoteConfig
         self.interactionsOptions = interactionsOptions
