@@ -58,6 +58,36 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         XCTAssertNil(storage.getEventCallback(insertId: try XCTUnwrap(event.insertId)))
     }
 
+    func testCallbackCanRegisterAnotherCallbackWithTheSameInsertId() throws {
+        let storage = PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
+            diagonostics: diagonostics, diagnosticsClient: diagnosticsClient)
+        defer { storage.reset() }
+        let insertId = UUID().uuidString
+        let replacement = BaseEvent(eventType: "replacement")
+        replacement.insertId = insertId
+        replacement.callback = { _, _, _ in }
+        let event = BaseEvent(eventType: "original")
+        event.insertId = insertId
+        event.callback = { _, _, _ in
+            // This also verifies that user callbacks run outside storage synchronization.
+            do {
+                try storage.write(key: .EVENTS, value: replacement)
+            } catch {
+                XCTFail("Failed to register replacement callback: \(error)")
+            }
+        }
+        try storage.write(key: .EVENTS, value: event)
+        storage.rollover()
+        let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+        let batch = try XCTUnwrap(files.first)
+        let payload = try XCTUnwrap(storage.getEventsString(eventBlock: batch))
+        let handler = PersistentStorageResponseHandler(configuration: configuration, storage: storage,
+            eventPipeline: eventPipeline, eventBlock: batch, eventsString: payload, diagnosticsClient: diagnosticsClient)
+        let handled: Bool = handler.handle(result: .success(200))
+        XCTAssertTrue(handled)
+        XCTAssertNotNil(storage.getEventCallback(insertId: insertId), "Do not delete a registration made during the callback")
+    }
+
     func testInit() {
         eventsString = """
             [

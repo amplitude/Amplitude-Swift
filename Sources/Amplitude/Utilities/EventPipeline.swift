@@ -27,18 +27,20 @@ public class EventPipeline {
     private let uploadsQueue = DispatchQueue(label: "uploadsQueue.amplitude.com")
 
     private var flushCompletions: [() -> Void] = []
-    private var currentUpload: (@Sendable () -> Void)?
+    private var uploadInProgress = false
+    private let vendorSystem: VendorSystem
     private let uploadStateStorage: (any UploadRequestStateStorage)?
     private var didRecoverPendingUpload = false
 
-    init(amplitude: Amplitude) {
+    init(amplitude: Amplitude, vendorSystem: VendorSystem = .current) {
+        self.vendorSystem = vendorSystem
         storage = amplitude.storage
         logger = amplitude.logger
         configuration = amplitude.configuration
         uploadStateStorage = amplitude.storage as? any UploadRequestStateStorage
         httpClient = AnalyticsHttpClient(configuration: amplitude.configuration,
-                                diagnostics: amplitude.configuration.diagonostics,
-                                callbackQueue: amplitude.trackingQueue)
+                                         diagnostics: amplitude.configuration.diagonostics,
+                                         callbackQueue: uploadsQueue)
         flushTimer = QueueTimer(interval: getFlushInterval(), queue: amplitude.trackingQueue) { [weak self] in
             self?.flush()
         }
@@ -80,7 +82,7 @@ public class EventPipeline {
 
     private func sendNextEventFile(failures: Int = 0, skipFiles: Set<URL> = []) {
         autoreleasepool {
-            guard currentUpload == nil else {
+            guard !uploadInProgress else {
                 logger?.log(message: "Existing upload in progress, skipping...")
                 return
             }
@@ -124,10 +126,20 @@ public class EventPipeline {
                 return
             }
 
+            var expired = false
+            var cancelUpload: (@Sendable () -> Void)?
+            let backgroundTaskCompletion = vendorSystem.beginBackgroundTask(label: "amplitude.upload") {
+                // Request creation and response handling also run on uploadsQueue.
+                self.uploadsQueue.async {
+                    expired = true
+                    cancelUpload?()
+                }
+            }
             if configuration.enableDiagnostics {
                 uploadStateStorage?.uploadRequestPending = true
             }
-            currentUpload = httpClient.upload(events: eventsString) { [self] result in
+            uploadInProgress = true
+            cancelUpload = httpClient.upload(events: eventsString) { [self] result in
                 if configuration.enableDiagnostics {
                     uploadStateStorage?.uploadRequestPending = false
                 }
@@ -138,6 +150,18 @@ public class EventPipeline {
                     eventsString: eventsString
                 )
                 let handled: Bool = responseHandler.handle(result: result)
+                backgroundTaskCompletion?()
+
+                // Process late responses, but do not continue a chain whose background time expired.
+                guard !expired else {
+                    self.uploadsQueue.async {
+                        self.uploadInProgress = false
+                        self.flushCompletions.forEach { $0() }
+                        self.flushCompletions.removeAll()
+                    }
+                    return
+                }
+
                 var failures = failures
 
                 switch result {
@@ -151,7 +175,7 @@ public class EventPipeline {
 
                 if failures > self.configuration.flushMaxRetries {
                     self.uploadsQueue.async {
-                        self.currentUpload = nil
+                        self.uploadInProgress = false
                     }
                     self.configuration.offline = true
                     self.logger?.error(message: "Request failed more than \(self.configuration.flushMaxRetries) times, marking offline")
@@ -161,7 +185,7 @@ public class EventPipeline {
                         guard let self = self else {
                             return
                         }
-                        self.currentUpload = nil
+                        self.uploadInProgress = false
                         self.sendNextEventFile(failures: failures, skipFiles: skipFiles)
                     }
 

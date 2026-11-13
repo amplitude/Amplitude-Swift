@@ -66,6 +66,22 @@ final class HttpClientTests: XCTestCase {
         wait(for: [cancelled, completed], timeout: 3)
     }
 
+    func testRequestConstructionFailureUsesCallbackQueue() {
+        configuration.serverUrl = "local host"
+        let queue = DispatchQueue(label: "http-failure-test")
+        let key = DispatchSpecificKey<Bool>()
+        queue.setSpecific(key: key, value: true)
+        let completed = expectation(description: "request construction failure on callback queue")
+        let client = AnalyticsHttpClient(configuration: configuration, diagnostics: diagonostics, callbackQueue: queue)
+        let cancellation = client.upload(events: "[]") { result in
+            XCTAssertEqual(DispatchQueue.getSpecific(key: key), true)
+            guard case .failure = result else { return XCTFail("Expected invalid URL failure") }
+            completed.fulfill()
+        }
+        XCTAssertNil(cancellation)
+        wait(for: [completed], timeout: 3)
+    }
+
     func testGetUrlWithDefault() {
         let httpClient = AnalyticsHttpClient(configuration: configuration, diagnostics: diagonostics)
         XCTAssertEqual(httpClient.getUrl(), Constants.DEFAULT_API_HOST)
