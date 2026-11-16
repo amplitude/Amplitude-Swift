@@ -26,11 +26,26 @@ final class AmplitudeIOSTests: XCTestCase {
     }
 
     func testForegroundEventsStayAheadOfCallerEventsAndBackgrounding() throws {
-        IOSVendorSystem.overrideApplicationState(.background)
+        try assertLifecycleOrdering(notification: UIApplication.willEnterForegroundNotification, instanceName: #function)
+    }
+
+    func testActiveFallbackEventsStayAheadOfCallerEventsAndBackgrounding() throws {
+        try assertLifecycleOrdering(notification: UIApplication.didBecomeActiveNotification, instanceName: #function)
+    }
+
+    func testColdLaunchEventsStayAheadOfCallerEventsAndBackgrounding() throws {
+        try assertLifecycleOrdering(notification: UIApplication.didBecomeActiveNotification, instanceName: #function,
+                                    initialState: .inactive, receivesLaunch: true)
+    }
+
+    private func assertLifecycleOrdering(notification: Notification.Name, instanceName: String,
+                                         initialState: UIApplication.State = .background, receivesLaunch: Bool = false) throws {
+        IOSVendorSystem.overrideApplicationState(initialState)
+        IOSVendorSystem.overrideUsesScenes(false)
         try storageMem.write(key: StorageKey.APP_BUILD, value: "old-build")
         try storageMem.write(key: StorageKey.APP_VERSION, value: "old-version")
         let amplitude = Amplitude(configuration: Configuration(
-            apiKey: "local-test", instanceName: #function,
+            apiKey: "local-test", instanceName: instanceName,
             storageProvider: storageMem, identifyStorageProvider: interceptStorageMem,
             autocapture: [.sessions, .appLifecycles],
             offline: NetworkConnectivityCheckerPlugin.Disabled,
@@ -44,7 +59,10 @@ final class AmplitudeIOSTests: XCTestCase {
         let releaseQueue = DispatchSemaphore(value: 0)
         amplitude.trackingQueue.async { releaseQueue.wait() }
         IOSVendorSystem.overrideApplicationState(.inactive)
-        NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        if receivesLaunch {
+            NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+        }
+        NotificationCenter.default.post(name: notification, object: nil)
         amplitude.track(eventType: "caller_event")
         IOSVendorSystem.overrideApplicationState(.background)
         NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -67,6 +85,10 @@ final class AmplitudeIOSTests: XCTestCase {
 
     func testSDK727LateBackgroundInitializationDefersUntilForeground() throws {
         try assertBackgroundLifecycle(instanceName: #function, receivesLaunch: false, usesScenes: true)
+    }
+
+    func testLateBackgroundInitializationOpensWhenForegroundNotificationWasMissed() throws {
+        try assertBackgroundLifecycle(instanceName: #function, receivesLaunch: false, usesScenes: false)
     }
 
     func testSDK727BackgroundInstallDefersUntilForeground() throws {
@@ -109,6 +131,7 @@ final class AmplitudeIOSTests: XCTestCase {
         if usesScenes {
             NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
         }
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
         NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
         for _ in 0..<4 { amplitude.waitForTrackingQueue() }
         let events = storageMem.events()

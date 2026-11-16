@@ -61,6 +61,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
         } else if appState == .background {
             // A background launch may have already delivered didFinishLaunching.
             sendAppInstalledOnDidBecomeActive = true
+            sendAppOpenedOnDidBecomeActive = true
         }
 
         updateAutocaptureSetup()
@@ -96,9 +97,7 @@ class IOSLifecycleMonitor: UtilityPlugin {
             // Preserve the previous version until the app enters the foreground.
             sendAppInstalledOnDidBecomeActive = true
         } else {
-            amplitude?.trackingQueue.async { [self] in
-                utils?.trackAppUpdatedInstalledEvent()
-            }
+            utils?.trackAppUpdatedInstalledEvent()
         }
 
         // Pre SceneDelegate apps wil not fire a willEnterForeground notification on app launch.
@@ -118,14 +117,12 @@ class IOSLifecycleMonitor: UtilityPlugin {
         sendAppInstalledOnDidBecomeActive = false
         sendAppOpenedOnDidBecomeActive = false
 
-        amplitude?.trackingQueue.async { [self] in
-            amplitude?.onEnterForeground(timestamp: currentTimestamp)
-            if sendInstall {
-                utils?.trackAppUpdatedInstalledEvent()
-            }
-            if sendOpened {
-                utils?.trackAppOpenedEvent()
-            }
+        amplitude?.onEnterForeground(timestamp: currentTimestamp)
+        if sendInstall {
+            utils?.trackAppUpdatedInstalledEvent()
+        }
+        if sendOpened {
+            utils?.trackAppOpenedEvent()
         }
     }
 
