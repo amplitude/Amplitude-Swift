@@ -40,7 +40,8 @@ public class EventPipeline {
         uploadStateStorage = amplitude.storage as? any UploadRequestStateStorage
         httpClient = AnalyticsHttpClient(configuration: amplitude.configuration,
                                 diagnostics: amplitude.configuration.diagonostics,
-                                callbackQueue: amplitude.trackingQueue)
+                                callbackQueue: amplitude.trackingQueue,
+                                serverZone: amplitude.amplitudeContext.serverZone)
         flushTimer = QueueTimer(interval: getFlushInterval(), queue: amplitude.trackingQueue) { [weak self] in
             self?.flush()
         }

@@ -14,6 +14,7 @@ import Foundation
 #endif
 
 class AnalyticsHttpClient {
+    private let serverZone: ServerZone
     let configuration: Configuration
     let httpClient: any HttpClient
     let logger: (any Logger)?
@@ -26,7 +27,9 @@ class AnalyticsHttpClient {
         return formatter
     }()
 
-    init(configuration: Configuration, diagnostics: Diagnostics, callbackQueue: DispatchQueue? = nil) {
+    init(configuration: Configuration, diagnostics: Diagnostics, callbackQueue: DispatchQueue? = nil,
+         serverZone: ServerZone? = nil) {
+        self.serverZone = serverZone ?? configuration.serverZone
         self.configuration = configuration
         self.diagnostics = diagnostics
         self.logger = configuration.loggerProvider
@@ -91,7 +94,7 @@ class AnalyticsHttpClient {
         if let url = configuration.serverUrl, !url.isEmpty {
             return url
         }
-        if configuration.serverZone == ServerZone.EU {
+        if serverZone == .EU {
             return configuration.useBatch ? Constants.EU_BATCH_API_HOST : Constants.EU_DEFAULT_API_HOST
         }
         return configuration.useBatch ? Constants.BATCH_API_HOST : Constants.DEFAULT_API_HOST

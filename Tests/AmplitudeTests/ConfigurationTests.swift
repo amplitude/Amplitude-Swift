@@ -57,21 +57,14 @@ final class ConfigurationTests: XCTestCase {
         await fulfillment(of: [uploaded], timeout: 5)
     }
 
-    func testChangingZoneAfterStartupWarnsAndKeepsEU() {
+    func testChangingZoneAfterStartupKeepsEU() {
         let config = Configuration(apiKey: apiKey, serverZone: .EU, httpClient: RemoteConfigMockServer())
-        let objcConfig = ObjCConfiguration(configuration: config)
-        let warning = expectation(description: "serverZone warning")
-        objcConfig.loggerProvider = { level, message in
-            if level == LogLevelEnum.warn.rawValue, message.contains("serverZone") {
-                warning.fulfill()
-            }
-        }
-        let amplitude = ObjCAmplitude(configuration: objcConfig)
-        amplitude.configuration.serverZone = .US
-        XCTAssertEqual(config.serverZone, .EU)
-        let uploads = AnalyticsHttpClient(configuration: config, diagnostics: config.diagonostics)
-        XCTAssertEqual(uploads.getUrl(), Constants.EU_DEFAULT_API_HOST)
-        wait(for: [warning], timeout: 1)
+        let amplitude = Amplitude(configuration: config)
+        ObjCConfiguration(configuration: config).serverZone = .US
+        XCTAssertEqual(config.serverZone, .US)
+        XCTAssertEqual(amplitude.amplitudeContext.serverZone, .EU)
+        let pipeline = EventPipeline(amplitude: amplitude)
+        XCTAssertEqual(pipeline.httpClient.getUrl(), Constants.EU_DEFAULT_API_HOST)
     }
 
     func testConfigurationIsValid() {

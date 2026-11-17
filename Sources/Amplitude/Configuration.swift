@@ -76,22 +76,8 @@ public class Configuration {
     public var flushMaxRetries: Int
     public var useBatch: Bool
 
-    /// Set the server zone before passing this configuration to Amplitude.
-    /// Later assignments log a warning and keep the startup zone.
-    public var serverZone: ServerZone {
-        get { contextLock.withLock { configuredServerZone } }
-        set {
-            let updated = contextLock.withLock {
-                guard context == nil else { return false }
-                configuredServerZone = newValue
-                return true
-            }
-            if !updated {
-                loggerProvider.warn(message: "Set serverZone before initializing Amplitude. Keeping the startup zone.")
-            }
-        }
-    }
-
+    /// The SDK reads this value when the configuration is first used to initialize Amplitude.
+    public var serverZone: ServerZone
     public var serverUrl: String?
 
     /// Transport for Analytics uploads, remote configuration, diagnostics, and plugins
@@ -130,7 +116,6 @@ public class Configuration {
     /// regardless of this setting.
     public var enableRequestBodyCompression: Bool
 
-    private var configuredServerZone: ServerZone
     private let contextLock = NSLock()
     private var context: AmplitudeContext?
 
@@ -138,15 +123,16 @@ public class Configuration {
         contextLock.withLock {
             if let context { return context }
 
-            let remoteConfig = RemoteConfigClient(apiKey: apiKey, serverZone: configuredServerZone,
+            let serverZone = self.serverZone
+            let remoteConfig = RemoteConfigClient(apiKey: apiKey, serverZone: serverZone,
                                                   instanceName: instanceName, logger: loggerProvider,
                                                   httpClient: httpClient)
-            let diagnostics = DiagnosticsClient(apiKey: apiKey, serverZone: configuredServerZone,
+            let diagnostics = DiagnosticsClient(apiKey: apiKey, serverZone: serverZone,
                                                 instanceName: instanceName, logger: loggerProvider,
                                                 enabled: enableDiagnostics, remoteConfigClient: remoteConfig,
                                                 httpClient: httpClient ?? URLSessionHttpClient())
             let context = AmplitudeContext(apiKey: apiKey, instanceName: instanceName,
-                                           serverZone: configuredServerZone, logger: loggerProvider,
+                                           serverZone: serverZone, logger: loggerProvider,
                                            remoteConfigClient: remoteConfig, diagnosticsClient: diagnostics,
                                            httpClient: httpClient)
             (storageProvider as? PersistentStorage)?.attachDiagnosticsIfNeeded(diagnostics)
@@ -265,7 +251,7 @@ public class Configuration {
         self.diagonostics = Diagnostics()
         self.logLevel = logLevel
         self.loggerProvider = loggerProvider
-        self.configuredServerZone = serverZone
+        self.serverZone = serverZone
         self.enableDiagnostics = enableDiagnostics
         self.storageProvider = storageProvider
         ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics)
