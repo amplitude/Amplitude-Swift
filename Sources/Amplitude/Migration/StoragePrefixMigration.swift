@@ -16,6 +16,7 @@ class StoragePrefixMigration {
             return
         }
 
+        source.migrateEventFiles()
         if !skipEventFiles {
             moveSourceEventFilesToDestination()
         }

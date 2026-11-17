@@ -20,7 +20,7 @@ final class ConfigurationTests: XCTestCase {
         )
     }
 
-    func testDefaultStoreMigrationsWaitForStartupOrDirectAccess() throws {
+    func testDefaultStoreMigrationsWaitForStartupOrEventFileAccess() throws {
         let instanceName = UUID().uuidString
         let seed = Configuration(apiKey: apiKey, instanceName: instanceName, httpClient: RemoteConfigMockServer())
         let events = try XCTUnwrap(seed.storageProvider as? PersistentStorage)
@@ -42,10 +42,13 @@ final class ConfigurationTests: XCTestCase {
 
         let config = Configuration(apiKey: apiKey, instanceName: instanceName, optOut: true,
                                    autocapture: [], httpClient: RemoteConfigMockServer())
+        let earlyStore = try XCTUnwrap(config.storageProvider as? PersistentStorage)
+        let identifyStore = try XCTUnwrap(config.identifyStorageProvider as? PersistentStorage)
+        try earlyStore.write(key: .USER_ID, value: "before-startup")
+        XCTAssertEqual(earlyStore.read(key: .USER_ID) as String?, "before-startup")
         XCTAssertTrue(FileManager.default.fileExists(atPath: legacyEvent.path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: legacyIdentify.path))
 
-        let earlyStore = try XCTUnwrap(config.storageProvider as? PersistentStorage)
         let blocks: [URL] = try XCTUnwrap(earlyStore.read(key: .EVENTS))
         let block = try XCTUnwrap(blocks.first)
         XCTAssertEqual(block.lastPathComponent, "v2-0")
@@ -57,6 +60,7 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: legacyIdentify.path))
         XCTAssertEqual(identifies.userDefaults?.integer(forKey: identifies.storageVersionKey), 2)
         XCTAssertTrue(amplitude.storage as? PersistentStorage === earlyStore)
+        XCTAssertTrue(amplitude.identifyStorage as? PersistentStorage === identifyStore)
     }
 
     func testCustomProvidersAreReusedAtStartup() {

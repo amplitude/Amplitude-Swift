@@ -66,19 +66,8 @@ public class Configuration {
             optOutChanged?(optOut)
         }
     }
-    private let eventStore: ConfiguredStorage
-    private let identifyStore: ConfiguredStorage
-
-    /// The default store is opened synchronously at SDK startup or on earlier access.
-    public final var storageProvider: any Storage {
-        eventStore.resolve(in: self)
-    }
-
-    /// The default identify store follows the same lifecycle as ``storageProvider``.
-    public final var identifyStorageProvider: any Storage {
-        identifyStore.resolve(in: self)
-    }
-
+    public let storageProvider: any Storage
+    public let identifyStorageProvider: any Storage
     public var logLevel: LogLevelEnum
     public var loggerProvider: any Logger
     public var minIdLength: Int?
@@ -251,12 +240,10 @@ public class Configuration {
                                                    enabled: self.enableDiagnostics,
                                                    remoteConfigClient: self.remoteConfigClient,
                                                    httpClient: httpClient ?? URLSessionHttpClient())
-        self.eventStore = ConfiguredStorage(storageProvider,
-                                            prefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName),
-                                            logger: loggerProvider)
-        self.identifyStore = ConfiguredStorage(identifyStorageProvider,
-                                               prefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName),
-                                               logger: loggerProvider)
+        self.storageProvider = storageProvider
+        ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        self.identifyStorageProvider = identifyStorageProvider
+        ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         self.minIdLength = minIdLength
         self.partnerId = partnerId
         self.callback = callback
@@ -304,30 +291,5 @@ extension Configuration: DefaultTrackingOptionsDelegate {
     @available(*, deprecated)
     func didChangeOptions(options: DefaultTrackingOptions) {
         autocapture = options.autocaptureOptions
-    }
-}
-
-private struct ConfiguredStorage {
-    private let provider: AtomicRef<(any Storage)?>
-    private let prefix: String
-    private let logger: any Logger
-
-    init(_ provider: (any Storage)?, prefix: String, logger: any Logger) {
-        self.provider = AtomicRef(wrappedValue: provider)
-        self.prefix = prefix
-        self.logger = logger
-    }
-
-    func resolve(in configuration: Configuration) -> any Storage {
-        provider.withLock { storage in
-            if let storage {
-                return storage
-            }
-            let persistentStorage = PersistentStorage(storagePrefix: prefix, logger: logger,
-                                                      diagonostics: configuration.diagonostics,
-                                                      diagnosticsClient: configuration.diagnosticsClient)
-            storage = persistentStorage
-            return persistentStorage
-        }
     }
 }
