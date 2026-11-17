@@ -21,6 +21,19 @@ final class ConfigurationTests: XCTestCase {
         )
     }
 
+    func testStorageProvidersAreUsableBeforeAmplitudeInit() throws {
+        let config = Configuration(apiKey: apiKey, instanceName: UUID().uuidString, httpClient: RemoteConfigMockServer())
+        defer {
+            config.storageProvider.reset()
+            config.identifyStorageProvider.reset()
+        }
+
+        try config.storageProvider.write(key: .USER_ID, value: "event-store-user")
+        try config.identifyStorageProvider.write(key: .USER_ID, value: "identify-store-user")
+        XCTAssertEqual(config.storageProvider.read(key: .USER_ID), "event-store-user")
+        XCTAssertEqual(config.identifyStorageProvider.read(key: .USER_ID), "identify-store-user")
+    }
+
     func testServerZoneSetBeforeAmplitudeInitRoutesCoreRequestsToEU() async throws {
         let fetched = expectation(description: "EU remote configuration")
         let uploaded = expectation(description: "EU diagnostics upload")
