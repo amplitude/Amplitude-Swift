@@ -20,6 +20,58 @@ final class ConfigurationTests: XCTestCase {
         )
     }
 
+    func testDefaultStoreMigrationsWaitForStartupOrDirectAccess() throws {
+        let instanceName = UUID().uuidString
+        let seed = Configuration(apiKey: apiKey, instanceName: instanceName, httpClient: RemoteConfigMockServer())
+        let events = try XCTUnwrap(seed.storageProvider as? PersistentStorage)
+        let identifies = try XCTUnwrap(seed.identifyStorageProvider as? PersistentStorage)
+        defer {
+            events.reset()
+            identifies.reset()
+        }
+
+        func seedLegacyFile(in store: PersistentStorage) throws -> URL {
+            store.userDefaults?.set(1, forKey: store.storageVersionKey)
+            let url = store.getLegacyEventsStorageDirectory().appendingPathComponent("0")
+            let json = "[\(BaseEvent(eventType: "legacy").toString())]"
+            try json.write(to: url, atomically: true, encoding: .utf8)
+            return url
+        }
+        let legacyEvent = try seedLegacyFile(in: events)
+        let legacyIdentify = try seedLegacyFile(in: identifies)
+
+        let config = Configuration(apiKey: apiKey, instanceName: instanceName, optOut: true,
+                                   autocapture: [], httpClient: RemoteConfigMockServer())
+        XCTAssertTrue(FileManager.default.fileExists(atPath: legacyEvent.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: legacyIdentify.path))
+
+        let earlyStore = try XCTUnwrap(config.storageProvider as? PersistentStorage)
+        let blocks: [URL] = try XCTUnwrap(earlyStore.read(key: .EVENTS))
+        let block = try XCTUnwrap(blocks.first)
+        XCTAssertEqual(block.lastPathComponent, "v2-0")
+        let json = try XCTUnwrap(earlyStore.getEventsString(eventBlock: block))
+        XCTAssertEqual(BaseEvent.fromArrayString(jsonString: json)?.first?.eventType, "legacy")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: legacyIdentify.path))
+
+        let amplitude = Amplitude(configuration: config)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyIdentify.path))
+        XCTAssertEqual(identifies.userDefaults?.integer(forKey: identifies.storageVersionKey), 2)
+        XCTAssertTrue(amplitude.storage as? PersistentStorage === earlyStore)
+    }
+
+    func testCustomProvidersAreReusedAtStartup() {
+        let events = FakeInMemoryStorage()
+        let identifies = FakeInMemoryStorage()
+        let config = Configuration(apiKey: apiKey, storageProvider: events, identifyStorageProvider: identifies,
+                                   httpClient: RemoteConfigMockServer())
+        XCTAssertTrue(config.storageProvider as? FakeInMemoryStorage === events)
+        XCTAssertTrue(config.identifyStorageProvider as? FakeInMemoryStorage === identifies)
+
+        let amplitude = Amplitude(configuration: config)
+        XCTAssertTrue(amplitude.storage as? FakeInMemoryStorage === events)
+        XCTAssertTrue(amplitude.identifyStorage as? FakeInMemoryStorage === identifies)
+    }
+
     func testConfigurationIsValid() {
         var configuration = Configuration(apiKey: apiKey, httpClient: RemoteConfigMockServer())
         XCTAssertTrue(configuration.isValid())
