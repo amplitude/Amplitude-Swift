@@ -162,8 +162,6 @@ public class Amplitude {
         let contextPlugin = ContextPlugin()
         self.contextPlugin = contextPlugin
 
-        (storage as? PersistentStorage)?.migrateEventFiles()
-        (identifyStorage as? PersistentStorage)?.migrateEventFiles()
         migrateApiKeyStorages()
         migrateDefaultInstanceStorages()
         if configuration.migrateLegacyData && getStorageVersion() < .API_KEY_AND_INSTANCE_NAME && isSandboxEnabled() {

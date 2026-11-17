@@ -95,29 +95,6 @@ final class StoragePrefixMigrationTests: XCTestCase {
         }
     }
 
-    func testPrefixMigrationIncludesLegacyEventFiles() throws {
-        let source = PersistentStorage(storagePrefix: UUID().uuidString, logger: logger,
-                                       diagonostics: diagonostics, diagnosticsClient: diagnosticsClient)
-        let destination = PersistentStorage(storagePrefix: UUID().uuidString, logger: logger,
-                                            diagonostics: diagonostics, diagnosticsClient: diagnosticsClient)
-        defer {
-            source.reset()
-            destination.reset()
-        }
-
-        let legacyFile = source.getLegacyEventsStorageDirectory().appendingPathComponent("0")
-        let json = "[\(BaseEvent(eventType: "from-old-prefix").toString())]"
-        try json.write(to: legacyFile, atomically: true, encoding: .utf8)
-
-        StoragePrefixMigration(source: source, destination: destination, logger: logger).execute()
-
-        let blocks: [URL] = try XCTUnwrap(destination.read(key: .EVENTS))
-        let block = try XCTUnwrap(blocks.first)
-        XCTAssertEqual(block.lastPathComponent, "v2-0")
-        let events = try XCTUnwrap(destination.getEventsString(eventBlock: block))
-        XCTAssertEqual(BaseEvent.fromArrayString(jsonString: events)?.first?.eventType, "from-old-prefix")
-    }
-
     func testMissingSource() throws {
         let source = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
         let destination = PersistentStorage(storagePrefix: NSUUID().uuidString, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
