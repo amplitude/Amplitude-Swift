@@ -39,9 +39,15 @@ final class ConfigurationTests: XCTestCase {
             return (body, try XCTUnwrap(HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)))
         }
         let config = Configuration(apiKey: apiKey, instanceName: UUID().uuidString, httpClient: transport)
+        let eventStorage = try XCTUnwrap(config.storageProvider as? PersistentStorage)
+        let identifyStorage = try XCTUnwrap(config.identifyStorageProvider as? PersistentStorage)
+        XCTAssertNil(eventStorage.diagnosticsClient)
+        XCTAssertNil(identifyStorage.diagnosticsClient)
         ObjCConfiguration(configuration: config).serverZone = .EU
         let amplitude = Amplitude(configuration: config)
         XCTAssertEqual(amplitude.amplitudeContext.serverZone, .EU)
+        XCTAssertTrue(eventStorage.diagnosticsClient === amplitude.amplitudeContext.diagnosticsClient)
+        XCTAssertTrue(identifyStorage.diagnosticsClient === amplitude.amplitudeContext.diagnosticsClient)
         await fulfillment(of: [fetched], timeout: 5)
 
         // Core applies the sampling response asynchronously. Flush until it enables this session.

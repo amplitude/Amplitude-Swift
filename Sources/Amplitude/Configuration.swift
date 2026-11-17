@@ -116,12 +116,11 @@ public class Configuration {
     /// regardless of this setting.
     public var enableRequestBodyCompression: Bool
 
-    private let contextLock = NSLock()
-    private var context: AmplitudeContext?
+    private let context = AtomicRef<AmplitudeContext?>(wrappedValue: nil)
 
     func initializeContext() -> AmplitudeContext {
-        contextLock.withLock {
-            if let context { return context }
+        context.withLock { cachedContext in
+            if let cachedContext { return cachedContext }
 
             let serverZone = self.serverZone
             let remoteConfig = RemoteConfigClient(apiKey: apiKey, serverZone: serverZone,
@@ -135,9 +134,7 @@ public class Configuration {
                                            serverZone: serverZone, logger: loggerProvider,
                                            remoteConfigClient: remoteConfig, diagnosticsClient: diagnostics,
                                            httpClient: httpClient)
-            (storageProvider as? PersistentStorage)?.attachDiagnosticsIfNeeded(diagnostics)
-            (identifyStorageProvider as? PersistentStorage)?.attachDiagnosticsIfNeeded(diagnostics)
-            self.context = context
+            cachedContext = context
             return context
         }
     }
@@ -253,10 +250,14 @@ public class Configuration {
         self.loggerProvider = loggerProvider
         self.serverZone = serverZone
         self.enableDiagnostics = enableDiagnostics
-        self.storageProvider = storageProvider
-        ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics)
-        self.identifyStorageProvider = identifyStorageProvider
-        ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics)
+        // Storage is usable before startup. Reading the cached context must never create it.
+        let diagnosticsProvider = { [context] in context.wrappedValue?.diagnosticsClient }
+        self.storageProvider = storageProvider ?? PersistentStorage(
+            storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName),
+            logger: loggerProvider, diagonostics: self.diagonostics, diagnosticsProvider: diagnosticsProvider)
+        self.identifyStorageProvider = identifyStorageProvider ?? PersistentStorage(
+            storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName),
+            logger: loggerProvider, diagonostics: self.diagonostics, diagnosticsProvider: diagnosticsProvider)
         self.minIdLength = minIdLength
         self.partnerId = partnerId
         self.callback = callback

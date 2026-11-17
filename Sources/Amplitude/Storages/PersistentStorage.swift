@@ -35,10 +35,16 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
     let storageVersionKey: String
     let logger: (any Logger)?
     let diagonostics: Diagnostics
-    @AtomicRef private var diagnosticsClient: CoreDiagnostics?
+    private let diagnosticsProvider: () -> CoreDiagnostics?
+    var diagnosticsClient: CoreDiagnostics? { diagnosticsProvider() }
     private var didExcludeStorageFromBackup = false
 
-    init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics, diagnosticsClient: CoreDiagnostics? = nil) {
+    convenience init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics, diagnosticsClient: CoreDiagnostics) {
+        self.init(storagePrefix: storagePrefix, logger: logger, diagonostics: diagonostics,
+                  diagnosticsProvider: { diagnosticsClient })
+    }
+
+    init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics, diagnosticsProvider: @escaping () -> CoreDiagnostics?) {
         self.storagePrefix = storagePrefix == PersistentStorage.DEFAULT_STORAGE_PREFIX || storagePrefix.starts(with: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-")
             ? storagePrefix
             : "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(storagePrefix)"
@@ -48,18 +54,12 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
         self.storageVersionKey = "\(PersistentStorage.STORAGE_VERSION).\(self.storagePrefix)"
         self.logger = logger
         self.diagonostics = diagonostics
-        self.diagnosticsClient = diagnosticsClient
+        self.diagnosticsProvider = diagnosticsProvider
         // Make sure Amplitude data is sandboxed per app
         self.appPath = Self.getAppPath(sandboxed: isStorageSandboxed())
 
         migrateLegacyStorageDirectories()
         handleV1Files()
-    }
-
-    func attachDiagnosticsIfNeeded(_ client: CoreDiagnostics) {
-        _diagnosticsClient.withLock {
-            if $0 == nil { $0 = client }
-        }
     }
 
     func write(key: StorageKey, value: Any?) throws {
