@@ -75,7 +75,23 @@ public class Configuration {
     public var callback: EventCallback?
     public var flushMaxRetries: Int
     public var useBatch: Bool
-    public var serverZone: ServerZone
+
+    /// Set the server zone before passing this configuration to Amplitude.
+    /// Later assignments log a warning and keep the startup zone.
+    public var serverZone: ServerZone {
+        get { contextLock.withLock { configuredServerZone } }
+        set {
+            let updated = contextLock.withLock {
+                guard context == nil else { return false }
+                configuredServerZone = newValue
+                return true
+            }
+            if !updated {
+                loggerProvider.warn(message: "Set serverZone before initializing Amplitude. Keeping the startup zone.")
+            }
+        }
+    }
+
     public var serverUrl: String?
 
     /// Transport for Analytics uploads, remote configuration, diagnostics, and plugins
@@ -114,8 +130,31 @@ public class Configuration {
     /// regardless of this setting.
     public var enableRequestBodyCompression: Bool
 
-    let remoteConfigClient: RemoteConfigClient
-    let diagnosticsClient: CoreDiagnostics
+    private var configuredServerZone: ServerZone
+    private let contextLock = NSLock()
+    private var context: AmplitudeContext?
+
+    func initializeContext() -> AmplitudeContext {
+        contextLock.withLock {
+            if let context { return context }
+
+            let remoteConfig = RemoteConfigClient(apiKey: apiKey, serverZone: configuredServerZone,
+                                                  instanceName: instanceName, logger: loggerProvider,
+                                                  httpClient: httpClient)
+            let diagnostics = DiagnosticsClient(apiKey: apiKey, serverZone: configuredServerZone,
+                                                instanceName: instanceName, logger: loggerProvider,
+                                                enabled: enableDiagnostics, remoteConfigClient: remoteConfig,
+                                                httpClient: httpClient ?? URLSessionHttpClient())
+            let context = AmplitudeContext(apiKey: apiKey, instanceName: instanceName,
+                                           serverZone: configuredServerZone, logger: loggerProvider,
+                                           remoteConfigClient: remoteConfig, diagnosticsClient: diagnostics,
+                                           httpClient: httpClient)
+            (storageProvider as? PersistentStorage)?.attachDiagnosticsIfNeeded(diagnostics)
+            (identifyStorageProvider as? PersistentStorage)?.attachDiagnosticsIfNeeded(diagnostics)
+            self.context = context
+            return context
+        }
+    }
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
     public convenience init(
@@ -226,24 +265,12 @@ public class Configuration {
         self.diagonostics = Diagnostics()
         self.logLevel = logLevel
         self.loggerProvider = loggerProvider
-        self.serverZone = serverZone
+        self.configuredServerZone = serverZone
         self.enableDiagnostics = enableDiagnostics
-        self.remoteConfigClient = RemoteConfigClient(apiKey: self.apiKey,
-                                                     serverZone: self.serverZone,
-                                                     instanceName: self.instanceName,
-                                                     logger: self.loggerProvider,
-                                                     httpClient: httpClient)
-        self.diagnosticsClient = DiagnosticsClient(apiKey: self.apiKey,
-                                                   serverZone: self.serverZone,
-                                                   instanceName: self.instanceName,
-                                                   logger: self.loggerProvider,
-                                                   enabled: self.enableDiagnostics,
-                                                   remoteConfigClient: self.remoteConfigClient,
-                                                   httpClient: httpClient ?? URLSessionHttpClient())
         self.storageProvider = storageProvider
-        ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics)
         self.identifyStorageProvider = identifyStorageProvider
-        ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics)
         self.minIdLength = minIdLength
         self.partnerId = partnerId
         self.callback = callback

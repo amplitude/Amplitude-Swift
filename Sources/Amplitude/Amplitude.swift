@@ -139,27 +139,7 @@ public class Amplitude {
         trackingQueue.suspend()
         self.configuration = configuration
 
-#if AMPLITUDE_DISABLE_UIKIT
-        let serverZone: AmplitudeCoreNoUIKit.ServerZone
-#else
-        let serverZone: AmplitudeCore.ServerZone
-#endif
-        switch configuration.serverZone {
-        case .US:
-            serverZone = .US
-        case .EU:
-            serverZone = .EU
-        @unknown default:
-            serverZone = .US
-        }
-
-        amplitudeContext = AmplitudeContext(apiKey: configuration.apiKey,
-                                            instanceName: configuration.getNormalizeInstanceName(),
-                                            serverZone: serverZone,
-                                            logger: configuration.loggerProvider,
-                                            remoteConfigClient: configuration.remoteConfigClient,
-                                            diagnosticsClient: configuration.diagnosticsClient,
-                                            httpClient: configuration.httpClient)
+        amplitudeContext = configuration.initializeContext()
 
         let contextPlugin = ContextPlugin()
         self.contextPlugin = contextPlugin

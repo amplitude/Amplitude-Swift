@@ -21,6 +21,7 @@ public class EventPipeline {
     let storage: Storage?
     let logger: (any Logger)?
     let configuration: Configuration
+    let diagnosticsClient: CoreDiagnostics
 
     @AtomicRef internal var eventCount: Int = 0
     internal var flushTimer: QueueTimer?
@@ -34,6 +35,7 @@ public class EventPipeline {
     init(amplitude: Amplitude) {
         storage = amplitude.storage
         logger = amplitude.logger
+        diagnosticsClient = amplitude.amplitudeContext.diagnosticsClient
         configuration = amplitude.configuration
         uploadStateStorage = amplitude.storage as? any UploadRequestStateStorage
         httpClient = AnalyticsHttpClient(configuration: amplitude.configuration,
@@ -90,7 +92,7 @@ public class EventPipeline {
             if configuration.enableDiagnostics && !didRecoverPendingUpload {
                 didRecoverPendingUpload = true
                 if uploadStateStorage?.uploadRequestPending == true {
-                    configuration.diagnosticsClient.increment(name: "analytics.upload.missed_network_callback")
+                    diagnosticsClient.increment(name: "analytics.upload.missed_network_callback")
                 }
                 uploadStateStorage?.uploadRequestPending = false
             }

@@ -35,10 +35,10 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
     let storageVersionKey: String
     let logger: (any Logger)?
     let diagonostics: Diagnostics
-    let diagonosticsClient: CoreDiagnostics
+    @AtomicRef private var diagnosticsClient: CoreDiagnostics?
     private var didExcludeStorageFromBackup = false
 
-    init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics, diagnosticsClient: CoreDiagnostics) {
+    init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics, diagnosticsClient: CoreDiagnostics? = nil) {
         self.storagePrefix = storagePrefix == PersistentStorage.DEFAULT_STORAGE_PREFIX || storagePrefix.starts(with: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-")
             ? storagePrefix
             : "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(storagePrefix)"
@@ -48,12 +48,18 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
         self.storageVersionKey = "\(PersistentStorage.STORAGE_VERSION).\(self.storagePrefix)"
         self.logger = logger
         self.diagonostics = diagonostics
-        self.diagonosticsClient = diagnosticsClient
+        self.diagnosticsClient = diagnosticsClient
         // Make sure Amplitude data is sandboxed per app
         self.appPath = Self.getAppPath(sandboxed: isStorageSandboxed())
 
         migrateLegacyStorageDirectories()
         handleV1Files()
+    }
+
+    func attachDiagnosticsIfNeeded(_ client: CoreDiagnostics) {
+        _diagnosticsClient.withLock {
+            if $0 == nil { $0 = client }
+        }
     }
 
     func write(key: StorageKey, value: Any?) throws {
@@ -102,8 +108,8 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
                 return readV1File(content: content!)
             }
         } catch {
-            diagonosticsClient.increment(name: "analytics.events.file.read.failed")
-            diagonosticsClient.recordEvent(name: "analytics.events.file.read.failed", properties: [
+            diagnosticsClient?.increment(name: "analytics.events.file.read.failed")
+            diagnosticsClient?.recordEvent(name: "analytics.events.file.read.failed", properties: [
                 "file": eventBlock.lastPathComponent,
                 "error": error.localizedDescription
             ])
@@ -126,11 +132,11 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
                 try fileManager.moveItem(at: file, to: target)
                 logger?.error(message: "Quarantined unreadable events file: \(file.lastPathComponent) -> \(PersistentStorage.QUARANTINE_DIR_NAME)/\(target.lastPathComponent)")
                 if let contents = try? fileManager.contentsOfDirectory(atPath: quarantineDir.path) {
-                    diagonosticsClient.recordHistogram(name: "analytics.events.file.quarantined.count", value: Double(contents.count))
+                    diagnosticsClient?.recordHistogram(name: "analytics.events.file.quarantined.count", value: Double(contents.count))
                 }
             } catch {
-                diagonosticsClient.increment(name: "analytics.events.file.quarantine.failed")
-                diagonosticsClient.recordEvent(name: "analytics.events.file.quarantine.failed", properties: [
+                diagnosticsClient?.increment(name: "analytics.events.file.quarantine.failed")
+                diagnosticsClient?.recordEvent(name: "analytics.events.file.quarantine.failed", properties: [
                     "file": file.lastPathComponent,
                     "error": error.localizedDescription
                 ])
@@ -198,7 +204,7 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
             eventPipeline: eventPipeline,
             eventBlock: eventBlock,
             eventsString: eventsString,
-            diagnosticsClient: diagonosticsClient
+            diagnosticsClient: diagnosticsClient ?? eventPipeline.diagnosticsClient
         )
     }
 
@@ -482,8 +488,8 @@ extension PersistentStorage {
         // optional chaining at outputStream?.write below silently drops every
         // new event into the void.
         if outputStream == nil {
-            diagonosticsClient.increment(name: "analytics.events.file.open.failed")
-            diagonosticsClient.recordEvent(name: "analytics.events.file.open.failed", properties: [
+            diagnosticsClient?.increment(name: "analytics.events.file.open.failed")
+            diagnosticsClient?.recordEvent(name: "analytics.events.file.open.failed", properties: [
                 "file": storeFile.lastPathComponent
             ])
             logger?.error(message: "Could not open events file for writing \(storeFile.lastPathComponent); rolling over to a fresh file.")
