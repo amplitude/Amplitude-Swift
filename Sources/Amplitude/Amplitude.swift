@@ -94,8 +94,8 @@ public class Amplitude {
 
     public let amplitudeContext: AmplitudeContext
 
-    var storage: any Storage
-    var identifyStorage: any Storage
+    let storage: any Storage
+    let identifyStorage: any Storage
 
     private var sessionsLock = NSLock()
     private var _sessions: Sessions?
