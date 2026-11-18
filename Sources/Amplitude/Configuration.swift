@@ -66,7 +66,9 @@ public class Configuration {
             optOutChanged?(optOut)
         }
     }
+    /// To access migrated data before SDK startup, call ``Storage/migrateIfNeeded()`` on the provider first.
     public let storageProvider: any Storage
+    /// The default identify store follows the same lifecycle as ``storageProvider``.
     public let identifyStorageProvider: any Storage
     public var logLevel: LogLevelEnum
     public var loggerProvider: any Logger

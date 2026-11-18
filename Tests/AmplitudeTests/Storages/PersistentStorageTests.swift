@@ -350,6 +350,7 @@ final class PersistentStorageTests: XCTestCase {
         persistentStorageToGetDirectory.reset()
         createEarilierVersionFiles(storageDirectory: storeDirectory)
         let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.migrateIfNeeded()
         let eventFiles: [URL]? = persistentStorage.read(key: StorageKey.EVENTS)
         XCTAssertEqual(eventFiles?.count, 6)
         var eventsCount = 0
@@ -368,6 +369,7 @@ final class PersistentStorageTests: XCTestCase {
         persistentStorageToGetDirectory.reset()
         createEarilierVersionFiles(storageDirectory: storeDirectory)
         let persistentStorage = PersistentStorage(storagePrefix: "xxx-instance", logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        persistentStorage.migrateIfNeeded()
         try? persistentStorage.write(
             key: StorageKey.EVENTS,
             value: BaseEvent(eventType: "test13")
@@ -463,6 +465,7 @@ final class PersistentStorageTests: XCTestCase {
         writeContent(file: legacyFile, content: "\(BaseEvent(eventType: "legacy-event").toString())\(PersistentStorage.DELMITER)")
 
         let migratedStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        migratedStorage.migrateIfNeeded()
         let eventFiles: [URL]? = migratedStorage.read(key: StorageKey.EVENTS)
         let migratedFile = storageDirectory.appendingPathComponent(legacyFile.lastPathComponent)
         XCTAssertEqual(eventFiles?.count, 1)
@@ -490,6 +493,7 @@ final class PersistentStorageTests: XCTestCase {
         try invalidUTF8.write(to: legacyFile)
 
         let migratedStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        migratedStorage.migrateIfNeeded()
         let eventFiles = try XCTUnwrap(migratedStorage.read(key: StorageKey.EVENTS) as [URL]?)
         XCTAssertEqual(eventFiles.count, 1)
         XCTAssertFalse(FileManager.default.fileExists(atPath: legacyFile.path))
@@ -520,6 +524,7 @@ final class PersistentStorageTests: XCTestCase {
         writeContent(file: legacyQuarantineDirectory.appendingPathComponent("quarantined-event"), content: "unreadable")
 
         let migratedStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        migratedStorage.migrateIfNeeded()
         let eventFiles: [URL]? = migratedStorage.read(key: StorageKey.EVENTS)
 
         XCTAssertEqual(eventFiles?.count, 1)
@@ -540,6 +545,7 @@ final class PersistentStorageTests: XCTestCase {
         writeContent(file: legacyQuarantineDirectory.appendingPathComponent("quarantined-event"), content: "unreadable")
 
         let migratedStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        migratedStorage.migrateIfNeeded()
         let eventFiles: [URL]? = migratedStorage.read(key: StorageKey.EVENTS)
 
         XCTAssertTrue(eventFiles?.isEmpty ?? false)
@@ -560,6 +566,7 @@ final class PersistentStorageTests: XCTestCase {
         writeContent(file: legacyTempFile, content: "\(BaseEvent(eventType: "legacy-unfinished-event").toString())\(PersistentStorage.DELMITER)")
 
         let migratedStorage = PersistentStorage(storagePrefix: storagePrefix, logger: self.logger, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        migratedStorage.migrateIfNeeded()
         let eventFiles: [URL]? = migratedStorage.read(key: StorageKey.EVENTS)
         let migratedFile = storageDirectory.appendingPathComponent(legacyTempFile.deletingPathExtension().lastPathComponent)
         XCTAssertEqual(eventFiles?.count, 1)

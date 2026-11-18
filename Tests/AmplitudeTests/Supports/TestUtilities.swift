@@ -105,6 +105,12 @@ class FakeInMemoryStorage: Storage {
     var index = URL(string: "0")!
     let storageQueue = DispatchQueue(label: "Amplitude.FakeInMemoryStorage")
 
+    private(set) var migrationCalls = 0
+
+    func migrateIfNeeded() {
+        migrationCalls += 1
+    }
+
     func write(key: StorageKey, value: Any?) throws {
         storageQueue.sync {
             switch key {
