@@ -292,8 +292,9 @@ class FakePersistentStorage: PersistentStorage {
     // Array to store the method invocation history for testing verification purpose
     var haveBeenCalledWith = [String]()
 
-    override func removeEventCallback(insertId: String) {
-        haveBeenCalledWith.append("removeEventCallback(insertId: \(insertId))")
+    override func takeEventCallback(insertId: String) -> EventCallback? {
+        haveBeenCalledWith.append("takeEventCallback(insertId: \(insertId))")
+        return nil
     }
 
     override func remove(eventBlock: EventBlock) {

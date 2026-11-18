@@ -172,12 +172,15 @@ class PersistentStorageResponseHandler: ResponseHandler {
 
 extension PersistentStorageResponseHandler {
     private func triggerEventsCallback(events: [BaseEvent], code: Int, message: String) {
-        events.forEach { event in
-            configuration.callback?(event, code, message)
-            if let eventInsertId = event.insertId, let eventCallback = storage.getEventCallback(insertId: eventInsertId)
-            {
-                eventCallback(event, code, message)
-                storage.removeEventCallback(insertId: eventInsertId)
+        // Claim callbacks before dispatch so later registrations cannot be consumed by this response.
+        let callbacks = events.map { event in
+            (event, event.insertId.flatMap { storage.takeEventCallback(insertId: $0) })
+        }
+        let globalCallback = configuration.callback
+        eventPipeline.dispatchCallbacks {
+            callbacks.forEach { event, eventCallback in
+                globalCallback?(event, code, message)
+                eventCallback?(event, code, message)
             }
         }
 
@@ -206,7 +209,7 @@ extension PersistentStorageResponseHandler {
             (1..<match.numberOfRanges).forEach {
                 if match.range(at: $0).location != NSNotFound {
                     let eventInsertId = eventsNSString.substring(with: match.range(at: $0))
-                    storage.removeEventCallback(insertId: eventInsertId)
+                    storage.takeEventCallback(insertId: eventInsertId)
                 }
             }
         }
