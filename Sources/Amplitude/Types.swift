@@ -67,6 +67,15 @@ public protocol Storage {
         eventBlock: URL,
         eventsString: String
     ) -> ResponseHandler
+
+    /// Synchronously applies this storage provider's pending migrations.
+    /// Amplitude calls this during startup. Call it directly for earlier access.
+    /// Implementations should tolerate repeated calls.
+    func migrateIfNeeded()
+}
+
+public extension Storage {
+    func migrateIfNeeded() {}
 }
 
 public enum StorageKey: String, CaseIterable {
