@@ -39,7 +39,7 @@ final class EventPipelineTests: XCTestCase {
             httpClient: RemoteConfigMockServer()
         )
         let amplitude = Amplitude(configuration: configuration)
-        httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagonostics)
+        httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagonostics, serverZone: configuration.serverZone)
         pipeline = EventPipeline(amplitude: amplitude)
         pipeline.httpClient = httpClient
         pipeline.flushTimer?.suspend()
@@ -94,7 +94,7 @@ final class EventPipelineTests: XCTestCase {
         }
         for result: Result<Int, Error> in [.success(200), .failure(AnalyticsHttpClient.Exception.httpError(code: 500, data: nil))] {
             let completed = expectation(description: "response callback completed")
-            let client = ObservingHttpClient(configuration: configuration, diagnostics: configuration.diagonostics)
+            let client = ObservingHttpClient(configuration: configuration, diagnostics: configuration.diagonostics, serverZone: configuration.serverZone)
             client.onRequest = { [storage] in
                 XCTAssertTrue(storage?.uploadRequestPending == true)
             }
@@ -358,7 +358,7 @@ final class EventPipelineTests: XCTestCase {
             httpClient: RemoteConfigMockServer()
         )
         let spyAmplitude = Amplitude(configuration: spyConfiguration)
-        let spyHttp = FakeHttpClient(configuration: spyConfiguration, diagnostics: spyConfiguration.diagonostics)
+        let spyHttp = FakeHttpClient(configuration: spyConfiguration, diagnostics: spyConfiguration.diagonostics, serverZone: spyConfiguration.serverZone)
         let spyPipeline = EventPipeline(amplitude: spyAmplitude)
         spyPipeline.httpClient = spyHttp
         spyPipeline.flushTimer?.suspend()

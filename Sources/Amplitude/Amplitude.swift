@@ -134,32 +134,37 @@ public class Amplitude {
         trackingQueue.suspend()
         self.configuration = configuration
 
-#if AMPLITUDE_DISABLE_UIKIT
-        let serverZone: AmplitudeCoreNoUIKit.ServerZone
-#else
-        let serverZone: AmplitudeCore.ServerZone
-#endif
-        switch configuration.serverZone {
-        case .US:
-            serverZone = .US
-        case .EU:
-            serverZone = .EU
-        @unknown default:
-            serverZone = .US
-        }
-
-        amplitudeContext = AmplitudeContext(apiKey: configuration.apiKey,
-                                            instanceName: configuration.getNormalizeInstanceName(),
+        let apiKey = configuration.apiKey
+        let instanceName = configuration.getNormalizeInstanceName()
+        let serverZone = configuration.serverZone
+        let logger = configuration.loggerProvider
+        let httpClient = configuration.httpClient
+        let remoteConfigClient = RemoteConfigClient(apiKey: apiKey,
+                                                    serverZone: serverZone,
+                                                    instanceName: instanceName,
+                                                    logger: logger,
+                                                    httpClient: httpClient)
+        let diagnosticsClient = DiagnosticsClient(apiKey: apiKey,
+                                                  serverZone: serverZone,
+                                                  instanceName: instanceName,
+                                                  logger: logger,
+                                                  enabled: configuration.enableDiagnostics,
+                                                  remoteConfigClient: remoteConfigClient,
+                                                  httpClient: httpClient ?? URLSessionHttpClient())
+        amplitudeContext = AmplitudeContext(apiKey: apiKey,
+                                            instanceName: instanceName,
                                             serverZone: serverZone,
-                                            logger: configuration.loggerProvider,
-                                            remoteConfigClient: configuration.remoteConfigClient,
-                                            diagnosticsClient: configuration.diagnosticsClient,
-                                            httpClient: configuration.httpClient)
+                                            logger: logger,
+                                            remoteConfigClient: remoteConfigClient,
+                                            diagnosticsClient: diagnosticsClient,
+                                            httpClient: httpClient)
 
         storage = configuration.storageProvider
+
         identifyStorage = configuration.identifyStorageProvider
 
         for provider in [storage, identifyStorage] {
+            (provider as? PersistentStorage)?.setDiagnosticsClientIfNeeded(amplitudeContext.diagnosticsClient)
             provider.migrateIfNeeded()
         }
 
