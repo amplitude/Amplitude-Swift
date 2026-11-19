@@ -25,10 +25,6 @@ internal class ApplicationLifecycle: NSObject {
     /// Called after all consumers are registered and SDK initialization is complete.
     func start() {}
 
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-
     func didFinishLaunching() {
         notify { $0.applicationDidFinishLaunching() }
     }
