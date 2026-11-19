@@ -10,18 +10,11 @@
     import Foundation
     import WatchKit
 
-    class WatchOSLifecycleMonitor: UtilityPlugin {
-        var wasBackgrounded: Bool = false
-
+    class WatchOSLifecycleMonitor: ApplicationLifecycle {
         private var appNotifications: [NSNotification.Name] = [
             WKExtension.applicationWillEnterForegroundNotification,
             WKExtension.applicationDidEnterBackgroundNotification,
         ]
-
-        override init() {
-            super.init()
-            setupListeners()
-        }
 
         @objc
         func notificationResponse(notification: NSNotification) {
@@ -35,7 +28,7 @@
             }
         }
 
-        func setupListeners() {
+        override func start() {
             // Configure the current life cycle events
             let notificationCenter = NotificationCenter.default
             for notification in appNotifications {
@@ -49,13 +42,11 @@
         }
 
         func applicationWillEnterForeground(notification: NSNotification) {
-            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
-            self.amplitude?.onEnterForeground(timestamp: timestamp)
+            enterForeground()
         }
 
         func applicationDidEnterBackground(notification: NSNotification) {
-            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
-            self.amplitude?.onExitForeground(timestamp: timestamp)
+            enterBackground()
         }
     }
 

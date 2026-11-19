@@ -8,7 +8,7 @@
 #if os(macOS)
     import Cocoa
 
-    class MacOSLifecycleMonitor: UtilityPlugin {
+    class MacOSLifecycleMonitor: ApplicationLifecycle {
         private var application: NSApplication
         private var appNotifications: [NSNotification.Name] =
             [
@@ -19,7 +19,6 @@
         override init() {
             self.application = NSApplication.shared
             super.init()
-            setupListeners()
         }
 
         @objc
@@ -34,7 +33,7 @@
             }
         }
 
-        func setupListeners() {
+        override func start() {
             // Configure the current life cycle events
             let notificationCenter = NotificationCenter.default
             for notification in appNotifications {
@@ -48,13 +47,11 @@
         }
 
         func applicationDidBecomeActive(notification: NSNotification) {
-            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
-            self.amplitude?.onEnterForeground(timestamp: timestamp)
+            enterForeground()
         }
 
         func applicationWillResignActive(notification: NSNotification) {
-            let timestamp = Int64(NSDate().timeIntervalSince1970 * 1000)
-            self.amplitude?.onExitForeground(timestamp: timestamp)
+            enterBackground()
         }
     }
 

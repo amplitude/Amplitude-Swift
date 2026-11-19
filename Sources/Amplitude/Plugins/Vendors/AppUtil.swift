@@ -62,6 +62,10 @@ import Foundation
             return getDeviceModel(platform: platform)
         }
 
+        override func makeApplicationLifecycle() -> ApplicationLifecycle {
+            return IOSApplicationLifecycle()
+        }
+
         override var requiredPlugin: Plugin {
             return IOSLifecycleMonitor()
         }
@@ -200,7 +204,7 @@ import Foundation
             )
         }
 
-        override var requiredPlugin: Plugin {
+        override func makeApplicationLifecycle() -> ApplicationLifecycle {
             return MacOSLifecycleMonitor()
         }
 
@@ -322,7 +326,7 @@ import Foundation
             return getDeviceModel(platform: platform)
         }
 
-        override var requiredPlugin: Plugin {
+        override func makeApplicationLifecycle() -> ApplicationLifecycle {
             return WatchOSLifecycleMonitor()
         }
 

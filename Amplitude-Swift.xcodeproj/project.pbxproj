@@ -130,6 +130,7 @@
 		EAED9A222EE7B47E00A5FC08 /* InteractionsOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28FDA32DED997900848BBB /* InteractionsOptions.swift */; };
 		EAED9A232EE7B47E00A5FC08 /* CodableExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_45 /* CodableExtension.swift */; };
 		EAED9A242EE7B47E00A5FC08 /* EventPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_46 /* EventPipeline.swift */; };
+		6A1CBCAE7EAA464B9958E291 /* ApplicationLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 249CDA38FB3A49F6B37BE2B2 /* ApplicationLifecycle.swift */; };
 		EAED9A252EE7B47E00A5FC08 /* UIKitElementInteractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FC402C58974A00EA8667 /* UIKitElementInteractions.swift */; };
 		EAED9A262EE7B47E00A5FC08 /* HttpClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_47 /* HttpClient.swift */; };
 		EAED9A272EE7B47E00A5FC08 /* OutputFileStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_48 /* OutputFileStream.swift */; };
@@ -196,6 +197,7 @@
 		OBJ_116 /* Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_44 /* Atomic.swift */; };
 		OBJ_117 /* CodableExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_45 /* CodableExtension.swift */; };
 		OBJ_118 /* EventPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_46 /* EventPipeline.swift */; };
+		D20A1DE7F8534212A2CFA4B0 /* ApplicationLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 249CDA38FB3A49F6B37BE2B2 /* ApplicationLifecycle.swift */; };
 		OBJ_119 /* HttpClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_47 /* HttpClient.swift */; };
 		OBJ_120 /* OutputFileStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_48 /* OutputFileStream.swift */; };
 		OBJ_121 /* PersistentStorageResponseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* PersistentStorageResponseHandler.swift */; };
@@ -353,6 +355,7 @@
 		OBJ_44 /* Atomic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Atomic.swift; sourceTree = "<group>"; };
 		OBJ_45 /* CodableExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableExtension.swift; sourceTree = "<group>"; };
 		OBJ_46 /* EventPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPipeline.swift; sourceTree = "<group>"; };
+		249CDA38FB3A49F6B37BE2B2 /* ApplicationLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationLifecycle.swift; sourceTree = "<group>"; };
 		OBJ_47 /* HttpClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HttpClient.swift; sourceTree = "<group>"; };
 		OBJ_48 /* OutputFileStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputFileStream.swift; sourceTree = "<group>"; };
 		OBJ_49 /* PersistentStorageResponseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentStorageResponseHandler.swift; sourceTree = "<group>"; };
@@ -583,6 +586,7 @@
 				OBJ_44 /* Atomic.swift */,
 				OBJ_45 /* CodableExtension.swift */,
 				OBJ_46 /* EventPipeline.swift */,
+				249CDA38FB3A49F6B37BE2B2 /* ApplicationLifecycle.swift */,
 				OBJ_47 /* HttpClient.swift */,
 				OBJ_48 /* OutputFileStream.swift */,
 				OBJ_49 /* PersistentStorageResponseHandler.swift */,
@@ -960,6 +964,7 @@
 				EAED9A222EE7B47E00A5FC08 /* InteractionsOptions.swift in Sources */,
 				EAED9A232EE7B47E00A5FC08 /* CodableExtension.swift in Sources */,
 				EAED9A242EE7B47E00A5FC08 /* EventPipeline.swift in Sources */,
+				6A1CBCAE7EAA464B9958E291 /* ApplicationLifecycle.swift in Sources */,
 				EAED9A252EE7B47E00A5FC08 /* UIKitElementInteractions.swift in Sources */,
 				EAED9A262EE7B47E00A5FC08 /* HttpClient.swift in Sources */,
 				EAED9A272EE7B47E00A5FC08 /* OutputFileStream.swift in Sources */,
@@ -1103,6 +1108,7 @@
 				EA28FDA42DED997900848BBB /* InteractionsOptions.swift in Sources */,
 				OBJ_117 /* CodableExtension.swift in Sources */,
 				OBJ_118 /* EventPipeline.swift in Sources */,
+				D20A1DE7F8534212A2CFA4B0 /* ApplicationLifecycle.swift in Sources */,
 				6C04FC412C58974A00EA8667 /* UIKitElementInteractions.swift in Sources */,
 				OBJ_119 /* HttpClient.swift in Sources */,
 				OBJ_120 /* OutputFileStream.swift in Sources */,

@@ -9,6 +9,7 @@ import Foundation
 public class Amplitude {
 
     public private(set) var configuration: Configuration
+    let appLifecycle = VendorSystem.current.makeApplicationLifecycle()
     private var inForeground = false
 
     public var sessionId: Int64 {
@@ -203,6 +204,8 @@ public class Amplitude {
            VendorSystem.current.networkConnectivityCheckingEnabled {
             _ = add(plugin: NetworkConnectivityCheckerPlugin())
         }
+        appLifecycle.addObserver(self)
+
         // required plugin for specific platform, only has lifecyclePlugin now
         if let requiredPlugin = VendorSystem.current.requiredPlugin {
             _ = add(plugin: requiredPlugin)
@@ -223,6 +226,7 @@ public class Amplitude {
         trackingQueue.async { [self] in
             self.trimQueuedEvents()
         }
+        appLifecycle.start()
         trackingQueue.resume()
 
         amplitudeContext.diagnosticsClient.setTag(name: "sdk.\(Constants.SDK_LIBRARY).version", value: Constants.SDK_VERSION)
@@ -694,6 +698,20 @@ extension Amplitude: AnalyticsClient {
         }
         set {
             configuration.optOut = newValue
+        }
+    }
+}
+
+extension Amplitude: ApplicationLifecycleObserver {
+    func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool) {
+        trackingQueue.async { [self] in
+            onEnterForeground(timestamp: timestamp)
+        }
+    }
+
+    func applicationDidEnterBackground(timestamp: Int64) {
+        trackingQueue.async { [self] in
+            onExitForeground(timestamp: timestamp)
         }
     }
 }

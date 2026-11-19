@@ -44,6 +44,10 @@ internal class VendorSystem {
         #endif
     }()
 
+    func makeApplicationLifecycle() -> ApplicationLifecycle {
+        return ApplicationLifecycle()
+    }
+
     var requiredPlugin: Plugin? {
         return nil
     }
