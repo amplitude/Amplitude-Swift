@@ -1,3 +1,12 @@
+## [1.20.1](https://github.com/amplitude/Amplitude-Swift/compare/v1.20.0...v1.20.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* declare system boot time API in privacy manifest ([#470](https://github.com/amplitude/Amplitude-Swift/issues/470)) ([adf1b31](https://github.com/amplitude/Amplitude-Swift/commit/adf1b31fe1675bc37281a9127ab5b19756980b4e))
+* defer storage migrations until Amplitude initialization ([#469](https://github.com/amplitude/Amplitude-Swift/issues/469)) ([30c499f](https://github.com/amplitude/Amplitude-Swift/commit/30c499fce43fc8a4623864fafa381298d555e2e9))
+* use the configured server zone at SDK startup ([#471](https://github.com/amplitude/Amplitude-Swift/issues/471)) ([e6f14a4](https://github.com/amplitude/Amplitude-Swift/commit/e6f14a4f9fbffd9d6727f1ce46c86627e01d5195))
+
 # [1.20.0](https://github.com/amplitude/Amplitude-Swift/compare/v1.19.4...v1.20.0) (2026-11-03)
 
 
