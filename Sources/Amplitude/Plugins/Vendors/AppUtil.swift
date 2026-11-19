@@ -63,7 +63,7 @@ import Foundation
         }
 
         override func makeApplicationLifecycle() -> ApplicationLifecycle {
-            return IOSApplicationLifecycle()
+            return IOSLifecycleMonitor()
         }
 
         override func beginBackgroundTask() -> BackgroundTaskCompletionCallback? {

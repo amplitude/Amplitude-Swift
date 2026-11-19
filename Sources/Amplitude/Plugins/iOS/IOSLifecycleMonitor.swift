@@ -4,7 +4,7 @@ import Foundation
 import UIKit
 
 /// Platform notifications and cold-start detection are independent of analytics processing.
-class IOSApplicationLifecycle: ApplicationLifecycle {
+class IOSLifecycleMonitor: ApplicationLifecycle {
     private var emitLaunchOnActivation = false
     private var emitForegroundOnActivation = false
 
