@@ -12,18 +12,16 @@ extension ApplicationLifecycleObserver {
 
 /// Owns platform lifecycle notifications and delivers them without retaining consumers.
 internal class ApplicationLifecycle: NSObject {
-    private struct WeakObserver {
-        weak var value: (any ApplicationLifecycleObserver)?
-    }
-
     private let lock = NSLock()
-    private var observers: [WeakObserver] = []
+    private let observers = NSMapTable<AnyObject, NSNumber>(
+        keyOptions: [.weakMemory, .objectPointerPersonality], valueOptions: .strongMemory)
+    private var nextObserverIndex = 0
 
     func addObserver(_ observer: any ApplicationLifecycleObserver) {
         lock.withLock {
-            observers.removeAll { $0.value == nil }
-            guard !observers.contains(where: { $0.value === observer }) else { return }
-            observers.append(WeakObserver(value: observer))
+            guard observers.object(forKey: observer) == nil else { return }
+            observers.setObject(NSNumber(value: nextObserverIndex), forKey: observer)
+            nextObserverIndex += 1
         }
     }
 
@@ -50,8 +48,12 @@ internal class ApplicationLifecycle: NSObject {
 
     private func notify(_ callback: (any ApplicationLifecycleObserver) -> Void) {
         let currentObservers = lock.withLock {
-            observers.removeAll { $0.value == nil }
-            return observers.compactMap { $0.value }
+            // NSMapTable is unordered. Preserve registration order for session and autocapture callbacks.
+            observers.keyEnumerator().allObjects.compactMap { key -> (observer: any ApplicationLifecycleObserver, index: Int)? in
+                guard let observer = key as? any ApplicationLifecycleObserver,
+                      let index = observers.object(forKey: observer) else { return nil }
+                return (observer, index.intValue)
+            }.sorted { $0.index < $1.index }.map(\.observer)
         }
         // Observers choose their execution queue; never invoke them while holding the lock.
         currentObservers.forEach(callback)

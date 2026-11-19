@@ -211,11 +211,14 @@ final class AmplitudeIOSTests: XCTestCase {
         let amplitude = Amplitude(configuration: configuration)
         NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
         amplitude.waitForTrackingQueue()
+        // Lifecycle consumers enqueue event processing on the same queue.
+        amplitude.waitForTrackingQueue()
 
         let events = storageMem.events()
         XCTAssertEqual(events.count, 1)
-        XCTAssertEqual(events[0].eventType, Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
-        XCTAssertNil(events[0].eventProperties)
+        let event = try XCTUnwrap(events.first)
+        XCTAssertEqual(event.eventType, Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
+        XCTAssertNil(event.eventProperties)
     }
 
     func testSetupWhileAppInactive() {
