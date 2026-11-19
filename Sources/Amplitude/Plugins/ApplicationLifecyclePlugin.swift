@@ -1,4 +1,4 @@
-/// Owns analytics lifecycle handling and its ordering on the tracking queue.
+/// Orders analytics lifecycle work before the existing session and event APIs enqueue processing.
 internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifecycleObserver {
     // App lifecycle autocapture is currently supported on UIKit platforms.
     private var utils: DefaultEventUtils?
@@ -17,23 +17,18 @@ internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifec
     }
 
     func applicationDidFinishLaunching() {
-        amplitude?.trackingQueue.async { [self] in
-            utils?.trackAppUpdatedInstalledEvent()
-        }
+        utils?.trackAppUpdatedInstalledEvent()
     }
 
     func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool) {
-        amplitude?.trackingQueue.async { [self] in
-            amplitude?.onEnterForeground(timestamp: timestamp)
-            utils?.trackAppOpenedEvent(fromBackground: fromBackground)
-        }
+        // Update foreground state immediately, before a subsequent track() snapshots it.
+        amplitude?.onEnterForeground(timestamp: timestamp)
+        utils?.trackAppOpenedEvent(fromBackground: fromBackground)
     }
 
     func applicationDidEnterBackground(timestamp: Int64) {
-        amplitude?.trackingQueue.async { [self] in
-            amplitude?.onExitForeground(timestamp: timestamp)
-            utils?.trackAppBackgroundedEvent()
-        }
+        amplitude?.onExitForeground(timestamp: timestamp)
+        utils?.trackAppBackgroundedEvent()
     }
 
 #if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT

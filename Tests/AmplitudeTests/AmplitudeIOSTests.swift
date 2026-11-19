@@ -301,6 +301,66 @@ final class AmplitudeIOSTests: XCTestCase {
         lifecycle.enterForeground()
     }
 
+    func testForegroundPrecedesTrackingWhileQueueIsBlocked() throws {
+        IOSVendorSystem.overrideApplicationState(.background)
+        let configuration = Configuration(
+            apiKey: "test", instanceName: UUID().uuidString,
+            storageProvider: storageMem, identifyStorageProvider: interceptStorageMem,
+            autocapture: [.appLifecycles, .sessions],
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
+            enableAutoCaptureRemoteConfig: false, httpClient: RemoteConfigMockServer()
+        )
+        let amplitude = Amplitude(configuration: configuration)
+        amplitude.waitForTrackingQueue()
+        let laterTimestamp = Int64(Date().timeIntervalSince1970 * 1000) + Int64(configuration.minTimeBetweenSessionsMillis * 2)
+
+        amplitude.trackingQueue.suspend()
+        NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        amplitude.track(event: BaseEvent(timestamp: laterTimestamp, eventType: "after foreground"))
+        amplitude.trackingQueue.resume()
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+
+        let events = storageMem.events()
+        XCTAssertEqual(events.map(\.eventType), [Constants.AMP_SESSION_START_EVENT,
+                                                Constants.AMP_APPLICATION_OPENED_EVENT,
+                                                "after foreground"])
+        let sessionId = try XCTUnwrap(events.first?.sessionId)
+        XCTAssertLessThan(sessionId, laterTimestamp, "Foregrounding establishes the session before the subsequent event")
+        XCTAssertEqual(events.last?.sessionId, sessionId, "Foreground events keep the session despite a long gap")
+    }
+
+    func testBackgroundPrecedesTrackingWhileQueueIsBlocked() {
+        IOSVendorSystem.overrideApplicationState(.active)
+        let configuration = Configuration(
+            apiKey: "test", instanceName: UUID().uuidString,
+            storageProvider: storageMem, identifyStorageProvider: interceptStorageMem,
+            autocapture: [.appLifecycles, .sessions],
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
+            enableAutoCaptureRemoteConfig: false, httpClient: RemoteConfigMockServer()
+        )
+        configuration.flushEventsOnClose = false
+        let amplitude = Amplitude(configuration: configuration)
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+        let initialEventCount = storageMem.events().count
+        let laterTimestamp = Int64(Date().timeIntervalSince1970 * 1000) + Int64(configuration.minTimeBetweenSessionsMillis * 2)
+
+        amplitude.trackingQueue.suspend()
+        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        amplitude.track(event: BaseEvent(timestamp: laterTimestamp, eventType: "after background"))
+        amplitude.trackingQueue.resume()
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+
+        let events = Array(storageMem.events().dropFirst(initialEventCount))
+        XCTAssertEqual(events.map(\.eventType), [Constants.AMP_APPLICATION_BACKGROUNDED_EVENT,
+                                                Constants.AMP_SESSION_END_EVENT,
+                                                Constants.AMP_SESSION_START_EVENT,
+                                                "after background"])
+        XCTAssertEqual(events.last?.sessionId, laterTimestamp, "Background events respect the session timeout")
+    }
+
     func testInitialActivationPreservesLifecycleEventOrder() {
         for appState in [UIApplication.State.active, .inactive] {
             IOSVendorSystem.overrideApplicationState(appState)
