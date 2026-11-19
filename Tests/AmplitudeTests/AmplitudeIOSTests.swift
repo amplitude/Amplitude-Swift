@@ -4,6 +4,26 @@ import XCTest
 @testable import AmplitudeSwift
 
 final class AmplitudeIOSTests: XCTestCase {
+    private final class VersionStorage: FakeInMemoryStorage {
+        override func read<T>(key: StorageKey) -> T? {
+            assertVersionAccess(key)
+            return super.read(key: key)
+        }
+
+        override func write(key: StorageKey, value: Any?) throws {
+            assertVersionAccess(key)
+            try super.write(key: key, value: value)
+        }
+
+        var allowsMainThreadVersionAccess = true
+
+        private func assertVersionAccess(_ key: StorageKey) {
+            if Thread.isMainThread && (key == .APP_BUILD || key == .APP_VERSION) {
+                XCTAssertTrue(allowsMainThreadVersionAccess, "Lifecycle callback accessed version storage on main")
+            }
+        }
+    }
+
     private var storageMem: FakeInMemoryStorage!
     private var interceptStorageMem: FakeInMemoryStorage!
     private var window: UIWindow!
@@ -42,11 +62,12 @@ final class AmplitudeIOSTests: XCTestCase {
                                          initialState: UIApplication.State = .background, receivesLaunch: Bool = false) throws {
         IOSVendorSystem.overrideApplicationState(initialState)
         IOSVendorSystem.overrideUsesScenes(false)
-        try storageMem.write(key: StorageKey.APP_BUILD, value: "old-build")
-        try storageMem.write(key: StorageKey.APP_VERSION, value: "old-version")
+        let versionStorage = VersionStorage()
+        try versionStorage.write(key: StorageKey.APP_BUILD, value: "old-build")
+        try versionStorage.write(key: StorageKey.APP_VERSION, value: "old-version")
         let amplitude = Amplitude(configuration: Configuration(
             apiKey: "local-test", instanceName: instanceName,
-            storageProvider: storageMem, identifyStorageProvider: interceptStorageMem,
+            storageProvider: versionStorage, identifyStorageProvider: interceptStorageMem,
             autocapture: [.sessions, .appLifecycles],
             offline: NetworkConnectivityCheckerPlugin.Disabled,
             enableAutoCaptureRemoteConfig: false,
@@ -56,6 +77,7 @@ final class AmplitudeIOSTests: XCTestCase {
         amplitude.add(plugin: collector)
         amplitude.waitForTrackingQueue()
 
+        versionStorage.allowsMainThreadVersionAccess = false
         let releaseQueue = DispatchSemaphore(value: 0)
         amplitude.trackingQueue.async { releaseQueue.wait() }
         IOSVendorSystem.overrideApplicationState(.inactive)
@@ -69,6 +91,8 @@ final class AmplitudeIOSTests: XCTestCase {
         releaseQueue.signal()
         for _ in 0..<4 { amplitude.waitForTrackingQueue() }
 
+        versionStorage.allowsMainThreadVersionAccess = true
+        XCTAssertEqual(versionStorage.read(key: .APP_BUILD) as String?, Bundle.main.infoDictionary?["CFBundleVersion"] as? String)
         XCTAssertEqual(collector.events.map { $0.eventType }, [
             Constants.AMP_SESSION_START_EVENT, Constants.AMP_APPLICATION_UPDATED_EVENT,
             Constants.AMP_APPLICATION_OPENED_EVENT, "caller_event", Constants.AMP_APPLICATION_BACKGROUNDED_EVENT

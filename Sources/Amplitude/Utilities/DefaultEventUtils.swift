@@ -20,17 +20,45 @@ public class DefaultEventUtils {
             return
         }
 
+        let previous = storedAppVersion(in: amplitude.storage)
+        trackAppUpdatedInstalledEvent(previous: previous, persistOn: nil)
+    }
+
+    struct AppVersion {
+        let build: String?
+        let version: String?
+    }
+
+    func storedAppVersion(in storage: Storage) -> AppVersion {
+        AppVersion(build: storage.read(key: .APP_BUILD), version: storage.read(key: .APP_VERSION))
+    }
+
+    func trackAppUpdatedInstalledEvent(previous: AppVersion, persistOn queue: DispatchQueue?) {
+        guard let amplitude = amplitude else {
+            return
+        }
+
         let info = Bundle.main.infoDictionary
         let currentBuild = info?["CFBundleVersion"] as? String
         let currentVersion = info?["CFBundleShortVersionString"] as? String
-        let previousBuild: String? = amplitude.storage.read(key: StorageKey.APP_BUILD)
-        let previousVersion: String? = amplitude.storage.read(key: StorageKey.APP_VERSION)
+        let previousBuild = previous.build
+        let previousVersion = previous.version
 
-        if currentBuild != previousBuild {
-            try? amplitude.storage.write(key: StorageKey.APP_BUILD, value: currentBuild)
-        }
-        if currentVersion != previousVersion {
-            try? amplitude.storage.write(key: StorageKey.APP_VERSION, value: currentVersion)
+        if currentBuild != previousBuild || currentVersion != previousVersion {
+            let storage = amplitude.storage
+            let persist = {
+                if currentBuild != previousBuild {
+                    try? storage.write(key: .APP_BUILD, value: currentBuild)
+                }
+                if currentVersion != previousVersion {
+                    try? storage.write(key: .APP_VERSION, value: currentVersion)
+                }
+            }
+            if let queue = queue {
+                queue.async { persist() }
+            } else {
+                persist()
+            }
         }
 
         guard trackAppLifecycles else {
