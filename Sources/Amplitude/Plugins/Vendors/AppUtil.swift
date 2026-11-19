@@ -66,10 +66,6 @@ import Foundation
             return IOSApplicationLifecycle()
         }
 
-        override var requiredPlugin: Plugin {
-            return IOSLifecycleMonitor()
-        }
-
         override func beginBackgroundTask() -> BackgroundTaskCompletionCallback? {
             if !isRunningInAppExtension, let application = IOSVendorSystem.sharedApplication {
                 var id: UIBackgroundTaskIdentifier = .invalid

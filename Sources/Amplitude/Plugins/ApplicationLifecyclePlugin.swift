@@ -1,35 +1,68 @@
-/// Serializes analytics lifecycle work independently of other lifecycle observers.
-internal class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifecycleObserver {
+/// Owns analytics lifecycle handling and its ordering on the tracking queue.
+internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifecycleObserver {
+    // App lifecycle autocapture is currently supported on UIKit platforms.
+    private var utils: DefaultEventUtils?
+
     override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
         amplitude.appLifecycle.addObserver(self)
+
+#if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
+        utils = DefaultEventUtils(amplitude: amplitude)
+        updateAutocaptureSetup()
+        amplitude.autocaptureManager.onChange { [weak self] _ in
+            self?.updateAutocaptureSetup()
+        }
+#endif
     }
 
-    final func applicationDidFinishLaunching() {
+    func applicationDidFinishLaunching() {
         amplitude?.trackingQueue.async { [self] in
-            didFinishLaunching()
+            utils?.trackAppUpdatedInstalledEvent()
         }
     }
 
-    final func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool) {
+    func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool) {
         amplitude?.trackingQueue.async { [self] in
-            willEnterForeground(timestamp: timestamp, fromBackground: fromBackground)
+            amplitude?.onEnterForeground(timestamp: timestamp)
+            utils?.trackAppOpenedEvent(fromBackground: fromBackground)
         }
     }
 
-    final func applicationDidEnterBackground(timestamp: Int64) {
+    func applicationDidEnterBackground(timestamp: Int64) {
         amplitude?.trackingQueue.async { [self] in
-            didEnterBackground(timestamp: timestamp)
+            amplitude?.onExitForeground(timestamp: timestamp)
+            utils?.trackAppBackgroundedEvent()
         }
     }
 
-    func didFinishLaunching() {}
+#if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
+    private func updateAutocaptureSetup() {
+        guard let amplitude else { return }
+        let manager = amplitude.autocaptureManager
 
-    func willEnterForeground(timestamp: Int64, fromBackground: Bool) {
-        amplitude?.onEnterForeground(timestamp: timestamp)
+        if manager.isEnabled(.screenViews) {
+            UIKitScreenViews.register(amplitude)
+        } else {
+            UIKitScreenViews.unregister(amplitude)
+        }
+
+        // Register UIKitElementInteractions if either element interactions or frustration interactions is enabled
+        let needsElementInteractions = manager.isEnabled(.elementInteractions) || manager.isEnabled(.frustrationInteractions)
+        if needsElementInteractions {
+            UIKitElementInteractions.register(amplitude)
+        } else {
+            UIKitElementInteractions.unregister(amplitude)
+        }
     }
 
-    func didEnterBackground(timestamp: Int64) {
-        amplitude?.onExitForeground(timestamp: timestamp)
+    override func teardown() {
+        super.teardown()
+
+        if let amplitude {
+            UIKitScreenViews.unregister(amplitude)
+            UIKitElementInteractions.unregister(amplitude)
+        }
     }
+#endif
 }
