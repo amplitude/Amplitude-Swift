@@ -11,17 +11,14 @@ extension ApplicationLifecycleObserver {
 }
 
 /// Owns platform lifecycle notifications and delivers them without retaining consumers.
+/// Observer delivery order is unspecified; consumers own any sequencing they require.
 internal class ApplicationLifecycle: NSObject {
     private let lock = NSLock()
-    private let observers = NSMapTable<AnyObject, NSNumber>(
-        keyOptions: [.weakMemory, .objectPointerPersonality], valueOptions: .strongMemory)
-    private var nextObserverIndex = 0
+    private let observers = NSHashTable<AnyObject>(options: [.weakMemory, .objectPointerPersonality])
 
     func addObserver(_ observer: any ApplicationLifecycleObserver) {
         lock.withLock {
-            guard observers.object(forKey: observer) == nil else { return }
-            observers.setObject(NSNumber(value: nextObserverIndex), forKey: observer)
-            nextObserverIndex += 1
+            observers.add(observer)
         }
     }
 
@@ -48,12 +45,7 @@ internal class ApplicationLifecycle: NSObject {
 
     private func notify(_ callback: (any ApplicationLifecycleObserver) -> Void) {
         let currentObservers = lock.withLock {
-            // NSMapTable is unordered. Preserve registration order for session and autocapture callbacks.
-            observers.keyEnumerator().allObjects.compactMap { key -> (observer: any ApplicationLifecycleObserver, index: Int)? in
-                guard let observer = key as? any ApplicationLifecycleObserver,
-                      let index = observers.object(forKey: observer) else { return nil }
-                return (observer, index.intValue)
-            }.sorted { $0.index < $1.index }.map(\.observer)
+            observers.allObjects.compactMap { $0 as? any ApplicationLifecycleObserver }
         }
         // Observers choose their execution queue; never invoke them while holding the lock.
         currentObservers.forEach(callback)

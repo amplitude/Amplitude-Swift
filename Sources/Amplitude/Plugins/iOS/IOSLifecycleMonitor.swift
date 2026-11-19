@@ -11,15 +11,13 @@ import AmplitudeCore
 import Foundation
 import SwiftUI
 
-class IOSLifecycleMonitor: UtilityPlugin, ApplicationLifecycleObserver {
+class IOSLifecycleMonitor: ApplicationLifecyclePlugin {
 
     private var utils: DefaultEventUtils?
 
     public override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
         utils = DefaultEventUtils(amplitude: amplitude)
-
-        amplitude.appLifecycle.addObserver(self)
 
         updateAutocaptureSetup()
 
@@ -48,23 +46,19 @@ class IOSLifecycleMonitor: UtilityPlugin, ApplicationLifecycleObserver {
         }
     }
 
-    func applicationDidFinishLaunching() {
-        amplitude?.trackingQueue.async { [self] in
-            utils?.trackAppUpdatedInstalledEvent()
-        }
+    override func didFinishLaunching() {
+        utils?.trackAppUpdatedInstalledEvent()
     }
 
-    func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool) {
-        amplitude?.trackingQueue.async { [self] in
-            utils?.trackAppOpenedEvent(fromBackground: fromBackground)
-        }
+    override func willEnterForeground(timestamp: Int64, fromBackground: Bool) {
+        super.willEnterForeground(timestamp: timestamp, fromBackground: fromBackground)
+        utils?.trackAppOpenedEvent(fromBackground: fromBackground)
     }
 
-    func applicationDidEnterBackground(timestamp: Int64) {
-        amplitude?.trackingQueue.async { [self] in
-            if let amplitude, amplitude.autocaptureManager.isEnabled(.appLifecycles) {
-                amplitude.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
-            }
+    override func didEnterBackground(timestamp: Int64) {
+        super.didEnterBackground(timestamp: timestamp)
+        if let amplitude, amplitude.autocaptureManager.isEnabled(.appLifecycles) {
+            amplitude.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
         }
     }
 

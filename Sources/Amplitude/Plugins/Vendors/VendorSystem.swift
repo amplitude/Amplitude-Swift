@@ -49,7 +49,7 @@ internal class VendorSystem {
     }
 
     var requiredPlugin: Plugin? {
-        return nil
+        return ApplicationLifecyclePlugin()
     }
 
     var networkConnectivityCheckingEnabled: Bool {

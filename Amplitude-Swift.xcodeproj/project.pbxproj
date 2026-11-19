@@ -104,6 +104,7 @@
 		EAED9A082EE7B47E00A5FC08 /* RevenueEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* RevenueEvent.swift */; };
 		EAED9A092EE7B47E00A5FC08 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
 		EAED9A0A2EE7B47E00A5FC08 /* AmplitudeDestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* AmplitudeDestinationPlugin.swift */; };
+		3F72FF3AFD094767B949E33D /* ApplicationLifecyclePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDE0A0708A04FC4A8706A38 /* ApplicationLifecyclePlugin.swift */; };
 		EAED9A0B2EE7B47E00A5FC08 /* ContextPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ContextPlugin.swift */; };
 		EAED9A0C2EE7B47E00A5FC08 /* DestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* DestinationPlugin.swift */; };
 		EAED9A0D2EE7B47E00A5FC08 /* IdentityEventSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* IdentityEventSender.swift */; };
@@ -181,6 +182,7 @@
 		EAF7B5582E0F1C1D00E6E61A /* ObjCInteractionsOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF7B5572E0F1C1000E6E61A /* ObjCInteractionsOptions.swift */; };
 		OBJ_100 /* Mediator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Mediator.swift */; };
 		OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* AmplitudeDestinationPlugin.swift */; };
+		99B0E08AFCD2400E897C6AA7 /* ApplicationLifecyclePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDE0A0708A04FC4A8706A38 /* ApplicationLifecyclePlugin.swift */; };
 		OBJ_102 /* ContextPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ContextPlugin.swift */; };
 		OBJ_103 /* DestinationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* DestinationPlugin.swift */; };
 		OBJ_104 /* IdentityEventSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* IdentityEventSender.swift */; };
@@ -339,6 +341,7 @@
 		OBJ_20 /* RevenueEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevenueEvent.swift; sourceTree = "<group>"; };
 		OBJ_21 /* Mediator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mediator.swift; sourceTree = "<group>"; };
 		OBJ_23 /* AmplitudeDestinationPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmplitudeDestinationPlugin.swift; sourceTree = "<group>"; };
+		1EDE0A0708A04FC4A8706A38 /* ApplicationLifecyclePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationLifecyclePlugin.swift; sourceTree = "<group>"; };
 		OBJ_24 /* ContextPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextPlugin.swift; sourceTree = "<group>"; };
 		OBJ_25 /* DestinationPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationPlugin.swift; sourceTree = "<group>"; };
 		OBJ_26 /* IdentityEventSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityEventSender.swift; sourceTree = "<group>"; };
@@ -513,6 +516,7 @@
 			children = (
 				EA8DA4BE2D91C101003B00F0 /* NetworkTrackingPlugin.swift */,
 				OBJ_23 /* AmplitudeDestinationPlugin.swift */,
+				1EDE0A0708A04FC4A8706A38 /* ApplicationLifecyclePlugin.swift */,
 				OBJ_24 /* ContextPlugin.swift */,
 				OBJ_25 /* DestinationPlugin.swift */,
 				OBJ_26 /* IdentityEventSender.swift */,
@@ -937,6 +941,7 @@
 				EAED9A082EE7B47E00A5FC08 /* RevenueEvent.swift in Sources */,
 				EAED9A092EE7B47E00A5FC08 /* Mediator.swift in Sources */,
 				EAED9A0A2EE7B47E00A5FC08 /* AmplitudeDestinationPlugin.swift in Sources */,
+				3F72FF3AFD094767B949E33D /* ApplicationLifecyclePlugin.swift in Sources */,
 				EAED9A0B2EE7B47E00A5FC08 /* ContextPlugin.swift in Sources */,
 				EAED9A0C2EE7B47E00A5FC08 /* DestinationPlugin.swift in Sources */,
 				EAED9A0D2EE7B47E00A5FC08 /* IdentityEventSender.swift in Sources */,
@@ -1081,6 +1086,7 @@
 				OBJ_99 /* RevenueEvent.swift in Sources */,
 				OBJ_100 /* Mediator.swift in Sources */,
 				OBJ_101 /* AmplitudeDestinationPlugin.swift in Sources */,
+				99B0E08AFCD2400E897C6AA7 /* ApplicationLifecyclePlugin.swift in Sources */,
 				OBJ_102 /* ContextPlugin.swift in Sources */,
 				OBJ_103 /* DestinationPlugin.swift in Sources */,
 				OBJ_104 /* IdentityEventSender.swift in Sources */,
