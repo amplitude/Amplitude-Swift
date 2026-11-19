@@ -30,11 +30,10 @@ final class IdentifyInterceptorTests: XCTestCase {
         amplitude = Amplitude(configuration: configuration)
         mockPathCreation = MockPathCreation()
         amplitude.add(plugin: NetworkConnectivityCheckerPlugin(pathCreation: mockPathCreation))
-        httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagonostics)
+        httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagonostics, serverZone: configuration.serverZone)
         pipeline = EventPipeline(amplitude: amplitude)
         pipeline.httpClient = httpClient
         interceptor = TestIdentifyInterceptor(
-            configuration: configuration,
             pipeline: pipeline,
             queue: amplitude.trackingQueue
         )
@@ -47,19 +46,19 @@ final class IdentifyInterceptorTests: XCTestCase {
 
     func testMinimumIdentifyBatchInterval() {
         var identifyBatchIntervalMillis = 0
-        var interceptor1 = IdentifyInterceptor(configuration: configuration, pipeline: pipeline, queue: .main, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
+        var interceptor1 = IdentifyInterceptor(pipeline: pipeline, queue: .main, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
         XCTAssertEqual(interceptor1.getIdentifyBatchInterval(), TimeInterval.milliseconds(Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS))
 
         identifyBatchIntervalMillis = Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS - 1
-        interceptor1 = IdentifyInterceptor(configuration: configuration, pipeline: pipeline, queue: .main, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
+        interceptor1 = IdentifyInterceptor(pipeline: pipeline, queue: .main, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
         XCTAssertEqual(interceptor1.getIdentifyBatchInterval(), TimeInterval.milliseconds(Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS))
 
         identifyBatchIntervalMillis = Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS
-        interceptor1 = IdentifyInterceptor(configuration: configuration, pipeline: pipeline, queue: .main, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
+        interceptor1 = IdentifyInterceptor(pipeline: pipeline, queue: .main, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
         XCTAssertEqual(interceptor1.getIdentifyBatchInterval(), TimeInterval.milliseconds(identifyBatchIntervalMillis))
 
         identifyBatchIntervalMillis = Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS * 2
-        interceptor1 = IdentifyInterceptor(configuration: configuration, pipeline: pipeline, queue: .main, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
+        interceptor1 = IdentifyInterceptor(pipeline: pipeline, queue: .main, identifyBatchIntervalMillis: identifyBatchIntervalMillis)
         XCTAssertEqual(interceptor1.getIdentifyBatchInterval(), TimeInterval.milliseconds(identifyBatchIntervalMillis))
     }
 
