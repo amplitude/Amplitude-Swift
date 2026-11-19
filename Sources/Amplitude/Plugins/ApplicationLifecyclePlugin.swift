@@ -1,3 +1,5 @@
+import Foundation
+
 /// Orders analytics lifecycle work before the existing session and event APIs enqueue processing.
 internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifecycleObserver {
     // App lifecycle autocapture is currently supported on UIKit platforms.
@@ -17,7 +19,20 @@ internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifec
     }
 
     func applicationDidFinishLaunching() {
-        utils?.trackAppUpdatedInstalledEvent()
+        amplitude?.trackingQueue.async { [self] in
+            utils?.trackAppUpdatedInstalledEvent()
+        }
+    }
+
+    func applicationDidBecomeActive(launch: Bool) {
+        // Startup historically defers generation, identity capture, and the session timestamp.
+        amplitude?.trackingQueue.async { [self] in
+            if launch {
+                utils?.trackAppUpdatedInstalledEvent()
+            }
+            amplitude?.onEnterForeground(timestamp: Int64(Date().timeIntervalSince1970 * 1000))
+            utils?.trackAppOpenedEvent()
+        }
     }
 
     func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool) {

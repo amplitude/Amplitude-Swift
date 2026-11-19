@@ -2,12 +2,14 @@ import Foundation
 
 internal protocol ApplicationLifecycleObserver: AnyObject {
     func applicationDidFinishLaunching()
+    func applicationDidBecomeActive(launch: Bool)
     func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool)
     func applicationDidEnterBackground(timestamp: Int64)
 }
 
 extension ApplicationLifecycleObserver {
     func applicationDidFinishLaunching() {}
+    func applicationDidBecomeActive(launch: Bool) {}
 }
 
 /// Owns platform lifecycle notifications and delivers them without retaining consumers.
@@ -22,11 +24,16 @@ internal class ApplicationLifecycle: NSObject {
         }
     }
 
-    /// Called after all consumers are registered and SDK initialization is complete.
+    /// Called once consumers are registered, before the remaining SDK plugins are set up.
     func start() {}
 
     func didFinishLaunching() {
         notify { $0.applicationDidFinishLaunching() }
+    }
+
+    /// Initial activation, including initialization in an already-active app.
+    func becomeActive(launch: Bool) {
+        notify { $0.applicationDidBecomeActive(launch: launch) }
     }
 
     func enterForeground(fromBackground: Bool = false) {

@@ -27,8 +27,7 @@ class IOSLifecycleMonitor: ApplicationLifecycle {
                                                object: nil)
         switch IOSVendorSystem.applicationState {
         case .active:
-            didFinishLaunching()
-            enterForeground()
+            becomeActive(launch: true)
         case .inactive:
             emitLaunchOnActivation = true
             emitForegroundOnActivation = true
@@ -52,10 +51,7 @@ class IOSLifecycleMonitor: ApplicationLifecycle {
         let emitLaunch = emitLaunchOnActivation
         emitLaunchOnActivation = false
         emitForegroundOnActivation = false
-        if emitLaunch {
-            didFinishLaunching()
-        }
-        enterForeground()
+        becomeActive(launch: emitLaunch)
     }
 
     @objc

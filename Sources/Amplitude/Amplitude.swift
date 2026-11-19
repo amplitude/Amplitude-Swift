@@ -208,6 +208,7 @@ public class Amplitude {
         if let requiredPlugin = VendorSystem.current.requiredPlugin {
             _ = add(plugin: requiredPlugin)
         }
+        appLifecycle.start()
         _ = add(plugin: contextPlugin)
         _ = add(plugin: AnalyticsConnectorPlugin())
         _ = add(plugin: AnalyticsConnectorIdentityPlugin())
@@ -224,7 +225,6 @@ public class Amplitude {
         trackingQueue.async { [self] in
             self.trimQueuedEvents()
         }
-        appLifecycle.start()
         trackingQueue.resume()
 
         amplitudeContext.diagnosticsClient.setTag(name: "sdk.\(Constants.SDK_LIBRARY).version", value: Constants.SDK_VERSION)

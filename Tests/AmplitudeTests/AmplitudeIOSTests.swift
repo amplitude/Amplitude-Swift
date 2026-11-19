@@ -361,6 +361,133 @@ final class AmplitudeIOSTests: XCTestCase {
         XCTAssertEqual(events.last?.sessionId, laterTimestamp, "Background events respect the session timeout")
     }
 
+    func testLaunchAndForegroundPreserveDeferredInstallOrdering() {
+        IOSVendorSystem.overrideApplicationState(.background)
+        let amplitude = Amplitude(configuration: lifecycleConfiguration())
+        amplitude.waitForTrackingQueue()
+
+        amplitude.trackingQueue.suspend()
+        NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+        NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        amplitude.trackingQueue.resume()
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+
+        // The original launch handler generated its event on tracking, after foreground work was queued.
+        XCTAssertEqual(storageMem.events().map(\.eventType), [Constants.AMP_SESSION_START_EVENT,
+                                                             Constants.AMP_APPLICATION_OPENED_EVENT,
+                                                             Constants.AMP_APPLICATION_INSTALLED_EVENT])
+    }
+
+    func testInitialActivationDefersIdentityCaptureAndEventGeneration() {
+        IOSVendorSystem.overrideApplicationState(.inactive)
+        let amplitude = Amplitude(configuration: lifecycleConfiguration())
+        amplitude.waitForTrackingQueue()
+        amplitude.setUserId(userId: "before activation")
+
+        amplitude.trackingQueue.suspend()
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        amplitude.setUserId(userId: "after activation")
+        amplitude.track(eventType: "queued during activation")
+        amplitude.trackingQueue.resume()
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+
+        let events = storageMem.events()
+        XCTAssertEqual(events.map(\.eventType), [Constants.AMP_SESSION_START_EVENT,
+                                                "queued during activation",
+                                                Constants.AMP_APPLICATION_INSTALLED_EVENT,
+                                                Constants.AMP_APPLICATION_OPENED_EVENT])
+        XCTAssertTrue(events.allSatisfy { $0.userId == "after activation" })
+    }
+
+    func testInitialActivationReadsOptOutWhenTrackingRuns() {
+        IOSVendorSystem.overrideApplicationState(.inactive)
+        let config = lifecycleConfiguration()
+        let amplitude = Amplitude(configuration: config)
+        amplitude.waitForTrackingQueue()
+
+        amplitude.trackingQueue.suspend()
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        config.optOut = true
+        amplitude.trackingQueue.resume()
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertTrue(storageMem.events().isEmpty)
+    }
+
+    func testInitialActivationReadsAutocaptureWhenTrackingRuns() {
+        IOSVendorSystem.overrideApplicationState(.inactive)
+        let amplitude = Amplitude(configuration: lifecycleConfiguration())
+        amplitude.waitForTrackingQueue()
+
+        amplitude.trackingQueue.suspend()
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        amplitude.autocaptureManager.handleRemoteConfig(["appLifecycles": false])
+        amplitude.trackingQueue.resume()
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertEqual(storageMem.events().map(\.eventType), [Constants.AMP_SESSION_START_EVENT])
+    }
+
+    func testActiveInitializationDefersVersionStorageAccess() {
+        class ObservingStorage: FakeInMemoryStorage {
+            var onBuildRead: (() -> Void)?
+            override func read<T>(key: StorageKey) -> T? {
+                if key == .APP_BUILD { onBuildRead?() }
+                return super.read(key: key)
+            }
+        }
+        IOSVendorSystem.overrideApplicationState(.active)
+        let storage = ObservingStorage()
+        let callerQueue = DispatchQueue(label: "lifecycle-initialization-caller")
+        let callerKey = DispatchSpecificKey<Bool>()
+        callerQueue.setSpecific(key: callerKey, value: true)
+        let readBuild = expectation(description: "version storage accessed off the initialization thread")
+        storage.onBuildRead = {
+            XCTAssertNil(DispatchQueue.getSpecific(key: callerKey))
+            readBuild.fulfill()
+        }
+        let config = lifecycleConfiguration(storage: storage)
+        let amplitude = callerQueue.sync { Amplitude(configuration: config) }
+        wait(for: [readBuild], timeout: 10)
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+    }
+
+    func testNotificationsAreObservedDuringContextPluginSetup() {
+        IOSVendorSystem.overrideApplicationState(.background)
+        var postedDuringSetup = false
+        let logger = ObjCLoggerProviderWrapper(logLevel: .warn) { _, message in
+            guard message.hasPrefix("Configured deviceId") else { return }
+            postedDuringSetup = true
+            NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+            NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        }
+        let config = lifecycleConfiguration()
+        config.loggerProvider = logger
+        // ContextPlugin warns about this configured ID during setup, after lifecycle setup.
+        config.deviceId = "00000000-0000-0000-0000-000000000000"
+        let amplitude = Amplitude(configuration: config)
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertTrue(postedDuringSetup)
+        XCTAssertEqual(storageMem.events().map(\.eventType), [Constants.AMP_SESSION_START_EVENT,
+                                                             Constants.AMP_APPLICATION_OPENED_EVENT,
+                                                             Constants.AMP_APPLICATION_BACKGROUNDED_EVENT])
+    }
+
+    private func lifecycleConfiguration(storage: FakeInMemoryStorage? = nil) -> Configuration {
+        Configuration(apiKey: "test", instanceName: UUID().uuidString,
+                      storageProvider: storage ?? storageMem, identifyStorageProvider: interceptStorageMem,
+                      flushEventsOnClose: false, autocapture: [.appLifecycles, .sessions],
+                      offline: NetworkConnectivityCheckerPlugin.Disabled,
+                      enableAutoCaptureRemoteConfig: false, httpClient: RemoteConfigMockServer())
+    }
+
     func testInitialActivationPreservesLifecycleEventOrder() {
         for appState in [UIApplication.State.active, .inactive] {
             IOSVendorSystem.overrideApplicationState(appState)
