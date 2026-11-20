@@ -290,6 +290,8 @@ final class EventPipelineTests: XCTestCase {
     }
 
     private final class ExpiringVendor: VendorSystem {
+        var isExtension = false
+        override var isRunningInAppExtension: Bool { isExtension }
         var expireDuringStart = false
         var expire: (() -> Void)?
         var onEnd: (() -> Void)?
@@ -322,7 +324,7 @@ final class EventPipelineTests: XCTestCase {
         let pipeline: EventPipeline
         let client: ControlledClient
 
-        init(storage: PersistentStorage? = nil) {
+        init(storage: PersistentStorage? = nil, isExtension: Bool = false) {
             self.storage = storage ?? PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
                 diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
             let config = Configuration(apiKey: "test", flushQueueSize: 1, flushIntervalMillis: 3_600_000,
@@ -330,6 +332,8 @@ final class EventPipelineTests: XCTestCase {
                 offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
                 httpClient: RemoteConfigMockServer())
             config.flushMaxRetries = 0
+            config.flushEventsOnClose = false
+            vendor.isExtension = isExtension
             amplitude = Amplitude(configuration: config)
             pipeline = EventPipeline(amplitude: amplitude, vendorSystem: vendor)
             client = ControlledClient(configuration: config, diagnostics: config.diagonostics,
@@ -354,7 +358,7 @@ final class EventPipelineTests: XCTestCase {
         }
     }
 
-    func testExplicitFlushDuringExpiredRequestIsNotLost() throws {
+    func testExpirationBlocksAllNewUploadsUntilForeground() throws {
         for expireFirst in [false, true] {
             let fixture = UploadFixture()
             defer { fixture.cleanUp() }
@@ -362,7 +366,7 @@ final class EventPipelineTests: XCTestCase {
             try fixture.writeBatch(["second"])
             let started = expectation(description: "first request started")
             let firstFlush = expectation(description: "first flush finished")
-            let explicitFlush = expectation(description: "new explicit flush drained remaining events")
+            let explicitFlush = expectation(description: "new explicit flush stops at the expired request")
             fixture.client.onUpload = { started.fulfill() }
             fixture.pipeline.flush { firstFlush.fulfill() }
             wait(for: [started], timeout: 10)
@@ -375,11 +379,53 @@ final class EventPipelineTests: XCTestCase {
             fixture.client.response?(.success(200))
             wait(for: [firstFlush, explicitFlush], timeout: 10)
 
-            XCTAssertEqual(fixture.client.uploadCount, 2)
-            XCTAssertEqual(fixture.vendor.endCount, 2)
+            XCTAssertEqual(fixture.client.uploadCount, 1)
+            XCTAssertEqual(fixture.vendor.endCount, 1)
             let remaining: [URL] = try XCTUnwrap(fixture.storage.read(key: .EVENTS))
-            XCTAssertTrue(remaining.isEmpty)
+            XCTAssertEqual(remaining.count, 1)
+
+            fixture.pipeline.put(event: BaseEvent(eventType: "third"))
+            let blocked = expectation(description: "explicit and event-count flushes remain blocked")
+            fixture.pipeline.flush { blocked.fulfill() }
+            wait(for: [blocked], timeout: 10)
+            XCTAssertEqual(fixture.client.uploadCount, 1)
+
+            fixture.amplitude.appLifecycle.enterForeground()
+            let resumed = expectation(description: "foreground permits uploads again")
+            fixture.pipeline.flush { resumed.fulfill() }
+            wait(for: [resumed], timeout: 10)
+            XCTAssertEqual(fixture.client.uploadCount, 3)
+            let afterForeground: [URL] = try XCTUnwrap(fixture.storage.read(key: .EVENTS))
+            XCTAssertTrue(afterForeground.isEmpty)
         }
+    }
+
+    func testExtensionsDoNotPauseOnLifecycleOrExpiration() throws {
+        let fixture = UploadFixture(isExtension: true)
+        defer { fixture.cleanUp() }
+        fixture.pipeline.start()
+        fixture.amplitude.appLifecycle.enterBackground()
+        fixture.client.callbackQueue.sync {}
+        XCTAssertEqual(fixture.pipeline.flushTimer?.state, .resumed)
+
+        try fixture.writeBatch(["first"])
+        try fixture.writeBatch(["second"])
+        fixture.vendor.expireDuringStart = true
+        fixture.client.onUpload = { fixture.client.response?(.success(200)) }
+        let drained = expectation(description: "extension keeps uploading across expiration")
+        fixture.pipeline.flush { drained.fulfill() }
+        wait(for: [drained], timeout: 10)
+        XCTAssertEqual(fixture.client.uploadCount, 2)
+        XCTAssertEqual(fixture.vendor.endCount, 2)
+        XCTAssertEqual(fixture.pipeline.flushTimer?.state, .resumed)
+
+        fixture.pipeline.put(event: BaseEvent(eventType: "third"))
+        let flushed = expectation(description: "new extension flushes remain available")
+        fixture.pipeline.flush { flushed.fulfill() }
+        wait(for: [flushed], timeout: 10)
+        XCTAssertEqual(fixture.client.uploadCount, 3)
+        let remaining: [URL] = try XCTUnwrap(fixture.storage.read(key: .EVENTS))
+        XCTAssertTrue(remaining.isEmpty)
     }
 
     func testAutomaticFlushDoesNotRestartExpiredRequest() throws {
@@ -425,7 +471,8 @@ final class EventPipelineTests: XCTestCase {
         let events = BaseEvent.fromArrayString(jsonString: try XCTUnwrap(fixture.storage.getEventsString(eventBlock: XCTUnwrap(remaining.first))))
         XCTAssertEqual(events?.map(\.eventType), ["retry"])
 
-        let drained = expectation(description: "later explicit flush uploads the retry")
+        fixture.amplitude.appLifecycle.enterForeground()
+        let drained = expectation(description: "explicit flush after foreground uploads the retry")
         fixture.client.onUpload = { fixture.client.response?(.success(200)) }
         fixture.pipeline.flush { drained.fulfill() }
         wait(for: [drained], timeout: 10)
@@ -528,7 +575,8 @@ final class EventPipelineTests: XCTestCase {
                 XCTAssertEqual(FileManager.default.fileExists(atPath: files[0].path), !succeeds)
                 XCTAssertTrue(FileManager.default.fileExists(atPath: files[1].path))
 
-                // Expiration stops this chain, not a later explicit flush.
+                // A new foreground execution window permits uploads again.
+                amplitude.appLifecycle.enterForeground()
                 vendor.expireDuringStart = false
                 let drained = expectation(description: "explicit flush drains remaining batches")
                 client.onUpload = { client.response?(.success(200)) }

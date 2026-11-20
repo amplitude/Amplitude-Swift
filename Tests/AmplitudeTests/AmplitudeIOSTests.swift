@@ -244,11 +244,11 @@ final class AmplitudeIOSTests: XCTestCase {
 
         vendor.shouldExpire = false
         try storage.write(key: .EVENTS, value: BaseEvent(eventType: "explicit-background-flush"))
-        let flushed = expectation(description: "explicit flush works with the timer suspended")
+        let flushed = expectation(description: "explicit flush is blocked after expiration")
         pipeline.flush { flushed.fulfill() }
         wait(for: [flushed], timeout: 10)
         let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
-        XCTAssertTrue(files.isEmpty)
+        XCTAssertEqual(files.count, 1)
         XCTAssertEqual(pipeline.flushTimer?.state, .suspended)
 
         for _ in 0..<2 {
@@ -256,6 +256,12 @@ final class AmplitudeIOSTests: XCTestCase {
         }
         uploadQueue.sync {}
         XCTAssertEqual(pipeline.flushTimer?.state, .resumed)
+        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        let foregroundFlush = expectation(description: "flushes remain allowed after backgrounding without expiry")
+        pipeline.flush { foregroundFlush.fulfill() }
+        wait(for: [foregroundFlush], timeout: 10)
+        let remaining: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+        XCTAssertTrue(remaining.isEmpty)
 
         // Backgrounding must preserve a suspension; only foregrounding resumes it.
         for notification in [UIApplication.willEnterForegroundNotification, UIApplication.didEnterBackgroundNotification] {
