@@ -1,4 +1,4 @@
-// swift-tools-version: 5.7
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -10,6 +10,7 @@ let package = Package(
         .iOS("13.0"),
         .tvOS("13.0"),
         .watchOS("7.0"),
+        .visionOS("1.0"),
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -42,5 +43,6 @@ let package = Package(
                 .process("Migration/legacy_v3.sqlite"),
                 .process("Migration/legacy_v4.sqlite"),
             ])
-    ]
+    ],
+    swiftLanguageModes: [.v5]
 )

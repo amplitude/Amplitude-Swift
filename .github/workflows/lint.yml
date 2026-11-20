@@ -12,8 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
-      - name: Set Xcode 16
+      - name: Set Xcode 26.0
         run: |
-          sudo xcode-select -switch /Applications/Xcode_16.1.app
+          sudo xcode-select -switch /Applications/Xcode_26.0.app
       - name: Lint
         run: swiftlint --strict # force to fix warnings too
