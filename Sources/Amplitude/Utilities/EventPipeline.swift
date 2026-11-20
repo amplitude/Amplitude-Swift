@@ -149,8 +149,8 @@ public class EventPipeline {
             backgroundTaskCompletion = vendorSystem.beginBackgroundTask(label: "amplitude.upload") {
                 self.uploadsQueue.async {
                     guard !finished else { return }
+                    expired = true
                     if !self.vendorSystem.isRunningInAppExtension {
-                        expired = true
                         self.uploadsExpired = true
                         self.flushTimer?.suspend()
                     }
@@ -193,7 +193,12 @@ public class EventPipeline {
                     finished = true
                     if expired {
                         self.uploadInProgress = false
-                        self.sendNextEventFile()
+                        if self.vendorSystem.isRunningInAppExtension {
+                            // Extensions have no foreground reset signal. Stop this chain only.
+                            self.completeFlush()
+                        } else {
+                            self.sendNextEventFile()
+                        }
                     } else if failures > self.configuration.flushMaxRetries {
                         self.uploadInProgress = false
                         self.configuration.offline = true
