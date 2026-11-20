@@ -48,10 +48,6 @@ internal class VendorSystem {
         return ApplicationLifecycle()
     }
 
-    var requiredPlugin: Plugin? {
-        return ApplicationLifecyclePlugin()
-    }
-
     var networkConnectivityCheckingEnabled: Bool {
         return true
     }

@@ -204,11 +204,7 @@ public class Amplitude {
            VendorSystem.current.networkConnectivityCheckingEnabled {
             _ = add(plugin: NetworkConnectivityCheckerPlugin())
         }
-        // required plugin for specific platform, only has lifecyclePlugin now
-        if let requiredPlugin = VendorSystem.current.requiredPlugin {
-            _ = add(plugin: requiredPlugin)
-        }
-        appLifecycle.start()
+        _ = add(plugin: ApplicationLifecyclePlugin())
         _ = add(plugin: contextPlugin)
         _ = add(plugin: AnalyticsConnectorPlugin())
         _ = add(plugin: AnalyticsConnectorIdentityPlugin())

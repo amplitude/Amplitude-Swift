@@ -7,10 +7,14 @@ internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifec
 
     override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
-        amplitude.appLifecycle.addObserver(self)
-
 #if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
         utils = DefaultEventUtils(amplitude: amplitude)
+#endif
+        amplitude.appLifecycle.addObserver(self)
+        // Observe transitions and capture initial state before setting up UI autocapture.
+        amplitude.appLifecycle.start()
+
+#if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
         updateAutocaptureSetup()
         amplitude.autocaptureManager.onChange { [weak self] _ in
             self?.updateAutocaptureSetup()
