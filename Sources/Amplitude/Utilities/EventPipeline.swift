@@ -51,9 +51,7 @@ public class EventPipeline {
         flushTimer = QueueTimer(interval: getFlushInterval(), queue: uploadsQueue) { [weak self] in
             self?.flush(automatic: true)
         }
-        if !vendorSystem.isRunningInAppExtension {
-            amplitude.appLifecycle.addObserver(self)
-        }
+        amplitude.appLifecycle.addObserver(self)
     }
 
     func put(event: BaseEvent, completion: (() -> Void)? = nil) {
@@ -267,6 +265,9 @@ extension EventPipeline: ApplicationLifecycleObserver {
     }
 
     func applicationDidEnterBackground(timestamp: Int64) {
+#if !os(macOS) && !targetEnvironment(macCatalyst)
+        // Desktop apps can keep uploading while inactive, hidden, or minimized.
         stop()
+#endif
     }
 }

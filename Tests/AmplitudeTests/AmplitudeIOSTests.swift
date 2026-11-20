@@ -198,7 +198,7 @@ final class AmplitudeIOSTests: XCTestCase {
         ])
     }
 
-    func testFlushTimerStopsOnBackgroundOrExpirationAndResumesOnForeground() throws {
+    func testFlushTimerFollowsLifecycleAndExpirationPolicy() throws {
         class ExpiringVendor: IOSVendorSystem {
             var shouldExpire = true
             var onExpire: (() -> Void)?
@@ -230,7 +230,11 @@ final class AmplitudeIOSTests: XCTestCase {
 
         NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
         uploadQueue.sync {}
+#if targetEnvironment(macCatalyst)
+        XCTAssertEqual(pipeline.flushTimer?.state, .resumed, "Catalyst keeps periodic flushing in the background")
+#else
         XCTAssertEqual(pipeline.flushTimer?.state, .suspended, "Backgrounding stops periodic flushing")
+#endif
 
         NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
         uploadQueue.sync {}
