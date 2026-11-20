@@ -27,9 +27,10 @@ public class EventPipeline {
     @AtomicRef internal var eventCount: Int = 0
     internal var flushTimer: QueueTimer?
     private let uploadsQueue = DispatchQueue(label: "uploadsQueue.amplitude.com")
+    private let callbackQueue = DispatchQueue(label: "callbacksQueue.amplitude.com")
 
     private var flushCompletions: [() -> Void] = []
-    private var currentUpload: (@Sendable () -> Void)?
+    private var uploadInProgress = false
     private let uploadStateStorage: (any UploadRequestStateStorage)?
     private var didRecoverPendingUpload = false
 
@@ -42,7 +43,7 @@ public class EventPipeline {
         uploadStateStorage = amplitude.storage as? any UploadRequestStateStorage
         httpClient = AnalyticsHttpClient(configuration: amplitude.configuration,
                                 diagnostics: amplitude.configuration.diagonostics,
-                                callbackQueue: amplitude.trackingQueue,
+                                callbackQueue: uploadsQueue,
                                 serverZone: amplitude.amplitudeContext.serverZone)
         flushTimer = QueueTimer(interval: getFlushInterval(), queue: amplitude.trackingQueue) { [weak self] in
             self?.flush()
@@ -85,7 +86,7 @@ public class EventPipeline {
 
     private func sendNextEventFile(failures: Int = 0, skipFiles: Set<URL> = []) {
         autoreleasepool {
-            guard currentUpload == nil else {
+            guard !uploadInProgress else {
                 logger?.log(message: "Existing upload in progress, skipping...")
                 return
             }
@@ -103,8 +104,7 @@ public class EventPipeline {
             guard let storage = storage,
                   let eventFiles: [URL] = storage.read(key: StorageKey.EVENTS),
                   let nextEventFile = eventFiles.first(where: { !skipFiles.contains($0) }) else {
-                flushCompletions.forEach { $0() }
-                flushCompletions.removeAll()
+                completeFlush()
                 logger?.debug(message: "No event files to upload")
                 return
             }
@@ -132,7 +132,8 @@ public class EventPipeline {
             if configuration.enableDiagnostics {
                 uploadStateStorage?.uploadRequestPending = true
             }
-            currentUpload = httpClient.upload(events: eventsString) { [self] result in
+            uploadInProgress = true
+            _ = httpClient.upload(events: eventsString) { [self] result in
                 if configuration.enableDiagnostics {
                     uploadStateStorage?.uploadRequestPending = false
                 }
@@ -156,7 +157,7 @@ public class EventPipeline {
 
                 if failures > self.configuration.flushMaxRetries {
                     self.uploadsQueue.async {
-                        self.currentUpload = nil
+                        self.uploadInProgress = false
                     }
                     self.configuration.offline = true
                     self.logger?.error(message: "Request failed more than \(self.configuration.flushMaxRetries) times, marking offline")
@@ -166,7 +167,7 @@ public class EventPipeline {
                         guard let self = self else {
                             return
                         }
-                        self.currentUpload = nil
+                        self.uploadInProgress = false
                         self.sendNextEventFile(failures: failures, skipFiles: skipFiles)
                     }
 
@@ -180,6 +181,17 @@ public class EventPipeline {
                 }
             }
         }
+    }
+
+    func dispatchCallbacks(_ callbacks: @escaping () -> Void) {
+        callbackQueue.async(execute: callbacks)
+    }
+
+    private func completeFlush() {
+        let completions = flushCompletions
+        flushCompletions.removeAll()
+        guard !completions.isEmpty else { return }
+        dispatchCallbacks { completions.forEach { $0() } }
     }
 
     func start() {

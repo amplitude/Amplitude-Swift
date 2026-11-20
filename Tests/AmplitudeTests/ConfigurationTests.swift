@@ -74,7 +74,7 @@ final class ConfigurationTests: XCTestCase {
             XCTAssertEqual(types.sorted(), expected)
         }
         XCTAssertNotNil(runtimeStore.getEventCallback(insertId: "before-startup"))
-        runtimeStore.removeEventCallback(insertId: "before-startup")
+        runtimeStore.takeEventCallback(insertId: "before-startup")
         XCTAssertNil(earlyStore.getEventCallback(insertId: "before-startup"))
     }
 

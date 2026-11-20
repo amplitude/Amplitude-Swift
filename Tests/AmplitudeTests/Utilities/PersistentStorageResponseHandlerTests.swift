@@ -35,6 +35,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         defer { storage.reset() }
         var batch: URL!
         var callbacks = [String]()
+        let delivered = expectation(description: "callbacks delivered")
         configuration.callback = { _, _, _ in
             XCTAssertFalse(FileManager.default.fileExists(atPath: batch.path))
             callbacks.append("global")
@@ -44,6 +45,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         event.callback = { _, _, _ in
             XCTAssertFalse(FileManager.default.fileExists(atPath: batch.path))
             callbacks.append("event")
+            delivered.fulfill()
         }
         try storage.write(key: .EVENTS, value: event)
         storage.rollover()
@@ -54,8 +56,42 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
             eventPipeline: eventPipeline, eventBlock: batch, eventsString: payload, diagnosticsClient: diagnosticsClient)
         let handled: Bool = handler.handle(result: .success(200))
         XCTAssertTrue(handled)
+        wait(for: [delivered], timeout: 10)
         XCTAssertEqual(callbacks, ["global", "event"])
         XCTAssertNil(storage.getEventCallback(insertId: try XCTUnwrap(event.insertId)))
+    }
+
+    func testCallbackCanRegisterAnotherCallbackWithTheSameInsertId() throws {
+        let storage = PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
+            diagonostics: diagonostics, diagnosticsClient: diagnosticsClient)
+        defer { storage.reset() }
+        let delivered = expectation(description: "replacement callback registered")
+        let insertId = UUID().uuidString
+        let replacement = BaseEvent(eventType: "replacement")
+        replacement.insertId = insertId
+        replacement.callback = { _, _, _ in }
+        let event = BaseEvent(eventType: "original")
+        event.insertId = insertId
+        event.callback = { _, _, _ in
+            // This also verifies that user callbacks run outside storage synchronization.
+            do {
+                try storage.write(key: .EVENTS, value: replacement)
+            } catch {
+                XCTFail("Failed to register replacement callback: \(error)")
+            }
+            delivered.fulfill()
+        }
+        try storage.write(key: .EVENTS, value: event)
+        storage.rollover()
+        let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+        let batch = try XCTUnwrap(files.first)
+        let payload = try XCTUnwrap(storage.getEventsString(eventBlock: batch))
+        let handler = PersistentStorageResponseHandler(configuration: configuration, storage: storage,
+            eventPipeline: eventPipeline, eventBlock: batch, eventsString: payload, diagnosticsClient: diagnosticsClient)
+        let handled: Bool = handler.handle(result: .success(200))
+        XCTAssertTrue(handled)
+        wait(for: [delivered], timeout: 10)
+        XCTAssertNotNil(storage.getEventCallback(insertId: insertId), "Do not delete a registration made during the callback")
     }
 
     func testInit() {
@@ -76,7 +112,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         XCTAssertEqual(handler.eventsString, eventsString)
     }
 
-    func testRemoveEventCallbackByEventsString_callsRemoveEventCallback() {
+    func testRemoveEventCallbackByEventsString_callsTakeEventCallback() {
         let eventsString = """
             [
               {"event_type":"test","insert_id":"e3e4488d-6877-4775-ae88-344df7ccd5d8","user_id":"test-user"},
@@ -100,15 +136,15 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         )
         XCTAssertEqual(
             fakePersistentStorage.haveBeenCalledWith[0],
-            "removeEventCallback(insertId: e3e4488d-6877-4775-ae88-344df7ccd5d8)"
+            "takeEventCallback(insertId: e3e4488d-6877-4775-ae88-344df7ccd5d8)"
         )
         XCTAssertEqual(
             fakePersistentStorage.haveBeenCalledWith[1],
-            "removeEventCallback(insertId: c8d58999-7539-4184-8a7d-54302697baf0)"
+            "takeEventCallback(insertId: c8d58999-7539-4184-8a7d-54302697baf0)"
         )
     }
 
-    func testRemoveEventCallbackByEventsString_notCallRemoveEventCallback() {
+    func testRemoveEventCallbackByEventsString_notCallTakeEventCallback() {
         // insert_id format, missing insert_id
         let eventsString = """
             [
@@ -160,7 +196,7 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         )
         XCTAssertEqual(
             fakePersistentStorage.haveBeenCalledWith[1],
-            "removeEventCallback(insertId: e3e4488d-6877-4775-ae88-344df7ccd5d8)"
+            "takeEventCallback(insertId: e3e4488d-6877-4775-ae88-344df7ccd5d8)"
         )
     }
 
@@ -187,9 +223,6 @@ final class PersistentStorageResponseHandlerTests: XCTestCase {
         )
 
         let _: Bool = handler.handleBadRequestResponse(data: ["error": "Invalid API key: \(configuration.apiKey)"])
-        XCTAssertEqual(
-            fakePersistentStorage.haveBeenCalledWith[0],
-            "remove(eventBlock: \(eventBlock.absoluteURL))"
-        )
+        XCTAssertTrue(fakePersistentStorage.haveBeenCalledWith.contains("remove(eventBlock: \(eventBlock.absoluteURL))"))
     }
 }

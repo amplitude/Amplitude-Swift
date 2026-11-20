@@ -84,8 +84,10 @@ class AnalyticsHttpClient {
             return httpClient.send(request, completion: requestCompletion)
         } catch {
             logger?.debug(message: "Failed to construct request")
-            completion(.failure(Exception.httpError(code: 500, data: nil)))
-            backgroundTaskCompletion?()
+            callbackQueue.async {
+                completion(.failure(Exception.httpError(code: 500, data: nil)))
+                backgroundTaskCompletion?()
+            }
         }
         return nil
     }
