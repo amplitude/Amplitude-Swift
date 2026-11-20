@@ -7,6 +7,12 @@
 
 import XCTest
 
+#if os(macOS)
+import AppKit
+#elseif targetEnvironment(macCatalyst)
+import UIKit
+#endif
+
 @testable import AmplitudeSwift
 
 final class EventPipelineTests: XCTestCase {
@@ -406,7 +412,6 @@ final class EventPipelineTests: XCTestCase {
                 let fixture = UploadFixture(isExtension: true)
                 defer { fixture.cleanUp() }
                 fixture.pipeline.start()
-                fixture.amplitude.appLifecycle.enterBackground()
                 fixture.client.callbackQueue.sync {}
                 XCTAssertEqual(fixture.pipeline.flushTimer?.state, .resumed)
 
@@ -634,6 +639,37 @@ final class EventPipelineTests: XCTestCase {
         let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
         XCTAssertTrue(files.isEmpty)
     }
+
+#if os(macOS) || targetEnvironment(macCatalyst)
+    func testDesktopFlushTimerUploadsInBackground() throws {
+        let storage = PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
+            diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
+        defer { storage.reset() }
+        let config = Configuration(apiKey: "test", flushQueueSize: 100, flushIntervalMillis: 50,
+            instanceName: UUID().uuidString, storageProvider: storage, autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer())
+        config.flushEventsOnClose = false
+        let delivered = expectation(description: "timer uploads below-threshold event in background")
+        config.callback = { event, code, _ in
+            XCTAssertEqual(event.eventType, "desktop-background-event")
+            XCTAssertEqual(code, 200)
+            delivered.fulfill()
+        }
+        let amplitude = Amplitude(configuration: config)
+        amplitude.trackingQueue.sync {}
+#if os(macOS)
+        NotificationCenter.default.post(name: NSApplication.willResignActiveNotification, object: NSApplication.shared)
+#else
+        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+#endif
+        amplitude.track(eventType: "desktop-background-event")
+        amplitude.trackingQueue.sync {}
+        wait(for: [delivered], timeout: 10)
+        let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+        XCTAssertTrue(files.isEmpty)
+    }
+#endif
 
     func testLifecycleDoesNotRetainPipeline() {
         let amplitude = Amplitude(configuration: configuration)
