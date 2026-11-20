@@ -52,7 +52,7 @@ internal class VendorSystem {
         return true
     }
 
-    func beginBackgroundTask() -> BackgroundTaskCompletionCallback? {
+    func beginBackgroundTask(label: String? = nil, expirationHandler: @escaping () -> Void) -> BackgroundTaskCompletionCallback? {
         return nil
     }
 }

@@ -198,6 +198,118 @@ final class AmplitudeIOSTests: XCTestCase {
         ])
     }
 
+    func testFlushTimerStopsOnBackgroundOrExpirationAndResumesOnForeground() throws {
+        class ExpiringVendor: IOSVendorSystem {
+            var shouldExpire = true
+            var onExpire: (() -> Void)?
+            override func beginBackgroundTask(label: String? = nil, expirationHandler: @escaping () -> Void) -> BackgroundTaskCompletionCallback? {
+                if shouldExpire {
+                    expirationHandler()
+                    onExpire?()
+                }
+                return {}
+            }
+        }
+        IOSVendorSystem.overrideApplicationState(.background)
+        let storage = PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
+            diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
+        defer { storage.reset() }
+        let config = Configuration(apiKey: "test", flushIntervalMillis: 3_600_000,
+            instanceName: UUID().uuidString, storageProvider: storage, autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer())
+        config.flushEventsOnClose = false
+        let amplitude = Amplitude(configuration: config)
+        let vendor = ExpiringVendor()
+        let pipeline = EventPipeline(amplitude: amplitude, vendorSystem: vendor)
+        let uploadQueue = pipeline.httpClient.callbackQueue
+        amplitude.waitForTrackingQueue()
+        amplitude.trackingQueue.suspend()
+        defer { amplitude.trackingQueue.resume() }
+        XCTAssertEqual(pipeline.flushTimer?.state, .resumed, "Preserve timer startup for a background launch")
+
+        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        uploadQueue.sync {}
+        XCTAssertEqual(pipeline.flushTimer?.state, .suspended, "Backgrounding stops periodic flushing")
+
+        NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        uploadQueue.sync {}
+        XCTAssertEqual(pipeline.flushTimer?.state, .resumed)
+        try storage.write(key: .EVENTS, value: BaseEvent(eventType: "expiring-upload"))
+        let expired = expectation(description: "response processed after expiration")
+        pipeline.flush { expired.fulfill() }
+        wait(for: [expired], timeout: 10)
+        uploadQueue.sync {}
+        XCTAssertEqual(pipeline.flushTimer?.state, .suspended)
+
+        vendor.shouldExpire = false
+        try storage.write(key: .EVENTS, value: BaseEvent(eventType: "explicit-background-flush"))
+        let flushed = expectation(description: "explicit flush works with the timer suspended")
+        pipeline.flush { flushed.fulfill() }
+        wait(for: [flushed], timeout: 10)
+        let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+        XCTAssertTrue(files.isEmpty)
+        XCTAssertEqual(pipeline.flushTimer?.state, .suspended)
+
+        for _ in 0..<2 {
+            NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        }
+        uploadQueue.sync {}
+        XCTAssertEqual(pipeline.flushTimer?.state, .resumed)
+
+        // Backgrounding must preserve a suspension; only foregrounding resumes it.
+        for notification in [UIApplication.willEnterForegroundNotification, UIApplication.didEnterBackgroundNotification] {
+            let expectedState: QueueTimer.State = notification == UIApplication.willEnterForegroundNotification ? .resumed : .suspended
+            pipeline.stop()
+            NotificationCenter.default.post(name: notification, object: nil)
+            uploadQueue.sync {}
+            XCTAssertEqual(pipeline.flushTimer?.state, expectedState)
+
+            vendor.shouldExpire = true
+            vendor.onExpire = {
+                NotificationCenter.default.post(name: notification, object: nil)
+            }
+            try storage.write(key: .EVENTS, value: BaseEvent(eventType: "lifecycle-transition-during-expiry"))
+            let transitioned = expectation(description: "expiry and lifecycle transitions preserve timer policy")
+            pipeline.flush { transitioned.fulfill() }
+            wait(for: [transitioned], timeout: 10)
+            uploadQueue.sync {}
+            XCTAssertEqual(pipeline.flushTimer?.state, expectedState)
+            vendor.onExpire = nil
+        }
+    }
+
+    func testInitialActivationResumesTimerWithoutWaitingForTracking() {
+        IOSVendorSystem.overrideApplicationState(.inactive)
+        let configuration = Configuration(
+            apiKey: "test", flushIntervalMillis: 3_600_000, instanceName: UUID().uuidString,
+            storageProvider: storageMem, identifyStorageProvider: interceptStorageMem,
+            autocapture: [.appLifecycles, .sessions],
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
+            enableAutoCaptureRemoteConfig: false, httpClient: RemoteConfigMockServer()
+        )
+        let amplitude = Amplitude(configuration: configuration)
+        let pipeline = EventPipeline(amplitude: amplitude)
+        let uploadQueue = pipeline.httpClient.callbackQueue
+        amplitude.waitForTrackingQueue()
+        pipeline.stop()
+        uploadQueue.sync {}
+
+        amplitude.trackingQueue.suspend()
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        uploadQueue.sync {}
+        XCTAssertEqual(pipeline.flushTimer?.state, .resumed)
+        XCTAssertTrue(storageMem.events().isEmpty)
+        amplitude.trackingQueue.resume()
+
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+        let eventTypes = storageMem.events().map(\.eventType)
+        XCTAssertEqual(eventTypes, [Constants.AMP_SESSION_START_EVENT,
+                                    Constants.AMP_APPLICATION_INSTALLED_EVENT,
+                                    Constants.AMP_APPLICATION_OPENED_EVENT])
+    }
+
     func testDidEnterBackground() throws {
         let configuration = Configuration(
             apiKey: "api-key",
