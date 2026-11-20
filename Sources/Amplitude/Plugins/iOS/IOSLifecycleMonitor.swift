@@ -14,6 +14,7 @@ import SwiftUI
 class IOSLifecycleMonitor: UtilityPlugin {
 
     private var utils: DefaultEventUtils?
+    private var previousAppVersion: DefaultEventUtils.AppVersion?
     private var sendAppInstalledOnDidBecomeActive = false
     private var sendAppOpenedOnDidBecomeActive = false
 
@@ -40,22 +41,29 @@ class IOSLifecycleMonitor: UtilityPlugin {
 
     public override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
-        utils = DefaultEventUtils(amplitude: amplitude)
+        let utils = DefaultEventUtils(amplitude: amplitude)
+        self.utils = utils
 
         let appState = IOSVendorSystem.applicationState
-        // If app state is already active, dispatch installed / opened events now
-        // we want to dispatch this from the initiating thread to maintain event ordering.
+        if appState != .active {
+            // Snapshot the previous version so lifecycle notifications can enqueue events without reading storage.
+            previousAppVersion = utils.storedAppVersion(in: amplitude.storage)
+        }
         if appState == .active {
             // this is added in init - launch on trackingQueue to allow identity to be set
             // prior to firing the event
             amplitude.trackingQueue.async { [self] in
-                utils?.trackAppUpdatedInstalledEvent()
                 amplitude.onEnterForeground(timestamp: currentTimestamp)
-                utils?.trackAppOpenedEvent()
+                utils.trackAppUpdatedInstalledEvent()
+                utils.trackAppOpenedEvent()
             }
         // If app state is inactive, it won't receive didFinishLaunching and willEnterForeground
         // notifications anymore, we need to send install and opened event when become active
         } else if appState == .inactive {
+            sendAppInstalledOnDidBecomeActive = true
+            sendAppOpenedOnDidBecomeActive = true
+        } else if appState == .background {
+            // A background launch may have already delivered didFinishLaunching.
             sendAppInstalledOnDidBecomeActive = true
             sendAppOpenedOnDidBecomeActive = true
         }
@@ -89,8 +97,11 @@ class IOSLifecycleMonitor: UtilityPlugin {
 
     @objc
     func applicationDidFinishLaunchingNotification(notification: Notification) {
-        amplitude?.trackingQueue.async { [self] in
-            utils?.trackAppUpdatedInstalledEvent()
+        if IOSVendorSystem.applicationState == .background {
+            // Preserve the previous version until the app enters the foreground.
+            sendAppInstalledOnDidBecomeActive = true
+        } else {
+            trackPendingAppVersion()
         }
 
         // Pre SceneDelegate apps wil not fire a willEnterForeground notification on app launch.
@@ -110,14 +121,12 @@ class IOSLifecycleMonitor: UtilityPlugin {
         sendAppInstalledOnDidBecomeActive = false
         sendAppOpenedOnDidBecomeActive = false
 
-        amplitude?.trackingQueue.async { [self] in
-            if sendInstall {
-                utils?.trackAppUpdatedInstalledEvent()
-            }
-            amplitude?.onEnterForeground(timestamp: currentTimestamp)
-            if sendOpened {
-                utils?.trackAppOpenedEvent()
-            }
+        amplitude?.onEnterForeground(timestamp: currentTimestamp)
+        if sendInstall {
+            trackPendingAppVersion()
+        }
+        if sendOpened {
+            utils?.trackAppOpenedEvent()
         }
     }
 
@@ -133,7 +142,13 @@ class IOSLifecycleMonitor: UtilityPlugin {
             fromBackground = false
         }
 
+        let sendInstall = sendAppInstalledOnDidBecomeActive
+        sendAppInstalledOnDidBecomeActive = false
+        sendAppOpenedOnDidBecomeActive = false
         amplitude?.onEnterForeground(timestamp: currentTimestamp)
+        if sendInstall {
+            trackPendingAppVersion()
+        }
         utils?.trackAppOpenedEvent(fromBackground: fromBackground)
     }
 
@@ -146,6 +161,13 @@ class IOSLifecycleMonitor: UtilityPlugin {
         if amplitude.autocaptureManager.isEnabled(.appLifecycles) {
             amplitude.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
         }
+    }
+
+    private func trackPendingAppVersion() {
+        guard let previous = previousAppVersion, let amplitude = amplitude else { return }
+        previousAppVersion = nil
+        // Enqueue events in callback order without waiting on UserDefaults writes.
+        utils?.trackAppUpdatedInstalledEvent(previous: previous, persistOn: amplitude.trackingQueue)
     }
 
     private var currentTimestamp: Int64 {

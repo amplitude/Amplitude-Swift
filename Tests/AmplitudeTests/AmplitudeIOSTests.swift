@@ -4,6 +4,26 @@ import XCTest
 @testable import AmplitudeSwift
 
 final class AmplitudeIOSTests: XCTestCase {
+    private final class VersionStorage: FakeInMemoryStorage {
+        override func read<T>(key: StorageKey) -> T? {
+            assertVersionAccess(key)
+            return super.read(key: key)
+        }
+
+        override func write(key: StorageKey, value: Any?) throws {
+            assertVersionAccess(key)
+            try super.write(key: key, value: value)
+        }
+
+        var allowsMainThreadVersionAccess = true
+
+        private func assertVersionAccess(_ key: StorageKey) {
+            if Thread.isMainThread && (key == .APP_BUILD || key == .APP_VERSION) {
+                XCTAssertTrue(allowsMainThreadVersionAccess, "Lifecycle callback accessed version storage on main")
+            }
+        }
+    }
+
     private var storageMem: FakeInMemoryStorage!
     private var interceptStorageMem: FakeInMemoryStorage!
     private var window: UIWindow!
@@ -23,6 +43,131 @@ final class AmplitudeIOSTests: XCTestCase {
         IOSVendorSystem.overrideApplicationState(nil)
         IOSVendorSystem.overrideUsesScenes(nil)
         super.tearDown()
+    }
+
+    func testForegroundEventsStayAheadOfCallerEventsAndBackgrounding() throws {
+        try assertLifecycleOrdering(notification: UIApplication.willEnterForegroundNotification, instanceName: #function)
+    }
+
+    func testActiveFallbackEventsStayAheadOfCallerEventsAndBackgrounding() throws {
+        try assertLifecycleOrdering(notification: UIApplication.didBecomeActiveNotification, instanceName: #function)
+    }
+
+    func testColdLaunchEventsStayAheadOfCallerEventsAndBackgrounding() throws {
+        try assertLifecycleOrdering(notification: UIApplication.didBecomeActiveNotification, instanceName: #function,
+                                    initialState: .inactive, receivesLaunch: true)
+    }
+
+    private func assertLifecycleOrdering(notification: Notification.Name, instanceName: String,
+                                         initialState: UIApplication.State = .background, receivesLaunch: Bool = false) throws {
+        IOSVendorSystem.overrideApplicationState(initialState)
+        IOSVendorSystem.overrideUsesScenes(false)
+        let versionStorage = VersionStorage()
+        try versionStorage.write(key: StorageKey.APP_BUILD, value: "old-build")
+        try versionStorage.write(key: StorageKey.APP_VERSION, value: "old-version")
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: "local-test", instanceName: instanceName,
+            storageProvider: versionStorage, identifyStorageProvider: interceptStorageMem,
+            autocapture: [.sessions, .appLifecycles],
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
+        ))
+        let collector = EventCollectorPlugin()
+        amplitude.add(plugin: collector)
+        amplitude.waitForTrackingQueue()
+
+        versionStorage.allowsMainThreadVersionAccess = false
+        let releaseQueue = DispatchSemaphore(value: 0)
+        amplitude.trackingQueue.async { releaseQueue.wait() }
+        IOSVendorSystem.overrideApplicationState(.inactive)
+        if receivesLaunch {
+            NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+        }
+        NotificationCenter.default.post(name: notification, object: nil)
+        amplitude.track(eventType: "caller_event")
+        IOSVendorSystem.overrideApplicationState(.background)
+        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        releaseQueue.signal()
+        for _ in 0..<4 { amplitude.waitForTrackingQueue() }
+
+        versionStorage.allowsMainThreadVersionAccess = true
+        XCTAssertEqual(versionStorage.read(key: .APP_BUILD) as String?, Bundle.main.infoDictionary?["CFBundleVersion"] as? String)
+        XCTAssertEqual(collector.events.map { $0.eventType }, [
+            Constants.AMP_SESSION_START_EVENT, Constants.AMP_APPLICATION_UPDATED_EVENT,
+            Constants.AMP_APPLICATION_OPENED_EVENT, "caller_event", Constants.AMP_APPLICATION_BACKGROUNDED_EVENT
+        ])
+    }
+
+    func testSDK727BackgroundLaunchDefersUntilForeground() throws {
+        try assertBackgroundLifecycle(instanceName: #function, receivesLaunch: true, usesScenes: false)
+    }
+
+    func testSDK727SceneBackgroundLaunchDefersUntilForeground() throws {
+        try assertBackgroundLifecycle(instanceName: #function, receivesLaunch: true, usesScenes: true)
+    }
+
+    func testSDK727LateBackgroundInitializationDefersUntilForeground() throws {
+        try assertBackgroundLifecycle(instanceName: #function, receivesLaunch: false, usesScenes: true)
+    }
+
+    func testLateBackgroundInitializationOpensWhenForegroundNotificationWasMissed() throws {
+        try assertBackgroundLifecycle(instanceName: #function, receivesLaunch: false, usesScenes: false)
+    }
+
+    func testSDK727BackgroundInstallDefersUntilForeground() throws {
+        try assertBackgroundLifecycle(instanceName: #function, receivesLaunch: true, usesScenes: false, installed: true)
+    }
+
+    private func assertBackgroundLifecycle(instanceName: String, receivesLaunch: Bool,
+                                           usesScenes: Bool, installed: Bool = false) throws {
+        let lifecycleEvent = installed ? Constants.AMP_APPLICATION_INSTALLED_EVENT : Constants.AMP_APPLICATION_UPDATED_EVENT
+        IOSVendorSystem.overrideApplicationState(.background)
+        IOSVendorSystem.overrideUsesScenes(usesScenes)
+        if !installed {
+            try storageMem.write(key: StorageKey.APP_BUILD, value: "old-build")
+            try storageMem.write(key: StorageKey.APP_VERSION, value: "old-version")
+        }
+        try storageMem.write(key: StorageKey.PREVIOUS_SESSION_ID, value: Int64(1000))
+        try storageMem.write(key: StorageKey.LAST_EVENT_TIME, value: Int64(1100))
+        let amplitude = Amplitude(configuration: Configuration(
+            apiKey: "local-test", instanceName: instanceName,
+            storageProvider: storageMem, identifyStorageProvider: interceptStorageMem,
+            minTimeBetweenSessionsMillis: 300000,
+            autocapture: [.sessions, .appLifecycles],
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
+            enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer()
+        ))
+        let eventCollector = EventCollectorPlugin()
+        amplitude.add(plugin: eventCollector)
+        amplitude.waitForTrackingQueue()
+        if receivesLaunch {
+            NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+        }
+        amplitude.track(event: BaseEvent(sessionId: -1, eventType: "background_work"))
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+        XCTAssertEqual(storageMem.events().map { $0.eventType }, ["background_work"])
+        XCTAssertEqual(amplitude.getSessionId(), 1000)
+        XCTAssertEqual(storageMem.read(key: StorageKey.APP_BUILD) as String?, installed ? nil : "old-build")
+        IOSVendorSystem.overrideApplicationState(.inactive)
+        if usesScenes {
+            NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        }
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        for _ in 0..<4 { amplitude.waitForTrackingQueue() }
+        let events = storageMem.events()
+        XCTAssertEqual(events.map { $0.eventType }, ["background_work", Constants.AMP_SESSION_END_EVENT,
+            Constants.AMP_SESSION_START_EVENT, lifecycleEvent, Constants.AMP_APPLICATION_OPENED_EVENT])
+        XCTAssertNotEqual(amplitude.getSessionId(), 1000)
+        XCTAssertTrue(events.dropFirst(2).allSatisfy { $0.sessionId == amplitude.getSessionId() })
+        XCTAssertEqual(storageMem.read(key: StorageKey.APP_BUILD) as String?, Bundle.main.infoDictionary?["CFBundleVersion"] as? String)
+        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        for _ in 0..<4 { amplitude.waitForTrackingQueue() }
+        XCTAssertEqual(eventCollector.events.filter { $0.eventType == lifecycleEvent }.count, 1)
     }
 
     func testDidFinishLaunching_ApplicationInstalled() throws {
