@@ -67,6 +67,11 @@ public class DefaultEventUtils {
         }
     }
 
+    func trackAppBackgroundedEvent() {
+        guard let amplitude, trackAppLifecycles else { return }
+        amplitude.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
+    }
+
     func trackAppOpenedEvent(fromBackground: Bool = false) {
         guard let amplitude = amplitude, trackAppLifecycles else {
             return
