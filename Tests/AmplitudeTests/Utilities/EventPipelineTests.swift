@@ -87,9 +87,9 @@ final class EventPipelineTests: XCTestCase {
     func testPendingMarkerClearsOnSuccessAndErrorCallbacks() throws {
         class ObservingHttpClient: FakeHttpClient {
             var onRequest: (() -> Void)?
-            override func upload(events: String, completion: @escaping (Result<Int, Error>) -> Void) -> (@Sendable () -> Void)? {
+            override func upload(events: String, onSuccess: (() -> Void)? = nil, completion: @escaping (Result<Int, Error>) -> Void) -> (@Sendable () -> Void)? {
                 onRequest?()
-                return super.upload(events: events, completion: completion)
+                return super.upload(events: events, onSuccess: onSuccess, completion: completion)
             }
         }
         for result: Result<Int, Error> in [.success(200), .failure(AnalyticsHttpClient.Exception.httpError(code: 500, data: nil))] {
@@ -112,6 +112,112 @@ final class EventPipelineTests: XCTestCase {
 
     func testInit() {
         XCTAssertEqual(pipeline.configuration.apiKey, configuration.apiKey)
+    }
+
+    func testSuccessAcknowledgesBatchWhileTrackingQueueIsSuspended() throws {
+        class ObservingStorage: PersistentStorage {
+            var onAcknowledged: (() -> Void)?
+            var removalCount = 0
+
+            override func remove(eventBlock: URL) {
+                super.remove(eventBlock: eventBlock)
+                removalCount += 1
+            }
+
+            override var uploadRequestPending: Bool {
+                get { super.uploadRequestPending }
+                set {
+                    let wasPending = super.uploadRequestPending
+                    super.uploadRequestPending = newValue
+                    if wasPending && !newValue {
+                        onAcknowledged?()
+                    }
+                }
+            }
+        }
+
+        let storage = ObservingStorage(storagePrefix: "early-ack-\(UUID().uuidString)", logger: nil,
+                                       diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
+        defer { storage.reset() }
+        let configuration = Configuration(apiKey: "test", flushIntervalMillis: 3_600_000,
+            instanceName: UUID().uuidString, storageProvider: storage, autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer())
+        let amplitude = Amplitude(configuration: configuration)
+        // Use the real HTTP client and its callback dispatch, not FakeHttpClient.
+        let pipeline = EventPipeline(amplitude: amplitude)
+        pipeline.stop()
+        let trackingQueue = amplitude.trackingQueue
+        let trackingKey = DispatchSpecificKey<Bool>()
+        trackingQueue.setSpecific(key: trackingKey, value: true)
+        let acknowledged = expectation(description: "batch acknowledged before tracking resumes")
+        let globalCallback = expectation(description: "global callback remains on tracking queue")
+        let eventCallback = expectation(description: "event callback remains on tracking queue")
+        let drained = expectation(description: "flush completes after tracking resumes")
+        storage.onAcknowledged = { acknowledged.fulfill() }
+        configuration.callback = { _, _, _ in
+            XCTAssertEqual(DispatchQueue.getSpecific(key: trackingKey), true)
+            globalCallback.fulfill()
+        }
+        let event = BaseEvent(eventType: "early-ack")
+        event.insertId = UUID().uuidString
+        event.callback = { _, _, _ in
+            XCTAssertEqual(DispatchQueue.getSpecific(key: trackingKey), true)
+            eventCallback.fulfill()
+        }
+        try storage.write(key: .EVENTS, value: event)
+        storage.rollover()
+        let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+        let batch = try XCTUnwrap(files.first)
+        let insertId = try XCTUnwrap(event.insertId)
+
+        trackingQueue.sync {}
+        trackingQueue.suspend()
+        var trackingSuspended = true
+        defer {
+            if trackingSuspended { trackingQueue.resume() }
+        }
+        pipeline.flush { drained.fulfill() }
+        wait(for: [acknowledged], timeout: 10)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: batch.path))
+        XCTAssertFalse(storage.uploadRequestPending)
+        XCTAssertNotNil(storage.getEventCallback(insertId: insertId), "Callback lookup and removal must wait for tracking")
+
+        trackingSuspended = false
+        trackingQueue.resume()
+        wait(for: [globalCallback, eventCallback, drained], timeout: 10)
+        XCTAssertNil(storage.getEventCallback(insertId: insertId))
+        XCTAssertEqual(storage.removalCount, 1, "The response handler must not delete the acknowledged file again")
+    }
+
+    func testCustomStorageResponseHandlingRemainsOnTrackingQueue() throws {
+        class ObservingStorage: FakeInMemoryStorage {
+            var onRemove: (() -> Void)?
+
+            override func remove(eventBlock: URL) {
+                onRemove?()
+                super.remove(eventBlock: eventBlock)
+            }
+        }
+        let storage = ObservingStorage()
+        let configuration = Configuration(apiKey: "test", flushIntervalMillis: 3_600_000,
+            instanceName: UUID().uuidString, storageProvider: storage, autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer())
+        let amplitude = Amplitude(configuration: configuration)
+        let pipeline = EventPipeline(amplitude: amplitude)
+        pipeline.stop()
+        let trackingKey = DispatchSpecificKey<Bool>()
+        amplitude.trackingQueue.setSpecific(key: trackingKey, value: true)
+        let removed = expectation(description: "custom storage handles success on tracking queue")
+        storage.onRemove = {
+            XCTAssertEqual(DispatchQueue.getSpecific(key: trackingKey), true)
+            removed.fulfill()
+        }
+        try storage.write(key: .EVENTS, value: BaseEvent(eventType: "custom-storage"))
+        let drained = expectation(description: "custom storage flush completed")
+        pipeline.flush { drained.fulfill() }
+        wait(for: [removed, drained], timeout: 10)
     }
 
     func testPutEvent() {

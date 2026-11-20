@@ -39,6 +39,12 @@ class PersistentStorageResponseHandler: ResponseHandler {
 
     func handleSuccessResponse(code: Int) -> Bool {
         storage.remove(eventBlock: eventBlock)
+        return handleAcknowledgedSuccessResponse(code: code)
+    }
+
+    // The upload pipeline has already removed the acknowledged batch before dispatching
+    // here. Callback lookup, invocation, and removal retain their tracking-queue ordering.
+    func handleAcknowledgedSuccessResponse(code: Int) -> Bool {
         guard let events = BaseEvent.fromArrayString(jsonString: eventsString) else {
             removeEventCallbackByEventsString(eventsString: eventsString)
             return true

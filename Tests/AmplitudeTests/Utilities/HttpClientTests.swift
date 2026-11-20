@@ -71,6 +71,25 @@ final class HttpClientTests: XCTestCase {
         XCTAssertEqual(httpClient.getUrl(), Constants.DEFAULT_API_HOST)
     }
 
+    func testFailedUploadsDoNotRunSuccessAcknowledgement() {
+        let completed = expectation(description: "HTTP and transport failures completed")
+        completed.expectedFulfillmentCount = 3
+        for status in [400, 500, 0] {
+            let config = Configuration(apiKey: "test", httpClient: ClosureHttpClient { request in
+                if status == 0 { throw URLError(.timedOut) }
+                return (Data(), HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil, headerFields: nil)!)
+            })
+            let client = AnalyticsHttpClient(configuration: config, diagnostics: diagonostics)
+            _ = client.upload(events: "[]", onSuccess: {
+                XCTFail("Failed uploads must remain available for retry")
+            }, completion: { result in
+                guard case .failure = result else { return XCTFail("Expected failure") }
+                completed.fulfill()
+            })
+        }
+        wait(for: [completed], timeout: 10)
+    }
+
     func testGetUrlWithCustomUrl() {
         let customUrl = "https//localhost.test"
         configuration.serverUrl = customUrl
