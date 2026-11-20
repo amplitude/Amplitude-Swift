@@ -54,7 +54,6 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
             pipeline: pipeline!,
             queue: amplitude.trackingQueue
         )
-        pipeline?.start()
 
         add(plugin: IdentityEventSender())
     }

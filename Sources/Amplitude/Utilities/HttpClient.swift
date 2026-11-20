@@ -46,7 +46,6 @@ class AnalyticsHttpClient {
     }
 
     func upload(events: String, completion: @escaping (_ result: Result<Int, Error>) -> Void) -> (@Sendable () -> Void)? {
-        let backgroundTaskCompletion = VendorSystem.current.beginBackgroundTask()
         do {
             let (requestData, isGzipEncoded) = getRequestData(events: events)
             var request = try getRequest(isGzipEncoded: isGzipEncoded)
@@ -78,7 +77,6 @@ class AnalyticsHttpClient {
                     } else {
                         completion(.failure(URLError(.badServerResponse)))
                     }
-                    backgroundTaskCompletion?()
                 }
             }
             return httpClient.send(request, completion: requestCompletion)
@@ -86,7 +84,6 @@ class AnalyticsHttpClient {
             logger?.debug(message: "Failed to construct request")
             callbackQueue.async {
                 completion(.failure(Exception.httpError(code: 500, data: nil)))
-                backgroundTaskCompletion?()
             }
         }
         return nil
