@@ -39,13 +39,14 @@ build_framework_with_schema_and_name() {
     done
 
     # then bundle them into an xcframework
-    CREATE_XCFRAMEWORK="xcodebuild -create-xcframework -output '$OUTPUT_PATH'"
+    local -a xcframework_args=(-create-xcframework -output "$OUTPUT_PATH")
     for ARCHIVE in "${ARCHIVES[@]}"
     do
-        CREATE_XCFRAMEWORK="$CREATE_XCFRAMEWORK -archive '$ARCHIVE' -framework '$FRAMEWORK.framework'"
+        xcframework_args+=(-archive "$ARCHIVE" -framework "$FRAMEWORK.framework")
     done
-    echo "$CREATE_XCFRAMEWORK"
-    eval "$CREATE_XCFRAMEWORK"
+    printf '%q ' xcodebuild "${xcframework_args[@]}"
+    printf '\n'
+    xcodebuild "${xcframework_args[@]}"
 }
 
 rm -rf "$BUILD_DIR"
