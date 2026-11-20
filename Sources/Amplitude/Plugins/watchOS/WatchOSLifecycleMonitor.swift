@@ -28,7 +28,7 @@
             }
         }
 
-        override func start() {
+        override func startObserving() {
             // Configure the current life cycle events
             let notificationCenter = NotificationCenter.default
             for notification in appNotifications {

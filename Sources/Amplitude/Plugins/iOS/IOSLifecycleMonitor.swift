@@ -9,6 +9,19 @@ class IOSLifecycleMonitor: ApplicationLifecycle {
     private var emitForegroundOnActivation = false
 
     override func start() {
+        super.start()
+        switch IOSVendorSystem.applicationState {
+        case .active:
+            becomeActive(launch: true)
+        case .inactive:
+            emitLaunchOnActivation = true
+            emitForegroundOnActivation = true
+        default:
+            break
+        }
+    }
+
+    override func startObserving() {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(applicationDidFinishLaunchingNotification(notification:)),
                                                name: UIApplication.didFinishLaunchingNotification,
@@ -25,15 +38,6 @@ class IOSLifecycleMonitor: ApplicationLifecycle {
                                                selector: #selector(applicationDidEnterBackground(notification:)),
                                                name: UIApplication.didEnterBackgroundNotification,
                                                object: nil)
-        switch IOSVendorSystem.applicationState {
-        case .active:
-            becomeActive(launch: true)
-        case .inactive:
-            emitLaunchOnActivation = true
-            emitForegroundOnActivation = true
-        default:
-            break
-        }
     }
 
     @objc

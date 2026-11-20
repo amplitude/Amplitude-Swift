@@ -279,6 +279,7 @@ final class AmplitudeIOSTests: XCTestCase {
         lifecycle.addObserver(observer)
         lifecycle.addObserver(observer)
         lifecycle.start()
+        lifecycle.start() // Repeated plugin setup must not duplicate platform notification delivery.
         XCTAssertTrue(observer.events.isEmpty, "A background launch should not synthesize a transition")
 
         NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)

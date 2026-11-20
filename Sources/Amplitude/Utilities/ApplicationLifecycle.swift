@@ -16,6 +16,7 @@ extension ApplicationLifecycleObserver {
 /// Observer delivery order is unspecified; consumers own any sequencing they require.
 internal class ApplicationLifecycle: NSObject {
     private let lock = NSLock()
+    private var isObserving = false
     private let observers = NSHashTable<AnyObject>(options: [.weakMemory, .objectPointerPersonality])
 
     func addObserver(_ observer: any ApplicationLifecycleObserver) {
@@ -25,7 +26,16 @@ internal class ApplicationLifecycle: NSObject {
     }
 
     /// Called once consumers are registered, before the remaining SDK plugins are set up.
-    func start() {}
+    func start() {
+        lock.withLock {
+            guard !isObserving else { return }
+            startObserving()
+            isObserving = true
+        }
+    }
+
+    /// Registers platform notifications once. Startup reconciliation stays in start().
+    func startObserving() {}
 
     func didFinishLaunching() {
         notify { $0.applicationDidFinishLaunching() }
