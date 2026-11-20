@@ -89,10 +89,6 @@ import Foundation
             }
         }
 
-        private var isRunningInAppExtension: Bool {
-            return Bundle.main.bundlePath.hasSuffix(".appex")
-        }
-
         // Extension-safe accessor for sharedApplication. Will return nil if run in an extension.
         // prefer to use individual property accessors which we can override for tests
         private static var sharedApplication: UIApplication? {

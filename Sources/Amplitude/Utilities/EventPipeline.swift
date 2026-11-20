@@ -31,7 +31,7 @@ public class EventPipeline {
 
     private var flushCompletions: [() -> Void] = []
     private var uploadInProgress = false
-    private var flushRequested = false
+    private var uploadsExpired = false
     private let vendorSystem: VendorSystem
     private let uploadStateStorage: (any UploadRequestStateStorage)?
     private var didRecoverPendingUpload = false
@@ -51,23 +51,19 @@ public class EventPipeline {
         flushTimer = QueueTimer(interval: getFlushInterval(), queue: uploadsQueue) { [weak self] in
             self?.flush(automatic: true)
         }
-        amplitude.appLifecycle.addObserver(self)
+        if !vendorSystem.isRunningInAppExtension {
+            amplitude.appLifecycle.addObserver(self)
+        }
     }
 
-    func put(event: BaseEvent, isRetry: Bool = false, completion: (() -> Void)? = nil) {
+    func put(event: BaseEvent, completion: (() -> Void)? = nil) {
         guard let storage = self.storage else { return }
         event.attempts += 1
         do {
             try storage.write(key: StorageKey.EVENTS, value: event)
             _eventCount.withLock { $0 += 1 }
             if eventCount >= getFlushCount() {
-                if isRetry {
-                    // The current chain owns retries; finalizing a batch must not start a new flush.
-                    eventCount = 0
-                    storage.rollover()
-                } else {
-                    flush()
-                }
+                flush()
             }
             completion?()
         } catch {
@@ -91,9 +87,6 @@ public class EventPipeline {
             if let completion {
                 flushCompletions.append(completion)
             }
-            if !automatic {
-                flushRequested = true
-            }
             self.sendNextEventFile()
         }
     }
@@ -105,7 +98,10 @@ public class EventPipeline {
                 return
             }
 
-            flushRequested = false
+            guard !uploadsExpired else {
+                completeFlush()
+                return
+            }
 
             // Runs once on uploadsQueue, before this instance can start a request.
             // Assumes one SDK initialization per instance name per process.
@@ -153,8 +149,11 @@ public class EventPipeline {
             backgroundTaskCompletion = vendorSystem.beginBackgroundTask(label: "amplitude.upload") {
                 self.uploadsQueue.async {
                     guard !finished else { return }
-                    expired = true
-                    self.flushTimer?.suspend()
+                    if !self.vendorSystem.isRunningInAppExtension {
+                        expired = true
+                        self.uploadsExpired = true
+                        self.flushTimer?.suspend()
+                    }
                     backgroundTaskCompletion?()
                     backgroundTaskCompletion = nil
                 }
@@ -194,11 +193,7 @@ public class EventPipeline {
                     finished = true
                     if expired {
                         self.uploadInProgress = false
-                        if self.flushRequested {
-                            self.sendNextEventFile()
-                        } else {
-                            self.completeFlush()
-                        }
+                        self.sendNextEventFile()
                     } else if failures > self.configuration.flushMaxRetries {
                         self.uploadInProgress = false
                         self.configuration.offline = true
@@ -236,6 +231,7 @@ public class EventPipeline {
 
     func start() {
         uploadsQueue.async { [weak self] in
+            self?.uploadsExpired = false
             self?.flushTimer?.resume()
         }
     }
