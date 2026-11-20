@@ -31,10 +31,13 @@ public class EventPipeline {
 
     private var flushCompletions: [() -> Void] = []
     private var uploadInProgress = false
+    private var uploadsExpired = false
+    private let vendorSystem: VendorSystem
     private let uploadStateStorage: (any UploadRequestStateStorage)?
     private var didRecoverPendingUpload = false
 
-    init(amplitude: Amplitude) {
+    init(amplitude: Amplitude, vendorSystem: VendorSystem = .current) {
+        self.vendorSystem = vendorSystem
         identifyStorage = amplitude.identifyStorage
         storage = amplitude.storage
         logger = amplitude.logger
@@ -45,9 +48,10 @@ public class EventPipeline {
                                 diagnostics: amplitude.configuration.diagonostics,
                                 callbackQueue: uploadsQueue,
                                 serverZone: amplitude.amplitudeContext.serverZone)
-        flushTimer = QueueTimer(interval: getFlushInterval(), queue: amplitude.trackingQueue) { [weak self] in
-            self?.flush()
+        flushTimer = QueueTimer(interval: getFlushInterval(), queue: uploadsQueue) { [weak self] in
+            self?.flush(automatic: true)
         }
+        amplitude.appLifecycle.addObserver(self)
     }
 
     func put(event: BaseEvent, completion: (() -> Void)? = nil) {
@@ -65,7 +69,7 @@ public class EventPipeline {
         }
     }
 
-    func flush(completion: (() -> Void)? = nil) {
+    func flush(automatic: Bool = false, completion: (() -> Void)? = nil) {
         if configuration.offline == true {
             logger?.debug(message: "Skipping flush while offline.")
             return
@@ -77,6 +81,7 @@ public class EventPipeline {
         storage.rollover()
 
         uploadsQueue.async { [self] in
+            guard !automatic || flushTimer?.state == .resumed else { return }
             if let completion {
                 flushCompletions.append(completion)
             }
@@ -88,6 +93,11 @@ public class EventPipeline {
         autoreleasepool {
             guard !uploadInProgress else {
                 logger?.log(message: "Existing upload in progress, skipping...")
+                return
+            }
+
+            guard !uploadsExpired else {
+                completeFlush()
                 return
             }
 
@@ -129,6 +139,23 @@ public class EventPipeline {
                 return
             }
 
+            // Expiration and response handling share uploadsQueue. End the assertion on
+            // expiry, but keep the request alive so a late success can acknowledge its batch.
+            var expired = false
+            var finished = false
+            var backgroundTaskCompletion: BackgroundTaskCompletionCallback?
+            backgroundTaskCompletion = vendorSystem.beginBackgroundTask(label: "amplitude.upload") {
+                self.uploadsQueue.async {
+                    guard !finished else { return }
+                    expired = true
+                    if !self.vendorSystem.isRunningInAppExtension {
+                        self.uploadsExpired = true
+                        self.flushTimer?.suspend()
+                    }
+                    backgroundTaskCompletion?()
+                    backgroundTaskCompletion = nil
+                }
+            }
             if configuration.enableDiagnostics {
                 uploadStateStorage?.uploadRequestPending = true
             }
@@ -144,6 +171,8 @@ public class EventPipeline {
                     eventsString: eventsString
                 )
                 let handled: Bool = responseHandler.handle(result: result)
+                backgroundTaskCompletion?()
+                backgroundTaskCompletion = nil
                 var failures = failures
 
                 switch result {
@@ -155,28 +184,37 @@ public class EventPipeline {
                     }
                 }
 
-                if failures > self.configuration.flushMaxRetries {
-                    self.uploadsQueue.async {
+                // Let expiration and flush requests queued during response handling run before
+                // deciding whether to continue. Keep the in-flight guard until that decision.
+                self.uploadsQueue.async { [weak self] in
+                    guard let self else { return }
+                    finished = true
+                    if expired {
                         self.uploadInProgress = false
-                    }
-                    self.configuration.offline = true
-                    self.logger?.error(message: "Request failed more than \(self.configuration.flushMaxRetries) times, marking offline")
-                } else {
-                    // Don't send the next event file if we're being deallocated
-                    let nextFileBlock: () -> Void = { [weak self] in
-                        guard let self = self else {
-                            return
+                        if self.vendorSystem.isRunningInAppExtension {
+                            // Extensions have no foreground reset signal. Stop this chain only.
+                            self.completeFlush()
+                        } else {
+                            self.sendNextEventFile()
                         }
+                    } else if failures > self.configuration.flushMaxRetries {
                         self.uploadInProgress = false
-                        self.sendNextEventFile(failures: failures, skipFiles: skipFiles)
-                    }
-
-                    if failures == 0 || handled {
-                        self.uploadsQueue.async(execute: nextFileBlock)
+                        self.configuration.offline = true
+                        self.logger?.error(message: "Request failed more than \(self.configuration.flushMaxRetries) times, marking offline")
                     } else {
-                        let sendingInterval = min(MAX_RETRY_INTERVAL, pow(2, Double(failures - 1)))
-                        self.uploadsQueue.asyncAfter(deadline: .now() + sendingInterval, execute: nextFileBlock)
-                        self.logger?.error(message: "Request failed \(failures) times, send next event file in \(sendingInterval) seconds")
+                        let nextFileBlock: () -> Void = { [weak self] in
+                            guard let self else { return }
+                            self.uploadInProgress = false
+                            self.sendNextEventFile(failures: failures, skipFiles: skipFiles)
+                        }
+
+                        if failures == 0 || handled {
+                            nextFileBlock()
+                        } else {
+                            let sendingInterval = min(MAX_RETRY_INTERVAL, pow(2, Double(failures - 1)))
+                            self.uploadsQueue.asyncAfter(deadline: .now() + sendingInterval, execute: nextFileBlock)
+                            self.logger?.error(message: "Request failed \(failures) times, send next event file in \(sendingInterval) seconds")
+                        }
                     }
                 }
             }
@@ -195,11 +233,16 @@ public class EventPipeline {
     }
 
     func start() {
-        flushTimer?.resume()
+        uploadsQueue.async { [weak self] in
+            self?.uploadsExpired = false
+            self?.flushTimer?.resume()
+        }
     }
 
     func stop() {
-        flushTimer?.suspend()
+        uploadsQueue.async { [weak self] in
+            self?.flushTimer?.suspend()
+        }
     }
 
     private func getFlushInterval() -> TimeInterval {
@@ -209,5 +252,22 @@ public class EventPipeline {
     private func getFlushCount() -> Int {
         let count = configuration.flushQueueSize
         return count != 0 ? count : 1
+    }
+}
+
+extension EventPipeline: ApplicationLifecycleObserver {
+    func applicationDidBecomeActive(launch: Bool) {
+        start()
+    }
+
+    func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool) {
+        start()
+    }
+
+    func applicationDidEnterBackground(timestamp: Int64) {
+#if !os(macOS) && !targetEnvironment(macCatalyst)
+        // Desktop apps can keep uploading while inactive, hidden, or minimized.
+        stop()
+#endif
     }
 }

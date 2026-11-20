@@ -7,6 +7,12 @@
 
 import XCTest
 
+#if os(macOS)
+import AppKit
+#elseif targetEnvironment(macCatalyst)
+import UIKit
+#endif
+
 @testable import AmplitudeSwift
 
 final class EventPipelineTests: XCTestCase {
@@ -42,7 +48,7 @@ final class EventPipelineTests: XCTestCase {
         httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagonostics, serverZone: configuration.serverZone)
         pipeline = EventPipeline(amplitude: amplitude)
         pipeline.httpClient = httpClient
-        pipeline.flushTimer?.suspend()
+        pipeline.stop()
 
     }
 
@@ -62,7 +68,7 @@ final class EventPipelineTests: XCTestCase {
             identifyStorageProvider: InMemoryStorage(), autocapture: [],
             offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false, httpClient: RemoteConfigMockServer()))
         let pipeline = EventPipeline(amplitude: amplitude)
-        pipeline.flushTimer?.suspend()
+        pipeline.stop()
         let firstScan = expectation(description: "recover previous request")
         pipeline.flush { firstScan.fulfill() }
         wait(for: [firstScan], timeout: 10)
@@ -287,6 +293,392 @@ final class EventPipelineTests: XCTestCase {
         XCTAssertTrue(files.isEmpty)
         releaseCallback.signal()
         wait(for: [drained], timeout: 10)
+    }
+
+    private final class ExpiringVendor: VendorSystem {
+        var isExtension = false
+        override var isRunningInAppExtension: Bool { isExtension }
+        var expireDuringStart = false
+        var expire: (() -> Void)?
+        var onEnd: (() -> Void)?
+        var endCount = 0
+        override func beginBackgroundTask(label: String? = nil, expirationHandler: @escaping () -> Void) -> BackgroundTaskCompletionCallback? {
+            XCTAssertEqual(label, "amplitude.upload")
+            expire = expirationHandler
+            if expireDuringStart { expirationHandler() }
+            return {
+                self.endCount += 1
+                self.onEnd?()
+            }
+        }
+    }
+    private final class ControlledClient: AnalyticsHttpClient {
+        var onUpload: (() -> Void)?
+        var response: ((Result<Int, Error>) -> Void)?
+        var uploadCount = 0
+        override func upload(events: String, completion: @escaping (Result<Int, Error>) -> Void) -> (@Sendable () -> Void)? {
+            uploadCount += 1
+            response = { result in self.callbackQueue.async { completion(result) } }
+            onUpload?()
+            return { XCTFail("Expiration must not cancel the request") }
+        }
+    }
+    private final class UploadFixture {
+        let storage: PersistentStorage
+        let amplitude: Amplitude
+        let vendor = ExpiringVendor()
+        let pipeline: EventPipeline
+        let client: ControlledClient
+
+        init(storage: PersistentStorage? = nil, isExtension: Bool = false) {
+            self.storage = storage ?? PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
+                diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
+            let config = Configuration(apiKey: "test", flushQueueSize: 1, flushIntervalMillis: 3_600_000,
+                instanceName: UUID().uuidString, storageProvider: self.storage, autocapture: [],
+                offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
+                httpClient: RemoteConfigMockServer())
+            config.flushMaxRetries = 0
+            config.flushEventsOnClose = false
+            vendor.isExtension = isExtension
+            amplitude = Amplitude(configuration: config)
+            pipeline = EventPipeline(amplitude: amplitude, vendorSystem: vendor)
+            client = ControlledClient(configuration: config, diagnostics: config.diagonostics,
+                callbackQueue: pipeline.httpClient.callbackQueue, serverZone: config.serverZone)
+            pipeline.httpClient = client
+            pipeline.stop()
+        }
+
+        func cleanUp() {
+            vendor.expire = nil
+            vendor.onEnd = nil
+            client.response = nil
+            client.onUpload = nil
+            storage.reset()
+        }
+
+        func writeBatch(_ eventTypes: [String]) throws {
+            for eventType in eventTypes {
+                try storage.write(key: .EVENTS, value: BaseEvent(eventType: eventType))
+            }
+            storage.rollover()
+        }
+    }
+
+    func testExpirationBlocksAllNewUploadsUntilForeground() throws {
+        for expireFirst in [false, true] {
+            let fixture = UploadFixture()
+            defer { fixture.cleanUp() }
+            try fixture.writeBatch(["first"])
+            try fixture.writeBatch(["second"])
+            let started = expectation(description: "first request started")
+            let firstFlush = expectation(description: "first flush finished")
+            let explicitFlush = expectation(description: "new explicit flush stops at the expired request")
+            fixture.client.onUpload = { started.fulfill() }
+            fixture.pipeline.flush { firstFlush.fulfill() }
+            wait(for: [started], timeout: 10)
+
+            if expireFirst { fixture.vendor.expire?() }
+            fixture.pipeline.flush { explicitFlush.fulfill() }
+            fixture.client.callbackQueue.sync {}
+            if !expireFirst { fixture.vendor.expire?() }
+            fixture.client.onUpload = { fixture.client.response?(.success(200)) }
+            fixture.client.response?(.success(200))
+            wait(for: [firstFlush, explicitFlush], timeout: 10)
+
+            XCTAssertEqual(fixture.client.uploadCount, 1)
+            XCTAssertEqual(fixture.vendor.endCount, 1)
+            let remaining: [URL] = try XCTUnwrap(fixture.storage.read(key: .EVENTS))
+            XCTAssertEqual(remaining.count, 1)
+
+            fixture.pipeline.put(event: BaseEvent(eventType: "third"))
+            let blocked = expectation(description: "explicit and event-count flushes remain blocked")
+            fixture.pipeline.flush { blocked.fulfill() }
+            wait(for: [blocked], timeout: 10)
+            XCTAssertEqual(fixture.client.uploadCount, 1)
+
+            fixture.amplitude.appLifecycle.enterForeground()
+            let resumed = expectation(description: "foreground permits uploads again")
+            fixture.pipeline.flush { resumed.fulfill() }
+            wait(for: [resumed], timeout: 10)
+            XCTAssertEqual(fixture.client.uploadCount, 3)
+            let afterForeground: [URL] = try XCTUnwrap(fixture.storage.read(key: .EVENTS))
+            XCTAssertTrue(afterForeground.isEmpty)
+        }
+    }
+
+    func testExtensionExpirationStopsOnlyCurrentChain() throws {
+        for succeeds in [false, true] {
+            for automatic in [false, true] {
+                let fixture = UploadFixture(isExtension: true)
+                defer { fixture.cleanUp() }
+                fixture.pipeline.start()
+                fixture.client.callbackQueue.sync {}
+                XCTAssertEqual(fixture.pipeline.flushTimer?.state, .resumed)
+
+                try fixture.writeBatch(["first"])
+                try fixture.writeBatch(["second"])
+                let started = expectation(description: "extension request started")
+                let ended = expectation(description: "expired activity ended before response")
+                let stopped = expectation(description: "expired extension chain stopped")
+                fixture.client.onUpload = { started.fulfill() }
+                fixture.vendor.onEnd = { ended.fulfill() }
+                fixture.pipeline.flush { stopped.fulfill() }
+                wait(for: [started], timeout: 10)
+                fixture.vendor.expire?()
+                wait(for: [ended], timeout: 10)
+                fixture.vendor.onEnd = nil
+                fixture.client.response?(succeeds ? .success(200) : .failure(URLError(.timedOut)))
+                wait(for: [stopped], timeout: 10)
+                fixture.client.callbackQueue.sync {}
+
+                XCTAssertEqual(fixture.client.uploadCount, 1)
+                XCTAssertEqual(fixture.vendor.endCount, 1)
+                XCTAssertFalse(fixture.pipeline.configuration.offline == true)
+                XCTAssertEqual(fixture.pipeline.flushTimer?.state, .resumed)
+                let remaining: [URL] = try XCTUnwrap(fixture.storage.read(key: .EVENTS))
+                XCTAssertEqual(remaining.count, succeeds ? 1 : 2)
+
+                let drained = expectation(description: "later extension flush starts a fresh chain")
+                fixture.client.onUpload = { fixture.client.response?(.success(200)) }
+                fixture.pipeline.flush(automatic: automatic) { drained.fulfill() }
+                wait(for: [drained], timeout: 10)
+                XCTAssertEqual(fixture.client.uploadCount, succeeds ? 2 : 3)
+                XCTAssertEqual(fixture.vendor.endCount, fixture.client.uploadCount)
+                let afterFlush: [URL] = try XCTUnwrap(fixture.storage.read(key: .EVENTS))
+                XCTAssertTrue(afterFlush.isEmpty)
+            }
+        }
+    }
+
+    func testAutomaticFlushDoesNotRestartExpiredRequest() throws {
+        let fixture = UploadFixture()
+        defer { fixture.cleanUp() }
+        try fixture.writeBatch(["first"])
+        try fixture.writeBatch(["second"])
+        let started = expectation(description: "request started")
+        let stopped = expectation(description: "expired flush stopped")
+        fixture.client.onUpload = { started.fulfill() }
+        fixture.pipeline.start()
+        fixture.pipeline.flush { stopped.fulfill() }
+        wait(for: [started], timeout: 10)
+        fixture.pipeline.flush(automatic: true)
+        fixture.client.callbackQueue.sync {}
+        fixture.vendor.expire?()
+        fixture.client.response?(.success(200))
+        wait(for: [stopped], timeout: 10)
+
+        XCTAssertEqual(fixture.client.uploadCount, 1)
+        let remaining: [URL] = try XCTUnwrap(fixture.storage.read(key: .EVENTS))
+        XCTAssertEqual(remaining.count, 1)
+    }
+
+    func testExpiredPartialFailureDoesNotStartRetryFlush() throws {
+        for isExtension in [false, true] {
+            let fixture = UploadFixture(isExtension: isExtension)
+            defer { fixture.cleanUp() }
+            try fixture.writeBatch(["invalid", "retry"])
+            let started = expectation(description: "request started")
+            let stopped = expectation(description: "expired partial failure processed")
+            fixture.client.onUpload = { started.fulfill() }
+            fixture.pipeline.flush { stopped.fulfill() }
+            wait(for: [started], timeout: 10)
+            fixture.vendor.expire?()
+            let data = Data(#"{"events_with_invalid_fields":{"event_type":[0]}}"#.utf8)
+            fixture.client.response?(.failure(AnalyticsHttpClient.Exception.httpError(code: 400, data: data)))
+            wait(for: [stopped], timeout: 10)
+            fixture.client.callbackQueue.sync {}
+
+            XCTAssertEqual(fixture.client.uploadCount, 1, "Response retries must not start a fresh flush after expiry")
+            let remaining: [URL] = try XCTUnwrap(fixture.storage.read(key: .EVENTS))
+            XCTAssertEqual(remaining.count, 1)
+            let events = BaseEvent.fromArrayString(jsonString: try XCTUnwrap(fixture.storage.getEventsString(eventBlock: XCTUnwrap(remaining.first))))
+            XCTAssertEqual(events?.map(\.eventType), ["retry"])
+
+            if !isExtension { fixture.amplitude.appLifecycle.enterForeground() }
+            let drained = expectation(description: "later permitted flush uploads the retry")
+            fixture.client.onUpload = { fixture.client.response?(.success(200)) }
+            fixture.pipeline.flush { drained.fulfill() }
+            wait(for: [drained], timeout: 10)
+            XCTAssertEqual(fixture.client.uploadCount, 2)
+        }
+    }
+
+    func testExpirationDuringResponseProcessingStopsContinuation() throws {
+        class ExpiringStorage: PersistentStorage {
+            var onResponse: (() -> Void)?
+            override func getResponseHandler(configuration: Configuration, eventPipeline: EventPipeline,
+                                             eventBlock: URL, eventsString: String) -> ResponseHandler {
+                onResponse?()
+                return super.getResponseHandler(configuration: configuration, eventPipeline: eventPipeline,
+                    eventBlock: eventBlock, eventsString: eventsString)
+            }
+        }
+        for succeeds in [false, true] {
+            let storage = ExpiringStorage(storagePrefix: UUID().uuidString, logger: nil,
+                diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
+            let fixture = UploadFixture(storage: storage)
+            defer {
+                storage.onResponse = nil
+                fixture.cleanUp()
+            }
+            try fixture.writeBatch(["first"])
+            try fixture.writeBatch(["second"])
+            let started = expectation(description: "request started")
+            let stopped = expectation(description: "expiry during response prevented continuation")
+            fixture.client.onUpload = { started.fulfill() }
+            fixture.pipeline.start()
+            fixture.pipeline.flush { stopped.fulfill() }
+            wait(for: [started], timeout: 10)
+            storage.onResponse = { fixture.vendor.expire?() }
+            fixture.client.response?(succeeds ? .success(200) : .failure(URLError(.timedOut)))
+            wait(for: [stopped], timeout: 10)
+            fixture.client.callbackQueue.sync {}
+
+            XCTAssertEqual(fixture.client.uploadCount, 1)
+            XCTAssertEqual(fixture.vendor.endCount, 1)
+            XCTAssertFalse(fixture.pipeline.configuration.offline == true)
+            XCTAssertEqual(fixture.pipeline.flushTimer?.state, .suspended)
+            let remaining: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+            XCTAssertEqual(remaining.count, succeeds ? 1 : 2)
+
+            fixture.pipeline.start()
+            fixture.client.callbackQueue.sync {}
+            fixture.vendor.expire?() // A stale callback after continuation was decided is harmless.
+            fixture.client.callbackQueue.sync {}
+            XCTAssertEqual(fixture.pipeline.flushTimer?.state, .resumed)
+            XCTAssertEqual(fixture.vendor.endCount, 1)
+        }
+    }
+
+    func testExpirationEndsTaskWithoutCancellingAndStopsAfterResponse() throws {
+        for expireDuringStart in [false, true] {
+            for succeeds in [false, true] {
+                let storage = PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
+                    diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
+                defer { storage.reset() }
+                let config = Configuration(apiKey: "test", flushIntervalMillis: 3_600_000,
+                    instanceName: UUID().uuidString, storageProvider: storage, autocapture: [],
+                    offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
+                    httpClient: RemoteConfigMockServer())
+                config.flushMaxRetries = 0
+                let amplitude = Amplitude(configuration: config)
+                let vendor = ExpiringVendor()
+                vendor.expireDuringStart = expireDuringStart
+                let pipeline = EventPipeline(amplitude: amplitude, vendorSystem: vendor)
+                pipeline.stop()
+                let client = ControlledClient(configuration: config, diagnostics: config.diagonostics,
+                    callbackQueue: pipeline.httpClient.callbackQueue, serverZone: config.serverZone)
+                pipeline.httpClient = client
+                for _ in 0..<2 {
+                    try storage.write(key: .EVENTS, value: BaseEvent(eventType: "expiration"))
+                    storage.rollover()
+                }
+                let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+                XCTAssertEqual(files.count, 2)
+                let started = expectation(description: "upload started")
+                let ended = expectation(description: "assertion ended without waiting for a response")
+                let stopped = expectation(description: "expired chain stopped after handling its response")
+                client.onUpload = { started.fulfill() }
+                vendor.onEnd = { ended.fulfill() }
+                amplitude.trackingQueue.sync {}
+                amplitude.trackingQueue.suspend()
+                defer { amplitude.trackingQueue.resume() }
+                pipeline.flush { stopped.fulfill() }
+                wait(for: [started], timeout: 10)
+                if !expireDuringStart { vendor.expire?() }
+                wait(for: [ended], timeout: 10)
+                XCTAssertTrue(storage.uploadRequestPending)
+                XCTAssertTrue(files.allSatisfy { FileManager.default.fileExists(atPath: $0.path) })
+                vendor.onEnd = nil
+                client.response?(succeeds ? .success(200) : .failure(URLError(.timedOut)))
+                wait(for: [stopped], timeout: 10)
+                XCTAssertEqual(client.uploadCount, 1)
+                XCTAssertEqual(vendor.endCount, 1, "The late response must not end the assertion again")
+                XCTAssertFalse(config.offline == true)
+                XCTAssertFalse(storage.uploadRequestPending)
+                XCTAssertEqual(FileManager.default.fileExists(atPath: files[0].path), !succeeds)
+                XCTAssertTrue(FileManager.default.fileExists(atPath: files[1].path))
+
+                // A new foreground execution window permits uploads again.
+                amplitude.appLifecycle.enterForeground()
+                vendor.expireDuringStart = false
+                let drained = expectation(description: "explicit flush drains remaining batches")
+                client.onUpload = { client.response?(.success(200)) }
+                pipeline.flush { drained.fulfill() }
+                wait(for: [drained], timeout: 10)
+                XCTAssertEqual(client.uploadCount, succeeds ? 2 : 3)
+                XCTAssertEqual(vendor.endCount, client.uploadCount)
+                let remaining: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+                XCTAssertTrue(remaining.isEmpty)
+                client.onUpload = nil
+                client.response = nil
+                vendor.expire = nil
+            }
+        }
+    }
+
+    func testFlushTimerUploadsWhileTrackingIsSuspended() throws {
+        let storage = PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
+            diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
+        defer { storage.reset() }
+        let config = Configuration(apiKey: "test", flushIntervalMillis: 50,
+            instanceName: UUID().uuidString, storageProvider: storage, autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer())
+        let delivered = expectation(description: "timer uploads and acknowledges event without tracking")
+        config.callback = { _, code, _ in
+            XCTAssertEqual(code, 200)
+            delivered.fulfill()
+        }
+        let amplitude = Amplitude(configuration: config)
+        amplitude.trackingQueue.sync {}
+        amplitude.trackingQueue.suspend()
+        defer { amplitude.trackingQueue.resume() }
+        try storage.write(key: .EVENTS, value: BaseEvent(eventType: "timer-upload"))
+        wait(for: [delivered], timeout: 10)
+        let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+        XCTAssertTrue(files.isEmpty)
+    }
+
+#if os(macOS) || targetEnvironment(macCatalyst)
+    func testDesktopFlushTimerUploadsInBackground() throws {
+        let storage = PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
+            diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
+        defer { storage.reset() }
+        let config = Configuration(apiKey: "test", flushQueueSize: 100, flushIntervalMillis: 50,
+            instanceName: UUID().uuidString, storageProvider: storage, autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
+            httpClient: RemoteConfigMockServer())
+        config.flushEventsOnClose = false
+        let delivered = expectation(description: "timer uploads below-threshold event in background")
+        config.callback = { event, code, _ in
+            XCTAssertEqual(event.eventType, "desktop-background-event")
+            XCTAssertEqual(code, 200)
+            delivered.fulfill()
+        }
+        let amplitude = Amplitude(configuration: config)
+        amplitude.trackingQueue.sync {}
+#if os(macOS)
+        NotificationCenter.default.post(name: NSApplication.willResignActiveNotification, object: NSApplication.shared)
+#else
+        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+#endif
+        amplitude.track(eventType: "desktop-background-event")
+        amplitude.trackingQueue.sync {}
+        wait(for: [delivered], timeout: 10)
+        let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+        XCTAssertTrue(files.isEmpty)
+    }
+#endif
+
+    func testLifecycleDoesNotRetainPipeline() {
+        let amplitude = Amplitude(configuration: configuration)
+        weak var observedPipeline: EventPipeline?
+        autoreleasepool {
+            let pipeline = EventPipeline(amplitude: amplitude)
+            observedPipeline = pipeline
+        }
+        XCTAssertNil(observedPipeline)
     }
 
     func testInit() {
@@ -585,7 +977,7 @@ final class EventPipelineTests: XCTestCase {
         let spyHttp = FakeHttpClient(configuration: spyConfiguration, diagnostics: spyConfiguration.diagonostics, serverZone: spyConfiguration.serverZone)
         let spyPipeline = EventPipeline(amplitude: spyAmplitude)
         spyPipeline.httpClient = spyHttp
-        spyPipeline.flushTimer?.suspend()
+        spyPipeline.stop()
 
         let storeDirectory = spyStorage.getEventsStorageDirectory(createDirectory: false)
         // Clear anything written during Amplitude init (e.g. session_start) so
