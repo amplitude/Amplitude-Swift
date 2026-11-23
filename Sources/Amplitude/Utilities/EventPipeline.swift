@@ -34,7 +34,7 @@ public class EventPipeline: ApplicationLifecycleObserver {
         case idle, uploading, expired, expiredWithPendingFlush
     }
     private var uploadState: UploadState = .idle
-    private var uploadsExpired = false
+    private var uploadsBlockedUntilForeground = false
     private var isInForeground: Bool?
     private let vendorSystem: VendorSystem
     private let uploadStateStorage: (any UploadRequestStateStorage)?
@@ -128,7 +128,7 @@ public class EventPipeline: ApplicationLifecycleObserver {
                 return
             }
 
-            guard !uploadsExpired else {
+            guard !uploadsBlockedUntilForeground else {
                 completeFlush()
                 return
             }
@@ -182,7 +182,7 @@ public class EventPipeline: ApplicationLifecycleObserver {
                     if self.vendorSystem.isRunningInAppExtension {
                         if self.uploadState == .uploading { self.uploadState = .expired }
                     } else if self.isInForeground != true {
-                        self.uploadsExpired = true
+                        self.uploadsBlockedUntilForeground = true
                         self.flushTimer?.stop()
                     }
                     backgroundTaskCompletion?()
@@ -221,7 +221,7 @@ public class EventPipeline: ApplicationLifecycleObserver {
                 self.uploadsQueue.async { [weak self] in
                     guard let self else { return }
                     finished = true
-                    if self.uploadsExpired || self.uploadState == .expired {
+                    if self.uploadsBlockedUntilForeground || self.uploadState == .expired {
                         self.uploadState = .idle
                         self.completeFlush()
                         return
@@ -288,7 +288,7 @@ public class EventPipeline: ApplicationLifecycleObserver {
     private func enterForeground() {
         uploadsQueue.async { [weak self] in
             self?.isInForeground = true
-            self?.uploadsExpired = false
+            self?.uploadsBlockedUntilForeground = false
             self?.flushTimer?.start()
         }
     }
