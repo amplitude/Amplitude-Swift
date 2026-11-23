@@ -17,11 +17,14 @@ extension ApplicationLifecycleObserver {
 internal class ApplicationLifecycle: NSObject {
     private let lock = NSLock()
     private var isObserving = false
+    private var isInForeground: Bool? // nil until activation or a foreground/background transition.
     private let observers = NSHashTable<AnyObject>(options: [.weakMemory, .objectPointerPersonality])
 
-    func addObserver(_ observer: any ApplicationLifecycleObserver) {
+    @discardableResult
+    func addObserver(_ observer: any ApplicationLifecycleObserver) -> Bool? {
         lock.withLock {
             observers.add(observer)
+            return isInForeground
         }
     }
 
@@ -45,22 +48,23 @@ internal class ApplicationLifecycle: NSObject {
 
     /// Initial activation, including initialization in an already-active app.
     func becomeActive(launch: Bool) {
-        notify { $0.applicationDidBecomeActive(launch: launch) }
+        notify(inForeground: true) { $0.applicationDidBecomeActive(launch: launch) }
     }
 
     func enterForeground(fromBackground: Bool = false) {
         let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-        notify { $0.applicationWillEnterForeground(timestamp: timestamp, fromBackground: fromBackground) }
+        notify(inForeground: true) { $0.applicationWillEnterForeground(timestamp: timestamp, fromBackground: fromBackground) }
     }
 
     func enterBackground() {
         let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-        notify { $0.applicationDidEnterBackground(timestamp: timestamp) }
+        notify(inForeground: false) { $0.applicationDidEnterBackground(timestamp: timestamp) }
     }
 
-    private func notify(_ callback: (any ApplicationLifecycleObserver) -> Void) {
+    private func notify(inForeground: Bool? = nil, _ callback: (any ApplicationLifecycleObserver) -> Void) {
         let currentObservers = lock.withLock {
-            observers.allObjects.compactMap { $0 as? any ApplicationLifecycleObserver }
+            if let inForeground { isInForeground = inForeground }
+            return observers.allObjects.compactMap { $0 as? any ApplicationLifecycleObserver }
         }
         // Observers choose their execution queue; never invoke them while holding the lock.
         currentObservers.forEach(callback)

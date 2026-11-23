@@ -6,7 +6,7 @@
 //
 
 public class AmplitudeDestinationPlugin: DestinationPlugin {
-    private var pipeline: EventPipeline?
+    private(set) var pipeline: EventPipeline?
     private var identifyInterceptor: IdentifyInterceptor?
 
     internal func enqueue(event: BaseEvent?) {
@@ -49,9 +49,10 @@ public class AmplitudeDestinationPlugin: DestinationPlugin {
 
     public override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
-        pipeline = EventPipeline(amplitude: amplitude)
+        let pipeline = EventPipeline(amplitude: amplitude)
+        self.pipeline = pipeline
         identifyInterceptor = IdentifyInterceptor(
-            pipeline: pipeline!,
+            pipeline: pipeline,
             queue: amplitude.trackingQueue
         )
 

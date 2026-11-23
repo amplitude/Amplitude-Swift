@@ -7,55 +7,33 @@
 
 import Foundation
 
-internal class QueueTimer {
-    enum State {
-        case suspended
-        case resumed
-    }
-
-    let interval: TimeInterval
-    let timer: DispatchSourceTimer
-    let queue: DispatchQueue
-    let handler: () -> Void
-
-    @AtomicRef var state: State = .suspended
+/// Call start() and stop() on the timer's serial queue.
+internal final class QueueTimer {
+    private let source: DispatchSourceTimer
+    private(set) var isRunning = true
 
     init(interval: TimeInterval, once: Bool = false, queue: DispatchQueue = .main, handler: @escaping () -> Void) {
-        self.interval = interval
-        self.queue = queue
-        self.handler = handler
-
-        timer = DispatchSource.makeTimerSource(flags: [], queue: queue)
-        timer.schedule(deadline: .now() + self.interval, repeating: once ? .infinity : self.interval)
-        timer.setEventHandler { [weak self] in
-            self?.handler()
-        }
-        resume()
+        source = DispatchSource.makeTimerSource(queue: queue)
+        source.schedule(deadline: .now() + interval, repeating: once ? .infinity : interval)
+        source.setEventHandler(handler: handler)
+        source.activate()
     }
 
     deinit {
-        timer.setEventHandler {
-            // do nothing ...
-        }
-        // if timer is suspended, we must resume if we're going to cancel.
-        timer.cancel()
-        resume()
+        source.cancel()
+        if !isRunning { source.resume() } // Balance the suspension before releasing the source.
     }
 
-    func suspend() {
-        if state == .suspended {
-            return
-        }
-        state = .suspended
-        timer.suspend()
+    func start() {
+        guard !isRunning else { return }
+        isRunning = true
+        source.resume()
     }
 
-    func resume() {
-        if state == .resumed {
-            return
-        }
-        state = .resumed
-        timer.resume()
+    func stop() {
+        guard isRunning else { return }
+        isRunning = false
+        source.suspend()
     }
 }
 

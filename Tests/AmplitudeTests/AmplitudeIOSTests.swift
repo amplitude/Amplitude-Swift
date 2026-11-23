@@ -198,97 +198,6 @@ final class AmplitudeIOSTests: XCTestCase {
         ])
     }
 
-    func testFlushTimerFollowsLifecycleAndExpirationPolicy() throws {
-        class ExpiringVendor: IOSVendorSystem {
-            var shouldExpire = true
-            var onExpire: (() -> Void)?
-            override func beginBackgroundTask(label: String? = nil, expirationHandler: @escaping () -> Void) -> BackgroundTaskCompletionCallback? {
-                if shouldExpire {
-                    expirationHandler()
-                    onExpire?()
-                }
-                return {}
-            }
-        }
-        IOSVendorSystem.overrideApplicationState(.background)
-        let storage = PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
-            diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
-        defer { storage.reset() }
-        let config = Configuration(apiKey: "test", flushIntervalMillis: 3_600_000,
-            instanceName: UUID().uuidString, storageProvider: storage, autocapture: [],
-            offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
-            httpClient: RemoteConfigMockServer())
-        config.flushEventsOnClose = false
-        let amplitude = Amplitude(configuration: config)
-        let vendor = ExpiringVendor()
-        let pipeline = EventPipeline(amplitude: amplitude, vendorSystem: vendor)
-        let uploadQueue = pipeline.httpClient.callbackQueue
-        amplitude.waitForTrackingQueue()
-        amplitude.trackingQueue.suspend()
-        defer { amplitude.trackingQueue.resume() }
-        XCTAssertEqual(pipeline.flushTimer?.state, .resumed, "Preserve timer startup for a background launch")
-
-        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
-        uploadQueue.sync {}
-#if targetEnvironment(macCatalyst)
-        XCTAssertEqual(pipeline.flushTimer?.state, .resumed, "Catalyst keeps periodic flushing in the background")
-#else
-        XCTAssertEqual(pipeline.flushTimer?.state, .suspended, "Backgrounding stops periodic flushing")
-#endif
-
-        NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
-        uploadQueue.sync {}
-        XCTAssertEqual(pipeline.flushTimer?.state, .resumed)
-        try storage.write(key: .EVENTS, value: BaseEvent(eventType: "expiring-upload"))
-        let expired = expectation(description: "response processed after expiration")
-        pipeline.flush { expired.fulfill() }
-        wait(for: [expired], timeout: 10)
-        uploadQueue.sync {}
-        XCTAssertEqual(pipeline.flushTimer?.state, .suspended)
-
-        vendor.shouldExpire = false
-        try storage.write(key: .EVENTS, value: BaseEvent(eventType: "explicit-background-flush"))
-        let flushed = expectation(description: "explicit flush is blocked after expiration")
-        pipeline.flush { flushed.fulfill() }
-        wait(for: [flushed], timeout: 10)
-        let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(pipeline.flushTimer?.state, .suspended)
-
-        for _ in 0..<2 {
-            NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
-        }
-        uploadQueue.sync {}
-        XCTAssertEqual(pipeline.flushTimer?.state, .resumed)
-        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
-        let foregroundFlush = expectation(description: "flushes remain allowed after backgrounding without expiry")
-        pipeline.flush { foregroundFlush.fulfill() }
-        wait(for: [foregroundFlush], timeout: 10)
-        let remaining: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
-        XCTAssertTrue(remaining.isEmpty)
-
-        // Backgrounding must preserve a suspension; only foregrounding resumes it.
-        for notification in [UIApplication.willEnterForegroundNotification, UIApplication.didEnterBackgroundNotification] {
-            let expectedState: QueueTimer.State = notification == UIApplication.willEnterForegroundNotification ? .resumed : .suspended
-            pipeline.stop()
-            NotificationCenter.default.post(name: notification, object: nil)
-            uploadQueue.sync {}
-            XCTAssertEqual(pipeline.flushTimer?.state, expectedState)
-
-            vendor.shouldExpire = true
-            vendor.onExpire = {
-                NotificationCenter.default.post(name: notification, object: nil)
-            }
-            try storage.write(key: .EVENTS, value: BaseEvent(eventType: "lifecycle-transition-during-expiry"))
-            let transitioned = expectation(description: "expiry and lifecycle transitions preserve timer policy")
-            pipeline.flush { transitioned.fulfill() }
-            wait(for: [transitioned], timeout: 10)
-            uploadQueue.sync {}
-            XCTAssertEqual(pipeline.flushTimer?.state, expectedState)
-            vendor.onExpire = nil
-        }
-    }
-
     func testInitialActivationResumesTimerWithoutWaitingForTracking() {
         IOSVendorSystem.overrideApplicationState(.inactive)
         let configuration = Configuration(
@@ -299,7 +208,7 @@ final class AmplitudeIOSTests: XCTestCase {
             enableAutoCaptureRemoteConfig: false, httpClient: RemoteConfigMockServer()
         )
         let amplitude = Amplitude(configuration: configuration)
-        let pipeline = EventPipeline(amplitude: amplitude)
+        let pipeline = amplitude.plugins(type: AmplitudeDestinationPlugin.self)[0].pipeline!
         let uploadQueue = pipeline.httpClient.callbackQueue
         amplitude.waitForTrackingQueue()
         pipeline.stop()
@@ -308,7 +217,7 @@ final class AmplitudeIOSTests: XCTestCase {
         amplitude.trackingQueue.suspend()
         NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
         uploadQueue.sync {}
-        XCTAssertEqual(pipeline.flushTimer?.state, .resumed)
+        XCTAssertEqual(pipeline.flushTimer?.isRunning, true)
         XCTAssertTrue(storageMem.events().isEmpty)
         amplitude.trackingQueue.resume()
 
@@ -325,6 +234,7 @@ final class AmplitudeIOSTests: XCTestCase {
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
+            flushEventsOnClose: false,
             autocapture: .appLifecycles,
             enableAutoCaptureRemoteConfig: false,
             httpClient: RemoteConfigMockServer()

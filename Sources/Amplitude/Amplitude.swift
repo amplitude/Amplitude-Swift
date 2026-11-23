@@ -541,9 +541,6 @@ public class Amplitude {
         trackingQueue.async { [self] in
             self.sessions.lastEventTime = timestamp
         }
-        if configuration.flushEventsOnClose == true {
-            flush()
-        }
     }
 
     private func getStorageVersion() -> PersistentStorageVersion {

@@ -16,7 +16,7 @@ import Foundation
 /// Retry interval capped at 1 minutes
 private let MAX_RETRY_INTERVAL: Double = 60
 
-public class EventPipeline {
+public class EventPipeline: ApplicationLifecycleObserver {
     var httpClient: AnalyticsHttpClient
     let identifyStorage: any Storage
     let storage: Storage?
@@ -30,8 +30,12 @@ public class EventPipeline {
     private let callbackQueue = DispatchQueue(label: "callbacksQueue.amplitude.com")
 
     private var flushCompletions: [() -> Void] = []
-    private var uploadInProgress = false
+    private enum UploadState {
+        case idle, uploading, expired, expiredWithPendingFlush
+    }
+    private var uploadState: UploadState = .idle
     private var uploadsExpired = false
+    private var isInForeground: Bool?
     private let vendorSystem: VendorSystem
     private let uploadStateStorage: (any UploadRequestStateStorage)?
     private var didRecoverPendingUpload = false
@@ -48,20 +52,35 @@ public class EventPipeline {
                                 diagnostics: amplitude.configuration.diagonostics,
                                 callbackQueue: uploadsQueue,
                                 serverZone: amplitude.amplitudeContext.serverZone)
-        flushTimer = QueueTimer(interval: getFlushInterval(), queue: uploadsQueue) { [weak self] in
-            self?.flush(automatic: true)
+        // Apply the snapshot before this queue handles any transition delivered after registration.
+        uploadsQueue.sync {
+            isInForeground = amplitude.appLifecycle.addObserver(self)
+            flushTimer = QueueTimer(interval: getFlushInterval(), queue: uploadsQueue) { [weak self] in
+                self?.flushOnTimer()
+            }
+#if !os(macOS) && !targetEnvironment(macCatalyst)
+            if isInForeground == false { flushTimer?.stop() }
+#endif
         }
-        amplitude.appLifecycle.addObserver(self)
     }
 
-    func put(event: BaseEvent, completion: (() -> Void)? = nil) {
+    func put(event: BaseEvent, isRetry: Bool = false, completion: (() -> Void)? = nil) {
         guard let storage = self.storage else { return }
         event.attempts += 1
         do {
             try storage.write(key: StorageKey.EVENTS, value: event)
-            _eventCount.withLock { $0 += 1 }
-            if eventCount >= getFlushCount() {
-                flush()
+            let shouldFlush = _eventCount.withLock { count in
+                count += 1
+                return count >= getFlushCount()
+            }
+            if shouldFlush {
+                if isRetry {
+                    // The current chain handles retry batches; requeues must not start a new one.
+                    eventCount = 0
+                    storage.rollover()
+                } else {
+                    flush()
+                }
             }
             completion?()
         } catch {
@@ -69,29 +88,42 @@ public class EventPipeline {
         }
     }
 
-    func flush(automatic: Bool = false, completion: (() -> Void)? = nil) {
+    func flush(completion: (() -> Void)? = nil) {
+        guard prepareFlush() else { return }
+        uploadsQueue.async { [self] in
+            if let completion {
+                flushCompletions.append(completion)
+            }
+            if uploadState == .expired {
+                uploadState = .expiredWithPendingFlush
+            }
+            sendNextEventFile()
+        }
+    }
+
+    func flushOnTimer() {
+        dispatchPrecondition(condition: .onQueue(uploadsQueue))
+        // Preserve the threshold for fresh extension events while the expired request finishes.
+        guard uploadState != .expired, uploadState != .expiredWithPendingFlush else { return }
+        if prepareFlush() { sendNextEventFile() }
+    }
+
+    private func prepareFlush() -> Bool {
         if configuration.offline == true {
             logger?.debug(message: "Skipping flush while offline.")
-            return
+            return false
         }
 
         logger?.log(message: "Start flushing \(eventCount) events")
         eventCount = 0
-        guard let storage = self.storage else { return }
+        guard let storage else { return false }
         storage.rollover()
-
-        uploadsQueue.async { [self] in
-            guard !automatic || flushTimer?.state == .resumed else { return }
-            if let completion {
-                flushCompletions.append(completion)
-            }
-            self.sendNextEventFile()
-        }
+        return true
     }
 
     private func sendNextEventFile(failures: Int = 0, skipFiles: Set<URL> = []) {
         autoreleasepool {
-            guard !uploadInProgress else {
+            guard uploadState == .idle else {
                 logger?.log(message: "Existing upload in progress, skipping...")
                 return
             }
@@ -141,16 +173,17 @@ public class EventPipeline {
 
             // Expiration and response handling share uploadsQueue. End the assertion on
             // expiry, but keep the request alive so a late success can acknowledge its batch.
-            var expired = false
+            uploadState = .uploading
             var finished = false
             var backgroundTaskCompletion: BackgroundTaskCompletionCallback?
             backgroundTaskCompletion = vendorSystem.beginBackgroundTask(label: "amplitude.upload") {
                 self.uploadsQueue.async {
                     guard !finished else { return }
-                    expired = true
-                    if !self.vendorSystem.isRunningInAppExtension {
+                    if self.vendorSystem.isRunningInAppExtension {
+                        if self.uploadState == .uploading { self.uploadState = .expired }
+                    } else if self.isInForeground != true {
                         self.uploadsExpired = true
-                        self.flushTimer?.suspend()
+                        self.flushTimer?.stop()
                     }
                     backgroundTaskCompletion?()
                     backgroundTaskCompletion = nil
@@ -159,7 +192,6 @@ public class EventPipeline {
             if configuration.enableDiagnostics {
                 uploadStateStorage?.uploadRequestPending = true
             }
-            uploadInProgress = true
             _ = httpClient.upload(events: eventsString) { [self] result in
                 if configuration.enableDiagnostics {
                     uploadStateStorage?.uploadRequestPending = false
@@ -189,32 +221,35 @@ public class EventPipeline {
                 self.uploadsQueue.async { [weak self] in
                     guard let self else { return }
                     finished = true
-                    if expired {
-                        self.uploadInProgress = false
-                        if self.vendorSystem.isRunningInAppExtension {
-                            // Extensions have no foreground reset signal. Stop this chain only.
-                            self.completeFlush()
-                        } else {
-                            self.sendNextEventFile()
-                        }
-                    } else if failures > self.configuration.flushMaxRetries {
-                        self.uploadInProgress = false
+                    if self.uploadsExpired || self.uploadState == .expired {
+                        self.uploadState = .idle
+                        self.completeFlush()
+                        return
+                    }
+                    if self.uploadState == .expiredWithPendingFlush {
+                        self.uploadState = .idle
+                        self.sendNextEventFile()
+                        return
+                    }
+
+                    // Foreground responses retain the ordinary retry limit and backoff, even after expiration.
+                    guard failures <= self.configuration.flushMaxRetries else {
+                        self.uploadState = .idle
                         self.configuration.offline = true
                         self.logger?.error(message: "Request failed more than \(self.configuration.flushMaxRetries) times, marking offline")
+                        return
+                    }
+                    let nextFileBlock: () -> Void = { [weak self] in
+                        guard let self else { return }
+                        self.uploadState = .idle
+                        self.sendNextEventFile(failures: failures, skipFiles: skipFiles)
+                    }
+                    if failures == 0 || handled {
+                        nextFileBlock()
                     } else {
-                        let nextFileBlock: () -> Void = { [weak self] in
-                            guard let self else { return }
-                            self.uploadInProgress = false
-                            self.sendNextEventFile(failures: failures, skipFiles: skipFiles)
-                        }
-
-                        if failures == 0 || handled {
-                            nextFileBlock()
-                        } else {
-                            let sendingInterval = min(MAX_RETRY_INTERVAL, pow(2, Double(failures - 1)))
-                            self.uploadsQueue.asyncAfter(deadline: .now() + sendingInterval, execute: nextFileBlock)
-                            self.logger?.error(message: "Request failed \(failures) times, send next event file in \(sendingInterval) seconds")
-                        }
+                        let sendingInterval = min(MAX_RETRY_INTERVAL, pow(2, Double(failures - 1)))
+                        self.uploadsQueue.asyncAfter(deadline: .now() + sendingInterval, execute: nextFileBlock)
+                        self.logger?.error(message: "Request failed \(failures) times, send next event file in \(sendingInterval) seconds")
                     }
                 }
             }
@@ -232,16 +267,9 @@ public class EventPipeline {
         dispatchCallbacks { completions.forEach { $0() } }
     }
 
-    func start() {
-        uploadsQueue.async { [weak self] in
-            self?.uploadsExpired = false
-            self?.flushTimer?.resume()
-        }
-    }
-
     func stop() {
         uploadsQueue.async { [weak self] in
-            self?.flushTimer?.suspend()
+            self?.flushTimer?.stop()
         }
     }
 
@@ -253,21 +281,24 @@ public class EventPipeline {
         let count = configuration.flushQueueSize
         return count != 0 ? count : 1
     }
-}
 
-extension EventPipeline: ApplicationLifecycleObserver {
-    func applicationDidBecomeActive(launch: Bool) {
-        start()
-    }
+    func applicationDidBecomeActive(launch: Bool) { enterForeground() }
+    func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool) { enterForeground() }
 
-    func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool) {
-        start()
+    private func enterForeground() {
+        uploadsQueue.async { [weak self] in
+            self?.isInForeground = true
+            self?.uploadsExpired = false
+            self?.flushTimer?.start()
+        }
     }
 
     func applicationDidEnterBackground(timestamp: Int64) {
+        uploadsQueue.async { [weak self] in
+            self?.isInForeground = false
 #if !os(macOS) && !targetEnvironment(macCatalyst)
-        // Desktop apps can keep uploading while inactive, hidden, or minimized.
-        stop()
+            self?.flushTimer?.stop()
 #endif
+        }
     }
 }
