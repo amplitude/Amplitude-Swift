@@ -262,6 +262,10 @@ final class AmplitudeIOSTests: XCTestCase {
             events.append("launch")
         }
 
+        func applicationDidBecomeActive(launch: Bool) {
+            events.append(launch ? "initial activation" : "activation")
+        }
+
         func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool) {
             events.append("foreground")
             self.fromBackground = fromBackground
@@ -288,6 +292,18 @@ final class AmplitudeIOSTests: XCTestCase {
 
         XCTAssertEqual(observer.events, ["launch", "foreground", "background"])
         XCTAssertEqual(observer.fromBackground, true)
+    }
+
+    func testRepeatedStartWhileActiveDeliversInitialActivationOnce() {
+        IOSVendorSystem.overrideApplicationState(.active)
+        let lifecycle = VendorSystem.current.makeApplicationLifecycle()
+        let observer = LifecycleObserver()
+        lifecycle.addObserver(observer)
+
+        lifecycle.start()
+        lifecycle.start()
+
+        XCTAssertEqual(observer.events, ["initial activation"])
     }
 
     func testLifecycleDoesNotRetainObservers() {

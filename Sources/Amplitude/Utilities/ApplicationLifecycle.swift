@@ -26,11 +26,13 @@ internal class ApplicationLifecycle: NSObject {
     }
 
     /// Called once consumers are registered, before the remaining SDK plugins are set up.
-    func start() {
+    @discardableResult
+    func start() -> Bool {
         lock.withLock {
-            guard !isObserving else { return }
+            guard !isObserving else { return false }
             startObserving()
             isObserving = true
+            return true
         }
     }
 

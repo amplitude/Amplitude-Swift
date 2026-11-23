@@ -8,8 +8,9 @@ class IOSLifecycleMonitor: ApplicationLifecycle {
     private var emitLaunchOnActivation = false
     private var emitForegroundOnActivation = false
 
-    override func start() {
-        super.start()
+    @discardableResult
+    override func start() -> Bool {
+        guard super.start() else { return false }
         switch IOSVendorSystem.applicationState {
         case .active:
             becomeActive(launch: true)
@@ -19,6 +20,7 @@ class IOSLifecycleMonitor: ApplicationLifecycle {
         default:
             break
         }
+        return true
     }
 
     override func startObserving() {
