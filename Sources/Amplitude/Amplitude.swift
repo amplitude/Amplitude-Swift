@@ -9,6 +9,7 @@ import Foundation
 public class Amplitude {
 
     public private(set) var configuration: Configuration
+    let appLifecycle = VendorSystem.current.makeApplicationLifecycle()
     private var inForeground = false
 
     public var sessionId: Int64 {
@@ -203,10 +204,7 @@ public class Amplitude {
            VendorSystem.current.networkConnectivityCheckingEnabled {
             _ = add(plugin: NetworkConnectivityCheckerPlugin())
         }
-        // required plugin for specific platform, only has lifecyclePlugin now
-        if let requiredPlugin = VendorSystem.current.requiredPlugin {
-            _ = add(plugin: requiredPlugin)
-        }
+        _ = add(plugin: ApplicationLifecyclePlugin())
         _ = add(plugin: contextPlugin)
         _ = add(plugin: AnalyticsConnectorPlugin())
         _ = add(plugin: AnalyticsConnectorIdentityPlugin())

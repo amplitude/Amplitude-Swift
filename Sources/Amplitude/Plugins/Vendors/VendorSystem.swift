@@ -44,8 +44,8 @@ internal class VendorSystem {
         #endif
     }()
 
-    var requiredPlugin: Plugin? {
-        return nil
+    func makeApplicationLifecycle() -> ApplicationLifecycle {
+        return ApplicationLifecycle()
     }
 
     var networkConnectivityCheckingEnabled: Bool {
