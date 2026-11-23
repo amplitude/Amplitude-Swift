@@ -99,13 +99,13 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [], httpClient: RemoteConfigMockServer()))
 
-        var iosLifecycleMonitor: IOSLifecycleMonitor?
+        var lifecyclePlugin: ApplicationLifecyclePlugin?
         amplitude.apply { plugin in
-            if let monitor = plugin as? IOSLifecycleMonitor {
-                iosLifecycleMonitor = monitor
+            if let monitor = plugin as? ApplicationLifecyclePlugin {
+                lifecyclePlugin = monitor
             }
         }
-        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
+        XCTAssertNotNil(lifecyclePlugin, "Application lifecycle plugin not installed")
 
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.screenViews), "Screen views should be off by default")
 
@@ -131,14 +131,14 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.screenViews], httpClient: RemoteConfigMockServer()))
 
-        var iosLifecycleMonitor: IOSLifecycleMonitor?
+        var lifecyclePlugin: ApplicationLifecyclePlugin?
         amplitude.apply { plugin in
-            if let monitor = plugin as? IOSLifecycleMonitor {
-                iosLifecycleMonitor = monitor
+            if let monitor = plugin as? ApplicationLifecyclePlugin {
+                lifecyclePlugin = monitor
             }
         }
 
-        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
+        XCTAssertNotNil(lifecyclePlugin, "Application lifecycle plugin not installed")
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.screenViews), "Screen views should be on by default")
 
@@ -164,14 +164,14 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [], httpClient: RemoteConfigMockServer()))
 
-        var iosLifecycleMonitor: IOSLifecycleMonitor?
+        var lifecyclePlugin: ApplicationLifecyclePlugin?
         amplitude.apply { plugin in
-            if let monitor = plugin as? IOSLifecycleMonitor {
-                iosLifecycleMonitor = monitor
+            if let monitor = plugin as? ApplicationLifecyclePlugin {
+                lifecyclePlugin = monitor
             }
         }
 
-        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
+        XCTAssertNotNil(lifecyclePlugin, "Application lifecycle plugin not installed")
 
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.elementInteractions), "Element interactions should be off by default")
 
@@ -197,14 +197,14 @@ class AutocaptureRemoteConfigTests: XCTestCase {
 
         let amplitude = Amplitude(configuration: Configuration(apiKey: apiKey, instanceName: uniqueInstanceName(), autocapture: [.elementInteractions], httpClient: RemoteConfigMockServer()))
 
-        var iosLifecycleMonitor: IOSLifecycleMonitor?
+        var lifecyclePlugin: ApplicationLifecyclePlugin?
         amplitude.apply { plugin in
-            if let monitor = plugin as? IOSLifecycleMonitor {
-                iosLifecycleMonitor = monitor
+            if let monitor = plugin as? ApplicationLifecyclePlugin {
+                lifecyclePlugin = monitor
             }
         }
 
-        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
+        XCTAssertNotNil(lifecyclePlugin, "Application lifecycle plugin not installed")
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.elementInteractions), "Element interactions should be on by default")
 
@@ -246,14 +246,14 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                                    interactionsOptions: interactionsOptions, httpClient: RemoteConfigMockServer())
         let amplitude = Amplitude(configuration: config)
 
-        var iosLifecycleMonitor: IOSLifecycleMonitor?
+        var lifecyclePlugin: ApplicationLifecyclePlugin?
         amplitude.apply { plugin in
-            if let monitor = plugin as? IOSLifecycleMonitor {
-                iosLifecycleMonitor = monitor
+            if let monitor = plugin as? ApplicationLifecyclePlugin {
+                lifecyclePlugin = monitor
             }
         }
 
-        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
+        XCTAssertNotNil(lifecyclePlugin, "Application lifecycle plugin not installed")
 
         XCTAssertFalse(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be off by default")
         XCTAssertFalse(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be off by default")
@@ -293,14 +293,14 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                                    interactionsOptions: interactionsOptions, httpClient: RemoteConfigMockServer())
         let amplitude = Amplitude(configuration: config)
 
-        var iosLifecycleMonitor: IOSLifecycleMonitor?
+        var lifecyclePlugin: ApplicationLifecyclePlugin?
         amplitude.apply { plugin in
-            if let monitor = plugin as? IOSLifecycleMonitor {
-                iosLifecycleMonitor = monitor
+            if let monitor = plugin as? ApplicationLifecyclePlugin {
+                lifecyclePlugin = monitor
             }
         }
 
-        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
+        XCTAssertNotNil(lifecyclePlugin, "Application lifecycle plugin not installed")
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be on by default")
         XCTAssertTrue(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be on by default")
@@ -345,14 +345,14 @@ class AutocaptureRemoteConfigTests: XCTestCase {
                                    interactionsOptions: interactionsOptions, httpClient: RemoteConfigMockServer())
         let amplitude = Amplitude(configuration: config)
 
-        var iosLifecycleMonitor: IOSLifecycleMonitor?
+        var lifecyclePlugin: ApplicationLifecyclePlugin?
         amplitude.apply { plugin in
-            if let monitor = plugin as? IOSLifecycleMonitor {
-                iosLifecycleMonitor = monitor
+            if let monitor = plugin as? ApplicationLifecyclePlugin {
+                lifecyclePlugin = monitor
             }
         }
 
-        XCTAssertNotNil(iosLifecycleMonitor, "iOS lifecycle monitor not installed")
+        XCTAssertNotNil(lifecyclePlugin, "Application lifecycle plugin not installed")
 
         XCTAssertTrue(amplitude.autocaptureManager.isEnabled(.frustrationInteractions), "Frustration interactions should be on by default")
         XCTAssertTrue(amplitude.autocaptureManager.rageClickEnabled, "Rage click should be on by default")

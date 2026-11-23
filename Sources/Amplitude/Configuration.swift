@@ -66,8 +66,19 @@ public class Configuration {
             optOutChanged?(optOut)
         }
     }
-    public let storageProvider: any Storage
-    public let identifyStorageProvider: any Storage
+    private let eventStore: ConfiguredStorage
+    private let identifyStore: ConfiguredStorage
+
+    /// To access migrated data before SDK startup, call ``Storage/migrateIfNeeded()`` on the provider first.
+    public final var storageProvider: any Storage {
+        eventStore.resolve(in: self)
+    }
+
+    /// The default identify store follows the same lifecycle as ``storageProvider``.
+    public final var identifyStorageProvider: any Storage {
+        identifyStore.resolve(in: self)
+    }
+
     public var logLevel: LogLevelEnum
     public var loggerProvider: any Logger
     public var minIdLength: Int?
@@ -75,6 +86,7 @@ public class Configuration {
     public var callback: EventCallback?
     public var flushMaxRetries: Int
     public var useBatch: Bool
+    /// Each Amplitude instance reads this value when it is constructed.
     public var serverZone: ServerZone
     public var serverUrl: String?
 
@@ -101,7 +113,12 @@ public class Configuration {
     }
     public internal(set) var autocapture: AutocaptureOptions
     public internal(set) var networkTrackingOptions: NetworkTrackingOptions
-    public var offline: Bool?
+    private let offlineLock = NSLock()
+    private var _offline: Bool?
+    public var offline: Bool? {
+        get { offlineLock.withLock { _offline } }
+        set { offlineLock.withLock { _offline = newValue } }
+    }
     internal let diagonostics: Diagnostics
     public var maxQueuedEventCount = -1
     var optOutChanged: ((Bool) -> Void)?
@@ -113,9 +130,6 @@ public class Configuration {
     /// When using the SDK's default endpoints, request bodies are always compressed
     /// regardless of this setting.
     public var enableRequestBodyCompression: Bool
-
-    let remoteConfigClient: RemoteConfigClient
-    let diagnosticsClient: CoreDiagnostics
 
     @available(*, deprecated, message: "Please use the `autocapture` parameter instead.")
     public convenience init(
@@ -228,22 +242,12 @@ public class Configuration {
         self.loggerProvider = loggerProvider
         self.serverZone = serverZone
         self.enableDiagnostics = enableDiagnostics
-        self.remoteConfigClient = RemoteConfigClient(apiKey: self.apiKey,
-                                                     serverZone: self.serverZone,
-                                                     instanceName: self.instanceName,
-                                                     logger: self.loggerProvider,
-                                                     httpClient: httpClient)
-        self.diagnosticsClient = DiagnosticsClient(apiKey: self.apiKey,
-                                                   serverZone: self.serverZone,
-                                                   instanceName: self.instanceName,
-                                                   logger: self.loggerProvider,
-                                                   enabled: self.enableDiagnostics,
-                                                   remoteConfigClient: self.remoteConfigClient,
-                                                   httpClient: httpClient ?? URLSessionHttpClient())
-        self.storageProvider = storageProvider
-        ?? PersistentStorage(storagePrefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
-        self.identifyStorageProvider = identifyStorageProvider
-        ?? PersistentStorage(storagePrefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName), logger: self.loggerProvider, diagonostics: self.diagonostics, diagnosticsClient: self.diagnosticsClient)
+        self.eventStore = ConfiguredStorage(storageProvider,
+                                            prefix: PersistentStorage.getEventStoragePrefix(apiKey, normalizedInstanceName),
+                                            logger: loggerProvider)
+        self.identifyStore = ConfiguredStorage(identifyStorageProvider,
+                                               prefix: PersistentStorage.getIdentifyStoragePrefix(apiKey, normalizedInstanceName),
+                                               logger: loggerProvider)
         self.minIdLength = minIdLength
         self.partnerId = partnerId
         self.callback = callback
@@ -262,7 +266,7 @@ public class Configuration {
         self.migrateLegacyData = migrateLegacyData
         // Logging is OFF by default
         self.loggerProvider.logLevel = logLevel.rawValue
-        self.offline = offline
+        self._offline = offline
         self.networkTrackingOptions = networkTrackingOptions
         self.enableAutoCaptureRemoteConfig = enableAutoCaptureRemoteConfig
         self.interactionsOptions = interactionsOptions
@@ -291,5 +295,30 @@ extension Configuration: DefaultTrackingOptionsDelegate {
     @available(*, deprecated)
     func didChangeOptions(options: DefaultTrackingOptions) {
         autocapture = options.autocaptureOptions
+    }
+}
+
+private struct ConfiguredStorage {
+    private let provider: AtomicRef<(any Storage)?>
+    private let prefix: String
+    private let logger: any Logger
+
+    init(_ provider: (any Storage)?, prefix: String, logger: any Logger) {
+        self.provider = AtomicRef(wrappedValue: provider)
+        self.prefix = prefix
+        self.logger = logger
+    }
+
+    func resolve(in configuration: Configuration) -> any Storage {
+        provider.withLock { storage in
+            if let storage {
+                return storage
+            }
+            let persistentStorage = PersistentStorage(storagePrefix: prefix, logger: logger,
+                                                      diagonostics: configuration.diagonostics,
+                                                      diagnosticsClient: nil)
+            storage = persistentStorage
+            return persistentStorage
+        }
     }
 }

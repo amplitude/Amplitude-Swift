@@ -105,6 +105,12 @@ class FakeInMemoryStorage: Storage {
     var index = URL(string: "0")!
     let storageQueue = DispatchQueue(label: "Amplitude.FakeInMemoryStorage")
 
+    private(set) var migrationCalls = 0
+
+    func migrateIfNeeded() {
+        migrationCalls += 1
+    }
+
     func write(key: StorageKey, value: Any?) throws {
         storageQueue.sync {
             switch key {
@@ -286,8 +292,9 @@ class FakePersistentStorage: PersistentStorage {
     // Array to store the method invocation history for testing verification purpose
     var haveBeenCalledWith = [String]()
 
-    override func removeEventCallback(insertId: String) {
-        haveBeenCalledWith.append("removeEventCallback(insertId: \(insertId))")
+    override func takeEventCallback(insertId: String) -> EventCallback? {
+        haveBeenCalledWith.append("takeEventCallback(insertId: \(insertId))")
+        return nil
     }
 
     override func remove(eventBlock: EventBlock) {

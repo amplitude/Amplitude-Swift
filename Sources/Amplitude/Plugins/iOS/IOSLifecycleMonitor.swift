@@ -1,26 +1,34 @@
-//
-//  IOSLifecycleMonitor.swift
-//
-//
-//  Created by Hao Yu on 11/15/22.
-//
-
 #if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
 
-import AmplitudeCore
 import Foundation
-import SwiftUI
+import UIKit
 
-class IOSLifecycleMonitor: UtilityPlugin {
+/// Platform notifications and cold-start detection are independent of analytics processing.
+class IOSLifecycleMonitor: ApplicationLifecycle {
+    private enum ActivationFallback {
+        case deferredStartup
+        case foreground
+    }
 
-    private var utils: DefaultEventUtils?
-    private var previousAppVersion: DefaultEventUtils.AppVersion?
-    private var sendAppInstalledOnDidBecomeActive = false
-    private var sendAppOpenedOnDidBecomeActive = false
+    private var activationFallback: ActivationFallback?
 
-    override init() {
-        super.init()
+    @discardableResult
+    override func start() -> Bool {
+        guard super.start() else { return false }
+        switch IOSVendorSystem.applicationState {
+        case .active:
+            becomeActive(launch: true)
+        case .inactive:
+            activationFallback = .deferredStartup
+        case .background:
+            activationFallback = .foreground
+        default:
+            break
+        }
+        return true
+    }
 
+    override func startObserving() {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(applicationDidFinishLaunchingNotification(notification:)),
                                                name: UIApplication.didFinishLaunchingNotification,
@@ -39,148 +47,38 @@ class IOSLifecycleMonitor: UtilityPlugin {
                                                object: nil)
     }
 
-    public override func setup(amplitude: Amplitude) {
-        super.setup(amplitude: amplitude)
-        let utils = DefaultEventUtils(amplitude: amplitude)
-        self.utils = utils
-
-        let appState = IOSVendorSystem.applicationState
-        if appState != .active {
-            // Snapshot the previous version so lifecycle notifications can enqueue events without reading storage.
-            previousAppVersion = utils.storedAppVersion(in: amplitude.storage)
+    @objc
+    private func applicationDidFinishLaunchingNotification(notification: Notification) {
+        // A background launch or an app without scenes may need activation as its foreground signal.
+        if IOSVendorSystem.applicationState == .background || !IOSVendorSystem.usesScenes {
+            activationFallback = .foreground
         }
-        if appState == .active {
-            // this is added in init - launch on trackingQueue to allow identity to be set
-            // prior to firing the event
-            amplitude.trackingQueue.async { [self] in
-                amplitude.onEnterForeground(timestamp: currentTimestamp)
-                utils.trackAppUpdatedInstalledEvent()
-                utils.trackAppOpenedEvent()
-            }
-        // If app state is inactive, it won't receive didFinishLaunching and willEnterForeground
-        // notifications anymore, we need to send install and opened event when become active
-        } else if appState == .inactive {
-            sendAppInstalledOnDidBecomeActive = true
-            sendAppOpenedOnDidBecomeActive = true
-        } else if appState == .background {
-            // A background launch may have already delivered didFinishLaunching.
-            sendAppInstalledOnDidBecomeActive = true
-            sendAppOpenedOnDidBecomeActive = true
-        }
-
-        updateAutocaptureSetup()
-
-        // Listen for autocapture config changes from the manager
-        amplitude.autocaptureManager.onChange { [weak self] _ in
-            self?.updateAutocaptureSetup()
-        }
+        didFinishLaunching()
     }
 
-    private func updateAutocaptureSetup() {
-        guard let amplitude else { return }
-        let manager = amplitude.autocaptureManager
-
-        if manager.isEnabled(.screenViews) {
-            UIKitScreenViews.register(amplitude)
-        } else {
-            UIKitScreenViews.unregister(amplitude)
-        }
-
-        // Register UIKitElementInteractions if either element interactions or frustration interactions is enabled
-        let needsElementInteractions = manager.isEnabled(.elementInteractions) || manager.isEnabled(.frustrationInteractions)
-        if needsElementInteractions {
-            UIKitElementInteractions.register(amplitude)
-        } else {
-            UIKitElementInteractions.unregister(amplitude)
+    @objc
+    private func applicationDidBecomeActive(notification: Notification) {
+        let fallback = activationFallback
+        activationFallback = nil
+        switch fallback {
+        case .deferredStartup:
+            becomeActive(launch: true)
+        case .foreground:
+            enterForeground()
+        case nil:
+            break
         }
     }
 
     @objc
-    func applicationDidFinishLaunchingNotification(notification: Notification) {
-        if IOSVendorSystem.applicationState == .background {
-            // Preserve the previous version until the app enters the foreground.
-            sendAppInstalledOnDidBecomeActive = true
-        } else {
-            trackPendingAppVersion()
-        }
-
-        // Pre SceneDelegate apps wil not fire a willEnterForeground notification on app launch.
-        // Instead, use the initial applicationDidBecomeActive
-        if !IOSVendorSystem.usesScenes {
-            sendAppOpenedOnDidBecomeActive = true
-        }
+    private func applicationWillEnterForeground(notification: Notification) {
+        activationFallback = nil
+        enterForeground(fromBackground: IOSVendorSystem.applicationState == .background)
     }
 
     @objc
-    func applicationDidBecomeActive(notification: Notification) {
-        guard sendAppInstalledOnDidBecomeActive || sendAppOpenedOnDidBecomeActive else {
-            return
-        }
-        let sendInstall = sendAppInstalledOnDidBecomeActive
-        let sendOpened = sendAppOpenedOnDidBecomeActive
-        sendAppInstalledOnDidBecomeActive = false
-        sendAppOpenedOnDidBecomeActive = false
-
-        amplitude?.onEnterForeground(timestamp: currentTimestamp)
-        if sendInstall {
-            trackPendingAppVersion()
-        }
-        if sendOpened {
-            utils?.trackAppOpenedEvent()
-        }
-    }
-
-    @objc
-    func applicationWillEnterForeground(notification: Notification) {
-        let fromBackground: Bool
-        switch IOSVendorSystem.applicationState {
-        case nil, .active, .inactive:
-            fromBackground = false
-        case .background:
-            fromBackground = true
-        @unknown default:
-            fromBackground = false
-        }
-
-        let sendInstall = sendAppInstalledOnDidBecomeActive
-        sendAppInstalledOnDidBecomeActive = false
-        sendAppOpenedOnDidBecomeActive = false
-        amplitude?.onEnterForeground(timestamp: currentTimestamp)
-        if sendInstall {
-            trackPendingAppVersion()
-        }
-        utils?.trackAppOpenedEvent(fromBackground: fromBackground)
-    }
-
-    @objc
-    func applicationDidEnterBackground(notification: Notification) {
-        guard let amplitude = amplitude else {
-            return
-        }
-        amplitude.onExitForeground(timestamp: currentTimestamp)
-        if amplitude.autocaptureManager.isEnabled(.appLifecycles) {
-            amplitude.track(eventType: Constants.AMP_APPLICATION_BACKGROUNDED_EVENT)
-        }
-    }
-
-    private func trackPendingAppVersion() {
-        guard let previous = previousAppVersion, let amplitude = amplitude else { return }
-        previousAppVersion = nil
-        // Enqueue events in callback order without waiting on UserDefaults writes.
-        utils?.trackAppUpdatedInstalledEvent(previous: previous, persistOn: amplitude.trackingQueue)
-    }
-
-    private var currentTimestamp: Int64 {
-        return Int64(NSDate().timeIntervalSince1970 * 1000)
-    }
-
-    override func teardown() {
-        super.teardown()
-
-        if let amplitude {
-            UIKitScreenViews.unregister(amplitude)
-            UIKitElementInteractions.unregister(amplitude)
-        }
+    private func applicationDidEnterBackground(notification: Notification) {
+        enterBackground()
     }
 }
 

@@ -28,32 +28,44 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
     let userDefaults: UserDefaults?
     let fileManager: FileManager
     private var outputStream: OutputFileStream?
-    // Store event.callback in memory as it cannot be ser/deser in files.
-    private var eventCallbackMap: [String: EventCallback]
+    // Store event.callback in memory as it cannot be ser/deser in files. Access only on syncQueue.
+    private var eventCallbackMap = [String: EventCallback]()
+    private var didExcludeStorageFromBackup = false
+    private var didMigrateEventFiles = false
     private var appPath: String!
     let syncQueue = DispatchQueueHolder.storageQueue
     let storageVersionKey: String
     let logger: (any Logger)?
     let diagonostics: Diagnostics
-    let diagonosticsClient: CoreDiagnostics
-    private var didExcludeStorageFromBackup = false
+    @AtomicRef private(set) var diagnosticsClient: CoreDiagnostics?
 
-    init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics, diagnosticsClient: CoreDiagnostics) {
+    init(storagePrefix: String, logger: (any Logger)?, diagonostics: Diagnostics, diagnosticsClient: CoreDiagnostics?) {
         self.storagePrefix = storagePrefix == PersistentStorage.DEFAULT_STORAGE_PREFIX || storagePrefix.starts(with: "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-")
             ? storagePrefix
             : "\(PersistentStorage.DEFAULT_STORAGE_PREFIX)-\(storagePrefix)"
         self.userDefaults = UserDefaults(suiteName: "\(PersistentStorage.AMP_STORAGE_PREFIX).\(self.storagePrefix)")
         self.fileManager = FileManager.default
-        self.eventCallbackMap = [String: EventCallback]()
         self.storageVersionKey = "\(PersistentStorage.STORAGE_VERSION).\(self.storagePrefix)"
         self.logger = logger
         self.diagonostics = diagonostics
-        self.diagonosticsClient = diagnosticsClient
+        self.diagnosticsClient = diagnosticsClient
         // Make sure Amplitude data is sandboxed per app
         self.appPath = Self.getAppPath(sandboxed: isStorageSandboxed())
+    }
 
-        migrateLegacyStorageDirectories()
-        handleV1Files()
+    func setDiagnosticsClientIfNeeded(_ client: CoreDiagnostics) {
+        _diagnosticsClient.withLock { current in
+            if current == nil { current = client }
+        }
+    }
+
+    func migrateIfNeeded() {
+        syncQueue.sync {
+            guard !didMigrateEventFiles else { return }
+            migrateLegacyStorageDirectories()
+            handleV1Files()
+            didMigrateEventFiles = true
+        }
     }
 
     func write(key: StorageKey, value: Any?) throws {
@@ -102,8 +114,8 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
                 return readV1File(content: content!)
             }
         } catch {
-            diagonosticsClient.increment(name: "analytics.events.file.read.failed")
-            diagonosticsClient.recordEvent(name: "analytics.events.file.read.failed", properties: [
+            diagnosticsClient?.increment(name: "analytics.events.file.read.failed")
+            diagnosticsClient?.recordEvent(name: "analytics.events.file.read.failed", properties: [
                 "file": eventBlock.lastPathComponent,
                 "error": error.localizedDescription
             ])
@@ -126,11 +138,11 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
                 try fileManager.moveItem(at: file, to: target)
                 logger?.error(message: "Quarantined unreadable events file: \(file.lastPathComponent) -> \(PersistentStorage.QUARANTINE_DIR_NAME)/\(target.lastPathComponent)")
                 if let contents = try? fileManager.contentsOfDirectory(atPath: quarantineDir.path) {
-                    diagonosticsClient.recordHistogram(name: "analytics.events.file.quarantined.count", value: Double(contents.count))
+                    diagnosticsClient?.recordHistogram(name: "analytics.events.file.quarantined.count", value: Double(contents.count))
                 }
             } catch {
-                diagonosticsClient.increment(name: "analytics.events.file.quarantine.failed")
-                diagonosticsClient.recordEvent(name: "analytics.events.file.quarantine.failed", properties: [
+                diagnosticsClient?.increment(name: "analytics.events.file.quarantine.failed")
+                diagnosticsClient?.recordEvent(name: "analytics.events.file.quarantine.failed", properties: [
                     "file": file.lastPathComponent,
                     "error": error.localizedDescription
                 ])
@@ -198,7 +210,7 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
             eventPipeline: eventPipeline,
             eventBlock: eventBlock,
             eventsString: eventsString,
-            diagnosticsClient: diagonosticsClient
+            diagnosticsClient: diagnosticsClient ?? eventPipeline.diagnosticsClient
         )
     }
 
@@ -236,11 +248,12 @@ class PersistentStorage: Storage, UploadRequestStateStorage {
     }
 
     func getEventCallback(insertId: String) -> EventCallback? {
-        return eventCallbackMap[insertId]
+        syncQueue.sync { eventCallbackMap[insertId] }
     }
 
-    func removeEventCallback(insertId: String) {
-        eventCallbackMap.removeValue(forKey: insertId)
+    @discardableResult
+    func takeEventCallback(insertId: String) -> EventCallback? {
+        syncQueue.sync { eventCallbackMap.removeValue(forKey: insertId) }
     }
 
     func isBasicType(value: Any?) -> Bool {
@@ -300,7 +313,7 @@ extension PersistentStorage {
             includingPropertiesForKeys: [],
             options: .skipsHiddenFiles
         ).filter { (file) -> Bool in
-            return file.pathExtension == PersistentStorage.TEMP_FILE_EXTENSION
+            return file.hasPrefix(PersistentStorage.STORAGE_V2_PREFIX) && file.pathExtension == PersistentStorage.TEMP_FILE_EXTENSION
         }
         if allOpenFiles != nil && allOpenFiles!.count > 0 {
             return allOpenFiles![0]
@@ -357,58 +370,56 @@ extension PersistentStorage {
     }
 
     private func migrateLegacyStorageDirectories() {
-        syncQueue.sync {
-            let legacyStorageDirectory = getLegacyEventsStorageDirectory(createDirectory: false)
-            guard fileManager.fileExists(atPath: legacyStorageDirectory.path) else {
-                return
-            }
+        let legacyStorageDirectory = getLegacyEventsStorageDirectory(createDirectory: false)
+        guard fileManager.fileExists(atPath: legacyStorageDirectory.path) else {
+            return
+        }
 
-            defer {
-                // Clean up directory if it is empty
-                let remainingLegacyFiles = try? fileManager.contentsOfDirectory(
-                    at: legacyStorageDirectory,
-                    includingPropertiesForKeys: [],
-                    options: []
-                )
-                if remainingLegacyFiles?.isEmpty == true {
-                    try? fileManager.removeItem(at: legacyStorageDirectory)
-                }
-            }
-
-            // Remove anything in legacy quarantine directory
-            let legacyQuarantineDirectory = legacyStorageDirectory
-                .appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
-            if fileManager.fileExists(atPath: legacyQuarantineDirectory.path) {
-                try? fileManager.removeItem(at: legacyQuarantineDirectory)
-            }
-
-            // Move event files
-            let legacyFiles = (try? fileManager.contentsOfDirectory(
+        defer {
+            // Clean up directory if it is empty
+            let remainingLegacyFiles = try? fileManager.contentsOfDirectory(
                 at: legacyStorageDirectory,
                 includingPropertiesForKeys: [],
-                options: .skipsHiddenFiles
-            )) ?? []
-
-            guard !legacyFiles.isEmpty else {
-                return
+                options: []
+            )
+            if remainingLegacyFiles?.isEmpty == true {
+                try? fileManager.removeItem(at: legacyStorageDirectory)
             }
+        }
 
-            let storageDirectory = getEventsStorageDirectory(createDirectory: true)
-            for legacyFile in legacyFiles {
-                var destinationFile = storageDirectory.appendingPathComponent(legacyFile.lastPathComponent)
-                if legacyFile.pathExtension == PersistentStorage.TEMP_FILE_EXTENSION {
-                    destinationFile = destinationFile.deletingPathExtension()
-                }
-                if fileManager.fileExists(atPath: destinationFile.path) {
-                    let suffix = "-\(Date().timeIntervalSince1970)-\(Int.random(in: 0..<1000))"
-                    destinationFile = destinationFile.appendFileNameSuffix(suffix: suffix)
-                }
-                do {
-                    try fileManager.moveItem(at: legacyFile, to: destinationFile)
-                } catch {
-                    diagonostics.addErrorLog(error.localizedDescription)
-                    logger?.error(message: "Unable to migrate legacy event file: \(legacyFile.path)")
-                }
+        // Remove anything in legacy quarantine directory
+        let legacyQuarantineDirectory = legacyStorageDirectory
+            .appendingPathComponent(PersistentStorage.QUARANTINE_DIR_NAME)
+        if fileManager.fileExists(atPath: legacyQuarantineDirectory.path) {
+            try? fileManager.removeItem(at: legacyQuarantineDirectory)
+        }
+
+        // Move event files
+        let legacyFiles = (try? fileManager.contentsOfDirectory(
+            at: legacyStorageDirectory,
+            includingPropertiesForKeys: [],
+            options: .skipsHiddenFiles
+        )) ?? []
+
+        guard !legacyFiles.isEmpty else {
+            return
+        }
+
+        let storageDirectory = getEventsStorageDirectory(createDirectory: true)
+        for legacyFile in legacyFiles {
+            var destinationFile = storageDirectory.appendingPathComponent(legacyFile.lastPathComponent)
+            if legacyFile.pathExtension == PersistentStorage.TEMP_FILE_EXTENSION {
+                destinationFile = destinationFile.deletingPathExtension()
+            }
+            if fileManager.fileExists(atPath: destinationFile.path) {
+                let suffix = "-\(Date().timeIntervalSince1970)-\(Int.random(in: 0..<1000))"
+                destinationFile = destinationFile.appendFileNameSuffix(suffix: suffix)
+            }
+            do {
+                try fileManager.moveItem(at: legacyFile, to: destinationFile)
+            } catch {
+                diagonostics.addErrorLog(error.localizedDescription)
+                logger?.error(message: "Unable to migrate legacy event file: \(legacyFile.path)")
             }
         }
     }
@@ -482,8 +493,8 @@ extension PersistentStorage {
         // optional chaining at outputStream?.write below silently drops every
         // new event into the void.
         if outputStream == nil {
-            diagonosticsClient.increment(name: "analytics.events.file.open.failed")
-            diagonosticsClient.recordEvent(name: "analytics.events.file.open.failed", properties: [
+            diagnosticsClient?.increment(name: "analytics.events.file.open.failed")
+            diagnosticsClient?.recordEvent(name: "analytics.events.file.open.failed", properties: [
                 "file": storeFile.lastPathComponent
             ])
             logger?.error(message: "Could not open events file for writing \(storeFile.lastPathComponent); rolling over to a fresh file.")
@@ -570,7 +581,7 @@ extension PersistentStorage {
     }
 
     private func finish(file: URL) {
-        guard let outputStream = self.outputStream else {
+        guard let outputStream else {
             return
         }
 
@@ -616,39 +627,38 @@ extension PersistentStorage {
     }
 
     private func handleV1Files() {
-        syncQueue.sync {
-            let currentStorageVersion = (userDefaults?.object(forKey: self.storageVersionKey) as? Int) ?? 0
-            if currentStorageVersion > 1 {
-                return
-            }
-            let allFiles = self.getEventFiles(includeUnfinished: true)
-            for file in allFiles {
-                do {
-                    if file.hasPrefix(PersistentStorage.STORAGE_V2_PREFIX) {
-                        logger?.debug(message: "file already migrated")
-                        return
-                    }
-                    let content = try String(contentsOf: file, encoding: .utf8)
-                    if content.hasSuffix(PersistentStorage.DELMITER) {
-                        break // already handled and in v2 format
-                    }
-
-                    let normalizedContent = "[\(content.trimmingCharacters(in: ["[", ",", "]"]))]"
-                    let events = BaseEvent.fromArrayString(jsonString: normalizedContent)
-                    if events != nil {
-                        migrateFile(file: file, events: events!)
-                    }
-                    if file.pathExtension != "" {
-                        finish(file: file)
-                    }
-                    migrateFileName(file)
-                } catch {
-                    diagonostics.addErrorLog("Error migrating file: \(file.path) for \(error.localizedDescription)")
-                    logger?.error(message: error.localizedDescription)
-                }
-            }
-            userDefaults?.setValue(2, forKey: self.storageVersionKey)
+        let currentStorageVersion = (userDefaults?.object(forKey: self.storageVersionKey) as? Int) ?? 0
+        if currentStorageVersion > 1 {
+            return
         }
+        let allFiles = self.getEventFiles(includeUnfinished: true)
+        for file in allFiles {
+            do {
+                if file.hasPrefix(PersistentStorage.STORAGE_V2_PREFIX) {
+                    logger?.debug(message: "file already migrated")
+                    continue
+                }
+                let content = try String(contentsOf: file, encoding: .utf8)
+                if content.hasSuffix(PersistentStorage.DELMITER) {
+                    migrateFileName(file)
+                    continue
+                }
+
+                let normalizedContent = "[\(content.trimmingCharacters(in: ["[", ",", "]"]))]"
+                let events = BaseEvent.fromArrayString(jsonString: normalizedContent)
+                if events != nil {
+                    migrateFile(file: file, events: events!)
+                }
+                if file.pathExtension != "" {
+                    finish(file: file)
+                }
+                migrateFileName(file)
+            } catch {
+                diagonostics.addErrorLog("Error migrating file: \(file.path) for \(error.localizedDescription)")
+                logger?.error(message: error.localizedDescription)
+            }
+        }
+        userDefaults?.setValue(2, forKey: self.storageVersionKey)
     }
 
     private func migrateFile(file: URL, events: [BaseEvent]) {
@@ -668,10 +678,9 @@ extension PersistentStorage {
     }
 
     private func migrateFileName(_ file: URL) {
-        let fileNameV2 = file.appendFileNamePrefix(prefix: PersistentStorage.STORAGE_V2_PREFIX).deletingPathExtension()
+        var fileNameV2 = file.appendFileNamePrefix(prefix: PersistentStorage.STORAGE_V2_PREFIX).deletingPathExtension()
         if fileManager.fileExists(atPath: fileNameV2.path) {
-            logger?.debug(message: "Migrate found an existing file.")
-            return
+            fileNameV2 = fileNameV2.appendFileNameSuffix(suffix: "-\(UUID().uuidString)")
         }
         do {
             try fileManager.moveItem(at: file, to: fileNameV2)

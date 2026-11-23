@@ -39,7 +39,7 @@ final class EventPipelineTests: XCTestCase {
             httpClient: RemoteConfigMockServer()
         )
         let amplitude = Amplitude(configuration: configuration)
-        httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagonostics)
+        httpClient = FakeHttpClient(configuration: configuration, diagnostics: configuration.diagonostics, serverZone: configuration.serverZone)
         pipeline = EventPipeline(amplitude: amplitude)
         pipeline.httpClient = httpClient
         pipeline.flushTimer?.suspend()
@@ -94,7 +94,7 @@ final class EventPipelineTests: XCTestCase {
         }
         for result: Result<Int, Error> in [.success(200), .failure(AnalyticsHttpClient.Exception.httpError(code: 500, data: nil))] {
             let completed = expectation(description: "response callback completed")
-            let client = ObservingHttpClient(configuration: configuration, diagnostics: configuration.diagonostics)
+            let client = ObservingHttpClient(configuration: configuration, diagnostics: configuration.diagonostics, serverZone: configuration.serverZone)
             client.onRequest = { [storage] in
                 XCTAssertTrue(storage?.uploadRequestPending == true)
             }
@@ -108,6 +108,185 @@ final class EventPipelineTests: XCTestCase {
             wait(for: [completed], timeout: 10)
             XCTAssertFalse(storage.uploadRequestPending)
         }
+    }
+
+    func testCustomClientCancellationUsesNormalRetryPolicy() throws {
+        actor CancellingClient {
+            var firstRequest = true
+            let requests: XCTestExpectation
+            init(requests: XCTestExpectation) { self.requests = requests }
+            func send(_ request: URLRequest) throws -> (Data, URLResponse) {
+                requests.fulfill()
+                if firstRequest {
+                    firstRequest = false
+                    throw URLError(.cancelled)
+                }
+                return (Data(), HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+            }
+        }
+        let requests = expectation(description: "custom cancellation is retried")
+        requests.expectedFulfillmentCount = 2
+        let client = CancellingClient(requests: requests)
+        let transport = ClosureHttpClient { request in
+            if request.httpMethod != "POST" { return try await RemoteConfigMockServer().send(request) }
+            return try await client.send(request)
+        }
+        let storage = PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
+            diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
+        defer { storage.reset() }
+        let config = Configuration(apiKey: "test", flushIntervalMillis: 3_600_000,
+            instanceName: UUID().uuidString, storageProvider: storage, autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
+            httpClient: transport)
+        config.flushMaxRetries = 1
+        let amplitude = Amplitude(configuration: config)
+        let pipeline = EventPipeline(amplitude: amplitude)
+        pipeline.stop()
+        try storage.write(key: .EVENTS, value: BaseEvent(eventType: "custom-cancellation"))
+        let flushed = expectation(description: "flush completes after retry")
+        pipeline.flush { flushed.fulfill() }
+        wait(for: [requests, flushed], timeout: 10)
+        XCTAssertFalse(config.offline == true)
+        XCTAssertFalse(storage.uploadRequestPending)
+        let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+        XCTAssertTrue(files.isEmpty)
+    }
+
+    func testResponsesAndCallbacksCompleteWhileTrackingIsSuspended() throws {
+        actor Responses {
+            var firstStatus: Int?
+            let requests: XCTestExpectation
+            init(status: Int, requests: XCTestExpectation) {
+                firstStatus = status
+                self.requests = requests
+            }
+            func send(_ request: URLRequest) -> (Data, URLResponse) {
+                let status = firstStatus ?? 200
+                firstStatus = nil
+                requests.fulfill()
+                let body = status == 400 ? #"{"events_with_invalid_fields":{"event_type":[0]}}"# : "{}"
+                return (Data(body.utf8), HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil, headerFields: nil)!)
+            }
+        }
+        for status in [200, 400, 413] {
+            let requests = expectation(description: "all batches uploaded after \(status)")
+            requests.expectedFulfillmentCount = status == 200 ? 1 : (status == 400 ? 2 : 3)
+            let responses = Responses(status: status, requests: requests)
+            let transport = ClosureHttpClient { request in
+                if request.url?.absoluteString != Constants.DEFAULT_API_HOST {
+                    return try await RemoteConfigMockServer().send(request)
+                }
+                return await responses.send(request)
+            }
+            let storage = PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
+                diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
+            defer { storage.reset() }
+            let config = Configuration(apiKey: "test", flushQueueSize: 1, flushIntervalMillis: 3_600_000,
+                instanceName: UUID().uuidString, storageProvider: storage, autocapture: [],
+                offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
+                httpClient: transport)
+            let amplitude = Amplitude(configuration: config)
+            let pipeline = EventPipeline(amplitude: amplitude)
+            pipeline.stop()
+            let key = DispatchSpecificKey<Bool>()
+            pipeline.httpClient.callbackQueue.setSpecific(key: key, value: true)
+            let globalCallbacks = expectation(description: "global callbacks off upload queue")
+            let eventCallbacks = expectation(description: "event callbacks off upload queue")
+            globalCallbacks.expectedFulfillmentCount = 2
+            eventCallbacks.expectedFulfillmentCount = 2
+            var callbackCount = 0
+            config.callback = { _, _, _ in
+                XCTAssertNil(DispatchQueue.getSpecific(key: key))
+                callbackCount += 1
+                globalCallbacks.fulfill()
+            }
+            let ids = [UUID().uuidString, UUID().uuidString]
+            for id in ids {
+                let event = BaseEvent(eventType: "response-queue")
+                event.insertId = id
+                event.callback = { _, _, _ in
+                    XCTAssertNil(DispatchQueue.getSpecific(key: key))
+                    eventCallbacks.fulfill()
+                }
+                try storage.write(key: .EVENTS, value: event)
+            }
+            amplitude.trackingQueue.sync {}
+            amplitude.trackingQueue.suspend()
+            defer { amplitude.trackingQueue.resume() }
+            let drained = expectation(description: "response processing completed without tracking")
+            pipeline.flush {
+                XCTAssertNil(DispatchQueue.getSpecific(key: key))
+                XCTAssertEqual(callbackCount, 2)
+                drained.fulfill()
+            }
+            wait(for: [requests, drained, globalCallbacks, eventCallbacks], timeout: 10)
+            XCTAssertFalse(storage.uploadRequestPending)
+            let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+            XCTAssertTrue(files.isEmpty)
+            XCTAssertEqual(callbackCount, 2)
+            for id in ids { XCTAssertNil(storage.getEventCallback(insertId: id)) }
+        }
+    }
+
+    func testBlockedEventCallbackDoesNotBlockUploadsAndFlushCompletionRunsLast() throws {
+        class ObservingClient: AnalyticsHttpClient {
+            var onResponse: (() -> Void)?
+            override func upload(events: String, completion: @escaping (Result<Int, Error>) -> Void) -> (@Sendable () -> Void)? {
+                return super.upload(events: events) { result in
+                    completion(result)
+                    self.onResponse?()
+                }
+            }
+        }
+        let transport = ClosureHttpClient { request in
+            if request.httpMethod != "POST" { return try await RemoteConfigMockServer().send(request) }
+            return (Data(), HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+        }
+        let storage = PersistentStorage(storagePrefix: UUID().uuidString, logger: nil,
+            diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
+        defer { storage.reset() }
+        let config = Configuration(apiKey: "test", flushIntervalMillis: 3_600_000,
+            instanceName: UUID().uuidString, storageProvider: storage, autocapture: [],
+            offline: NetworkConnectivityCheckerPlugin.Disabled, enableAutoCaptureRemoteConfig: false,
+            httpClient: transport)
+        let amplitude = Amplitude(configuration: config)
+        let pipeline = EventPipeline(amplitude: amplitude)
+        pipeline.stop()
+        let client = ObservingClient(configuration: config, diagnostics: config.diagonostics,
+            callbackQueue: pipeline.httpClient.callbackQueue, serverZone: amplitude.amplitudeContext.serverZone)
+        pipeline.httpClient = client
+        let responses = expectation(description: "both responses processed while callback is blocked")
+        responses.expectedFulfillmentCount = 2
+        client.onResponse = { responses.fulfill() }
+        let callbackStarted = expectation(description: "first callback started")
+        let releaseCallback = DispatchSemaphore(value: 0)
+        defer { releaseCallback.signal() }
+        var order = [String]()
+        config.callback = { event, _, _ in
+            order.append("global-\(event.eventType)")
+            if event.eventType == "first" {
+                callbackStarted.fulfill()
+                XCTAssertEqual(releaseCallback.wait(timeout: .now() + 10), .success)
+            }
+        }
+        for name in ["first", "second"] {
+            let event = BaseEvent(eventType: name)
+            event.insertId = UUID().uuidString
+            event.callback = { _, _, _ in order.append("event-\(name)") }
+            try storage.write(key: .EVENTS, value: event)
+            storage.rollover()
+        }
+        let drained = expectation(description: "flush completion follows event callbacks")
+        pipeline.flush {
+            XCTAssertEqual(order, ["global-first", "event-first", "global-second", "event-second"])
+            drained.fulfill()
+        }
+        wait(for: [callbackStarted, responses], timeout: 10)
+        XCTAssertFalse(storage.uploadRequestPending)
+        let files: [URL] = try XCTUnwrap(storage.read(key: .EVENTS))
+        XCTAssertTrue(files.isEmpty)
+        releaseCallback.signal()
+        wait(for: [drained], timeout: 10)
     }
 
     func testInit() {
@@ -158,6 +337,51 @@ final class EventPipelineTests: XCTestCase {
 
         XCTAssertEqual(pipeline.configuration.offline, true)
         XCTAssertEqual(httpClient.uploadCount, 0, "There should be no uploads when offline")
+    }
+
+    func testConstructionFailureKeepsQueuedFlushFromStartingAnotherUpload() throws {
+        class CountingClient: AnalyticsHttpClient {
+            var uploadCount = 0
+            var onUpload: (() -> Void)?
+            var onResponse: (() -> Void)?
+            override func upload(events: String, completion: @escaping (Result<Int, Error>) -> Void) -> (@Sendable () -> Void)? {
+                uploadCount += 1
+                onUpload?()
+                return super.upload(events: events) { result in
+                    completion(result)
+                    self.onResponse?()
+                }
+            }
+        }
+        configuration.serverUrl = "local host"
+        configuration.flushMaxRetries = 0
+        let amplitude = Amplitude(configuration: configuration)
+        let pipeline = EventPipeline(amplitude: amplitude)
+        pipeline.stop()
+        let client = CountingClient(configuration: configuration, diagnostics: configuration.diagonostics,
+            callbackQueue: pipeline.httpClient.callbackQueue, serverZone: amplitude.amplitudeContext.serverZone)
+        pipeline.httpClient = client
+        let failed = expectation(description: "construction failure processed")
+        client.onResponse = { failed.fulfill() }
+        client.onUpload = {
+            // Queue a second flush before the first upload queues its failure callback.
+            if client.uploadCount == 1 { pipeline.flush() }
+        }
+        try storage.write(key: .EVENTS, value: BaseEvent(eventType: "construction-failure"))
+        pipeline.flush()
+        wait(for: [failed], timeout: 10)
+        XCTAssertEqual(client.uploadCount, 1)
+        XCTAssertTrue(configuration.offline == true)
+
+        // Failure processing releases the busy state so a later flush can proceed.
+        client.onResponse = nil
+        client.onUpload = nil
+        configuration.serverUrl = Constants.DEFAULT_API_HOST
+        configuration.offline = false
+        let drained = expectation(description: "later flush completes")
+        pipeline.flush { drained.fulfill() }
+        wait(for: [drained], timeout: 10)
+        XCTAssertEqual(client.uploadCount, 2)
     }
 
     func testSimultaneousFlush() throws {
@@ -358,7 +582,7 @@ final class EventPipelineTests: XCTestCase {
             httpClient: RemoteConfigMockServer()
         )
         let spyAmplitude = Amplitude(configuration: spyConfiguration)
-        let spyHttp = FakeHttpClient(configuration: spyConfiguration, diagnostics: spyConfiguration.diagonostics)
+        let spyHttp = FakeHttpClient(configuration: spyConfiguration, diagnostics: spyConfiguration.diagonostics, serverZone: spyConfiguration.serverZone)
         let spyPipeline = EventPipeline(amplitude: spyAmplitude)
         spyPipeline.httpClient = spyHttp
         spyPipeline.flushTimer?.suspend()

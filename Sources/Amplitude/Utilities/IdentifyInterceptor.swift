@@ -16,7 +16,7 @@ public class IdentifyInterceptor {
         }
     }
 
-    private let configuration: Configuration
+    private let storage: any Storage
     private let pipeline: EventPipeline
     private let logger: (any Logger)?
     private var identifyTransferTimer: QueueTimer?
@@ -24,19 +24,14 @@ public class IdentifyInterceptor {
     private var lastIdentity: Identity?
     private let queue: DispatchQueue
 
-    private lazy var storage: any Storage = {
-        return self.configuration.identifyStorageProvider
-    }()
-
     init(
-        configuration: Configuration,
         pipeline: EventPipeline,
         queue: DispatchQueue,
         identifyBatchIntervalMillis: Int = Constants.Configuration.IDENTIFY_BATCH_INTERVAL_MILLIS
     ) {
-        self.configuration = configuration
+        self.storage = pipeline.identifyStorage
         self.pipeline = pipeline
-        self.logger = configuration.loggerProvider
+        self.logger = pipeline.logger
         if identifyBatchIntervalMillis < Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS {
             self.logger?.warn(message: "Minimum `identifyBatchIntervalMillis` is \(Constants.MIN_IDENTIFY_BATCH_INTERVAL_MILLIS).")
         }
