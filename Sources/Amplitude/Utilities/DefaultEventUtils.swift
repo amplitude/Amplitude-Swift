@@ -34,9 +34,19 @@ public class DefaultEventUtils {
     }
 
     func trackAppUpdatedInstalledEvent(previous: AppVersion, persistOn queue: DispatchQueue?) {
-        guard let amplitude = amplitude else {
-            return
+        if let event = makeAppUpdatedInstalledEvent(previous: previous, persistOn: queue) {
+            amplitude?.track(event: event)
         }
+    }
+
+    func enqueueAppUpdatedInstalledEvent(previous: AppVersion) {
+        amplitude?.enqueueLifecycleEvent { [self] in
+            makeAppUpdatedInstalledEvent(previous: previous, persistOn: nil)
+        }
+    }
+
+    private func makeAppUpdatedInstalledEvent(previous: AppVersion, persistOn queue: DispatchQueue?) -> BaseEvent? {
+        guard let amplitude else { return nil }
 
         let info = Bundle.main.infoDictionary
         let currentBuild = info?["CFBundleVersion"] as? String
@@ -62,7 +72,7 @@ public class DefaultEventUtils {
         }
 
         guard trackAppLifecycles else {
-            return
+            return nil
         }
 
         // Only send one app installed / updated event per instance name, no matter how many times we are
@@ -77,22 +87,23 @@ public class DefaultEventUtils {
         }
 
         guard shouldSendAppInstalled else {
-            return
+            return nil
         }
 
         if previousBuild == nil || previousVersion == nil {
-            amplitude.track(eventType: Constants.AMP_APPLICATION_INSTALLED_EVENT, eventProperties: [
+            return BaseEvent(eventType: Constants.AMP_APPLICATION_INSTALLED_EVENT, eventProperties: [
                 Constants.AMP_APP_BUILD_PROPERTY: currentBuild ?? "",
                 Constants.AMP_APP_VERSION_PROPERTY: currentVersion ?? "",
             ])
         } else if currentBuild != previousBuild || currentVersion != previousVersion {
-            amplitude.track(eventType: Constants.AMP_APPLICATION_UPDATED_EVENT, eventProperties: [
+            return BaseEvent(eventType: Constants.AMP_APPLICATION_UPDATED_EVENT, eventProperties: [
                 Constants.AMP_APP_BUILD_PROPERTY: currentBuild ?? "",
                 Constants.AMP_APP_VERSION_PROPERTY: currentVersion ?? "",
                 Constants.AMP_APP_PREVIOUS_BUILD_PROPERTY: previousBuild ?? "",
                 Constants.AMP_APP_PREVIOUS_VERSION_PROPERTY: previousVersion ?? "",
             ])
         }
+        return nil
     }
 
     func trackAppBackgroundedEvent() {

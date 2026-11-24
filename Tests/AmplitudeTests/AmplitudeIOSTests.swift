@@ -235,6 +235,49 @@ final class AmplitudeIOSTests: XCTestCase {
         ])
     }
 
+    func testLaunchUpdateUsesIdentityWhenTrackingRuns() throws {
+        let update = try XCTUnwrap(try launchUpdate(instanceName: #function) { amplitude in
+            amplitude.setUserId(userId: "after launch")
+        })
+        XCTAssertEqual(update.userId, "after launch")
+    }
+
+    func testLaunchUpdateRespectsOptOutWhenTrackingRuns() throws {
+        XCTAssertNil(try launchUpdate(instanceName: #function) { amplitude in
+            amplitude.configuration.optOut = true
+        })
+    }
+
+    func testLaunchUpdateRespectsAutocaptureWhenTrackingRuns() throws {
+        XCTAssertNil(try launchUpdate(instanceName: #function) { amplitude in
+            amplitude.autocaptureManager.handleRemoteConfig(["appLifecycles": false])
+        })
+    }
+
+    private func launchUpdate(instanceName: String, configure: (Amplitude) -> Void) throws -> BaseEvent? {
+        IOSVendorSystem.overrideApplicationState(.inactive)
+        IOSVendorSystem.overrideUsesScenes(false)
+        try storageMem.write(key: .APP_BUILD, value: "old-build")
+        try storageMem.write(key: .APP_VERSION, value: "old-version")
+        let configuration = lifecycleConfiguration()
+        configuration.instanceName = instanceName
+        let amplitude = Amplitude(configuration: configuration)
+        amplitude.setUserId(userId: "before launch")
+        amplitude.waitForTrackingQueue()
+
+        amplitude.trackingQueue.suspend()
+        NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+        configure(amplitude)
+        IOSVendorSystem.overrideApplicationState(.active)
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        amplitude.trackingQueue.resume()
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+
+        XCTAssertEqual(storageMem.read(key: .APP_BUILD) as String?, Bundle.main.infoDictionary?["CFBundleVersion"] as? String)
+        return storageMem.events().first { $0.eventType == Constants.AMP_APPLICATION_UPDATED_EVENT }
+    }
+
     func testDidFinishLaunching_ApplicationOpened() throws {
         IOSVendorSystem.overrideApplicationState(.inactive)
         let configuration = Configuration(

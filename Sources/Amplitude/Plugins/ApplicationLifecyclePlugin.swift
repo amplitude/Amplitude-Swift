@@ -30,15 +30,14 @@ internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifec
 
     func applicationDidFinishLaunching() {
 #if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
-        guard IOSVendorSystem.applicationState != .background else { return }
-        trackPendingAppVersion()
+        guard IOSVendorSystem.applicationState != .background, let previous = takePendingAppVersion() else { return }
+        utils?.enqueueAppUpdatedInstalledEvent(previous: previous)
 #endif
     }
 
     func applicationDidBecomeActive(launch: Bool) {
         // Startup historically defers generation, identity capture, and the session timestamp.
-        let previous = previousAppVersion
-        previousAppVersion = nil
+        let previous = takePendingAppVersion()
         amplitude?.trackingQueue.async { [self] in
             amplitude?.onEnterForeground(timestamp: Int64(Date().timeIntervalSince1970 * 1000))
             if launch {
@@ -65,9 +64,13 @@ internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifec
     }
 
     private func trackPendingAppVersion() {
-        guard let previous = previousAppVersion, let amplitude else { return }
-        previousAppVersion = nil
+        guard let amplitude, let previous = takePendingAppVersion() else { return }
         utils?.trackAppUpdatedInstalledEvent(previous: previous, persistOn: amplitude.trackingQueue)
+    }
+
+    private func takePendingAppVersion() -> DefaultEventUtils.AppVersion? {
+        defer { previousAppVersion = nil }
+        return previousAppVersion
     }
 
 #if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
