@@ -81,10 +81,11 @@ final class EventPipelineTests: XCTestCase {
         XCTAssertTrue(stateStorage.uploadRequestPending)
     }
 
-    func testDisabledDiagnosticsLeavesPendingMarkerUntouched() {
+    func testDisabledDiagnosticsLeavesPendingMarkerUntouched() throws {
         configuration.enableDiagnostics = false
         storage.uploadRequestPending = true
-        let scanned = expectation(description: "scan without recovery")
+        try storage.write(key: .EVENTS, value: BaseEvent(eventType: "accepted"))
+        let scanned = expectation(description: "flush without updating the marker")
         pipeline.flush { scanned.fulfill() }
         wait(for: [scanned], timeout: 10)
         XCTAssertTrue(storage.uploadRequestPending)
@@ -114,6 +115,26 @@ final class EventPipelineTests: XCTestCase {
             wait(for: [completed], timeout: 10)
             XCTAssertFalse(storage.uploadRequestPending)
         }
+    }
+
+    func testSuccessDeletesBatchBeforeClearingPendingMarker() throws {
+        final class ObservingStorage: PersistentStorage {
+            override func remove(eventBlock: EventBlock) {
+                super.remove(eventBlock: eventBlock)
+                XCTAssertTrue(uploadRequestPending, "Clear the marker after deleting the batch")
+            }
+        }
+        let storage = ObservingStorage(storagePrefix: UUID().uuidString, logger: nil,
+            diagonostics: Diagnostics(), diagnosticsClient: FakeDiagnosticsClient())
+        let fixture = UploadFixture(storage: storage)
+        defer { fixture.cleanUp() }
+        try fixture.writeBatch(["accepted"])
+        fixture.client.onUpload = { fixture.client.response?(.success(200)) }
+        let flushed = expectation(description: "accepted batch handled")
+        fixture.pipeline.flush { flushed.fulfill() }
+        wait(for: [flushed], timeout: 10)
+        XCTAssertTrue(try fixture.storedEventTypes().isEmpty)
+        XCTAssertFalse(storage.uploadRequestPending)
     }
 
     func testCustomClientCancellationUsesNormalRetryPolicy() throws {

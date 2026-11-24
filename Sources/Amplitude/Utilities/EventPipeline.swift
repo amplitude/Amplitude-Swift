@@ -171,12 +171,12 @@ public class EventPipeline: ApplicationLifecycleObserver {
                 return
             }
 
-            // Expiration and response handling share uploadsQueue. End the assertion on
-            // expiry, but keep the request alive so a late success can acknowledge its batch.
             uploadState = .uploading
             var finished = false
             var backgroundTaskCompletion: BackgroundTaskCompletionCallback?
             backgroundTaskCompletion = vendorSystem.beginBackgroundTask(label: "amplitude.upload") {
+                // Let response handling already on this queue finish acknowledging its batch.
+                // If the queue stalls, the assertion can outlive the expiry handler and the OS may terminate the app.
                 self.uploadsQueue.async {
                     guard !finished else { return }
                     if self.vendorSystem.isRunningInAppExtension {
@@ -193,9 +193,6 @@ public class EventPipeline: ApplicationLifecycleObserver {
                 uploadStateStorage?.uploadRequestPending = true
             }
             _ = httpClient.upload(events: eventsString) { [self] result in
-                if configuration.enableDiagnostics {
-                    uploadStateStorage?.uploadRequestPending = false
-                }
                 let responseHandler = storage.getResponseHandler(
                     configuration: self.configuration,
                     eventPipeline: self,
@@ -203,6 +200,10 @@ public class EventPipeline: ApplicationLifecycleObserver {
                     eventsString: eventsString
                 )
                 let handled: Bool = responseHandler.handle(result: result)
+                // Handle the batch before doing best-effort diagnostic bookkeeping.
+                if configuration.enableDiagnostics {
+                    uploadStateStorage?.uploadRequestPending = false
+                }
                 backgroundTaskCompletion?()
                 backgroundTaskCompletion = nil
                 var failures = failures
