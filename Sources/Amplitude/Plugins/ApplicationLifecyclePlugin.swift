@@ -46,8 +46,12 @@ internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifec
     }
 
     func applicationDidEnterBackground(timestamp: Int64) {
-        amplitude?.onExitForeground(timestamp: timestamp)
+        guard let amplitude else { return }
+        amplitude.onExitForeground(timestamp: timestamp)
         utils?.trackAppBackgroundedEvent()
+        if amplitude.configuration.flushEventsOnClose {
+            amplitude.flush()
+        }
     }
 
 #if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT

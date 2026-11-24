@@ -95,7 +95,7 @@ class PersistentStorageResponseHandler: ResponseHandler {
         triggerEventsCallback(events: eventsToDrop, code: AnalyticsHttpClient.HttpStatus.BAD_REQUEST.rawValue, message: error)
 
         eventsToRetry.forEach { event in
-            eventPipeline.put(event: event)
+            eventPipeline.put(event: event, isRetry: true)
         }
 
         storage.remove(eventBlock: eventBlock)

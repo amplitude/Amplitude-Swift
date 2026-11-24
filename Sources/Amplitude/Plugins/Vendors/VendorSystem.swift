@@ -5,6 +5,8 @@
 //  Created by Hao Yu on 11/11/22.
 //
 
+import Foundation
+
 internal typealias BackgroundTaskCompletionCallback = () -> Void
 
 internal class VendorSystem {
@@ -44,6 +46,10 @@ internal class VendorSystem {
         #endif
     }()
 
+    var isRunningInAppExtension: Bool {
+        return Bundle.main.bundlePath.hasSuffix(".appex")
+    }
+
     func makeApplicationLifecycle() -> ApplicationLifecycle {
         return ApplicationLifecycle()
     }
@@ -52,7 +58,7 @@ internal class VendorSystem {
         return true
     }
 
-    func beginBackgroundTask() -> BackgroundTaskCompletionCallback? {
+    func beginBackgroundTask(label: String? = nil, expirationHandler: @escaping () -> Void) -> BackgroundTaskCompletionCallback? {
         return nil
     }
 }

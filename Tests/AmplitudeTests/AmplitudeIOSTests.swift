@@ -198,11 +198,43 @@ final class AmplitudeIOSTests: XCTestCase {
         ])
     }
 
+    func testInitialActivationResumesTimerWithoutWaitingForTracking() {
+        IOSVendorSystem.overrideApplicationState(.inactive)
+        let configuration = Configuration(
+            apiKey: "test", flushIntervalMillis: 3_600_000, instanceName: UUID().uuidString,
+            storageProvider: storageMem, identifyStorageProvider: interceptStorageMem,
+            autocapture: [.appLifecycles, .sessions],
+            offline: NetworkConnectivityCheckerPlugin.Disabled,
+            enableAutoCaptureRemoteConfig: false, httpClient: RemoteConfigMockServer()
+        )
+        let amplitude = Amplitude(configuration: configuration)
+        let pipeline = amplitude.plugins(type: AmplitudeDestinationPlugin.self)[0].pipeline!
+        let uploadQueue = pipeline.httpClient.callbackQueue
+        amplitude.waitForTrackingQueue()
+        pipeline.stop()
+        uploadQueue.sync {}
+
+        amplitude.trackingQueue.suspend()
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        uploadQueue.sync {}
+        XCTAssertEqual(pipeline.flushTimer?.isRunning, true)
+        XCTAssertTrue(storageMem.events().isEmpty)
+        amplitude.trackingQueue.resume()
+
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+        let eventTypes = storageMem.events().map(\.eventType)
+        XCTAssertEqual(eventTypes, [Constants.AMP_SESSION_START_EVENT,
+                                    Constants.AMP_APPLICATION_INSTALLED_EVENT,
+                                    Constants.AMP_APPLICATION_OPENED_EVENT])
+    }
+
     func testDidEnterBackground() throws {
         let configuration = Configuration(
             apiKey: "api-key",
             storageProvider: storageMem,
             identifyStorageProvider: interceptStorageMem,
+            flushEventsOnClose: false,
             autocapture: .appLifecycles,
             enableAutoCaptureRemoteConfig: false,
             httpClient: RemoteConfigMockServer()
