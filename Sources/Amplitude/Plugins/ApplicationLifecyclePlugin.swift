@@ -31,13 +31,12 @@ internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifec
     }
 
     func applicationDidFinishLaunching(inBackground: Bool) {
-        activationCompletesForeground = true
         guard !inBackground, let previous = takePendingAppVersion() else { return }
         utils?.enqueueAppUpdatedInstalledEvent(previous: previous)
     }
 
     func applicationDidBecomeActive(launch: Bool) {
-        if activationCompletesForeground {
+        if !launch || activationCompletesForeground {
             // Activation substitutes for a missing foreground callback. Enqueue before later caller events.
             trackForeground(timestamp: Int64(Date().timeIntervalSince1970 * 1000), fromBackground: false)
             return

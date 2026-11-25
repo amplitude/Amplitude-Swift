@@ -501,7 +501,21 @@ final class AmplitudeIOSTests: XCTestCase {
         NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
         NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
 
-        XCTAssertEqual(observer.events, ["launch", "initial activation"])
+        XCTAssertEqual(observer.events, ["launch", "activation"])
+    }
+
+    func testLateBackgroundInitializationReportsLaunchOnceWithoutLaunchNotification() {
+        IOSVendorSystem.overrideApplicationState(.background)
+        let lifecycle = VendorSystem.current.makeApplicationLifecycle()
+        let observer = LifecycleObserver()
+        lifecycle.addObserver(observer)
+        lifecycle.start()
+
+        IOSVendorSystem.overrideApplicationState(.active)
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+
+        XCTAssertEqual(observer.events, ["initial activation"])
     }
 
     func testBackgroundLaunchSignalDefersInstallRegardlessOfUIKitState() {

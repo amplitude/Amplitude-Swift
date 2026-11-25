@@ -6,6 +6,7 @@ import UIKit
 /// Platform notifications and cold-start detection are independent of analytics processing.
 class IOSLifecycleMonitor: ApplicationLifecycle {
     private var awaitingInitialActivation = false
+    private var launchPending = false
 
     override var initialState: InitialState {
         switch IOSVendorSystem.applicationState {
@@ -22,6 +23,7 @@ class IOSLifecycleMonitor: ApplicationLifecycle {
             becomeActive(launch: true)
         case .inactive, .background:
             awaitingInitialActivation = true
+            launchPending = true
         case .unknown:
             break
         }
@@ -53,6 +55,7 @@ class IOSLifecycleMonitor: ApplicationLifecycle {
         if inBackground || !IOSVendorSystem.usesScenes {
             awaitingInitialActivation = true
         }
+        launchPending = false
         didFinishLaunching(inBackground: inBackground)
     }
 
@@ -60,12 +63,15 @@ class IOSLifecycleMonitor: ApplicationLifecycle {
     private func applicationDidBecomeActive(notification: Notification) {
         guard awaitingInitialActivation else { return }
         awaitingInitialActivation = false
-        becomeActive(launch: true)
+        let launch = launchPending
+        launchPending = false
+        becomeActive(launch: launch)
     }
 
     @objc
     private func applicationWillEnterForeground(notification: Notification) {
         awaitingInitialActivation = false
+        launchPending = false
         enterForeground(fromBackground: IOSVendorSystem.applicationState == .background)
     }
 
