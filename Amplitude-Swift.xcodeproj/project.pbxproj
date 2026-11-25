@@ -388,7 +388,6 @@
 		OBJ_8 /* Amplitude.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Amplitude.swift; sourceTree = "<group>"; };
 		OBJ_80 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		OBJ_81 /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
-		OBJ_82 /* AmplitudeSwift.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = AmplitudeSwift.podspec; sourceTree = "<group>"; };
 		OBJ_9 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		"amplitude-swift::Amplitude-Swift::Product" /* AmplitudeSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AmplitudeSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"amplitude-swift::Amplitude-SwiftTests::Product" /* Amplitude-SwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = "Amplitude-SwiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -617,7 +616,6 @@
 				OBJ_79 /* LICENSE */,
 				OBJ_80 /* README.md */,
 				OBJ_81 /* CONTRIBUTING.md */,
-				OBJ_82 /* AmplitudeSwift.podspec */,
 				4EB530702CD2E05000E961F4 /* Frameworks */,
 			);
 			sourceTree = "<group>";
