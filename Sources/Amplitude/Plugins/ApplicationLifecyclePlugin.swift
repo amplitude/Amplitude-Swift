@@ -5,20 +5,22 @@ internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifec
     // App lifecycle autocapture is currently supported on UIKit platforms.
     private var utils: DefaultEventUtils?
     private var previousAppVersion: DefaultEventUtils.AppVersion?
+    private var activationCompletesForeground = false
 
     override func setup(amplitude: Amplitude) {
         super.setup(amplitude: amplitude)
 #if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
-        let utils = DefaultEventUtils(amplitude: amplitude)
-        self.utils = utils
-        if IOSVendorSystem.applicationState != .active {
-            // Notification callbacks use this snapshot instead of waiting on storage.
-            previousAppVersion = utils.storedAppVersion(in: amplitude.storage)
-        }
+        utils = DefaultEventUtils(amplitude: amplitude)
 #endif
         amplitude.appLifecycle.addObserver(self)
         // Observe transitions and capture initial state before setting up UI autocapture.
-        amplitude.appLifecycle.start()
+        amplitude.appLifecycle.start { state in
+            activationCompletesForeground = state == .background
+            if state != .active {
+                // Later notification callbacks can enqueue events without waiting on version storage.
+                previousAppVersion = utils?.storedAppVersion(in: amplitude.storage)
+            }
+        }
 
 #if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
         updateAutocaptureSetup()
@@ -28,14 +30,19 @@ internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifec
 #endif
     }
 
-    func applicationDidFinishLaunching() {
-#if (os(iOS) || os(tvOS) || os(visionOS) || targetEnvironment(macCatalyst)) && !AMPLITUDE_DISABLE_UIKIT
-        guard IOSVendorSystem.applicationState != .background, let previous = takePendingAppVersion() else { return }
+    func applicationDidFinishLaunching(inBackground: Bool) {
+        activationCompletesForeground = true
+        guard !inBackground, let previous = takePendingAppVersion() else { return }
         utils?.enqueueAppUpdatedInstalledEvent(previous: previous)
-#endif
     }
 
     func applicationDidBecomeActive(launch: Bool) {
+        if activationCompletesForeground {
+            // Activation substitutes for a missing foreground callback. Enqueue before later caller events.
+            trackForeground(timestamp: Int64(Date().timeIntervalSince1970 * 1000), fromBackground: false)
+            return
+        }
+
         // Startup historically defers generation, identity capture, and the session timestamp.
         let previous = takePendingAppVersion()
         amplitude?.trackingQueue.async { [self] in
@@ -52,6 +59,10 @@ internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifec
     }
 
     func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool) {
+        trackForeground(timestamp: timestamp, fromBackground: fromBackground)
+    }
+
+    private func trackForeground(timestamp: Int64, fromBackground: Bool) {
         // Update foreground state immediately, before a subsequent track() snapshots it.
         amplitude?.onEnterForeground(timestamp: timestamp)
         trackPendingAppVersion()

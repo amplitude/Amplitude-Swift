@@ -452,8 +452,8 @@ final class AmplitudeIOSTests: XCTestCase {
         var events: [String] = []
         var fromBackground: Bool?
 
-        func applicationDidFinishLaunching() {
-            events.append("launch")
+        func applicationDidFinishLaunching(inBackground: Bool) {
+            events.append(inBackground ? "background launch" : "launch")
         }
 
         func applicationDidBecomeActive(launch: Bool) {
@@ -484,8 +484,41 @@ final class AmplitudeIOSTests: XCTestCase {
         NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
         NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
 
-        XCTAssertEqual(observer.events, ["launch", "foreground", "background"])
+        XCTAssertEqual(observer.events, ["background launch", "foreground", "background"])
         XCTAssertEqual(observer.fromBackground, true)
+    }
+
+    func testColdLaunchWithoutScenesReportsActivationInsteadOfForeground() {
+        IOSVendorSystem.overrideApplicationState(.inactive)
+        IOSVendorSystem.overrideUsesScenes(false)
+        let lifecycle = VendorSystem.current.makeApplicationLifecycle()
+        let observer = LifecycleObserver()
+        lifecycle.addObserver(observer)
+        lifecycle.start()
+
+        NotificationCenter.default.post(name: UIApplication.didFinishLaunchingNotification, object: nil)
+        IOSVendorSystem.overrideApplicationState(.active)
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+
+        XCTAssertEqual(observer.events, ["launch", "initial activation"])
+    }
+
+    func testBackgroundLaunchSignalDefersInstallRegardlessOfUIKitState() {
+        IOSVendorSystem.overrideApplicationState(.inactive)
+        let amplitude = Amplitude(configuration: lifecycleConfiguration())
+
+        amplitude.appLifecycle.didFinishLaunching(inBackground: true)
+        amplitude.waitForTrackingQueue()
+        amplitude.waitForTrackingQueue()
+        XCTAssertTrue(storageMem.events().isEmpty)
+        XCTAssertNil(storageMem.read(key: .APP_BUILD) as String?)
+
+        amplitude.appLifecycle.enterForeground()
+        amplitude.waitForTrackingQueue()
+        XCTAssertEqual(storageMem.events().map(\.eventType), [
+            Constants.AMP_SESSION_START_EVENT, Constants.AMP_APPLICATION_INSTALLED_EVENT, Constants.AMP_APPLICATION_OPENED_EVENT
+        ])
     }
 
     func testRepeatedStartWhileActiveDeliversInitialActivationOnce() {
@@ -494,8 +527,11 @@ final class AmplitudeIOSTests: XCTestCase {
         let observer = LifecycleObserver()
         lifecycle.addObserver(observer)
 
-        lifecycle.start()
-        lifecycle.start()
+        XCTAssertTrue(lifecycle.start { state in
+            XCTAssertEqual(state, .active)
+            XCTAssertTrue(observer.events.isEmpty)
+        })
+        XCTAssertFalse(lifecycle.start { _ in XCTFail("Startup state was already delivered") })
 
         XCTAssertEqual(observer.events, ["initial activation"])
     }
