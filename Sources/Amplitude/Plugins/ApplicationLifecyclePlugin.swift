@@ -38,7 +38,8 @@ internal final class ApplicationLifecyclePlugin: UtilityPlugin, ApplicationLifec
     func applicationDidBecomeActive(launch: Bool) {
         if !launch || activationCompletesForeground {
             // Activation substitutes for a missing foreground callback. Enqueue before later caller events.
-            trackForeground(timestamp: Int64(Date().timeIntervalSince1970 * 1000), fromBackground: false)
+            trackForeground(timestamp: Int64(Date().timeIntervalSince1970 * 1000),
+                            fromBackground: activationCompletesForeground)
             return
         }
 

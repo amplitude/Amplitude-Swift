@@ -161,6 +161,11 @@ final class AmplitudeIOSTests: XCTestCase {
         let events = storageMem.events()
         XCTAssertEqual(events.map { $0.eventType }, ["background_work", Constants.AMP_SESSION_END_EVENT,
             Constants.AMP_SESSION_START_EVENT, lifecycleEvent, Constants.AMP_APPLICATION_OPENED_EVENT])
+        if !usesScenes {
+            XCTAssertEqual(getDictionary(try XCTUnwrap(events.last?.eventProperties))[
+                Constants.AMP_APP_FROM_BACKGROUND_PROPERTY
+            ] as? Bool, true)
+        }
         XCTAssertNotEqual(amplitude.getSessionId(), 1000)
         XCTAssertTrue(events.dropFirst(2).allSatisfy { $0.sessionId == amplitude.getSessionId() })
         XCTAssertEqual(storageMem.read(key: StorageKey.APP_BUILD) as String?, Bundle.main.infoDictionary?["CFBundleVersion"] as? String)
