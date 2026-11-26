@@ -508,12 +508,23 @@ public class Amplitude {
         }
 
         trackingQueue.async { [self, identity, inForeground] in
-            let events = self.sessions.processEvent(event: event, inForeground: inForeground)
-            events.forEach { e in
-                e.userId = e.userId ?? identity.userId
-                e.deviceId = e.deviceId ?? identity.deviceId
-                self.timeline.processEvent(event: e)
-            }
+            processQueuedEvent(event, identity: identity, inForeground: inForeground)
+        }
+    }
+
+    func enqueueLifecycleEvent(_ makeEvent: @escaping () -> BaseEvent?) {
+        // Keep the callback's queue position and app state, but read identity and config when tracking runs.
+        trackingQueue.async { [self, inForeground] in
+            guard let event = makeEvent(), !configuration.optOut else { return }
+            processQueuedEvent(event, identity: identity, inForeground: inForeground)
+        }
+    }
+
+    private func processQueuedEvent(_ event: BaseEvent, identity: Identity, inForeground: Bool) {
+        for processed in sessions.processEvent(event: event, inForeground: inForeground) {
+            processed.userId = processed.userId ?? identity.userId
+            processed.deviceId = processed.deviceId ?? identity.deviceId
+            timeline.processEvent(event: processed)
         }
     }
 

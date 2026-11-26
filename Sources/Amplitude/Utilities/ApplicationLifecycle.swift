@@ -1,20 +1,27 @@
 import Foundation
 
 internal protocol ApplicationLifecycleObserver: AnyObject {
-    func applicationDidFinishLaunching()
+    func applicationDidFinishLaunching(inBackground: Bool)
     func applicationDidBecomeActive(launch: Bool)
     func applicationWillEnterForeground(timestamp: Int64, fromBackground: Bool)
     func applicationDidEnterBackground(timestamp: Int64)
 }
 
 extension ApplicationLifecycleObserver {
-    func applicationDidFinishLaunching() {}
+    func applicationDidFinishLaunching(inBackground: Bool) {}
     func applicationDidBecomeActive(launch: Bool) {}
 }
 
 /// Owns platform lifecycle notifications and delivers them without retaining consumers.
 /// Observer delivery order is unspecified; consumers own any sequencing they require.
 internal class ApplicationLifecycle: NSObject {
+    enum InitialState {
+        case active
+        case inactive
+        case background
+        case unknown
+    }
+
     private let lock = NSLock()
     private var isObserving = false
     private let observers = NSHashTable<AnyObject>(options: [.weakMemory, .objectPointerPersonality])
@@ -25,22 +32,32 @@ internal class ApplicationLifecycle: NSObject {
         }
     }
 
-    /// Called once consumers are registered, before the remaining SDK plugins are set up.
+    /// Prepares consumers with one initial state before notifications or startup reconciliation.
     @discardableResult
-    func start() -> Bool {
-        lock.withLock {
+    func start(preparing: (InitialState) -> Void = { _ in }) -> Bool {
+        let shouldStart = lock.withLock {
             guard !isObserving else { return false }
-            startObserving()
             isObserving = true
             return true
         }
+        guard shouldStart else { return false }
+
+        let state = initialState
+        preparing(state)
+        startObserving()
+        reconcileInitialState(state)
+        return true
     }
 
-    /// Registers platform notifications once. Startup reconciliation stays in start().
+    var initialState: InitialState { .unknown }
+
+    /// Registers platform notifications once.
     func startObserving() {}
 
-    func didFinishLaunching() {
-        notify { $0.applicationDidFinishLaunching() }
+    func reconcileInitialState(_ state: InitialState) {}
+
+    func didFinishLaunching(inBackground: Bool) {
+        notify { $0.applicationDidFinishLaunching(inBackground: inBackground) }
     }
 
     /// Initial activation, including initialization in an already-active app.

@@ -20,21 +20,59 @@ public class DefaultEventUtils {
             return
         }
 
+        let previous = storedAppVersion(in: amplitude.storage)
+        trackAppUpdatedInstalledEvent(previous: previous, persistOn: nil)
+    }
+
+    struct AppVersion {
+        let build: String?
+        let version: String?
+    }
+
+    func storedAppVersion(in storage: Storage) -> AppVersion {
+        AppVersion(build: storage.read(key: .APP_BUILD), version: storage.read(key: .APP_VERSION))
+    }
+
+    func trackAppUpdatedInstalledEvent(previous: AppVersion, persistOn queue: DispatchQueue?) {
+        if let event = makeAppUpdatedInstalledEvent(previous: previous, persistOn: queue) {
+            amplitude?.track(event: event)
+        }
+    }
+
+    func enqueueAppUpdatedInstalledEvent(previous: AppVersion) {
+        amplitude?.enqueueLifecycleEvent { [self] in
+            makeAppUpdatedInstalledEvent(previous: previous, persistOn: nil)
+        }
+    }
+
+    private func makeAppUpdatedInstalledEvent(previous: AppVersion, persistOn queue: DispatchQueue?) -> BaseEvent? {
+        guard let amplitude else { return nil }
+
         let info = Bundle.main.infoDictionary
         let currentBuild = info?["CFBundleVersion"] as? String
         let currentVersion = info?["CFBundleShortVersionString"] as? String
-        let previousBuild: String? = amplitude.storage.read(key: StorageKey.APP_BUILD)
-        let previousVersion: String? = amplitude.storage.read(key: StorageKey.APP_VERSION)
+        let previousBuild = previous.build
+        let previousVersion = previous.version
 
-        if currentBuild != previousBuild {
-            try? amplitude.storage.write(key: StorageKey.APP_BUILD, value: currentBuild)
-        }
-        if currentVersion != previousVersion {
-            try? amplitude.storage.write(key: StorageKey.APP_VERSION, value: currentVersion)
+        if currentBuild != previousBuild || currentVersion != previousVersion {
+            let storage = amplitude.storage
+            let persist = {
+                if currentBuild != previousBuild {
+                    try? storage.write(key: .APP_BUILD, value: currentBuild)
+                }
+                if currentVersion != previousVersion {
+                    try? storage.write(key: .APP_VERSION, value: currentVersion)
+                }
+            }
+            if let queue = queue {
+                queue.async { persist() }
+            } else {
+                persist()
+            }
         }
 
         guard trackAppLifecycles else {
-            return
+            return nil
         }
 
         // Only send one app installed / updated event per instance name, no matter how many times we are
@@ -49,22 +87,23 @@ public class DefaultEventUtils {
         }
 
         guard shouldSendAppInstalled else {
-            return
+            return nil
         }
 
         if previousBuild == nil || previousVersion == nil {
-            amplitude.track(eventType: Constants.AMP_APPLICATION_INSTALLED_EVENT, eventProperties: [
+            return BaseEvent(eventType: Constants.AMP_APPLICATION_INSTALLED_EVENT, eventProperties: [
                 Constants.AMP_APP_BUILD_PROPERTY: currentBuild ?? "",
                 Constants.AMP_APP_VERSION_PROPERTY: currentVersion ?? "",
             ])
         } else if currentBuild != previousBuild || currentVersion != previousVersion {
-            amplitude.track(eventType: Constants.AMP_APPLICATION_UPDATED_EVENT, eventProperties: [
+            return BaseEvent(eventType: Constants.AMP_APPLICATION_UPDATED_EVENT, eventProperties: [
                 Constants.AMP_APP_BUILD_PROPERTY: currentBuild ?? "",
                 Constants.AMP_APP_VERSION_PROPERTY: currentVersion ?? "",
                 Constants.AMP_APP_PREVIOUS_BUILD_PROPERTY: previousBuild ?? "",
                 Constants.AMP_APP_PREVIOUS_VERSION_PROPERTY: previousVersion ?? "",
             ])
         }
+        return nil
     }
 
     func trackAppBackgroundedEvent() {

@@ -5,22 +5,28 @@ import UIKit
 
 /// Platform notifications and cold-start detection are independent of analytics processing.
 class IOSLifecycleMonitor: ApplicationLifecycle {
-    private var emitLaunchOnActivation = false
-    private var emitForegroundOnActivation = false
+    private var awaitingInitialActivation = false
+    private var launchPending = false
 
-    @discardableResult
-    override func start() -> Bool {
-        guard super.start() else { return false }
+    override var initialState: InitialState {
         switch IOSVendorSystem.applicationState {
+        case .active: return .active
+        case .inactive: return .inactive
+        case .background: return .background
+        default: return .unknown
+        }
+    }
+
+    override func reconcileInitialState(_ state: InitialState) {
+        switch state {
         case .active:
             becomeActive(launch: true)
-        case .inactive:
-            emitLaunchOnActivation = true
-            emitForegroundOnActivation = true
-        default:
+        case .inactive, .background:
+            awaitingInitialActivation = true
+            launchPending = true
+        case .unknown:
             break
         }
-        return true
     }
 
     override func startObserving() {
@@ -44,24 +50,28 @@ class IOSLifecycleMonitor: ApplicationLifecycle {
 
     @objc
     private func applicationDidFinishLaunchingNotification(notification: Notification) {
-        didFinishLaunching()
-        // Apps without scenes use their initial activation as the foreground signal.
-        if !IOSVendorSystem.usesScenes {
-            emitForegroundOnActivation = true
+        let inBackground = IOSVendorSystem.applicationState == .background
+        // Apps without scenes and background launches may only get an activation notification.
+        if inBackground || !IOSVendorSystem.usesScenes {
+            awaitingInitialActivation = true
         }
+        launchPending = false
+        didFinishLaunching(inBackground: inBackground)
     }
 
     @objc
     private func applicationDidBecomeActive(notification: Notification) {
-        guard emitLaunchOnActivation || emitForegroundOnActivation else { return }
-        let emitLaunch = emitLaunchOnActivation
-        emitLaunchOnActivation = false
-        emitForegroundOnActivation = false
-        becomeActive(launch: emitLaunch)
+        guard awaitingInitialActivation else { return }
+        awaitingInitialActivation = false
+        let launch = launchPending
+        launchPending = false
+        becomeActive(launch: launch)
     }
 
     @objc
     private func applicationWillEnterForeground(notification: Notification) {
+        awaitingInitialActivation = false
+        launchPending = false
         enterForeground(fromBackground: IOSVendorSystem.applicationState == .background)
     }
 
